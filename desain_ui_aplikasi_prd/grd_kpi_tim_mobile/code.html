@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html lang="id"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;background-color:#f8f9ff;}body{overscroll-behavior:none;font-family:'Plus Jakarta Sans',sans-serif;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"primary-fixed-dim":"#bec6e0","primary-container":"#131b2e","on-error-container":"#93000a","on-tertiary-fixed-variant":"#783200","status-red-badge":"#EF4444","status-orange-text":"#C2410C","surface-tint":"#565e74","surface-container-low":"#eff4ff","tertiary-fixed-dim":"#ffb690","on-primary-fixed":"#131b2e","on-surface-variant":"#45464d","status-blue-text":"#1D4ED8","status-red-fill":"#FEF2F2","primary":"#000000","surface-container-highest":"#d3e4fe","secondary-fixed-dim":"#b4c5ff","surface":"#f8f9ff","tertiary-fixed":"#ffdbca","status-green-text":"#047857","on-tertiary-container":"#d95f00","on-primary-fixed-variant":"#3f465c","on-secondary-container":"#fefcff","inverse-primary":"#bec6e0","secondary-container":"#316bf3","on-secondary-fixed":"#00174b","surface-variant":"#d3e4fe","status-red-text":"#B91C1C","outline":"#76777d","on-secondary-fixed-variant":"#003ea8","status-orange-fill":"#FFF7ED","tertiary":"#000000","outline-variant":"#c6c6cd","on-tertiary":"#ffffff","status-purple-text":"#7E22CE","border-subtle":"#E2E8F0","surface-container-lowest":"#ffffff","on-surface":"#0b1c30","secondary":"#0051d5","on-background":"#0b1c30","inverse-surface":"#213145","surface-dim":"#cbdbf5","surface-bright":"#f8f9ff","status-green-badge":"#10B981","surface-container":"#e5eeff","on-secondary":"#ffffff","surface-white":"#FFFFFF","status-blue-fill":"#EFF6FF","on-tertiary-fixed":"#341100","background":"#f8f9ff","on-primary-container":"#7c839b","error-container":"#ffdad6","on-error":"#ffffff","secondary-fixed":"#dbe1ff","surface-container-high":"#dce9ff","canvas-bg":"#F4F5F9","tertiary-container":"#341100","inverse-on-surface":"#eaf1ff","error":"#ba1a1a","status-green-fill":"#ECFDF5","primary-fixed":"#dae2fd","on-primary":"#ffffff","status-purple-fill":"#FAF5FF"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-xl":"2rem","gutter":"1.25rem","margin":"1rem","gutter-desktop":"1.5rem","margin-desktop":"2rem","space-sm":"0.5rem","margin-tablet":"1.5rem","space-lg":"1.5rem","space-md":"1rem","space-xs":"0.25rem"},"fontFamily":{"body-lg":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"metric-value":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"display":["Plus Jakarta Sans"],"label-lg":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"]},"fontSize":{"body-lg":["15px",{"lineHeight":"22px","fontWeight":"400"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"headline-sm":["16px",{"lineHeight":"24px","fontWeight":"600"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"metric-value":["24px",{"lineHeight":"30px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-sm":["13px",{"lineHeight":"18px","fontWeight":"400"}],"headline-lg-mobile":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"700"}],"label-sm":["11px",{"lineHeight":"14px","fontWeight":"500"}],"display":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-lg":["13px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"600"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"600"}]}}}};</script></head><body class="bg-surface text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="Brand logo. - Primary color: #0f172a
+- Font: plusJakartaSans
+- Mode: light
+- Roundness: rounded-md
+" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WKmvH88VYAo8jHx2gNQWkTca1e4eGll31WpaH1aNWw4oUzjtpJCZyrleHuftBOqzjImm6nTLdMp4n059wmY6PURkWizBBurXxDKhxDhKQ2xb_SuVMB74Smk_UpfK5_VHRIVaTncViM3N7JreJTw2Gnr_Gh3DgAOgom2js8LJQ1HEk4fRLTaPfxyUirZyfgA5WXi64P5s5UbxwDGmr757DeNy0p0mGMIKubgTkNVUaNtLKX-vJWEaLyp5Y"/><div class="flex flex-col"><div class="flex items-center gap-1.5"><span class="font-headline-sm text-headline-sm text-on-surface leading-none">K-Space</span><span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded-full bg-status-green-fill text-status-green-text leading-none font-semibold">V2</span></div><span class="font-label-sm text-label-sm text-on-surface-variant truncate max-w-[110px]">Matriks Grd</span></div></div><div class="flex items-center gap-space-sm"><button aria-label="Notifikasi Operasional" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface bg-surface-container-lowest shadow-[0_2px_8px_rgba(15,23,42,0.04)] hover:bg-surface-container transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-status-red-badge"></span></button><div class="flex items-center gap-2 pl-1"><img alt="Profile" class="w-8 h-8 rounded-full object-cover shadow-[0_2px_6px_rgba(15,23,42,0.06)]" src="https://lh3.googleusercontent.com/aida/AEtjO1WHD8-VHInLffa7EOxIN1uDkZZRrAOkARcFRJ27AUZumMk1mKT4SD-j7KWLQHClWv-8J_sZSJGhvJIpHaG1hWbe0bMYNmzAcXhrREK4gOnQ-vc_upilfkh_H3GWFTHE87wKqKB4sGkAlYd8fIPHLJO-Ak9kwkBXRu4r1b6Zj80Md2f3qaFkk0aeiYsqTjeQCIzfVcQ0RablHyT1kOoSmheqc6EUd3OgSSRcetqy2kbPx3ZgAQnFcr3texs"/><div class="hidden sm:flex flex-col text-left"><span class="font-label-md text-label-md text-on-surface leading-tight font-semibold">Farhan P.</span><span class="font-label-sm text-label-sm text-on-surface-variant leading-none">Al-Kahfi Corp</span></div></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-28 bg-surface"><div class="flex flex-col w-full">
+<div class="flex flex-col gap-space-md px-margin py-space-md">
+<!-- Top Filter Pill Row (Modern Segmented Navigation) -->
+<div class="flex items-center justify-between gap-2 overflow-x-auto pb-1">
+<div class="inline-flex p-1 bg-surface-container-lowest rounded-full shadow-[0_2px_10px_rgba(15,23,42,0.03)]">
+<button class="px-3.5 py-1.5 rounded-full font-label-md text-label-md bg-primary text-on-primary shadow-sm flex items-center gap-1.5 transition-all" type="button">
+<span class="material-symbols-outlined text-[16px]">calendar_today</span>
+          Minggu 11
+        </button>
+<button class="px-3.5 py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-all" type="button">
+          Q1 2026
+        </button>
+</div>
+<button class="px-3.5 py-1.5 rounded-full font-label-md text-label-md bg-surface-container-lowest text-on-surface shadow-[0_2px_8px_rgba(15,23,42,0.04)] active:scale-95 flex items-center gap-1.5 hover:bg-surface-container transition-all" id="btn-lock-period" type="button">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant">lock_clock</span>
+<span>Kunci Bulan</span>
+</button>
+</div>
+<!-- Company Objective Hero Card (Base / Goal / Stretch) -->
+<div class="bg-surface-white rounded-[24px] p-5 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.03)] flex flex-col gap-4 relative overflow-hidden">
+<div class="flex items-start justify-between">
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Goal Korporasi Q1</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-bold">Rp 697.000.000</span>
+<span class="font-label-md text-label-md text-on-surface-variant font-medium">/ 850 Jt</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-full bg-status-green-fill text-status-green-text flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-[22px]">trending_up</span>
+</div>
+</div>
+<!-- Segmented Goal Progress Bar -->
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-center font-label-sm text-label-sm">
+<span class="text-status-green-text font-semibold flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-status-green-badge inline-block"></span>
+            82.0% Tercapai
+          </span>
+<span class="text-on-surface-variant">Target Sisa: Rp 153 Jt</span>
+</div>
+<div class="h-3 w-full bg-surface-container rounded-full overflow-hidden flex p-0.5">
+<div class="h-full bg-secondary-container rounded-full transition-all duration-700" style="width: 82%;"></div>
+</div>
+<!-- Milestones Indicators -->
+<div class="flex justify-between text-on-surface-variant font-label-sm text-label-sm pt-1">
+<div class="flex flex-col items-start">
+<span class="font-semibold text-on-surface">Base</span>
+<span>Rp 600 Jt</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="font-semibold text-secondary">Goal (Target)</span>
+<span>Rp 850 Jt</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-semibold text-on-surface">Stretch</span>
+<span>Rp 1.1 M</span>
+</div>
+</div>
+</div>
+</div>
+<!-- WRM Matrix Banner (Status Mingguan) -->
+<div class="bg-surface-white rounded-[24px] p-5 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.03)] flex flex-col gap-3.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-status-green-fill flex items-center justify-center text-status-green-text">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface">Status Matriks WRM</span>
+</div>
+<span class="px-3 py-1 rounded-full font-label-sm text-label-sm bg-status-green-fill text-status-green-text font-bold tracking-wide flex items-center gap-1.5 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-status-green-badge animate-pulse"></span>
+          LANJUT (HIJAU)
+        </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+        Rasio eksekusi operasional dan metrik GMV sinkron optimal. Rencana kerja mingguan dilanjutkan tanpa intervensi deviasi.
+      </p>
+<div class="grid grid-cols-2 gap-2.5 pt-1">
+<div class="p-3 bg-status-green-fill rounded-[16px] flex flex-col">
+<span class="font-label-sm text-label-sm text-status-green-text">Hasil GMV Tim</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-headline-sm text-headline-sm text-status-green-text font-bold">96.4%</span>
+<span class="font-label-sm text-label-sm text-status-green-text">&gt; 95%</span>
+</div>
+</div>
+<div class="p-3 bg-status-blue-fill rounded-[16px] flex flex-col">
+<span class="font-label-sm text-label-sm text-status-blue-text">KRI Lead Indicator</span>
+<div class="flex items-baseline gap-1 mt-1">
+<span class="font-headline-sm text-headline-sm text-status-blue-text font-bold">93.5%</span>
+<span class="font-label-sm text-label-sm text-status-blue-text">&gt; 90%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Papan Skor Lead Measure Mingguan -->
+<div class="bg-surface-white rounded-[24px] p-5 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.03)] flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface">Lead Measure Mingguan</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Aktivitas penentu capaian GMV Al-Kahfi</p>
+</div>
+<button aria-label="Lihat detail lead measure" class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">north_east</span>
+</button>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Lead Metric 1: TikTok Live -->
+<div class="p-3.5 bg-status-orange-fill rounded-[18px] flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 rounded-full bg-surface-white flex items-center justify-center text-status-orange-text shadow-sm">
+<span class="material-symbols-outlined text-[20px]">sensors</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Live Stream TikTok</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">38 dari 40 Jam</span>
+</div>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-surface-white font-label-md text-label-md text-status-orange-text font-bold shadow-sm">
+              95.0%
+            </span>
+</div>
+<div class="w-full bg-surface-white/80 h-2.5 rounded-full overflow-hidden p-0.5">
+<div class="h-full bg-status-orange-text rounded-full transition-all duration-500" style="width: 95%;"></div>
+</div>
+</div>
+<!-- Lead Metric 2: Creator Binding -->
+<div class="p-3.5 bg-status-purple-fill rounded-[18px] flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 rounded-full bg-surface-white flex items-center justify-center text-status-purple-text shadow-sm">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Creator Binding MMC</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">14 dari 15 Akun</span>
+</div>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-surface-white font-label-md text-label-md text-status-purple-text font-bold shadow-sm">
+              93.3%
+            </span>
+</div>
+<div class="w-full bg-surface-white/80 h-2.5 rounded-full overflow-hidden p-0.5">
+<div class="h-full bg-status-purple-text rounded-full transition-all duration-500" style="width: 93.3%;"></div>
+</div>
+</div>
+<!-- Lead Metric 3: Video Affiliate & UGC -->
+<div class="p-3.5 bg-status-blue-fill rounded-[18px] flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-9 h-9 rounded-full bg-surface-white flex items-center justify-center text-status-blue-text shadow-sm">
+<span class="material-symbols-outlined text-[20px]">video_library</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Video Affiliate &amp; UGC</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">185 dari 200 Video</span>
+</div>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-surface-white font-label-md text-label-md text-status-blue-text font-bold shadow-sm">
+              92.5%
+            </span>
+</div>
+<div class="w-full bg-surface-white/80 h-2.5 rounded-full overflow-hidden p-0.5">
+<div class="h-full bg-status-blue-text rounded-full transition-all duration-500" style="width: 92.5%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Anak Tangga Target Unit (Target Roll-Down Hierarchy) -->
+<div class="bg-surface-white rounded-[24px] p-5 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.03)] flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-headline-sm text-headline-sm text-on-surface">Anak Tangga Target Unit</span>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Distribusi komitmen level operasional</p>
+</div>
+<span class="font-label-sm text-label-sm px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant font-medium">4 Unit Aktif</span>
+</div>
+<div class="flex flex-col gap-2.5">
+<!-- Level 1: Manager Operasional -->
+<div class="p-3 bg-surface-container-low rounded-[18px] flex items-center justify-between transition-all hover:bg-surface-container">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center font-bold">
+              01
+            </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Manager Operasional</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Rp 850.000.000 (Penuh)</span>
+</div>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="font-label-md text-label-md font-bold text-status-green-text">100%</span>
+<span class="material-symbols-outlined text-[18px] text-status-green-text">check_circle</span>
+</div>
+</div>
+<!-- Level 2: Leader Affiliator -->
+<div class="p-3 bg-surface-container-low rounded-[18px] flex items-center justify-between transition-all hover:bg-surface-container">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container text-on-surface font-label-md text-label-md flex items-center justify-center font-bold">
+              02
+            </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Leader Affiliator</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Rp 450 Jt (Capaian 84.2%)</span>
+</div>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-surface-white text-secondary font-label-md text-label-md font-bold shadow-sm">
+            84.2%
+          </span>
+</div>
+<!-- Level 3: Leader MCN -->
+<div class="p-3 bg-surface-container-low rounded-[18px] flex items-center justify-between transition-all hover:bg-surface-container">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container text-on-surface font-label-md text-label-md flex items-center justify-center font-bold">
+              03
+            </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Leader MCN &amp; Talent</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Rp 280 Jt (Capaian 78.5%)</span>
+</div>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-surface-white text-status-orange-text font-label-md text-label-md font-bold shadow-sm">
+            78.5%
+          </span>
+</div>
+<!-- Level 4: Leader TAP -->
+<div class="p-3 bg-surface-container-low rounded-[18px] flex items-center justify-between transition-all hover:bg-surface-container">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container text-on-surface font-label-md text-label-md flex items-center justify-center font-bold">
+              04
+            </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Leader TAP (TikTok Partner)</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Rp 120 Jt (Capaian 89.1%)</span>
+</div>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-surface-white text-status-green-text font-label-md text-label-md font-bold shadow-sm">
+            89.1%
+          </span>
+</div>
+</div>
+</div>
+<!-- KPI Tim Skala 1.000 (Scorecard Section) -->
+<div class="bg-surface-white rounded-[24px] p-5 shadow-[0_4px_20px_-2px_rgba(15,23,42,0.03)] flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Scorecard KPI Tim</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Evaluasi performa berkala (Skala 1.000)</span>
+</div>
+<div class="flex flex-col items-end">
+<span class="font-headline-sm text-headline-sm text-status-green-text font-bold">842</span>
+<span class="font-label-sm text-label-sm text-status-green-text font-semibold">Rata-rata Istimewa</span>
+</div>
+</div>
+<!-- Member KPI Cards -->
+<div class="flex flex-col gap-3">
+<!-- Member 1: Anisa -->
+<div class="p-3.5 bg-surface-container-low rounded-[18px] flex items-center justify-between">
+<div class="flex items-center gap-3 min-w-0">
+<img class="w-10 h-10 rounded-full object-cover shadow-sm shrink-0" data-alt="A portrait of Anisa Safitri, a professional Indonesian female project manager in a soft navy modern hijab with a pleasant smile, warm studio illumination, shot against a crisp minimalist office backdrop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDOITRh_FPpbhD4cPw041GQMMVHpSK4e_qUCHsrP3tMUauzIHR7qVemgW0QAVhjeKymIOCv1EbcYMxhW4yjmodGPzIJJFwsvdUZc4iOh0m-UCHTwuFhGjpY4fFZtr7SBYu-pW4qlEeG_Bkb1pK9E3pU90uKvv0GEpnF5EbWPfnG-o-pBRl1nZq9Sqx46ht3f_hrcmVGh7oF6Eijlqi-8E89Rm3uzC5A_skU14rihOA54ACGYIslqpem"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Anisa Safitri</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">Lead Affiliator</span>
+</div>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<div class="flex flex-col items-end">
+<span class="font-label-md text-label-md text-on-surface font-bold">890</span>
+<span class="font-label-sm text-label-sm text-status-green-text font-semibold">Istimewa</span>
+</div>
+<span class="w-2.5 h-2.5 rounded-full bg-status-green-badge"></span>
+</div>
+</div>
+<!-- Member 2: Dinda Ayu -->
+<div class="p-3.5 bg-surface-container-low rounded-[18px] flex items-center justify-between">
+<div class="flex items-center gap-3 min-w-0">
+<img class="w-10 h-10 rounded-full object-cover shadow-sm shrink-0" data-alt="A portrait of Dinda Ayu, a creative Indonesian female live stream producer in stylish office attire, warm ambient indoor studio lighting, clean background aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBp35ijOVylAP0Uy8GaAAjakYysCfd2DkARXLqlj62qgb-OgBWumMF1No1TOkXPyFqpvUeONXMOYhABY5qwRUnkRjXaI8BRMCaDAcWc9NcvKhjw3jfEZxggKIAWmlRbnaqzQQ5nBRo958-n3feg0jLMjUyyYTN7gpWtGunBgNe0UgHWFrygxnc218AlSjAxwYSpS-tvOxgBQ4-G9Nb4UUHEhDy0s1AgbSiBBbhuEwJp3HVV0Np-LNiI"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Dinda Ayu</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">Live Stream Producer</span>
+</div>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<div class="flex flex-col items-end">
+<span class="font-label-md text-label-md text-on-surface font-bold">865</span>
+<span class="font-label-sm text-label-sm text-status-green-text font-semibold">Istimewa</span>
+</div>
+<span class="w-2.5 h-2.5 rounded-full bg-status-green-badge"></span>
+</div>
+</div>
+<!-- Member 3: Rian Maulana -->
+<div class="p-3.5 bg-surface-container-low rounded-[18px] flex items-center justify-between">
+<div class="flex items-center gap-3 min-w-0">
+<img class="w-10 h-10 rounded-full object-cover shadow-sm shrink-0" data-alt="A portrait of Rian Maulana, a sharp focused Southeast Asian male data analyst wearing neat black collared polo, contemporary office studio environment, soft natural side lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLrolChm5wE5PUgTdV_ea7fu8Vc6S0-b6piFsKEg8OcXlxj5GkKXxER9dPJj_UGgH61y4KMN0lpsNcNzNB0Jz-3dMP88K49-rt0R6m-hb4OieFwYPo8_OcNbAdrm6X_Fohbj0EjYP7H_BKa0IAu_xlbEXttLFVQa3jxQaACkKFxNIEJeG4XUvDzbSYf4WlHz0YayqQbYkyyf3T6WXtYKj35IHwUoOpmZKTMU0Sv8z3AHlABrgreb0J"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Rian Maulana</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">Talent Binding Officer</span>
+</div>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<div class="flex flex-col items-end">
+<span class="font-label-md text-label-md text-on-surface font-bold">810</span>
+<span class="font-label-sm text-label-sm text-status-blue-text font-semibold">Baik</span>
+</div>
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-container"></span>
+</div>
+</div>
+<!-- Member 4: Bagas Pamungkas -->
+<div class="p-3.5 bg-surface-container-low rounded-[18px] flex items-center justify-between">
+<div class="flex items-center gap-3 min-w-0">
+<img class="w-10 h-10 rounded-full object-cover shadow-sm shrink-0" data-alt="A portrait of Bagas Pamungkas, an Indonesian male content creator and video editor with glasses smiling, relaxed casual workspace setting, natural daylight, minimalist corporate portrait." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBh502nHaXbnifIGDG2RayzGtDW9XUg8FMtl4ByMNf3DUkfTPODyRcMpNXJ4J4aQfowh2usWYtoq0R-QHSxLsiRUBChpJOpBw2Rix8rvRJlnSvtHseCY387sEsgGz191yePpUFjoqoQi330mQMQUgiUHfM6RVjkokQz588JsMEbmgNNwZ3bd0zggTR-eIE5D8B-_7Qhp9uKVXFDd1ErFCwQbVN3qS5LaAaAnvR22BmzXqZh7IMZ8Trh"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Bagas Pamungkas</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">UGC Content Specialist</span>
+</div>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<div class="flex flex-col items-end">
+<span class="font-label-md text-label-md text-on-surface font-bold">715</span>
+<span class="font-label-sm text-label-sm text-status-orange-text font-semibold">Cukup</span>
+</div>
+<span class="w-2.5 h-2.5 rounded-full bg-status-orange-text"></span>
+</div>
+</div>
+</div>
+<!-- Action: Export Report -->
+<button class="w-full mt-1 py-3.5 px-4 rounded-full bg-primary text-on-primary font-label-md text-label-md font-semibold flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(0,0,0,0.12)] active:scale-[0.98] hover:bg-primary-container transition-all" id="btn-export-grd" type="button">
+<span class="material-symbols-outlined text-[20px]">ios_share</span>
+<span>Ekspor Laporan GRD (PDF/Excel)</span>
+</button>
+</div>
+<!-- Motivational Delight Footer Note -->
+<div class="flex items-center justify-center gap-2 text-center py-2 text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[16px] text-secondary">workspace_premium</span>
+<span>Disiplin Eksekusi 4DX • Al-Kahfi Corp Performance</span>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    const lockBtn = document.getElementById('btn-lock-period');
+    const exportBtn = document.getElementById('btn-export-grd');
+
+    if (lockBtn) {
+      lockBtn.addEventListener('click', function() {
+        const isLocked = lockBtn.getAttribute('data-locked') === 'true';
+        if (!isLocked) {
+          lockBtn.setAttribute('data-locked', 'true');
+          lockBtn.innerHTML = '<span class="material-symbols-outlined text-[16px] text-status-green-text">check</span><span class="text-status-green-text font-semibold">Terkunci</span>';
+        } else {
+          lockBtn.setAttribute('data-locked', 'false');
+          lockBtn.innerHTML = '<span class="material-symbols-outlined text-[16px] text-on-surface-variant">lock_clock</span><span>Kunci Bulan</span>';
+        }
+      });
+    }
+
+    if (exportBtn) {
+      exportBtn.addEventListener('click', function() {
+        const originalText = exportBtn.innerHTML;
+        exportBtn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">sync</span><span>Menyiapkan Berkas...</span>';
+        setTimeout(function() {
+          exportBtn.innerHTML = '<span class="material-symbols-outlined text-[20px] text-status-green-badge">download_done</span><span>Siap Diunduh</span>';
+          setTimeout(function() {
+            exportBtn.innerHTML = originalText;
+          }, 2400);
+        }, 1200);
+      });
+    }
+  })();
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe pointer-events-none flex justify-center" data-active-classes="bg-primary text-on-primary shadow-sm font-semibold"><div class="pointer-events-auto w-full max-w-md px-margin mb-3"><div class="h-16 px-2 bg-surface-white/95 backdrop-blur-xl rounded-full shadow-[0_12px_32px_-4px_rgba(15,23,42,0.08),0_4px_12px_-2px_rgba(15,23,42,0.03)] flex items-center justify-around"><a class="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-on-surface-variant hover:text-on-surface transition-all min-h-[44px] min-w-[44px] justify-center" data-path="beranda" href="#"><span class="material-symbols-outlined text-[22px]">home</span><span class="font-label-md text-label-md hidden xs:inline">Beranda</span></a><a class="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-on-surface-variant hover:text-on-surface transition-all min-h-[44px] min-w-[44px] justify-center" data-path="absensi-dan-lapor" href="#"><span class="material-symbols-outlined text-[22px]">assignment_turned_in</span><span class="font-label-md text-label-md hidden xs:inline">Absensi</span></a><a class="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-on-surface-variant hover:text-on-surface transition-all min-h-[44px] min-w-[44px] justify-center" data-path="tugas-harian" href="#"><span class="material-symbols-outlined text-[22px]">checklist</span><span class="font-label-md text-label-md hidden xs:inline">Tugas</span></a><a aria-current="page" class="flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all min-h-[44px] min-w-[44px] justify-center bg-primary text-on-primary shadow-sm font-semibold" data-path="matriks-grd" href="#"><span class="material-symbols-outlined text-[22px]">monitoring</span><span class="font-label-md text-label-md hidden xs:inline">GRD</span></a></div></div></nav></body></html>

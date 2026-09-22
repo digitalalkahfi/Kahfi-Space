@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+
+<html lang="id"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;background-color:#f8f9ff;}body{overscroll-behavior:none;font-family:'Plus Jakarta Sans',sans-serif;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"primary-fixed-dim":"#bec6e0","primary-container":"#131b2e","on-error-container":"#93000a","on-tertiary-fixed-variant":"#783200","status-red-badge":"#EF4444","status-orange-text":"#C2410C","surface-tint":"#565e74","surface-container-low":"#eff4ff","tertiary-fixed-dim":"#ffb690","on-primary-fixed":"#131b2e","on-surface-variant":"#45464d","status-blue-text":"#1D4ED8","status-red-fill":"#FEF2F2","primary":"#000000","surface-container-highest":"#d3e4fe","secondary-fixed-dim":"#b4c5ff","surface":"#f8f9ff","tertiary-fixed":"#ffdbca","status-green-text":"#047857","on-tertiary-container":"#d95f00","on-primary-fixed-variant":"#3f465c","on-secondary-container":"#fefcff","inverse-primary":"#bec6e0","secondary-container":"#316bf3","on-secondary-fixed":"#00174b","surface-variant":"#d3e4fe","status-red-text":"#B91C1C","outline":"#76777d","on-secondary-fixed-variant":"#003ea8","status-orange-fill":"#FFF7ED","tertiary":"#000000","outline-variant":"#c6c6cd","on-tertiary":"#ffffff","status-purple-text":"#7E22CE","border-subtle":"#E2E8F0","surface-container-lowest":"#ffffff","on-surface":"#0b1c30","secondary":"#0051d5","on-background":"#0b1c30","inverse-surface":"#213145","surface-dim":"#cbdbf5","surface-bright":"#f8f9ff","status-green-badge":"#10B981","surface-container":"#e5eeff","on-secondary":"#ffffff","surface-white":"#FFFFFF","status-blue-fill":"#EFF6FF","on-tertiary-fixed":"#341100","background":"#f8f9ff","on-primary-container":"#7c839b","error-container":"#ffdad6","on-error":"#ffffff","secondary-fixed":"#dbe1ff","surface-container-high":"#dce9ff","canvas-bg":"#F4F5F9","tertiary-container":"#341100","inverse-on-surface":"#eaf1ff","error":"#ba1a1a","status-green-fill":"#ECFDF5","primary-fixed":"#dae2fd","on-primary":"#ffffff","status-purple-fill":"#FAF5FF"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-xl":"2rem","gutter":"1.25rem","margin":"1rem","gutter-desktop":"1.5rem","margin-desktop":"2rem","space-sm":"0.5rem","margin-tablet":"1.5rem","space-lg":"1.5rem","space-md":"1rem","space-xs":"0.25rem"},"fontFamily":{"body-lg":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"metric-value":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"display":["Plus Jakarta Sans"],"label-lg":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"]},"fontSize":{"body-lg":["15px",{"lineHeight":"22px","fontWeight":"400"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"headline-sm":["16px",{"lineHeight":"24px","fontWeight":"600"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"metric-value":["24px",{"lineHeight":"30px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-sm":["13px",{"lineHeight":"18px","fontWeight":"400"}],"headline-lg-mobile":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"700"}],"label-sm":["11px",{"lineHeight":"14px","fontWeight":"500"}],"display":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-lg":["13px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"600"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"600"}]}}}};</script></head><body class="bg-surface text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="Brand logo. - Primary color: #0f172a
+- Font: plusJakartaSans
+- Mode: light
+- Roundness: rounded-md
+" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WKmvH88VYAo8jHx2gNQWkTca1e4eGll31WpaH1aNWw4oUzjtpJCZyrleHuftBOqzjImm6nTLdMp4n059wmY6PURkWizBBurXxDKhxDhKQ2xb_SuVMB74Smk_UpfK5_VHRIVaTncViM3N7JreJTw2Gnr_Gh3DgAOgom2js8LJQ1HEk4fRLTaPfxyUirZyfgA5WXi64P5s5UbxwDGmr757DeNy0p0mGMIKubgTkNVUaNtLKX-vJWEaLyp5Y"/><div class="flex flex-col"><div class="flex items-center gap-1.5"><span class="font-headline-sm text-headline-sm text-on-surface leading-none">K-Space</span><span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded-full bg-status-green-fill text-status-green-text leading-none font-semibold">V2</span></div><span class="font-label-sm text-label-sm text-on-surface-variant truncate max-w-[110px]">Beranda</span></div></div><div class="flex items-center gap-space-sm"><button aria-label="Notifikasi Operasional" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface bg-surface-container-lowest shadow-[0_2px_8px_rgba(15,23,42,0.04)] hover:bg-surface-container transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-status-red-badge"></span></button><div class="flex items-center gap-2 pl-1"><img alt="Profile" class="w-8 h-8 rounded-full object-cover shadow-[0_2px_6px_rgba(15,23,42,0.06)]" src="https://lh3.googleusercontent.com/aida/AEtjO1WHD8-VHInLffa7EOxIN1uDkZZRrAOkARcFRJ27AUZumMk1mKT4SD-j7KWLQHClWv-8J_sZSJGhvJIpHaG1hWbe0bMYNmzAcXhrREK4gOnQ-vc_upilfkh_H3GWFTHE87wKqKB4sGkAlYd8fIPHLJO-Ak9kwkBXRu4r1b6Zj80Md2f3qaFkk0aeiYsqTjeQCIzfVcQ0RablHyT1kOoSmheqc6EUd3OgSSRcetqy2kbPx3ZgAQnFcr3texs"/><div class="hidden sm:flex flex-col text-left"><span class="font-label-md text-label-md text-on-surface leading-tight font-semibold">Farhan P.</span><span class="font-label-sm text-label-sm text-on-surface-variant leading-none">Al-Kahfi Corp</span></div></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-28 bg-surface"><div class="flex flex-col w-full px-margin pb-8 space-y-space-md">
+<!-- Segmented Timeframe Switcher & Live Sync Indicator -->
+<div class="flex items-center justify-between pt-2">
+<!-- Tactile Segmented Pill Filter -->
+<div class="inline-flex items-center bg-surface-container p-1 rounded-full shadow-sm" id="time-filter-pill">
+<button class="px-3.5 py-1.5 rounded-full bg-primary text-on-primary font-label-md text-label-md transition-all duration-200" type="button">Hari Ini</button>
+<button class="px-3 py-1.5 rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all duration-200" type="button">Minggu Ini</button>
+<button class="px-3 py-1.5 rounded-full text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all duration-200" type="button">Bulan Ini</button>
+</div>
+<!-- Live Sync Chip -->
+<div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-lowest shadow-sm text-status-green-text">
+<span class="relative flex h-2 w-2">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-status-green-badge opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-status-green-badge"></span>
+</span>
+<span class="font-label-sm text-label-sm font-semibold tracking-tight">Sinkron 14:20</span>
+</div>
+</div>
+<!-- Manager Greeting Profile Bar -->
+<div class="flex items-center justify-between bg-surface-container-lowest p-space-md rounded-[22px] shadow-sm">
+<div class="flex items-center gap-3">
+<div class="relative">
+<img class="w-12 h-12 rounded-full object-cover shadow-sm" data-alt="Warm studio headshot portrait of Farhan Pratama, a sharp Indonesian operational manager in clean navy linen shirt, bright studio softbox illumination, friendly authentic professional demeanor, high aesthetic composition" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWGqL7hqsYUS7Mp3NuP1W_mLZPsKPReKHh6zMLNorSg3CTZpyknA-O_fzMjvIHme0wCk4dACluob6xs79C_kiWAzwXzSimIsC_qd8cw8aXaPP--9s4MePU2ydgn9cHe4C5WsFGDxMn27RzK49e_tumCFpQoeqz2grZXylEd_LPQj-i3m3own1NHTo1LXhamzxtdZ2A9MTRqWsjukgPC-OKMnMIbsEJ9FSoi_7_NmDkHNsaJFMpc0pn"/>
+<span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-status-green-badge rounded-full shadow-sm"></span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Kamis, 24 Oktober 2024</span>
+</div>
+<h1 class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Halo, Farhan Pratama 👋</h1>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Manager Operasional Al-Kahfi Corp</span>
+</div>
+</div>
+<button aria-label="Buka Pengaturan Dashboard" class="w-9 h-9 rounded-full bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-container-high transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+</button>
+</div>
+<!-- Hero Highlight: Hari Ini Kita Di Mana? -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-lg rounded-[26px] shadow-sm flex flex-col gap-4">
+<!-- Subtle Gradient Aura -->
+<div class="absolute -top-16 -right-16 w-48 h-48 bg-secondary-container/10 rounded-full blur-3xl pointer-events-none"></div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-status-green-badge"></span>
+<span class="font-label-md text-label-md text-on-surface uppercase tracking-wider font-semibold">Hari Ini Kita Di Mana?</span>
+</div>
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-green-fill text-status-green-text font-label-sm text-label-sm font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-status-green-badge"></span>
+        LANJUT RITME
+      </div>
+</div>
+<div class="flex items-end justify-between pt-1">
+<div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Total Capaian GMV Hari Ini</div>
+<div class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mt-0.5 tracking-tight flex items-baseline gap-1.5">
+<span>Rp 34,20 Jt</span>
+<span class="font-label-md text-label-md text-status-green-text bg-status-green-fill px-2 py-0.5 rounded-full font-bold">+18%</span>
+</div>
+</div>
+<div class="text-right">
+<div class="font-label-sm text-label-sm text-on-surface-variant">Target Harian</div>
+<div class="font-label-lg text-label-lg text-on-surface font-semibold">Rp 37,50 Jt</div>
+</div>
+</div>
+<!-- Mini Daily Target Meter -->
+<div class="w-full bg-surface-container rounded-full h-2 overflow-hidden">
+<div class="bg-primary h-2 rounded-full transition-all duration-700" style="width: 91.2%;"></div>
+</div>
+<div class="flex justify-between items-center text-on-surface-variant font-label-sm text-label-sm -mt-2">
+<span>91.2% tercapai per 14:20 WIB</span>
+<span class="text-on-surface font-semibold">Sisa Rp 3,30 Jt</span>
+</div>
+</div>
+<!-- Monthly GMV Progress (Progress Ring + Breakdown Cards) -->
+<div class="bg-surface-container-lowest p-space-lg rounded-[26px] shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface">Target GMV Bulan Ini</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Akumulasi Target Rp 850 Jt</span>
+</div>
+<button aria-label="Detail GMV Bulanan" class="w-8 h-8 rounded-full bg-surface-container-low flex items-center justify-center text-on-surface hover:bg-surface-container transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">north_east</span>
+</button>
+</div>
+<div class="flex items-center gap-5 pt-1">
+<!-- Lightweight SVG Progress Ring (68%) -->
+<div class="relative w-28 h-28 shrink-0 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<circle class="text-surface-container fill-none" cx="50" cy="50" r="40" stroke="currentColor" stroke-width="9"></circle>
+<circle class="text-primary fill-none transition-all duration-1000" cx="50" cy="50" r="40" stroke="currentColor" stroke-dasharray="251.2" stroke-dashoffset="80.38" stroke-linecap="round" stroke-width="9"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold leading-none">68%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant mt-0.5">Tercapai</span>
+</div>
+</div>
+<!-- Unit Breakdown Badges Stack -->
+<div class="flex-1 flex flex-col gap-2">
+<div class="flex items-center justify-between p-2 rounded-xl bg-status-orange-fill">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>
+<span class="font-label-sm text-label-sm text-status-orange-text font-semibold">Affiliator</span>
+</div>
+<span class="font-label-sm text-label-sm text-status-orange-text font-bold">Rp 306 Jt</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-xl bg-status-blue-fill">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span class="font-label-sm text-label-sm text-status-blue-text font-semibold">MCN Network</span>
+</div>
+<span class="font-label-sm text-label-sm text-status-blue-text font-bold">Rp 187 Jt</span>
+</div>
+<div class="flex items-center justify-between p-2 rounded-xl bg-status-purple-fill">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-status-purple-text"></span>
+<span class="font-label-sm text-label-sm text-status-purple-text font-semibold">TAP Partner</span>
+</div>
+<span class="font-label-sm text-label-sm text-status-purple-text font-bold">Rp 85 Jt</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Realtime GMV vs Target per 3 Unit (Panze Bar Rhythm) -->
+<div class="bg-surface-container-lowest p-space-lg rounded-[26px] shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">GMV Realtime vs Target Unit</h2>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Update terkini 3 pilar operasional</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">bar_chart</span>
+</div>
+<div class="space-y-3.5 pt-1">
+<!-- Unit 1: Affiliator Network -->
+<div class="p-3.5 rounded-[18px] bg-status-orange-fill/60 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-status-orange-fill flex items-center justify-center text-status-orange-text font-bold">
+<span class="material-symbols-outlined text-[16px]">groups</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Affiliator Network</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="font-label-md text-label-md text-on-surface font-bold">Rp 18,4 Jt</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">/ 20 Jt</span>
+</div>
+</div>
+<div class="w-full bg-surface-container-lowest rounded-full h-2.5 overflow-hidden">
+<div class="bg-on-tertiary-container h-2.5 rounded-full" style="width: 92%;"></div>
+</div>
+<div class="flex justify-between items-center font-label-sm text-label-sm text-status-orange-text">
+<span class="font-semibold">92.0% dari target</span>
+<span class="text-on-surface-variant font-normal">Sisa Rp 1,6 Jt</span>
+</div>
+</div>
+<!-- Unit 2: MCN (incl. MMC) -->
+<div class="p-3.5 rounded-[18px] bg-status-blue-fill/60 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-status-blue-fill flex items-center justify-center text-status-blue-text font-bold">
+<span class="material-symbols-outlined text-[16px]">live_tv</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-semibold">MCN (incl. MMC)</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="font-label-md text-label-md text-on-surface font-bold">Rp 11,2 Jt</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">/ 12,5 Jt</span>
+</div>
+</div>
+<div class="w-full bg-surface-container-lowest rounded-full h-2.5 overflow-hidden">
+<div class="bg-secondary-container h-2.5 rounded-full" style="width: 89.6%;"></div>
+</div>
+<div class="flex justify-between items-center font-label-sm text-label-sm text-status-blue-text">
+<span class="font-semibold">89.6% dari target</span>
+<span class="text-on-surface-variant font-normal">Sisa Rp 1,3 Jt</span>
+</div>
+</div>
+<!-- Unit 3: TAP Partner -->
+<div class="p-3.5 rounded-[18px] bg-status-purple-fill/60 flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-full bg-status-purple-fill flex items-center justify-center text-status-purple-text font-bold">
+<span class="material-symbols-outlined text-[16px]">hub</span>
+</div>
+<span class="font-label-md text-label-md text-on-surface font-semibold">TAP (TikTok Agency Partner)</span>
+</div>
+<div class="flex items-baseline gap-1">
+<span class="font-label-md text-label-md text-on-surface font-bold">Rp 4,6 Jt</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">/ 5,0 Jt</span>
+</div>
+</div>
+<div class="w-full bg-surface-container-lowest rounded-full h-2.5 overflow-hidden">
+<div class="bg-status-purple-text h-2.5 rounded-full" style="width: 92%;"></div>
+</div>
+<div class="flex justify-between items-center font-label-sm text-label-sm text-status-purple-text">
+<span class="font-semibold">92.0% dari target</span>
+<span class="text-on-surface-variant font-normal">Sisa Rp 400 Rb</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Team Operational Pulse & Quick Reminder -->
+<div class="bg-surface-container-lowest p-space-lg rounded-[26px] shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Status Tim Hari Ini</h3>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Total 25 Staf Lapangan &amp; Admin</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">badge</span>
+</div>
+<!-- Dual Metric Status Pills -->
+<div class="grid grid-cols-2 gap-3">
+<!-- Card Kehadiran -->
+<div class="p-3.5 rounded-[18px] bg-status-green-fill flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-status-green-text font-semibold">Kehadiran</span>
+<span class="material-symbols-outlined text-status-green-text text-[18px]">verified_user</span>
+</div>
+<div class="mt-2">
+<div class="font-headline-sm text-headline-sm text-status-green-text font-bold">22<span class="font-label-md text-label-md font-normal text-status-green-text/80">/25</span></div>
+<span class="font-label-sm text-label-sm text-status-green-text">88% Sudah Check-in</span>
+</div>
+</div>
+<!-- Card Laporan GMV -->
+<div class="p-3.5 rounded-[18px] bg-status-orange-fill flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-status-orange-text font-semibold">Laporan GMV</span>
+<span class="material-symbols-outlined text-status-orange-text text-[18px]">pending_actions</span>
+</div>
+<div class="mt-2">
+<div class="font-headline-sm text-headline-sm text-status-orange-text font-bold">18<span class="font-label-md text-label-md font-normal text-status-orange-text/80">/25</span></div>
+<span class="font-label-sm text-label-sm text-status-orange-text">72% Akun Terkirim</span>
+</div>
+</div>
+</div>
+<!-- Nudge Button Action -->
+<button class="w-full py-3 px-4 rounded-full bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-2 active:scale-[0.98] transition-transform shadow-sm" id="nudge-team-btn" type="button">
+<span class="material-symbols-outlined text-[18px]">notifications_active</span>
+<span>Ingatkan 7 Tim yang Belum Lapor</span>
+</button>
+</div>
+<!-- Tugas & Tiket Mendesak Hari Ini (Card Stack Style) -->
+<div class="bg-surface-container-lowest p-space-lg rounded-[26px] shadow-sm flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Tugas &amp; Tiket Mendesak</h3>
+<span class="w-5 h-5 rounded-full bg-status-red-fill text-status-red-text font-label-sm text-label-sm flex items-center justify-center font-bold">2</span>
+</div>
+<button class="font-label-sm text-label-sm text-secondary font-semibold hover:underline" type="button">Lihat Semua</button>
+</div>
+<!-- Task Item 1: TikTok Beauty Audit -->
+<div class="p-3.5 rounded-[18px] bg-status-red-fill/60 flex items-start gap-3">
+<div class="w-10 h-10 rounded-full bg-status-red-fill text-status-red-text flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">warning</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Audit GMV Akun Beauty</span>
+<span class="font-label-sm text-label-sm text-status-red-text font-bold shrink-0">15:00 WIB</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-0.5">Penyesuaian deviasi nominal komisi kreator top 5 kategori skincare.</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest text-status-red-text font-label-sm text-label-sm font-semibold shadow-xs">High Priority</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">PIC: Rian A.</span>
+</div>
+</div>
+</div>
+<!-- Task Item 2: Otorisasi Akun MMC -->
+<div class="p-3.5 rounded-[18px] bg-status-blue-fill/60 flex items-start gap-3">
+<div class="w-10 h-10 rounded-full bg-status-blue-fill text-status-blue-text flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">verified</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between gap-1">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Otorisasi Akun MMC Baru</span>
+<span class="font-label-sm text-label-sm text-status-blue-text font-bold shrink-0">16:30 WIB</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant line-clamp-2 mt-0.5">Persetujuan token akses multi-channel TikTok Shop untuk 12 kreator MCN.</p>
+<div class="flex items-center gap-2 mt-2">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest text-status-blue-text font-label-sm text-label-sm font-semibold shadow-xs">Approval</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">PIC: Maya S.</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Operational Broadcast Notice -->
+<div class="p-space-md rounded-[22px] bg-surface-container flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-lowest flex items-center justify-center text-on-surface shrink-0 shadow-xs">
+<span class="material-symbols-outlined text-[18px]">campaign</span>
+</div>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Pengumuman Operasional</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Hari ini</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5 leading-relaxed">
+        Batas penutupan sinkronisasi GRD Laporan GMV malam ini dipercepat menjadi pukul 20:00 WIB untuk persiapan evaluasi mingguan besok.
+      </p>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    // Segmented Control Micro-interaction
+    const filterContainer = document.getElementById('time-filter-pill');
+    if (filterContainer) {
+      const buttons = filterContainer.querySelectorAll('button');
+      buttons.forEach(btn => {
+        btn.addEventListener('click', function() {
+          buttons.forEach(b => {
+            b.classList.remove('bg-primary', 'text-on-primary', 'shadow-sm');
+            b.classList.add('text-on-surface-variant');
+          });
+          this.classList.add('bg-primary', 'text-on-primary', 'shadow-sm');
+          this.classList.remove('text-on-surface-variant');
+        });
+      });
+    }
+
+    // Nudge Reminder Micro-interaction
+    const nudgeBtn = document.getElementById('nudge-team-btn');
+    if (nudgeBtn) {
+      nudgeBtn.addEventListener('click', function() {
+        const originalContent = this.innerHTML;
+        this.innerHTML = `<span class="material-symbols-outlined text-[18px] text-status-green-text">check_circle</span><span class="text-status-green-text">Notifikasi Terkirim ke 7 Staf!</span>`;
+        this.classList.replace('bg-primary', 'bg-status-green-fill');
+        setTimeout(() => {
+          this.innerHTML = originalContent;
+          this.classList.replace('bg-status-green-fill', 'bg-primary');
+        }, 3000);
+      });
+    }
+  })();
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe pointer-events-none flex justify-center" data-active-classes="bg-primary text-on-primary shadow-sm font-semibold"><div class="pointer-events-auto w-full max-w-md px-margin mb-3"><div class="h-16 px-2 bg-surface-white/95 backdrop-blur-xl rounded-full shadow-[0_12px_32px_-4px_rgba(15,23,42,0.08),0_4px_12px_-2px_rgba(15,23,42,0.03)] flex items-center justify-around"><a aria-current="page" class="flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all min-h-[44px] min-w-[44px] justify-center bg-primary text-on-primary shadow-sm font-semibold" data-path="beranda" href="#"><span class="material-symbols-outlined text-[22px]">home</span><span class="font-label-md text-label-md hidden xs:inline">Beranda</span></a><a class="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-on-surface-variant hover:text-on-surface transition-all min-h-[44px] min-w-[44px] justify-center" data-path="absensi-dan-lapor" href="#"><span class="material-symbols-outlined text-[22px]">assignment_turned_in</span><span class="font-label-md text-label-md hidden xs:inline">Absensi</span></a><a class="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-on-surface-variant hover:text-on-surface transition-all min-h-[44px] min-w-[44px] justify-center" data-path="tugas-harian" href="#"><span class="material-symbols-outlined text-[22px]">checklist</span><span class="font-label-md text-label-md hidden xs:inline">Tugas</span></a><a class="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-on-surface-variant hover:text-on-surface transition-all min-h-[44px] min-w-[44px] justify-center" data-path="matriks-grd" href="#"><span class="material-symbols-outlined text-[22px]">monitoring</span><span class="font-label-md text-label-md hidden xs:inline">GRD</span></a></div></div></nav></body></html>

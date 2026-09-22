@@ -1,0 +1,5980 @@
+{
+  "_catatan": "Sumber kebenaran data contoh. Dipakai supabase/seed.sql (via scripts/buat-seed-sql.mjs) DAN mode demo aplikasi. Ubah di sini saja.",
+  "tanggalAcuan": "2024-10-24",
+  "departments": [
+    {
+      "nama": "MCN"
+    },
+    {
+      "nama": "TAP"
+    },
+    {
+      "nama": "Affiliator"
+    },
+    {
+      "nama": "MMC"
+    },
+    {
+      "nama": "Mabit Scholar"
+    }
+  ],
+  "units": [
+    {
+      "id": "19570324-4683-5829-9eb5-4c69aa62222a",
+      "kode": "affiliator",
+      "nama": "Affiliator Network",
+      "department": "Affiliator",
+      "deskripsi": "Akun affiliator TikTok Shop; program Mabit Scholar ikut di sini."
+    },
+    {
+      "id": "db5378cf-cefb-5acc-9e22-8d62911fe882",
+      "kode": "mcn",
+      "nama": "MCN (incl. MMC)",
+      "department": "MCN",
+      "deskripsi": "Multi-channel network; MMC sebagai pendukung."
+    },
+    {
+      "id": "f1b49e07-9937-5915-bedc-37348bdf1ac1",
+      "kode": "tap",
+      "nama": "TAP (TikTok Agency Partner)",
+      "department": "TAP",
+      "deskripsi": "Brand ads campaign sebagai agency partner."
+    }
+  ],
+  "programs": [
+    {
+      "id": "bd30261c-89ca-5f3c-934e-682566c1e29b",
+      "nama": "Mabit Scholar",
+      "unit": "affiliator",
+      "aktif": true
+    },
+    {
+      "id": "566f6a36-a537-5e58-a02b-39f2330b6f81",
+      "nama": "Reguler",
+      "unit": "affiliator",
+      "aktif": true
+    },
+    {
+      "id": "5a03b042-d06f-5662-ab6c-13ba731bf701",
+      "nama": "MMC",
+      "unit": "mcn",
+      "aktif": true
+    }
+  ],
+  "users": [
+    {
+      "id": "7019770e-faea-5467-98ad-3c4a088d602e",
+      "nama": "Farhan Pratama",
+      "email": "farhan@alkahfi.co.id",
+      "role": "Manager",
+      "jabatan": "Manager Operasional Al-Kahfi Corp",
+      "unit": null,
+      "atasan": "Hafidz Alkahfi",
+      "inisial": "FP",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:52",
+        "sudah_lapor": true
+      },
+      "kontak": "0812-3456-7890",
+      "wa_terverifikasi": "2024-10-20T09:00:00+07:00",
+      "wa_optin": true
+    },
+    {
+      "id": "9fbfa1b2-ab86-5fa3-8a0c-1a88537cdc33",
+      "nama": "Hafidz Alkahfi",
+      "email": "hafidz@alkahfi.co.id",
+      "role": "CEO",
+      "jabatan": "CEO Al-Kahfi Corp",
+      "unit": null,
+      "atasan": null,
+      "inisial": "HA",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:20",
+        "sudah_lapor": true
+      },
+      "kontak": "+62 811 2233 4455",
+      "wa_terverifikasi": "2024-10-18T14:00:00+07:00",
+      "wa_optin": true
+    },
+    {
+      "id": "484a9a6a-149f-56d0-a15a-9215cf7403a3",
+      "nama": "Rian Hidayat",
+      "email": "rian@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff Affiliator · PIC akun beauty",
+      "unit": "affiliator",
+      "atasan": "Dewi Lestari",
+      "inisial": "RH",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:48",
+        "sudah_lapor": false
+      },
+      "kontak": "085700112233",
+      "wa_terverifikasi": "2024-10-21T08:00:00+07:00",
+      "wa_optin": false
+    },
+    {
+      "id": "ad72efba-7708-5742-9bea-3e70ead115f2",
+      "nama": "Nabila Putri",
+      "email": "nabila@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff Affiliator",
+      "unit": "affiliator",
+      "atasan": "Dewi Lestari",
+      "inisial": "NP",
+      "absen": {
+        "status": "terlambat",
+        "jam_masuk": "09:14",
+        "sudah_lapor": false
+      },
+      "kontak": "62 813 9988 7766"
+    },
+    {
+      "id": "83dc3963-466d-5d71-93d3-0815f1fd926b",
+      "nama": "Bayu Nugraha",
+      "email": "bayu@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff Affiliator",
+      "unit": "affiliator",
+      "atasan": "Dewi Lestari",
+      "inisial": "BN",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:31",
+        "sudah_lapor": true
+      }
+    },
+    {
+      "id": "c5631790-4df7-5d06-b9db-ee468783017f",
+      "nama": "Dimas Maulana",
+      "email": "dimas@alkahfi.co.id",
+      "role": "Leader",
+      "jabatan": "Leader TAP",
+      "unit": "tap",
+      "atasan": "Farhan Pratama",
+      "inisial": "DM",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:40",
+        "sudah_lapor": true
+      }
+    },
+    {
+      "id": "581aa0ce-6f9c-5d52-8922-c102e64aa12c",
+      "nama": "Maya Safitri",
+      "email": "maya@alkahfi.co.id",
+      "role": "Co-Leader",
+      "jabatan": "Co-Leader MCN",
+      "unit": "mcn",
+      "atasan": "Galih Prakoso",
+      "inisial": "MS",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:44",
+        "sudah_lapor": true
+      }
+    },
+    {
+      "id": "56e8a824-7195-5cca-8b01-80b5516bd3db",
+      "nama": "Rizky Ananda",
+      "email": "rizky@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff MCN",
+      "unit": "mcn",
+      "atasan": "Galih Prakoso",
+      "inisial": "RA",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:55",
+        "sudah_lapor": false
+      },
+      "kontak": "0857-1122-3344"
+    },
+    {
+      "id": "dd0b0a40-8d0f-5534-bbcf-3aae10cdbee9",
+      "nama": "Intan Permata",
+      "email": "intan@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff Affiliator",
+      "unit": "affiliator",
+      "atasan": "Dewi Lestari",
+      "inisial": "IP",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:37",
+        "sudah_lapor": true
+      }
+    },
+    {
+      "id": "73eab5ac-5007-5391-913e-01e9ad855f45",
+      "nama": "Yoga Saputra",
+      "email": "yoga@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff TAP",
+      "unit": "tap",
+      "atasan": "Dimas Maulana",
+      "inisial": "YS",
+      "absen": {
+        "status": "terlambat",
+        "jam_masuk": "08:47",
+        "sudah_lapor": false
+      }
+    },
+    {
+      "id": "ff63318a-dd1f-5438-bb27-88987420c0d9",
+      "nama": "Salsabila Rahma",
+      "email": "salsabila@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff Affiliator · Mabit Scholar",
+      "unit": "affiliator",
+      "atasan": "Dewi Lestari",
+      "inisial": "SR",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:29",
+        "sudah_lapor": true
+      },
+      "program": "Mabit Scholar",
+      "departemen": "Mabit Scholar"
+    },
+    {
+      "id": "72005e8f-e3c0-51fe-ade9-0d6f3a5d508d",
+      "nama": "Fajar Ramadhan",
+      "email": "fajar@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff MCN",
+      "unit": "mcn",
+      "atasan": "Galih Prakoso",
+      "inisial": "FR",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:58",
+        "sudah_lapor": true
+      }
+    },
+    {
+      "id": "7f52935c-fccd-55c6-9d33-341cf854fb18",
+      "nama": "Anisa Larasati",
+      "email": "anisa@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff Affiliator",
+      "unit": "affiliator",
+      "atasan": "Dewi Lestari",
+      "inisial": "AL",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:41",
+        "sudah_lapor": true
+      }
+    },
+    {
+      "id": "fd438ea5-9664-51d4-9fed-4744fe5c6d8d",
+      "nama": "Hendra Kusuma",
+      "email": "hendra@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff TAP",
+      "unit": "tap",
+      "atasan": "Dimas Maulana",
+      "inisial": "HK",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:50",
+        "sudah_lapor": true
+      }
+    },
+    {
+      "id": "66f8b261-08cb-58cd-980d-ea3cb7f2f61d",
+      "nama": "Putri Amelia",
+      "email": "putri@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff MCN",
+      "unit": "mcn",
+      "atasan": "Galih Prakoso",
+      "inisial": "PA",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:36",
+        "sudah_lapor": true
+      }
+    },
+    {
+      "id": "48e841ca-3e54-5c76-a7c5-084b7cd81677",
+      "nama": "Arif Setiawan",
+      "email": "arif@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff Affiliator",
+      "unit": "affiliator",
+      "atasan": "Dewi Lestari",
+      "inisial": "AS",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:59",
+        "sudah_lapor": true
+      }
+    },
+    {
+      "id": "e2391748-8e38-5009-b5d6-758e232c6381",
+      "nama": "Dewi Lestari",
+      "email": "dewi@alkahfi.co.id",
+      "role": "Leader",
+      "jabatan": "Leader Affiliator",
+      "unit": "affiliator",
+      "atasan": "Farhan Pratama",
+      "inisial": "DL",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:33",
+        "sudah_lapor": true
+      },
+      "kontak": "0821-5566-7788"
+    },
+    {
+      "id": "32de9d7a-0ac4-5c56-a57f-aeb9f7099b97",
+      "nama": "Galih Prakoso",
+      "email": "galih@alkahfi.co.id",
+      "role": "Leader",
+      "jabatan": "Leader MCN",
+      "unit": "mcn",
+      "atasan": "Farhan Pratama",
+      "inisial": "GP",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:46",
+        "sudah_lapor": true
+      }
+    },
+    {
+      "id": "2f4160f3-fea1-5b98-ba6c-f93645b4fbc0",
+      "nama": "Vina Oktaviani",
+      "email": "vina@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff TAP",
+      "unit": "tap",
+      "atasan": "Dimas Maulana",
+      "inisial": "VO",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:52",
+        "sudah_lapor": true
+      }
+    },
+    {
+      "id": "670c9117-473d-5c0a-8ccd-1cfac0f0f80b",
+      "nama": "Rendi Firmansyah",
+      "email": "rendi@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff Affiliator",
+      "unit": "affiliator",
+      "atasan": "Dewi Lestari",
+      "inisial": "RF",
+      "absen": {
+        "status": "terlambat",
+        "jam_masuk": "08:22",
+        "sudah_lapor": true
+      }
+    },
+    {
+      "id": "0c613b14-b429-57b2-aed0-395751a41d97",
+      "nama": "Bagas Adriansyah",
+      "email": "bagas@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff Affiliator · Mabit Scholar",
+      "unit": "affiliator",
+      "atasan": "Dewi Lestari",
+      "inisial": "BA",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:43",
+        "sudah_lapor": true
+      },
+      "program": "Mabit Scholar",
+      "departemen": "Mabit Scholar"
+    },
+    {
+      "id": "2a6feda0-dc3c-5aeb-9122-0640f53e3c33",
+      "nama": "Laras Ayuningtyas",
+      "email": "laras@alkahfi.co.id",
+      "role": "Finance",
+      "jabatan": "Finance Al-Kahfi Corp",
+      "unit": null,
+      "atasan": "Farhan Pratama",
+      "inisial": "LA",
+      "absen": {
+        "status": "hadir",
+        "jam_masuk": "07:47",
+        "sudah_lapor": true
+      },
+      "kontak": "081199887766"
+    },
+    {
+      "id": "2752b688-eaaa-574c-b84e-ab675064d7be",
+      "nama": "Teguh Wibowo",
+      "email": "teguh@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff Affiliator",
+      "unit": "affiliator",
+      "atasan": "Dewi Lestari",
+      "inisial": "TW",
+      "absen": {
+        "status": "izin",
+        "jam_masuk": null,
+        "sudah_lapor": false
+      }
+    },
+    {
+      "id": "26acd2f9-a9bd-5479-84e9-6ecf01b58709",
+      "nama": "Sinta Maharani",
+      "email": "sinta@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff MCN",
+      "unit": "mcn",
+      "atasan": "Galih Prakoso",
+      "inisial": "SM",
+      "absen": {
+        "status": "sakit",
+        "jam_masuk": null,
+        "sudah_lapor": false
+      }
+    },
+    {
+      "id": "f65668c7-d2d9-5812-b4a9-2e085cce40c6",
+      "nama": "Eko Prasetyo",
+      "email": "eko@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff TAP",
+      "unit": "tap",
+      "atasan": "Dimas Maulana",
+      "inisial": "EP",
+      "absen": {
+        "status": "belum_absen",
+        "jam_masuk": null,
+        "sudah_lapor": false
+      }
+    },
+    {
+      "id": "b7c1e0d2-4a3f-5e6b-8c9d-1f2a3b4c5d6e",
+      "nama": "Yusuf Ramadhan",
+      "email": "yusuf@alkahfi.co.id",
+      "role": "Staff",
+      "jabatan": "Staff Affiliator",
+      "unit": "affiliator",
+      "atasan": "Dewi Lestari",
+      "inisial": "YR",
+      "status": "nonaktif",
+      "_catatan": "Bekas anggota; disimpan nonaktif agar riwayat & lencana statusnya terlihat."
+    }
+  ],
+  "accounts": [
+    {
+      "id": "23f37851-57bd-55bd-9d1a-8699874b39a1",
+      "username": "@skincare_official",
+      "pic": "Rian Hidayat",
+      "co_leader": "Dewi Lestari",
+      "unit": "affiliator",
+      "program": "Reguler",
+      "target_harian": 4500000
+    },
+    {
+      "id": "6bc1d8ed-0115-50a0-a6b5-ae5570c9a925",
+      "username": "@beauty_daily.id",
+      "pic": "Rian Hidayat",
+      "co_leader": "Dewi Lestari",
+      "unit": "affiliator",
+      "program": "Mabit Scholar",
+      "target_harian": 3000000
+    },
+    {
+      "id": "341fd812-5440-518a-af7c-d9e589d9cc39",
+      "username": "@fashion_hijab",
+      "pic": "Nabila Putri",
+      "co_leader": "Dewi Lestari",
+      "unit": "affiliator",
+      "program": "Reguler",
+      "target_harian": 3500000
+    },
+    {
+      "id": "4bcb8165-a584-5d5b-a194-859250042d96",
+      "username": "@gadget_daily",
+      "pic": "Bayu Nugraha",
+      "co_leader": "Dewi Lestari",
+      "unit": "affiliator",
+      "program": "Reguler",
+      "target_harian": 4000000
+    },
+    {
+      "id": "8fedddaa-ad4e-5faa-b7a0-9aa815be177f",
+      "username": "@snack_nusantara",
+      "pic": "Intan Permata",
+      "co_leader": "Dewi Lestari",
+      "unit": "affiliator",
+      "program": "Mabit Scholar",
+      "target_harian": 2500000
+    },
+    {
+      "id": "87969379-7771-5c7a-bc4b-d4e5983b59be",
+      "username": "@home_essentials",
+      "pic": "Salsabila Rahma",
+      "co_leader": "Dewi Lestari",
+      "unit": "affiliator",
+      "program": "Reguler",
+      "target_harian": 2500000
+    }
+  ],
+  "announcements": [
+    {
+      "id": "cutoff-partner-center",
+      "judul": "Cutoff Partner Center",
+      "ringkasan": "Sinkronisasi GRD laporan GMV malam ini dipercepat menjadi pukul 20.00 WIB.",
+      "isi": [
+        "Batas penutupan sinkronisasi GRD untuk laporan GMV malam ini dipercepat menjadi pukul 20.00 WIB, dari yang biasanya 23.59 WIB. Percepatan ini disiapkan untuk evaluasi mingguan besok pagi.",
+        "Mohon seluruh PIC akun affiliator dan Leader unit MCN serta TAP menyelesaikan input GMV di menu Laporan Harian sebelum pukul 19.30 WIB, agar masih ada waktu memeriksa angka terhadap Partner Center.",
+        "Laporan yang masuk setelah cutoff tetap tercatat, tetapi tidak ikut terhitung pada rekap mingguan yang dibahas besok."
+      ],
+      "target_role": null,
+      "target_unit": null,
+      "disematkan": true,
+      "dibuat_oleh": "Farhan Pratama",
+      "published_at": "2024-10-24T09:00:00+07:00"
+    },
+    {
+      "id": "revisi-alur-qc-tiket",
+      "judul": "Revisi alur QC tiket",
+      "ringkasan": "Tiket yang sudah diperiksa Leader kini perlu satu kali konfirmasi balik dari pembuat tiket.",
+      "isi": [
+        "Mulai pekan ini, tiket yang statusnya sudah diperiksa (QC) oleh Leader tidak langsung berubah menjadi selesai. Pembuat tiket perlu memberi satu konfirmasi balik bahwa hasilnya sesuai permintaan.",
+        "Tujuannya menutup celah tiket yang ditandai selesai padahal hasilnya masih perlu perbaikan. Perubahan status tetap tercatat lengkap di jejak audit."
+      ],
+      "target_role": "Leader",
+      "target_unit": null,
+      "disematkan": false,
+      "dibuat_oleh": "Farhan Pratama",
+      "published_at": "2024-10-23T16:30:00+07:00"
+    },
+    {
+      "id": "jadwal-standup-oktober",
+      "judul": "Jadwal standup Oktober",
+      "ringkasan": "Standup harian unit Affiliator bergeser ke pukul 09.00 WIB sampai akhir bulan.",
+      "isi": [
+        "Standup harian unit Affiliator bergeser dari pukul 08.30 WIB menjadi 09.00 WIB sampai akhir Oktober, menyesuaikan jam live pagi yang ditambah.",
+        "Unit MCN dan TAP tidak terpengaruh dan tetap mulai pukul 08.30 WIB."
+      ],
+      "target_role": null,
+      "target_unit": "affiliator",
+      "disematkan": false,
+      "dibuat_oleh": "Dewi Lestari",
+      "published_at": "2024-10-21T07:15:00+07:00"
+    }
+  ],
+  "goals": [
+    {
+      "id": "3fb5b63e-0edc-5124-8ccf-504549fc9de7",
+      "judul": "GMV perusahaan Oktober 2024",
+      "level": "company",
+      "unit": null,
+      "account": null,
+      "pemilik": "Hafidz Alkahfi",
+      "target_base": 930000000,
+      "target_goal": 1162500000,
+      "target_stretch": 1453125000,
+      "periode": "2024-Q4",
+      "bulan": "2024-10-01",
+      "target_bulan": 1162500000,
+      "parent": null,
+      "bulan_list": [
+        {
+          "bulan": "2024-10-01",
+          "target": 1162500000
+        },
+        {
+          "bulan": "2024-11-01",
+          "target": 1255500000
+        },
+        {
+          "bulan": "2024-12-01",
+          "target": 1395000000
+        }
+      ]
+    },
+    {
+      "id": "f3e9fd84-efee-52ea-911e-a908b5093f74",
+      "judul": "GMV operasional Oktober 2024",
+      "level": "manager",
+      "unit": null,
+      "account": null,
+      "pemilik": "Farhan Pratama",
+      "target_base": 930000000,
+      "target_goal": 1162500000,
+      "target_stretch": 1395000000,
+      "periode": "2024-Q4",
+      "bulan": "2024-10-01",
+      "target_bulan": 1162500000,
+      "parent": "3fb5b63e-0edc-5124-8ccf-504549fc9de7",
+      "bulan_list": [
+        {
+          "bulan": "2024-10-01",
+          "target": 1162500000
+        },
+        {
+          "bulan": "2024-11-01",
+          "target": 1255500000
+        },
+        {
+          "bulan": "2024-12-01",
+          "target": 1395000000
+        }
+      ]
+    },
+    {
+      "id": "0844d12e-eb26-5be5-ac8a-db6e4d7113e2",
+      "judul": "GMV bulanan unit AFFILIATOR",
+      "level": "leader",
+      "unit": "affiliator",
+      "account": null,
+      "pemilik": "Dewi Lestari",
+      "target_base": 496000000,
+      "target_goal": 620000000,
+      "target_stretch": 744000000,
+      "periode": "2024-Q4",
+      "bulan": "2024-10-01",
+      "target_bulan": 620000000,
+      "parent": "f3e9fd84-efee-52ea-911e-a908b5093f74",
+      "bulan_list": [
+        {
+          "bulan": "2024-10-01",
+          "target": 620000000
+        },
+        {
+          "bulan": "2024-11-01",
+          "target": 669600000
+        },
+        {
+          "bulan": "2024-12-01",
+          "target": 744000000
+        }
+      ]
+    },
+    {
+      "id": "21b36aa0-2fe0-58e5-a7bb-58c202d71bf1",
+      "judul": "GMV bulanan unit MCN",
+      "level": "leader",
+      "unit": "mcn",
+      "account": null,
+      "pemilik": "Galih Prakoso",
+      "target_base": 310000000,
+      "target_goal": 387500000,
+      "target_stretch": 465000000,
+      "periode": "2024-Q4",
+      "bulan": "2024-10-01",
+      "target_bulan": 387500000,
+      "parent": "f3e9fd84-efee-52ea-911e-a908b5093f74",
+      "bulan_list": [
+        {
+          "bulan": "2024-10-01",
+          "target": 387500000
+        },
+        {
+          "bulan": "2024-11-01",
+          "target": 418500000
+        },
+        {
+          "bulan": "2024-12-01",
+          "target": 465000000
+        }
+      ]
+    },
+    {
+      "id": "21e8a8a0-afdf-589d-a6e8-e18d2b920b0a",
+      "judul": "GMV bulanan unit TAP",
+      "level": "leader",
+      "unit": "tap",
+      "account": null,
+      "pemilik": "Dimas Maulana",
+      "target_base": 124000000,
+      "target_goal": 155000000,
+      "target_stretch": 186000000,
+      "periode": "2024-Q4",
+      "bulan": "2024-10-01",
+      "target_bulan": 155000000,
+      "parent": "f3e9fd84-efee-52ea-911e-a908b5093f74",
+      "bulan_list": [
+        {
+          "bulan": "2024-10-01",
+          "target": 155000000
+        },
+        {
+          "bulan": "2024-11-01",
+          "target": 167400000
+        },
+        {
+          "bulan": "2024-12-01",
+          "target": 186000000
+        }
+      ]
+    },
+    {
+      "id": "24ca497b-8472-57c8-a3a7-44d4d2f81acf",
+      "judul": "GMV bulanan @skincare_official",
+      "level": "account",
+      "unit": null,
+      "account": "@skincare_official",
+      "pemilik": "Rian Hidayat",
+      "target_base": 111600000,
+      "target_goal": 139500000,
+      "target_stretch": 167400000,
+      "periode": "2024-Q4",
+      "bulan": "2024-10-01",
+      "target_bulan": 139500000,
+      "parent": "0844d12e-eb26-5be5-ac8a-db6e4d7113e2",
+      "bulan_list": [
+        {
+          "bulan": "2024-10-01",
+          "target": 139500000
+        },
+        {
+          "bulan": "2024-11-01",
+          "target": 150660000
+        },
+        {
+          "bulan": "2024-12-01",
+          "target": 167400000
+        }
+      ]
+    },
+    {
+      "id": "a85afd06-e3f2-5b85-992f-6732bd543394",
+      "judul": "GMV bulanan @beauty_daily.id",
+      "level": "account",
+      "unit": null,
+      "account": "@beauty_daily.id",
+      "pemilik": "Rian Hidayat",
+      "target_base": 74400000,
+      "target_goal": 93000000,
+      "target_stretch": 111600000,
+      "periode": "2024-Q4",
+      "bulan": "2024-10-01",
+      "target_bulan": 93000000,
+      "parent": "0844d12e-eb26-5be5-ac8a-db6e4d7113e2",
+      "bulan_list": [
+        {
+          "bulan": "2024-10-01",
+          "target": 93000000
+        },
+        {
+          "bulan": "2024-11-01",
+          "target": 100440000
+        },
+        {
+          "bulan": "2024-12-01",
+          "target": 111600000
+        }
+      ]
+    },
+    {
+      "id": "dfcae26c-b716-5e38-9de3-3a68890413f2",
+      "judul": "GMV bulanan @fashion_hijab",
+      "level": "account",
+      "unit": null,
+      "account": "@fashion_hijab",
+      "pemilik": "Nabila Putri",
+      "target_base": 86800000,
+      "target_goal": 108500000,
+      "target_stretch": 130200000,
+      "periode": "2024-Q4",
+      "bulan": "2024-10-01",
+      "target_bulan": 108500000,
+      "parent": "0844d12e-eb26-5be5-ac8a-db6e4d7113e2",
+      "bulan_list": [
+        {
+          "bulan": "2024-10-01",
+          "target": 108500000
+        },
+        {
+          "bulan": "2024-11-01",
+          "target": 117180000
+        },
+        {
+          "bulan": "2024-12-01",
+          "target": 130200000
+        }
+      ]
+    },
+    {
+      "id": "26c6d65a-d4d7-5a2c-b44e-647701fd767c",
+      "judul": "GMV bulanan @gadget_daily",
+      "level": "account",
+      "unit": null,
+      "account": "@gadget_daily",
+      "pemilik": "Bayu Nugraha",
+      "target_base": 99200000,
+      "target_goal": 124000000,
+      "target_stretch": 148800000,
+      "periode": "2024-Q4",
+      "bulan": "2024-10-01",
+      "target_bulan": 124000000,
+      "parent": "0844d12e-eb26-5be5-ac8a-db6e4d7113e2",
+      "bulan_list": [
+        {
+          "bulan": "2024-10-01",
+          "target": 124000000
+        },
+        {
+          "bulan": "2024-11-01",
+          "target": 133920000
+        },
+        {
+          "bulan": "2024-12-01",
+          "target": 148800000
+        }
+      ]
+    },
+    {
+      "id": "f9774007-22de-5136-8497-0fe82d95aaea",
+      "judul": "GMV bulanan @snack_nusantara",
+      "level": "account",
+      "unit": null,
+      "account": "@snack_nusantara",
+      "pemilik": "Intan Permata",
+      "target_base": 62000000,
+      "target_goal": 77500000,
+      "target_stretch": 93000000,
+      "periode": "2024-Q4",
+      "bulan": "2024-10-01",
+      "target_bulan": 77500000,
+      "parent": "0844d12e-eb26-5be5-ac8a-db6e4d7113e2",
+      "bulan_list": [
+        {
+          "bulan": "2024-10-01",
+          "target": 77500000
+        },
+        {
+          "bulan": "2024-11-01",
+          "target": 83700000
+        },
+        {
+          "bulan": "2024-12-01",
+          "target": 93000000
+        }
+      ]
+    },
+    {
+      "id": "d8b3f49b-4999-5c04-85e2-e135bc6826d5",
+      "judul": "GMV bulanan @home_essentials",
+      "level": "account",
+      "unit": null,
+      "account": "@home_essentials",
+      "pemilik": "Salsabila Rahma",
+      "target_base": 62000000,
+      "target_goal": 77500000,
+      "target_stretch": 93000000,
+      "periode": "2024-Q4",
+      "bulan": "2024-10-01",
+      "target_bulan": 77500000,
+      "parent": "0844d12e-eb26-5be5-ac8a-db6e4d7113e2",
+      "bulan_list": [
+        {
+          "bulan": "2024-10-01",
+          "target": 77500000
+        },
+        {
+          "bulan": "2024-11-01",
+          "target": 83700000
+        },
+        {
+          "bulan": "2024-12-01",
+          "target": 93000000
+        }
+      ]
+    }
+  ],
+  "daily_reports": [
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-01",
+      "gmv": 4176000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:18"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-01",
+      "gmv": 2784000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:32"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-01",
+      "gmv": 3248000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:18"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-01",
+      "gmv": 3712000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:05"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-01",
+      "gmv": 2320000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:47"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-01",
+      "gmv": 2320000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:47"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-01",
+      "gmv": 13160000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:55"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-01",
+      "gmv": 5020000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:25"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-02",
+      "gmv": 4146000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:47"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-02",
+      "gmv": 2763000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:05"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-02",
+      "gmv": 3223000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:47"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-02",
+      "gmv": 3684000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:18"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-02",
+      "gmv": 2302000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:32"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-02",
+      "gmv": 2302000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:32"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-02",
+      "gmv": 12770000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:25"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-02",
+      "gmv": 4390000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:25"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-03",
+      "gmv": 4416000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:47"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-03",
+      "gmv": 2943000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:05"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-03",
+      "gmv": 3433000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:18"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-03",
+      "gmv": 3924000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:47"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-03",
+      "gmv": 2452000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:18"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-03",
+      "gmv": 2452000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:47"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-03",
+      "gmv": 11380000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:40"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-03",
+      "gmv": 4740000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:25"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-04",
+      "gmv": 3903000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:18"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-04",
+      "gmv": 2601000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:47"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-04",
+      "gmv": 3034000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:32"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-04",
+      "gmv": 3468000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:32"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-04",
+      "gmv": 2167000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:18"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-04",
+      "gmv": 2167000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:05"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-04",
+      "gmv": 12620000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:25"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-04",
+      "gmv": 4160000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:10"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-05",
+      "gmv": 3726000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:32"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-05",
+      "gmv": 2482000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:05"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-05",
+      "gmv": 2896000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:32"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-05",
+      "gmv": 3310000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:18"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-05",
+      "gmv": 2068000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:47"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-05",
+      "gmv": 2068000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:05"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-05",
+      "gmv": 13080000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:40"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-05",
+      "gmv": 4820000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:25"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-07",
+      "gmv": 3748000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:32"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-07",
+      "gmv": 2497000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:32"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-07",
+      "gmv": 2913000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:47"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-07",
+      "gmv": 3330000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:32"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-07",
+      "gmv": 2081000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:05"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-07",
+      "gmv": 2081000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:47"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-07",
+      "gmv": 11510000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:40"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-07",
+      "gmv": 4270000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:55"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-08",
+      "gmv": 3852000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:05"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-08",
+      "gmv": 2566000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:32"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-08",
+      "gmv": 2994000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:18"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-08",
+      "gmv": 3422000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:05"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-08",
+      "gmv": 2138000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:32"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-08",
+      "gmv": 2138000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:47"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-08",
+      "gmv": 12590000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:55"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-08",
+      "gmv": 4190000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:10"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-09",
+      "gmv": 4632000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:18"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-09",
+      "gmv": 3087000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:18"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-09",
+      "gmv": 3601000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:05"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-09",
+      "gmv": 4116000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:18"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-09",
+      "gmv": 2572000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:05"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-09",
+      "gmv": 2572000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:05"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-09",
+      "gmv": 11540000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:40"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-09",
+      "gmv": 4790000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:55"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-10",
+      "gmv": 3852000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:18"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-10",
+      "gmv": 2566000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:47"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-10",
+      "gmv": 2994000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:32"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-10",
+      "gmv": 3422000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:32"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-10",
+      "gmv": 2138000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:32"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-10",
+      "gmv": 2138000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:32"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-10",
+      "gmv": 12580000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:40"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-10",
+      "gmv": 4550000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:10"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-11",
+      "gmv": 4581000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:47"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-11",
+      "gmv": 3052000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:18"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-11",
+      "gmv": 3561000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:18"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-11",
+      "gmv": 4070000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:18"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-11",
+      "gmv": 2543000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:32"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-11",
+      "gmv": 2543000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:18"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-11",
+      "gmv": 13910000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:55"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-11",
+      "gmv": 5300000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:40"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-12",
+      "gmv": 4149000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:05"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-12",
+      "gmv": 2764000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:47"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-12",
+      "gmv": 3225000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:32"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-12",
+      "gmv": 3686000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:05"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-12",
+      "gmv": 2303000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:05"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-12",
+      "gmv": 2303000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:32"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-12",
+      "gmv": 12640000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:40"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-12",
+      "gmv": 4540000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:10"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-14",
+      "gmv": 5094000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:32"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-14",
+      "gmv": 3396000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:05"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-14",
+      "gmv": 3962000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:47"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-14",
+      "gmv": 4528000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:05"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-14",
+      "gmv": 2830000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:18"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-14",
+      "gmv": 2830000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:18"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-14",
+      "gmv": 13860000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:10"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-14",
+      "gmv": 4250000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:55"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-15",
+      "gmv": 4491000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:18"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-15",
+      "gmv": 2992000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:05"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-15",
+      "gmv": 3491000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:05"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-15",
+      "gmv": 3990000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:32"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-15",
+      "gmv": 2493000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:47"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-15",
+      "gmv": 2493000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:05"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-15",
+      "gmv": 10760000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:55"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-15",
+      "gmv": 5020000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:10"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-16",
+      "gmv": 4707000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:18"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-16",
+      "gmv": 3138000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:32"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-16",
+      "gmv": 3661000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:32"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-16",
+      "gmv": 4184000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:05"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-16",
+      "gmv": 2615000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:32"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-16",
+      "gmv": 2615000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:47"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-16",
+      "gmv": 11580000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:10"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-16",
+      "gmv": 5630000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:10"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-17",
+      "gmv": 4221000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:05"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-17",
+      "gmv": 2814000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:18"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-17",
+      "gmv": 3283000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:05"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-17",
+      "gmv": 3752000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:32"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-17",
+      "gmv": 2345000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:18"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-17",
+      "gmv": 2345000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:05"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-17",
+      "gmv": 10600000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:40"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-17",
+      "gmv": 4810000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:25"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-18",
+      "gmv": 4515000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:05"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-18",
+      "gmv": 3009000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:32"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-18",
+      "gmv": 3510000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:05"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-18",
+      "gmv": 4012000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:47"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-18",
+      "gmv": 2507000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:32"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-18",
+      "gmv": 2507000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:18"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-18",
+      "gmv": 11000000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:40"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-18",
+      "gmv": 5480000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:55"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-19",
+      "gmv": 3930000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:18"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-19",
+      "gmv": 2619000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:47"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-19",
+      "gmv": 3055000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:18"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-19",
+      "gmv": 3492000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:32"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-19",
+      "gmv": 2182000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:05"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-19",
+      "gmv": 2182000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:05"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-19",
+      "gmv": 12050000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:25"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-19",
+      "gmv": 5410000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:10"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-21",
+      "gmv": 3775000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:05"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-21",
+      "gmv": 2515000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:47"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-21",
+      "gmv": 2934000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:32"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-21",
+      "gmv": 3354000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:32"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-21",
+      "gmv": 2096000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:47"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-21",
+      "gmv": 2096000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:18"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-21",
+      "gmv": 11870000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:25"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-21",
+      "gmv": 4780000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:40"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-22",
+      "gmv": 5130000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:18"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-22",
+      "gmv": 3418000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:32"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-22",
+      "gmv": 3988000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:47"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-22",
+      "gmv": 4558000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:18"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-22",
+      "gmv": 2848000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:05"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-22",
+      "gmv": 2848000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:47"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-22",
+      "gmv": 14220000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:55"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-22",
+      "gmv": 4260000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:40"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-23",
+      "gmv": 3510000,
+      "catatan": "Live 4 jam, bundling serum + toner jalan. Stok toner tinggal 40 pcs.",
+      "status": "terkirim",
+      "jam": "18:47"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-23",
+      "gmv": 2340000,
+      "catatan": "Host pengganti, ritme masih menyesuaikan.",
+      "status": "terkirim",
+      "jam": "19:18"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "unit": null,
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-23",
+      "gmv": 2730000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:32"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-23",
+      "gmv": 3120000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:18"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-23",
+      "gmv": 1950000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:47"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-23",
+      "gmv": 1950000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:05"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-23",
+      "gmv": 9400000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:55"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-23",
+      "gmv": 3900000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:40"
+    },
+    {
+      "akun": "@skincare_official",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-24",
+      "gmv": 4784000,
+      "catatan": "Live streaming 3 jam stabil, konversi paket glowing bundle naik 22%.",
+      "status": "terkirim",
+      "jam": "19:47"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "unit": null,
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-24",
+      "gmv": 3404000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:18"
+    },
+    {
+      "akun": "@gadget_daily",
+      "unit": null,
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-24",
+      "gmv": 4324000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "19:32"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "unit": null,
+      "user": "Intan Permata",
+      "tanggal": "2024-10-24",
+      "gmv": 2944000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:32"
+    },
+    {
+      "akun": "@home_essentials",
+      "unit": null,
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-24",
+      "gmv": 2944000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "17:32"
+    },
+    {
+      "akun": null,
+      "unit": "mcn",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-24",
+      "gmv": 11200000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:40"
+    },
+    {
+      "akun": null,
+      "unit": "tap",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-24",
+      "gmv": 4600000,
+      "catatan": "",
+      "status": "terkirim",
+      "jam": "18:25"
+    }
+  ],
+  "targetUnitHarian": {
+    "affiliator": 20000000,
+    "mcn": 12500000,
+    "tap": 5000000
+  },
+  "tasks": [
+    {
+      "tipe": "pribadi",
+      "judul": "Cek 14 sesi live sore",
+      "konteks": "Affiliator · jadwal 16.00–21.00",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Farhan Pratama",
+      "tenggat": "2024-10-24T16:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "todo",
+      "qc": "belum"
+    },
+    {
+      "tipe": "pribadi",
+      "judul": "Balas 6 pengajuan sampel",
+      "konteks": "MCN · antrean kreator baru",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Farhan Pratama",
+      "tenggat": null,
+      "prioritas": "sedang",
+      "status": "todo",
+      "qc": "belum"
+    },
+    {
+      "tipe": "pribadi",
+      "judul": "Review draf brief TAP",
+      "konteks": "TAP · brand ads Ramadan",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Farhan Pratama",
+      "tenggat": "2024-10-24T13:30:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "belum"
+    },
+    {
+      "tipe": "pribadi",
+      "judul": "Kunci target harian tim",
+      "konteks": "GRD · anak tangga Oktober",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Farhan Pratama",
+      "tenggat": null,
+      "prioritas": "rendah",
+      "status": "todo",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Audit GMV Akun Beauty",
+      "konteks": "Prioritas Tinggi",
+      "deskripsi": "Penyesuaian deviasi nominal komisi kreator top 5 kategori skincare.",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Rian Hidayat",
+      "tenggat": "2024-10-24T15:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Otorisasi Akun MMC Baru",
+      "konteks": "Approval",
+      "deskripsi": "Persetujuan token akses multi-channel TikTok Shop untuk 12 kreator batch Ramadan.",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Maya Safitri",
+      "tenggat": "2024-10-24T16:30:00+07:00",
+      "prioritas": "sedang",
+      "status": "menunggu_qc",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Sinkronisasi TAP Center",
+      "konteks": "Finance & GMV",
+      "deskripsi": "Rekonsiliasi data GMV dasbor terhadap invoice real-time TikTok Ads Agency.",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Dimas Maulana",
+      "tenggat": "2024-10-24T18:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "QC Tiket Konten FYP",
+      "konteks": "SOP GRD",
+      "deskripsi": "Verifikasi 12 video batch Ramadan sebelum jadwal posting jam 17.15.",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Bayu Nugraha",
+      "tenggat": "2024-10-24T17:15:00+07:00",
+      "prioritas": "sedang",
+      "status": "menunggu_qc",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rapikan stok sampel skincare",
+      "konteks": "Operasional",
+      "deskripsi": "Hitung ulang sisa sampel serum dan toner, cocokkan dengan catatan gudang.",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Intan Permata",
+      "tenggat": "2024-10-23T17:00:00+07:00",
+      "prioritas": "rendah",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "komitmen_mingguan",
+      "judul": "Naikkan konversi live Affiliator 5%",
+      "konteks": "Komitmen pekan ini",
+      "deskripsi": "Fokus pada bundling dan voucher toko di dua jam pertama tiap sesi.",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Dewi Lestari",
+      "goal_unit": "affiliator",
+      "tenggat": "2024-10-27T23:59:00+07:00",
+      "prioritas": "tinggi",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rapikan katalog produk pekan ini — Rian",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Rian Hidayat",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Kurasi 10 kreator baru — Rian",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Rian Hidayat",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun jadwal live sepekan — Rian",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Rian Hidayat",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut order pending — Rian",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Rian Hidayat",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rapikan katalog produk pekan ini — Nabila",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Nabila Putri",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Kurasi 10 kreator baru — Nabila",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Nabila Putri",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "todo",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun jadwal live sepekan — Nabila",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Nabila Putri",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "todo",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut order pending — Nabila",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Nabila Putri",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rapikan katalog produk pekan ini — Bayu",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Bayu Nugraha",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Kurasi 10 kreator baru — Bayu",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Bayu Nugraha",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun jadwal live sepekan — Bayu",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Bayu Nugraha",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut order pending — Bayu",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Bayu Nugraha",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Validasi dokumen agency — Dimas",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Dimas Maulana",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rekap pencairan komisi — Dimas",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Dimas Maulana",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tinjau pengajuan sampel — Dimas",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Dimas Maulana",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun laporan kemitraan — Dimas",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Dimas Maulana",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Verifikasi binding kreator — Maya",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Maya Safitri",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rekap kehadiran MMC — Maya",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Maya Safitri",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut kreator pasif — Maya",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Maya Safitri",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Siapkan materi kelas MMC — Maya",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Maya Safitri",
+      "tenggat": "2024-10-22T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Verifikasi binding kreator — Rizky",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Rizky Ananda",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rekap kehadiran MMC — Rizky",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Rizky Ananda",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut kreator pasif — Rizky",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Rizky Ananda",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Siapkan materi kelas MMC — Rizky",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Rizky Ananda",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rapikan katalog produk pekan ini — Intan",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Intan Permata",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Kurasi 10 kreator baru — Intan",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Intan Permata",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun jadwal live sepekan — Intan",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Intan Permata",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut order pending — Intan",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Intan Permata",
+      "tenggat": "2024-10-22T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Validasi dokumen agency — Yoga",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Dimas Maulana",
+      "penerima": "Yoga Saputra",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rekap pencairan komisi — Yoga",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Dimas Maulana",
+      "penerima": "Yoga Saputra",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tinjau pengajuan sampel — Yoga",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Dimas Maulana",
+      "penerima": "Yoga Saputra",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "todo",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun laporan kemitraan — Yoga",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Dimas Maulana",
+      "penerima": "Yoga Saputra",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rapikan katalog produk pekan ini — Salsabila",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Salsabila Rahma",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Kurasi 10 kreator baru — Salsabila",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Salsabila Rahma",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun jadwal live sepekan — Salsabila",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Salsabila Rahma",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut order pending — Salsabila",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Salsabila Rahma",
+      "tenggat": "2024-10-22T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Verifikasi binding kreator — Fajar",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Fajar Ramadhan",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rekap kehadiran MMC — Fajar",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Fajar Ramadhan",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut kreator pasif — Fajar",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Fajar Ramadhan",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Siapkan materi kelas MMC — Fajar",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Fajar Ramadhan",
+      "tenggat": "2024-10-22T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rapikan katalog produk pekan ini — Anisa",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Anisa Larasati",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Kurasi 10 kreator baru — Anisa",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Anisa Larasati",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun jadwal live sepekan — Anisa",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Anisa Larasati",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut order pending — Anisa",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Anisa Larasati",
+      "tenggat": "2024-10-22T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Validasi dokumen agency — Hendra",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Dimas Maulana",
+      "penerima": "Hendra Kusuma",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rekap pencairan komisi — Hendra",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Dimas Maulana",
+      "penerima": "Hendra Kusuma",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tinjau pengajuan sampel — Hendra",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Dimas Maulana",
+      "penerima": "Hendra Kusuma",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun laporan kemitraan — Hendra",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Dimas Maulana",
+      "penerima": "Hendra Kusuma",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Verifikasi binding kreator — Putri",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Putri Amelia",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rekap kehadiran MMC — Putri",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Putri Amelia",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut kreator pasif — Putri",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Putri Amelia",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Siapkan materi kelas MMC — Putri",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Putri Amelia",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rapikan katalog produk pekan ini — Arif",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Arif Setiawan",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Kurasi 10 kreator baru — Arif",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Arif Setiawan",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun jadwal live sepekan — Arif",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Arif Setiawan",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut order pending — Arif",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Arif Setiawan",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rapikan katalog produk pekan ini — Dewi",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Dewi Lestari",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Kurasi 10 kreator baru — Dewi",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Dewi Lestari",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun jadwal live sepekan — Dewi",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Dewi Lestari",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut order pending — Dewi",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Dewi Lestari",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Verifikasi binding kreator — Galih",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Galih Prakoso",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rekap kehadiran MMC — Galih",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Galih Prakoso",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut kreator pasif — Galih",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Galih Prakoso",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Siapkan materi kelas MMC — Galih",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Galih Prakoso",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Validasi dokumen agency — Vina",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Dimas Maulana",
+      "penerima": "Vina Oktaviani",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rekap pencairan komisi — Vina",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Dimas Maulana",
+      "penerima": "Vina Oktaviani",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tinjau pengajuan sampel — Vina",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Dimas Maulana",
+      "penerima": "Vina Oktaviani",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun laporan kemitraan — Vina",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Dimas Maulana",
+      "penerima": "Vina Oktaviani",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rapikan katalog produk pekan ini — Rendi",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Rendi Firmansyah",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Kurasi 10 kreator baru — Rendi",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Rendi Firmansyah",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "todo",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun jadwal live sepekan — Rendi",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Rendi Firmansyah",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "todo",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut order pending — Rendi",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Rendi Firmansyah",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rapikan katalog produk pekan ini — Bagas",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Bagas Adriansyah",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Kurasi 10 kreator baru — Bagas",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Bagas Adriansyah",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun jadwal live sepekan — Bagas",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Bagas Adriansyah",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut order pending — Bagas",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Bagas Adriansyah",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rekonsiliasi kas operasional — Laras",
+      "konteks": "Keuangan",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Laras Ayuningtyas",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Verifikasi bukti pengeluaran — Laras",
+      "konteks": "Keuangan",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Laras Ayuningtyas",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun laporan arus kas — Laras",
+      "konteks": "Keuangan",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Laras Ayuningtyas",
+      "tenggat": "2024-10-18T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tinjau pengajuan reimburse — Laras",
+      "konteks": "Keuangan",
+      "deskripsi": "",
+      "pembuat": "Farhan Pratama",
+      "penerima": "Laras Ayuningtyas",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rapikan katalog produk pekan ini — Teguh",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Teguh Wibowo",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Kurasi 10 kreator baru — Teguh",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Teguh Wibowo",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun jadwal live sepekan — Teguh",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Teguh Wibowo",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "todo",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut order pending — Teguh",
+      "konteks": "Unit AFFILIATOR",
+      "deskripsi": "",
+      "pembuat": "Dewi Lestari",
+      "penerima": "Teguh Wibowo",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Verifikasi binding kreator — Sinta",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Sinta Maharani",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rekap kehadiran MMC — Sinta",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Sinta Maharani",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tindak lanjut kreator pasif — Sinta",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Sinta Maharani",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "todo",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Siapkan materi kelas MMC — Sinta",
+      "konteks": "Unit MCN",
+      "deskripsi": "",
+      "pembuat": "Galih Prakoso",
+      "penerima": "Sinta Maharani",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Validasi dokumen agency — Eko",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Dimas Maulana",
+      "penerima": "Eko Prasetyo",
+      "tenggat": "2024-10-08T17:00:00+07:00",
+      "prioritas": "tinggi",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Rekap pencairan komisi — Eko",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Dimas Maulana",
+      "penerima": "Eko Prasetyo",
+      "tenggat": "2024-10-14T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "selesai",
+      "qc": "lolos"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Tinjau pengajuan sampel — Eko",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Dimas Maulana",
+      "penerima": "Eko Prasetyo",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "todo",
+      "qc": "belum"
+    },
+    {
+      "tipe": "tiket",
+      "judul": "Susun laporan kemitraan — Eko",
+      "konteks": "Unit TAP",
+      "deskripsi": "",
+      "pembuat": "Dimas Maulana",
+      "penerima": "Eko Prasetyo",
+      "tenggat": "2024-10-24T17:00:00+07:00",
+      "prioritas": "sedang",
+      "status": "berjalan",
+      "qc": "belum"
+    }
+  ],
+  "attendance": [
+    {
+      "user": "Farhan Pratama",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:52:00+07:00",
+      "lat": -6.260982,
+      "lng": 106.810041
+    },
+    {
+      "user": "Hafidz Alkahfi",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:20:00+07:00",
+      "lat": -6.260459,
+      "lng": 106.809916
+    },
+    {
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:48:00+07:00",
+      "lat": -6.260643,
+      "lng": 106.810385
+    },
+    {
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-24",
+      "status": "terlambat",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T09:14:00+07:00",
+      "lat": -6.261407,
+      "lng": 106.810612
+    },
+    {
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:31:00+07:00",
+      "lat": -6.26144,
+      "lng": 106.810494
+    },
+    {
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:40:00+07:00",
+      "lat": -6.261388,
+      "lng": 106.809945
+    },
+    {
+      "user": "Maya Safitri",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:44:00+07:00",
+      "lat": -6.260821,
+      "lng": 106.811123
+    },
+    {
+      "user": "Rizky Ananda",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:55:00+07:00",
+      "lat": -6.261302,
+      "lng": 106.810157
+    },
+    {
+      "user": "Intan Permata",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:37:00+07:00",
+      "lat": -6.260496,
+      "lng": 106.811316
+    },
+    {
+      "user": "Yoga Saputra",
+      "tanggal": "2024-10-24",
+      "status": "terlambat",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T08:47:00+07:00",
+      "lat": -6.256577,
+      "lng": 106.810435
+    },
+    {
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:29:00+07:00",
+      "lat": -6.259938,
+      "lng": 106.809875
+    },
+    {
+      "user": "Fajar Ramadhan",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:58:00+07:00",
+      "lat": -6.260126,
+      "lng": 106.810263
+    },
+    {
+      "user": "Anisa Larasati",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:41:00+07:00",
+      "lat": -6.261269,
+      "lng": 106.809988
+    },
+    {
+      "user": "Hendra Kusuma",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:50:00+07:00",
+      "lat": -6.261006,
+      "lng": 106.811106
+    },
+    {
+      "user": "Putri Amelia",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:36:00+07:00",
+      "lat": -6.261211,
+      "lng": 106.810731
+    },
+    {
+      "user": "Arif Setiawan",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:59:00+07:00",
+      "lat": -6.260478,
+      "lng": 106.810396
+    },
+    {
+      "user": "Dewi Lestari",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:33:00+07:00",
+      "lat": -6.260624,
+      "lng": 106.8099
+    },
+    {
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:46:00+07:00",
+      "lat": -6.261405,
+      "lng": 106.81013
+    },
+    {
+      "user": "Vina Oktaviani",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:52:00+07:00",
+      "lat": -6.260411,
+      "lng": 106.810484
+    },
+    {
+      "user": "Rendi Firmansyah",
+      "tanggal": "2024-10-24",
+      "status": "terlambat",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T08:22:00+07:00",
+      "lat": -6.260997,
+      "lng": 106.810737
+    },
+    {
+      "user": "Bagas Adriansyah",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:43:00+07:00",
+      "lat": -6.260775,
+      "lng": 106.81028
+    },
+    {
+      "user": "Laras Ayuningtyas",
+      "tanggal": "2024-10-24",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-24T07:47:00+07:00",
+      "lat": -6.260229,
+      "lng": 106.810918
+    },
+    {
+      "user": "Teguh Wibowo",
+      "tanggal": "2024-10-24",
+      "status": "izin",
+      "alasan": "Mengurus dokumen keluarga di luar kota.",
+      "persetujuan": "disetujui"
+    },
+    {
+      "user": "Sinta Maharani",
+      "tanggal": "2024-10-24",
+      "status": "sakit",
+      "alasan": "Demam sejak semalam, istirahat sesuai anjuran klinik.",
+      "persetujuan": "disetujui"
+    },
+    {
+      "user": "Eko Prasetyo",
+      "tanggal": "2024-10-25",
+      "status": "izin",
+      "alasan": "Mengurus administrasi BPJS keluarga, kembali besok siang.",
+      "persetujuan": "diajukan"
+    },
+    {
+      "user": "Fajar Ramadhan",
+      "tanggal": "2024-10-25",
+      "status": "sakit",
+      "alasan": "Radang tenggorokan, sudah periksa ke klinik pagi ini.",
+      "persetujuan": "diajukan"
+    }
+  ],
+  "lead_measures": [
+    {
+      "id": "6a55cbe0-37f3-5115-92f8-bb270ea28c1e",
+      "unit": "affiliator",
+      "judul": "Live Stream TikTok",
+      "satuan": "jam",
+      "target_mingguan": 40,
+      "label_pendukung": null,
+      "urutan": 1
+    },
+    {
+      "id": "44ed0b3a-9df7-572c-bd77-72dc885dd1c3",
+      "unit": "mcn",
+      "judul": "Creator Binding MMC",
+      "satuan": "akun",
+      "target_mingguan": 15,
+      "label_pendukung": "Peserta hadir MMC",
+      "urutan": 1
+    },
+    {
+      "id": "9f506e5c-fc29-5633-a410-f73323f13884",
+      "unit": "tap",
+      "judul": "Video Affiliate & UGC",
+      "satuan": "video",
+      "target_mingguan": 200,
+      "label_pendukung": null,
+      "urutan": 1
+    }
+  ],
+  "lead_measure_entries": [
+    {
+      "lead": "6a55cbe0-37f3-5115-92f8-bb270ea28c1e",
+      "user": "Dewi Lestari",
+      "tanggal": "2024-10-21",
+      "nilai": 10,
+      "nilai_pendukung": null,
+      "catatan": ""
+    },
+    {
+      "lead": "6a55cbe0-37f3-5115-92f8-bb270ea28c1e",
+      "user": "Dewi Lestari",
+      "tanggal": "2024-10-22",
+      "nilai": 9,
+      "nilai_pendukung": null,
+      "catatan": ""
+    },
+    {
+      "lead": "6a55cbe0-37f3-5115-92f8-bb270ea28c1e",
+      "user": "Dewi Lestari",
+      "tanggal": "2024-10-23",
+      "nilai": 10,
+      "nilai_pendukung": null,
+      "catatan": ""
+    },
+    {
+      "lead": "6a55cbe0-37f3-5115-92f8-bb270ea28c1e",
+      "user": "Dewi Lestari",
+      "tanggal": "2024-10-24",
+      "nilai": 9,
+      "nilai_pendukung": null,
+      "catatan": ""
+    },
+    {
+      "lead": "44ed0b3a-9df7-572c-bd77-72dc885dd1c3",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-21",
+      "nilai": 4,
+      "nilai_pendukung": 22,
+      "catatan": ""
+    },
+    {
+      "lead": "44ed0b3a-9df7-572c-bd77-72dc885dd1c3",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-22",
+      "nilai": 3,
+      "nilai_pendukung": 18,
+      "catatan": ""
+    },
+    {
+      "lead": "44ed0b3a-9df7-572c-bd77-72dc885dd1c3",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-23",
+      "nilai": 4,
+      "nilai_pendukung": 25,
+      "catatan": ""
+    },
+    {
+      "lead": "44ed0b3a-9df7-572c-bd77-72dc885dd1c3",
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-24",
+      "nilai": 3,
+      "nilai_pendukung": 20,
+      "catatan": ""
+    },
+    {
+      "lead": "9f506e5c-fc29-5633-a410-f73323f13884",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-21",
+      "nilai": 50,
+      "nilai_pendukung": null,
+      "catatan": ""
+    },
+    {
+      "lead": "9f506e5c-fc29-5633-a410-f73323f13884",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-22",
+      "nilai": 45,
+      "nilai_pendukung": null,
+      "catatan": ""
+    },
+    {
+      "lead": "9f506e5c-fc29-5633-a410-f73323f13884",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-23",
+      "nilai": 48,
+      "nilai_pendukung": null,
+      "catatan": ""
+    },
+    {
+      "lead": "9f506e5c-fc29-5633-a410-f73323f13884",
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-24",
+      "nilai": 42,
+      "nilai_pendukung": null,
+      "catatan": ""
+    }
+  ],
+  "kpi_definitions": [
+    {
+      "jabatan": "Staff",
+      "nama": "Capaian GMV akun",
+      "bobot": 50,
+      "satuan": "%",
+      "base": 80,
+      "goal": 100,
+      "stretch": 120,
+      "sumber": "gmv"
+    },
+    {
+      "jabatan": "Staff",
+      "nama": "Kedisiplinan absensi",
+      "bobot": 25,
+      "satuan": "%",
+      "base": 85,
+      "goal": 95,
+      "stretch": 100,
+      "sumber": "absensi"
+    },
+    {
+      "jabatan": "Staff",
+      "nama": "Penyelesaian tiket",
+      "bobot": 25,
+      "satuan": "%",
+      "base": 70,
+      "goal": 90,
+      "stretch": 100,
+      "sumber": "tiket"
+    },
+    {
+      "jabatan": "Leader",
+      "nama": "Capaian GMV unit",
+      "bobot": 45,
+      "satuan": "%",
+      "base": 85,
+      "goal": 100,
+      "stretch": 120,
+      "sumber": "gmv"
+    },
+    {
+      "jabatan": "Leader",
+      "nama": "Eksekusi lead measure",
+      "bobot": 35,
+      "satuan": "%",
+      "base": 75,
+      "goal": 95,
+      "stretch": 110,
+      "sumber": "lead_measure"
+    },
+    {
+      "jabatan": "Leader",
+      "nama": "Ketepatan laporan tim",
+      "bobot": 20,
+      "satuan": "%",
+      "base": 80,
+      "goal": 95,
+      "stretch": 100,
+      "sumber": "tiket"
+    },
+    {
+      "jabatan": "Co-Leader",
+      "nama": "Capaian GMV unit",
+      "bobot": 40,
+      "satuan": "%",
+      "base": 80,
+      "goal": 100,
+      "stretch": 115,
+      "sumber": "gmv"
+    },
+    {
+      "jabatan": "Co-Leader",
+      "nama": "Eksekusi lead measure",
+      "bobot": 35,
+      "satuan": "%",
+      "base": 75,
+      "goal": 95,
+      "stretch": 110,
+      "sumber": "lead_measure"
+    },
+    {
+      "jabatan": "Co-Leader",
+      "nama": "Kedisiplinan absensi",
+      "bobot": 25,
+      "satuan": "%",
+      "base": 85,
+      "goal": 95,
+      "stretch": 100,
+      "sumber": "absensi"
+    },
+    {
+      "jabatan": "Manager",
+      "nama": "Capaian GMV perusahaan",
+      "bobot": 60,
+      "satuan": "%",
+      "base": 85,
+      "goal": 100,
+      "stretch": 120,
+      "sumber": "gmv"
+    },
+    {
+      "jabatan": "Manager",
+      "nama": "Kesehatan matriks WRM",
+      "bobot": 40,
+      "satuan": "%",
+      "base": 70,
+      "goal": 90,
+      "stretch": 100,
+      "sumber": "lead_measure"
+    },
+    {
+      "jabatan": "CEO",
+      "nama": "Capaian GMV perusahaan",
+      "bobot": 60,
+      "satuan": "%",
+      "base": 85,
+      "goal": 100,
+      "stretch": 115,
+      "sumber": "gmv"
+    },
+    {
+      "jabatan": "CEO",
+      "nama": "Kesehatan matriks WRM",
+      "bobot": 40,
+      "satuan": "%",
+      "base": 70,
+      "goal": 90,
+      "stretch": 100,
+      "sumber": "lead_measure"
+    },
+    {
+      "jabatan": "Finance",
+      "nama": "Ketepatan tugas keuangan",
+      "bobot": 60,
+      "satuan": "%",
+      "base": 80,
+      "goal": 95,
+      "stretch": 100,
+      "sumber": "tiket"
+    },
+    {
+      "jabatan": "Finance",
+      "nama": "Kedisiplinan absensi",
+      "bobot": 40,
+      "satuan": "%",
+      "base": 85,
+      "goal": 95,
+      "stretch": 100,
+      "sumber": "absensi"
+    }
+  ],
+  "samples": [
+    {
+      "kode": "SMP-0001",
+      "nama": "Serum Vitamin C 30ml",
+      "kategori": "Skincare",
+      "unit": "affiliator",
+      "nilai": 185000,
+      "status": "diterima",
+      "pemegang": null,
+      "kreator": "@rara.beauty",
+      "akun": "@skincare_official",
+      "brand": "Glowrich Official",
+      "link": "https://shopee.co.id/glowrich-serum-vitamin-c-30ml-i.112233.445566"
+    },
+    {
+      "kode": "SMP-0002",
+      "nama": "Cushion Matte SPF50",
+      "kategori": "Skincare",
+      "unit": "affiliator",
+      "nilai": 145000,
+      "status": "dikirim",
+      "pemegang": "Rian Hidayat",
+      "kreator": "@dinda.makeup",
+      "akun": "@beauty_daily.id",
+      "brand": "Belle Cosmetics",
+      "link": "https://www.tiktok.com/@belle.cosmetics/video/7301122334455667788"
+    },
+    {
+      "kode": "SMP-0003",
+      "nama": "Hijab Voal Premium",
+      "kategori": "Fashion",
+      "unit": "affiliator",
+      "nilai": 89000,
+      "status": "dipegang",
+      "pemegang": "Nabila Putri",
+      "kreator": "",
+      "akun": null,
+      "brand": "Nadia Hijab House",
+      "link": "https://shopee.co.id/nadia-hijab-voal-premium-i.223344.556677"
+    },
+    {
+      "kode": "SMP-0004",
+      "nama": "Earbuds TWS Pro",
+      "kategori": "Gadget",
+      "unit": "affiliator",
+      "nilai": 320000,
+      "status": "tersedia",
+      "pemegang": null,
+      "kreator": "",
+      "akun": null,
+      "brand": "Aeromode Gadget",
+      "link": "https://www.tiktok.com/@aeromode.id/video/7311223344556677889"
+    },
+    {
+      "kode": "SMP-0005",
+      "nama": "Snack Box Nusantara",
+      "kategori": "F&B",
+      "unit": "affiliator",
+      "nilai": 75000,
+      "status": "dikembalikan",
+      "pemegang": null,
+      "kreator": "@resep.ibu",
+      "akun": "@snack_nusantara",
+      "brand": "Dapur Rasa Nusantara",
+      "link": ""
+    },
+    {
+      "kode": "SMP-0006",
+      "nama": "Set Panci Antilengket",
+      "kategori": "Home",
+      "unit": "affiliator",
+      "nilai": 410000,
+      "status": "hilang",
+      "pemegang": "Teguh Wibowo",
+      "kreator": "@dapur.mama",
+      "akun": null,
+      "brand": "Homey Living",
+      "link": "https://shopee.co.id/homey-living-set-toples-kaca-i.334455.667788"
+    },
+    {
+      "kode": "SMP-0007",
+      "nama": "Lampu Meja LED",
+      "kategori": "Home",
+      "unit": "mcn",
+      "nilai": 135000,
+      "status": "dipegang",
+      "pemegang": "Rizky Ananda",
+      "kreator": "",
+      "akun": null,
+      "brand": "Glowrich Official",
+      "link": "https://shopee.co.id/glowrich-toner-centella-i.112233.998877"
+    },
+    {
+      "kode": "SMP-0008",
+      "nama": "Tripod Ring Light 18\"",
+      "kategori": "Gadget",
+      "unit": "mcn",
+      "nilai": 275000,
+      "status": "diterima",
+      "pemegang": null,
+      "kreator": "@kreator.mmc",
+      "akun": null,
+      "brand": "Belle Cosmetics",
+      "link": ""
+    },
+    {
+      "kode": "SMP-0009",
+      "nama": "Mic Lavalier Wireless",
+      "kategori": "Gadget",
+      "unit": "tap",
+      "nilai": 390000,
+      "status": "tersedia",
+      "pemegang": null,
+      "kreator": "",
+      "akun": null,
+      "brand": "Aeromode Gadget",
+      "link": "https://www.tiktok.com/@aeromode.id/video/7322334455667788990"
+    },
+    {
+      "kode": "SMP-0010",
+      "nama": "Parfum Travel 15ml",
+      "kategori": "Skincare",
+      "unit": "tap",
+      "nilai": 98000,
+      "status": "dikirim",
+      "pemegang": "Hendra Kusuma",
+      "kreator": "@brand.partner",
+      "akun": null,
+      "brand": "Nadia Hijab House",
+      "link": "https://shopee.co.id/nadia-hijab-inner-ninja-i.223344.112233"
+    }
+  ],
+  "problems": [
+    {
+      "judul": "GMV akun beauty turun 3 pekan berturut-turut",
+      "konteks": "Turun dari Rp 4,2 Jt/hari menjadi Rp 2,1 Jt/hari sejak awal Oktober.",
+      "unit": "affiliator",
+      "pelapor": "Dewi Lestari",
+      "dampak": "tinggi",
+      "status": "selesai",
+      "solusi": "Jadwal pelatihan host dibuat bulanan, minimal 2 host cadangan per akun. Sementara itu 8 sesi live tambahan pekan ini diisi host dari akun lain."
+    },
+    {
+      "judul": "Laporan harian sering terlambat di unit MCN",
+      "konteks": "Rata-rata masuk pukul 21.00, jauh setelah batas 18.00.",
+      "unit": "mcn",
+      "pelapor": "Galih Prakoso",
+      "dampak": "sedang",
+      "status": "diproses",
+      "solusi": ""
+    },
+    {
+      "judul": "Sampel sering tidak kembali setelah dikirim ke kreator",
+      "konteks": "6 dari 20 sampel bulan lalu tidak pernah kembali.",
+      "unit": "affiliator",
+      "pelapor": "Farhan Pratama",
+      "dampak": "sedang",
+      "status": "diproses",
+      "solusi": ""
+    },
+    {
+      "judul": "Absensi selfie gagal di beberapa perangkat Android lama",
+      "konteks": "Tiga staf melaporkan kamera tidak terbuka sejak pekan lalu.",
+      "unit": "tap",
+      "pelapor": "Dimas Maulana",
+      "dampak": "rendah",
+      "status": "baru",
+      "solusi": ""
+    }
+  ],
+  "courses": [
+    {
+      "judul": "Dasar Live Streaming TikTok Shop",
+      "ringkasan": "Menyiapkan sesi live yang layak tayang: pencahayaan, skrip, dan penanganan komentar.",
+      "kategori": "Affiliator",
+      "tingkat": "dasar",
+      "unit": "affiliator",
+      "wajib_untuk": [
+        "Staff"
+      ],
+      "modul": [
+        {
+          "judul": "Menyiapkan alat & pencahayaan",
+          "durasi": 12,
+          "isi": [
+            "Sesi live yang layak tayang tidak butuh alat mahal, tapi butuh tiga hal yang konsisten: cahaya yang merata di wajah, suara yang bersih, dan gambar yang stabil.",
+            "Letakkan sumber cahaya di depan, bukan di belakang. Cahaya dari belakang membuat wajah gelap dan penonton pergi dalam hitungan detik.",
+            "Periksa suara sebelum mulai. Suara yang pecah lebih cepat mengusir penonton daripada gambar yang kurang tajam.",
+            "Kunci ponsel pada tripod. Gambar yang bergoyang membuat penonton lelah tanpa mereka sadari alasannya."
+          ]
+        },
+        {
+          "judul": "Menyusun skrip 60 menit",
+          "durasi": 18,
+          "isi": [
+            "Skrip bukan naskah yang dibaca kata per kata, melainkan urutan yang menjaga sesi tidak kehilangan arah.",
+            "Bagi 60 menit menjadi enam blok 10 menit. Tiap blok punya satu produk utama dan satu ajakan yang jelas.",
+            "Sediakan dua menit di setiap blok untuk menjawab komentar. Sesi yang tidak pernah menjawab terasa seperti iklan.",
+            "Siapkan penutup yang sama setiap kali. Penonton yang hafal penutupmu tahu kapan harus bertindak."
+          ]
+        },
+        {
+          "judul": "Menangani komentar dan keberatan",
+          "durasi": 15,
+          "isi": [
+            "Sebagian besar keberatan berulang: harga, keaslian, dan lama pengiriman. Siapkan jawabannya sebelum live, bukan saat ditanya.",
+            "Jawab keberatan dengan fakta, bukan bantahan. Sebutkan nomor batch, garansi, atau perkiraan waktu kirim.",
+            "Komentar kasar tidak perlu dilayani. Sapa yang bertanya dengan sungguh-sungguh, abaikan sisanya tanpa menyebutnya."
+          ]
+        },
+        {
+          "judul": "Membaca angka setelah live",
+          "durasi": 10,
+          "isi": [
+            "Angka yang paling menolong bukan total penonton, melainkan berapa yang bertahan lebih dari lima menit.",
+            "Bandingkan GMV per jam tayang, bukan GMV total. Sesi empat jam yang menghasilkan sama dengan sesi dua jam berarti dua jam terbuang.",
+            "Catat satu hal yang akan diubah di sesi berikutnya. Satu, bukan lima — perubahan yang terlalu banyak membuat sebabnya tak terlacak."
+          ]
+        }
+      ]
+    },
+    {
+      "judul": "Membaca Angka GMV & Target Harian",
+      "ringkasan": "Memahami dari mana angka target datang dan apa artinya bagi pekerjaan sehari-hari.",
+      "kategori": "GRD",
+      "tingkat": "dasar",
+      "unit": null,
+      "wajib_untuk": [
+        "Staff",
+        "Leader",
+        "Co-Leader"
+      ],
+      "modul": [
+        {
+          "judul": "Base, Goal, Stretch",
+          "durasi": 10,
+          "isi": [
+            "Base adalah angka yang harus tercapai agar operasional tetap sehat. Tidak mencapainya berarti ada yang perlu dibereskan segera.",
+            "Goal adalah target yang disepakati. Inilah angka yang dipakai menilai apakah rencana berjalan.",
+            "Stretch adalah angka terbaik yang masuk akal bila semuanya berpihak. Ia bukan hukuman bila tidak tercapai.",
+            "Pada skala KPI 1.000: base bernilai 500, goal 800, dan stretch 1.000. Di antaranya dihitung lurus."
+          ]
+        },
+        {
+          "judul": "Anak tangga bulanan",
+          "durasi": 12,
+          "isi": [
+            "Target tahunan dipecah menjadi anak tangga bulanan supaya kekurangan terlihat sejak awal, bukan di bulan terakhir.",
+            "Anak tangga tidak selalu rata. Bulan dengan kampanye besar wajar dipatok lebih tinggi.",
+            "Yang penting dijaga: jumlah seluruh anak tangga sama dengan target tahunannya."
+          ]
+        },
+        {
+          "judul": "Membaca scorecard sendiri",
+          "durasi": 10,
+          "isi": [
+            "Skor KPI dihitung dari indikator yang memang berlaku untukmu. Indikator yang tidak kamu pegang tidak dinilai, dan bobotnya dibagi ulang.",
+            "Perhatikan cakupannya. Skor 1.000 dengan cakupan 25% berarti hanya seperempat bobot yang benar-benar terukur.",
+            "Kalau ada indikator yang tertulis 'tidak berlaku' padahal seharusnya berlaku, itu tanda datanya belum masuk — bukan tanda kamu aman."
+          ]
+        }
+      ]
+    },
+    {
+      "judul": "Creator Binding untuk MCN",
+      "ringkasan": "Alur mengikat kreator baru, dari pendekatan awal sampai verifikasi.",
+      "kategori": "MCN",
+      "tingkat": "menengah",
+      "unit": "mcn",
+      "wajib_untuk": [],
+      "modul": [
+        {
+          "judul": "Menyaring calon kreator",
+          "durasi": 15,
+          "isi": []
+        },
+        {
+          "judul": "Percakapan pertama",
+          "durasi": 12,
+          "isi": []
+        },
+        {
+          "judul": "Verifikasi & dokumen",
+          "durasi": 20,
+          "isi": []
+        }
+      ]
+    },
+    {
+      "judul": "Etika Kerja & Kerahasiaan Data",
+      "ringkasan": "Apa yang boleh dan tidak boleh dibagikan keluar, termasuk angka penjualan.",
+      "kategori": "Umum",
+      "tingkat": "dasar",
+      "unit": null,
+      "wajib_untuk": [
+        "CEO",
+        "Manager",
+        "Leader",
+        "Co-Leader",
+        "Staff",
+        "Finance"
+      ],
+      "modul": [
+        {
+          "judul": "Data mana yang rahasia",
+          "durasi": 8,
+          "isi": []
+        },
+        {
+          "judul": "Berbagi dengan mitra",
+          "durasi": 10,
+          "isi": []
+        }
+      ]
+    },
+    {
+      "judul": "Brand Ads Campaign untuk TAP",
+      "ringkasan": "Menyusun proposal kampanye dan melaporkan hasilnya ke brand.",
+      "kategori": "TAP",
+      "tingkat": "lanjutan",
+      "unit": "tap",
+      "wajib_untuk": [],
+      "modul": [
+        {
+          "judul": "Membaca brief brand",
+          "durasi": 15,
+          "isi": []
+        },
+        {
+          "judul": "Menyusun proposal",
+          "durasi": 25,
+          "isi": []
+        },
+        {
+          "judul": "Laporan hasil kampanye",
+          "durasi": 20,
+          "isi": []
+        }
+      ]
+    }
+  ],
+  "enrollments": [
+    {
+      "kursus": "Dasar Live Streaming TikTok Shop",
+      "orang": "Rian Hidayat",
+      "tuntas": 4
+    },
+    {
+      "kursus": "Dasar Live Streaming TikTok Shop",
+      "orang": "Anisa Larasati",
+      "tuntas": 2
+    },
+    {
+      "kursus": "Dasar Live Streaming TikTok Shop",
+      "orang": "Nabila Putri",
+      "tuntas": 0
+    },
+    {
+      "kursus": "Membaca Angka GMV & Target Harian",
+      "orang": "Rian Hidayat",
+      "tuntas": 3
+    },
+    {
+      "kursus": "Membaca Angka GMV & Target Harian",
+      "orang": "Maya Safitri",
+      "tuntas": 1
+    },
+    {
+      "kursus": "Etika Kerja & Kerahasiaan Data",
+      "orang": "Rian Hidayat",
+      "tuntas": 1
+    },
+    {
+      "kursus": "Creator Binding untuk MCN",
+      "orang": "Rizky Ananda",
+      "tuntas": 3
+    }
+  ],
+  "quiz": [
+    {
+      "modul": "Base, Goal, Stretch",
+      "soal": [
+        {
+          "pertanyaan": "Pada skala KPI 1.000, berapa nilai skor bila capaian tepat di Goal?",
+          "pilihan": [
+            "500",
+            "650",
+            "800",
+            "1.000"
+          ],
+          "benar": 2,
+          "penjelasan": "Base bernilai 500, Goal 800, dan Stretch 1.000."
+        },
+        {
+          "pertanyaan": "Apa arti tidak tercapainya Base?",
+          "pilihan": [
+            "Bonus batal",
+            "Ada yang perlu dibereskan segera",
+            "Target tahun depan diturunkan",
+            "Tidak berarti apa-apa"
+          ],
+          "benar": 1,
+          "penjelasan": "Base adalah angka minimum agar operasional tetap sehat."
+        },
+        {
+          "pertanyaan": "Stretch paling tepat dipahami sebagai…",
+          "pilihan": [
+            "Hukuman bila tidak tercapai",
+            "Angka terbaik yang masuk akal bila semuanya berpihak",
+            "Angka wajib",
+            "Rata-rata tahun lalu"
+          ],
+          "benar": 1,
+          "penjelasan": "Stretch bukan kewajiban; ia menandai hasil terbaik yang masuk akal."
+        }
+      ]
+    },
+    {
+      "modul": "Menyiapkan alat & pencahayaan",
+      "soal": [
+        {
+          "pertanyaan": "Di mana sebaiknya sumber cahaya diletakkan?",
+          "pilihan": [
+            "Di belakang host",
+            "Di depan host",
+            "Di lantai",
+            "Tidak perlu cahaya tambahan"
+          ],
+          "benar": 1,
+          "penjelasan": "Cahaya dari belakang membuat wajah gelap."
+        },
+        {
+          "pertanyaan": "Mana yang lebih cepat mengusir penonton?",
+          "pilihan": [
+            "Gambar kurang tajam",
+            "Suara yang pecah",
+            "Latar polos",
+            "Host tidak memakai seragam"
+          ],
+          "benar": 1,
+          "penjelasan": "Penonton bertahan pada gambar seadanya, tapi tidak pada suara buruk."
+        }
+      ]
+    },
+    {
+      "modul": "Data mana yang rahasia",
+      "soal": [
+        {
+          "pertanyaan": "Angka GMV per akun termasuk data…",
+          "pilihan": [
+            "Publik",
+            "Rahasia internal",
+            "Boleh dibagikan ke kreator",
+            "Boleh diunggah ke media sosial"
+          ],
+          "benar": 1,
+          "penjelasan": "Angka penjualan per akun hanya untuk internal."
+        },
+        {
+          "pertanyaan": "Bila mitra meminta data penjualan rinci, yang tepat dilakukan adalah…",
+          "pilihan": [
+            "Kirim langsung",
+            "Tolak dan teruskan permintaannya ke Manager",
+            "Kirim sebagian",
+            "Abaikan"
+          ],
+          "benar": 1,
+          "penjelasan": "Permintaan data keluar diputuskan Manager, bukan per orang."
+        }
+      ]
+    }
+  ],
+  "feedback": [
+    {
+      "jenis": "bug",
+      "judul": "Absensi selfie gagal terbuka di Android 8",
+      "keparahan": "berat",
+      "halaman": "/absensi",
+      "status": "dikerjakan",
+      "pelapor": "Hendra Kusuma",
+      "isi": "Tombol ambil foto ditekan, kamera tidak terbuka sama sekali. Sudah dicoba di dua perangkat Android 8.",
+      "dukungan": [
+        "Vina Oktaviani",
+        "Eko Prasetyo",
+        "Yoga Saputra"
+      ],
+      "komentar": [
+        {
+          "oleh": "Farhan Pratama",
+          "isi": "Sudah bisa ditiru di perangkat uji. Sedang dicari penyebabnya."
+        }
+      ],
+      "ditugaskan": "Farhan Pratama"
+    },
+    {
+      "jenis": "saran",
+      "judul": "Tambahkan pengingat laporan harian jam 17.00",
+      "keparahan": null,
+      "halaman": "/laporan-harian",
+      "status": "ditinjau",
+      "pelapor": "Maya Safitri",
+      "isi": "Banyak yang lupa mengisi sebelum pulang. Pengingat satu jam sebelum batas akan sangat menolong.",
+      "dukungan": [
+        "Galih Prakoso",
+        "Rizky Ananda",
+        "Putri Amelia",
+        "Sinta Maharani"
+      ],
+      "komentar": []
+    },
+    {
+      "jenis": "bug",
+      "judul": "Angka GMV di beranda berbeda dengan halaman laporan",
+      "keparahan": "kritis",
+      "halaman": "/beranda",
+      "status": "selesai",
+      "pelapor": "Dewi Lestari",
+      "isi": "Beranda menampilkan Rp 34,2 Jt sementara laporan harian menjumlahkan Rp 34,7 Jt untuk tanggal yang sama.",
+      "dukungan": [
+        "Rian Hidayat"
+      ],
+      "komentar": [
+        {
+          "oleh": "Farhan Pratama",
+          "isi": "Penyebabnya laporan revisi terhitung dua kali. Sudah diperbaiki."
+        }
+      ],
+      "ditugaskan": "Farhan Pratama"
+    },
+    {
+      "jenis": "saran",
+      "judul": "Izinkan mengunduh rekap absensi sebagai Excel",
+      "keparahan": null,
+      "halaman": "/absensi/rekap",
+      "status": "baru",
+      "pelapor": "Laras Ayuningtyas",
+      "isi": "Untuk keperluan penggajian, rekapnya perlu dibuka di Excel.",
+      "dukungan": [],
+      "komentar": []
+    },
+    {
+      "jenis": "pertanyaan",
+      "judul": "Apakah target stretch memengaruhi bonus bulanan?",
+      "keparahan": null,
+      "halaman": "/grd",
+      "status": "ditolak",
+      "pelapor": "Arif Setiawan",
+      "isi": "Belum jelas apakah mencapai stretch berpengaruh ke bonus.",
+      "alasan_tolak": "Pertanyaan kebijakan, bukan masukan produk. Sudah dijawab langsung di rapat mingguan.",
+      "dukungan": [
+        "Bagas Adriansyah"
+      ],
+      "komentar": []
+    }
+  ],
+  "agenda": [
+    {
+      "judul": "Rapat mingguan WRM",
+      "jenis": "rapat",
+      "tanggal": "2024-10-21",
+      "jam_mulai": "09:00",
+      "jam_selesai": "10:30",
+      "unit": null,
+      "lokasi": "Ruang rapat lantai 2",
+      "keterangan": "Membahas matriks WRM pekan lalu dan keputusan pekan ini."
+    },
+    {
+      "judul": "Rapat mingguan WRM",
+      "jenis": "rapat",
+      "tanggal": "2024-10-28",
+      "jam_mulai": "09:00",
+      "jam_selesai": "10:30",
+      "unit": null,
+      "lokasi": "Ruang rapat lantai 2",
+      "keterangan": ""
+    },
+    {
+      "judul": "Kelas MMC angkatan 4",
+      "jenis": "pelatihan",
+      "tanggal": "2024-10-24",
+      "jam_mulai": "13:00",
+      "jam_selesai": "16:00",
+      "unit": "mcn",
+      "lokasi": "Studio MCN",
+      "keterangan": "Materi: creator binding dan etika konten."
+    },
+    {
+      "judul": "Briefing kampanye 11.11",
+      "jenis": "rapat",
+      "tanggal": "2024-10-25",
+      "jam_mulai": "15:00",
+      "jam_selesai": "16:00",
+      "unit": "affiliator",
+      "lokasi": "Ruang rapat lantai 2",
+      "keterangan": "Persiapan stok dan jadwal live."
+    },
+    {
+      "judul": "Maulid Nabi",
+      "jenis": "libur",
+      "tanggal": "2024-09-16",
+      "jam_mulai": null,
+      "jam_selesai": null,
+      "unit": null,
+      "lokasi": "",
+      "keterangan": "Libur nasional."
+    },
+    {
+      "judul": "Tutup buku Oktober",
+      "jenis": "lainnya",
+      "tanggal": "2024-10-31",
+      "jam_mulai": "16:00",
+      "jam_selesai": null,
+      "unit": null,
+      "lokasi": "",
+      "keterangan": "Batas akhir seluruh laporan harian Oktober masuk."
+    },
+    {
+      "judul": "Pelatihan host cadangan",
+      "jenis": "pelatihan",
+      "tanggal": "2024-11-04",
+      "jam_mulai": "10:00",
+      "jam_selesai": "12:00",
+      "unit": "affiliator",
+      "lokasi": "Studio Affiliator",
+      "keterangan": "Tindak lanjut masalah GMV akun beauty."
+    },
+    {
+      "judul": "Sesi foto produk bersama",
+      "jenis": "lainnya",
+      "tanggal": "2024-10-24",
+      "jam_mulai": "15:00",
+      "jam_selesai": "17:00",
+      "unit": null,
+      "lokasi": "Studio lantai 1",
+      "keterangan": "Pengambilan foto katalog untuk kampanye November."
+    }
+  ],
+  "sample_scans": [
+    {
+      "kode": "SMP-0003",
+      "oleh": "Nabila Putri",
+      "dikenali": true,
+      "lalu_hari": 0
+    },
+    {
+      "kode": "SMP-0001",
+      "oleh": "Rian Hidayat",
+      "dikenali": true,
+      "lalu_hari": 1
+    },
+    {
+      "kode": "SMP-LAMA-114",
+      "oleh": "Rian Hidayat",
+      "dikenali": false,
+      "lalu_hari": 1
+    },
+    {
+      "kode": "SMP-0007",
+      "oleh": "Rizky Ananda",
+      "dikenali": true,
+      "lalu_hari": 2
+    },
+    {
+      "kode": "SMP-LAMA-114",
+      "oleh": "Nabila Putri",
+      "dikenali": false,
+      "lalu_hari": 3
+    }
+  ],
+  "transaksi": [
+    {
+      "id": "bf449933-c24f-4891-98dd-a9e67138c468",
+      "tanggal": "2024-09-06",
+      "arah": "masuk",
+      "jenis": null,
+      "unit": "affiliator",
+      "akun": "@beauty_daily.id",
+      "keterangan": "Pencairan komisi TikTok Shop periode 21–31 Agu",
+      "jumlah": 158200000,
+      "status": "dibayar",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "180c9be7-f3f2-459b-a2ba-ac9f6fdff738",
+      "tanggal": "2024-09-06",
+      "arah": "masuk",
+      "jenis": null,
+      "unit": "mcn",
+      "akun": null,
+      "keterangan": "Pencairan MCN periode 21–31 Agu",
+      "jumlah": 81500000,
+      "status": "dibayar",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "b663ff0b-4822-41e8-81af-97511f309645",
+      "tanggal": "2024-09-09",
+      "arah": "keluar",
+      "jenis": "creator_share",
+      "unit": "mcn",
+      "akun": null,
+      "keterangan": "Bagi hasil kreator MCN Agustus",
+      "jumlah": 34100000,
+      "status": "dibayar",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "ab374e79-f68b-433e-976a-753dcc4c4247",
+      "tanggal": "2024-09-11",
+      "arah": "keluar",
+      "jenis": "direct_cost",
+      "unit": "affiliator",
+      "akun": "@beauty_daily.id",
+      "keterangan": "Iklan TikTok akun beauty daily",
+      "jumlah": 21800000,
+      "status": "dibayar",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "43973bd0-0a66-4451-9dcd-804cf488e1c3",
+      "tanggal": "2024-09-10",
+      "arah": "keluar",
+      "jenis": "beban",
+      "unit": null,
+      "akun": null,
+      "keterangan": "Gaji tim September",
+      "jumlah": 74500000,
+      "status": "dibayar",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": "Hafidz Alkahfi"
+    },
+    {
+      "id": "b6ca9980-49c1-42dc-9ddf-aa27d9d7261f",
+      "tanggal": "2024-10-05",
+      "arah": "masuk",
+      "jenis": null,
+      "unit": "affiliator",
+      "akun": "@skincare_official",
+      "keterangan": "Pencairan komisi TikTok Shop periode 21–30 Sep",
+      "jumlah": 186400000,
+      "status": "dibayar",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "2bdb507d-b4b1-4b4c-9b8b-bf4a47eb5dfd",
+      "tanggal": "2024-10-05",
+      "arah": "masuk",
+      "jenis": null,
+      "unit": "mcn",
+      "akun": null,
+      "keterangan": "Pencairan MCN periode 21–30 Sep",
+      "jumlah": 92300000,
+      "status": "dibayar",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "787d7276-8bca-42e3-8a42-d88f0ecd6e37",
+      "tanggal": "2024-10-07",
+      "arah": "keluar",
+      "jenis": "creator_share",
+      "unit": "mcn",
+      "akun": null,
+      "keterangan": "Bagi hasil kreator MCN September",
+      "jumlah": 38700000,
+      "status": "dibayar",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "55c65085-7d86-4b21-8dcc-13e22a6d484f",
+      "tanggal": "2024-10-08",
+      "arah": "keluar",
+      "jenis": "direct_cost",
+      "unit": "affiliator",
+      "akun": "@skincare_official",
+      "keterangan": "Iklan TikTok akun skincare",
+      "jumlah": 24500000,
+      "status": "dibayar",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "653a6136-28d4-4c7c-8009-a23d142c3706",
+      "tanggal": "2024-10-10",
+      "arah": "keluar",
+      "jenis": "beban",
+      "unit": null,
+      "akun": null,
+      "keterangan": "Gaji tim Oktober",
+      "jumlah": 78000000,
+      "status": "dibayar",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": "Hafidz Alkahfi"
+    },
+    {
+      "id": "b3c41384-dd96-4389-8aff-ec16f023dafb",
+      "tanggal": "2024-10-12",
+      "arah": "keluar",
+      "jenis": "aset",
+      "unit": "affiliator",
+      "akun": null,
+      "keterangan": "Dua set lighting studio live",
+      "jumlah": 18900000,
+      "status": "dibayar",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "f76c3249-f871-46cb-b74f-4ed0df627d80",
+      "tanggal": "2024-10-15",
+      "arah": "masuk",
+      "jenis": null,
+      "unit": "tap",
+      "akun": null,
+      "keterangan": "Termin pertama kampanye brand ads",
+      "jumlah": 64000000,
+      "status": "dibayar",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "ba692b76-0584-44c4-8f13-fa36109b335c",
+      "tanggal": "2024-10-18",
+      "arah": "keluar",
+      "jenis": "beban",
+      "unit": null,
+      "akun": null,
+      "keterangan": "Sewa kantor kuartal IV",
+      "jumlah": 45000000,
+      "status": "dibayar",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": "Hafidz Alkahfi"
+    },
+    {
+      "id": "665b79a2-5248-400d-97a8-7bd494bac801",
+      "tanggal": "2024-10-21",
+      "arah": "keluar",
+      "jenis": "beban",
+      "unit": "mcn",
+      "akun": null,
+      "keterangan": "Konsumsi MMC Oktober",
+      "jumlah": 3200000,
+      "status": "diajukan",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": null
+    },
+    {
+      "id": "5bae9eee-bc9d-4309-b31f-7b671cf2e976",
+      "tanggal": "2024-10-22",
+      "arah": "keluar",
+      "jenis": "aset",
+      "unit": "tap",
+      "akun": null,
+      "keterangan": "Laptop editor TAP",
+      "jumlah": 21500000,
+      "status": "diajukan",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": null
+    },
+    {
+      "id": "c4e44309-c6fc-4f0f-a402-2dd249c9aeaa",
+      "tanggal": "2024-10-23",
+      "arah": "keluar",
+      "jenis": "direct_cost",
+      "unit": "affiliator",
+      "akun": "@fashion_hijab",
+      "keterangan": "Iklan akun fashion hijab",
+      "jumlah": 9800000,
+      "status": "disetujui",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "1a2e4861-7dcd-4dc3-b12d-24961f5138b7",
+      "tanggal": "2024-10-09",
+      "arah": "keluar",
+      "jenis": "dividen",
+      "unit": null,
+      "akun": null,
+      "keterangan": "Dividen pemegang saham kuartal III",
+      "jumlah": 50000000,
+      "status": "dibayar",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": "Hafidz Alkahfi"
+    },
+    {
+      "id": "dd983c69-4e64-4d05-8de3-f5059ba8bba5",
+      "tanggal": "2024-10-20",
+      "arah": "keluar",
+      "jenis": "beban",
+      "unit": null,
+      "akun": null,
+      "keterangan": "Langganan alat desain & penjadwalan",
+      "jumlah": 4600000,
+      "status": "ditolak",
+      "diajukan": "Laras Ayuningtyas",
+      "disetujui": "Farhan Pratama",
+      "catatan": "Dua langganan tumpang tindih; pakai yang sudah ada dulu."
+    }
+  ],
+  "kas_awal": 185000000,
+  "aset": [
+    {
+      "id": "e4421f3e-9323-45e9-941b-0b3b6ca21f07",
+      "kode": "AST-0001",
+      "nama": "Laptop editor MacBook Pro 14",
+      "kategori": "Elektronik",
+      "unit": "mcn",
+      "tanggal": "2023-03-15",
+      "nilai": 32500000,
+      "masa_manfaat": 48,
+      "residu": 5000000,
+      "status": "dipakai",
+      "pemegang": "Fajar Ramadhan",
+      "lokasi": "Studio MCN Lt. 2",
+      "transaksi": null,
+      "berakhir": null,
+      "catatan": "Mesin utama pemotongan kasar."
+    },
+    {
+      "id": "0d8b1334-a752-4f7b-8c8f-91d689213dd7",
+      "kode": "AST-0002",
+      "nama": "Kamera Sony A7 IV",
+      "kategori": "Elektronik",
+      "unit": "mcn",
+      "tanggal": "2023-06-02",
+      "nilai": 38900000,
+      "masa_manfaat": 60,
+      "residu": 6000000,
+      "status": "dipakai",
+      "pemegang": "Galih Prakoso",
+      "lokasi": "Studio MCN Lt. 2",
+      "transaksi": null,
+      "berakhir": null,
+      "catatan": ""
+    },
+    {
+      "id": "11809d69-57e0-423c-bf4b-c2a1c4523046",
+      "kode": "AST-0003",
+      "nama": "Dua set lighting studio live",
+      "kategori": "Peralatan studio",
+      "unit": "affiliator",
+      "tanggal": "2024-10-12",
+      "nilai": 18900000,
+      "masa_manfaat": 36,
+      "residu": 0,
+      "status": "dipakai",
+      "pemegang": "Dewi Lestari",
+      "lokasi": "Studio live Affiliator",
+      "transaksi": "Dua set lighting studio live",
+      "berakhir": null,
+      "catatan": "Lahir dari transaksi aset yang sudah dibayar."
+    },
+    {
+      "id": "cd45c49a-6ad9-49d3-950a-45601bb8e856",
+      "kode": "AST-0004",
+      "nama": "PC editing Ryzen 9",
+      "kategori": "Elektronik",
+      "unit": "tap",
+      "tanggal": "2022-11-08",
+      "nilai": 27400000,
+      "masa_manfaat": 48,
+      "residu": 3000000,
+      "status": "dipakai",
+      "pemegang": "Dimas Maulana",
+      "lokasi": "Ruang kerja TAP",
+      "transaksi": null,
+      "berakhir": null,
+      "catatan": ""
+    },
+    {
+      "id": "c1996503-770a-480c-9e08-3ac0e3415a5f",
+      "kode": "AST-0005",
+      "nama": "Green screen dan rigging",
+      "kategori": "Peralatan studio",
+      "unit": "mcn",
+      "tanggal": "2023-01-20",
+      "nilai": 6800000,
+      "masa_manfaat": 36,
+      "residu": 0,
+      "status": "cadangan",
+      "pemegang": null,
+      "lokasi": "Gudang Lt. 1",
+      "transaksi": null,
+      "berakhir": null,
+      "catatan": "Dipakai bergantian saat studio penuh."
+    },
+    {
+      "id": "f3e2f6ec-cbe0-4baf-95fa-3eb85c234297",
+      "kode": "AST-0006",
+      "nama": "iPhone 13 untuk akun live",
+      "kategori": "Elektronik",
+      "unit": "affiliator",
+      "tanggal": "2023-08-14",
+      "nilai": 12900000,
+      "masa_manfaat": 36,
+      "residu": 2000000,
+      "status": "dipakai",
+      "pemegang": "Rian Hidayat",
+      "lokasi": "Dibawa pemegang",
+      "transaksi": null,
+      "berakhir": null,
+      "catatan": ""
+    },
+    {
+      "id": "8d5a2dbd-c75b-434a-8f54-fd39b235bb0c",
+      "kode": "AST-0007",
+      "nama": "Meja kerja modular 6 unit",
+      "kategori": "Perabot",
+      "unit": null,
+      "tanggal": "2022-09-01",
+      "nilai": 15600000,
+      "masa_manfaat": 96,
+      "residu": 0,
+      "status": "dipakai",
+      "pemegang": null,
+      "lokasi": "Kantor Lt. 1",
+      "transaksi": null,
+      "berakhir": null,
+      "catatan": "Perabot bersama, tidak dipegang perorangan."
+    },
+    {
+      "id": "00edcf51-12a6-4e9c-8e67-bd9afd11523b",
+      "kode": "AST-0008",
+      "nama": "Mikrofon Rode Wireless Go II",
+      "kategori": "Elektronik",
+      "unit": "tap",
+      "tanggal": "2023-05-11",
+      "nilai": 4950000,
+      "masa_manfaat": 36,
+      "residu": 0,
+      "status": "perbaikan",
+      "pemegang": "Yoga Saputra",
+      "lokasi": "Servis resmi Bandung",
+      "transaksi": null,
+      "berakhir": null,
+      "catatan": "Kanal kanan mati sejak 9 Okt 2024."
+    },
+    {
+      "id": "5d9c93da-a19e-4f02-b241-626548b68835",
+      "kode": "AST-0009",
+      "nama": "Gimbal DJI RS 3 dan tripod",
+      "kategori": "Peralatan studio",
+      "unit": "mcn",
+      "tanggal": "2023-04-03",
+      "nilai": 8700000,
+      "masa_manfaat": 36,
+      "residu": 0,
+      "status": "dipakai",
+      "pemegang": "Maya Safitri",
+      "lokasi": "Studio MCN Lt. 2",
+      "transaksi": null,
+      "berakhir": null,
+      "catatan": ""
+    },
+    {
+      "id": "456b392a-d8ee-4fe2-b6b1-2c5de4d4160b",
+      "kode": "AST-0010",
+      "nama": "Laptop ASUS Vivobook staf",
+      "kategori": "Elektronik",
+      "unit": "affiliator",
+      "tanggal": "2022-07-19",
+      "nilai": 9300000,
+      "masa_manfaat": 48,
+      "residu": 1000000,
+      "status": "hilang",
+      "pemegang": "Yusuf Ramadhan",
+      "lokasi": "Tidak diketahui",
+      "transaksi": null,
+      "berakhir": "2024-09-30",
+      "catatan": "Belum kembali setelah pemegangnya berhenti; sudah dilaporkan ke Manager."
+    },
+    {
+      "id": "9fad67ec-c044-428b-9df1-b9719cd866fa",
+      "kode": "AST-0011",
+      "nama": "Printer dan pemindai kantor",
+      "kategori": "Perabot",
+      "unit": null,
+      "tanggal": "2021-12-05",
+      "nilai": 5400000,
+      "masa_manfaat": 60,
+      "residu": 0,
+      "status": "dilepas",
+      "pemegang": null,
+      "lokasi": "—",
+      "transaksi": null,
+      "berakhir": "2024-08-16",
+      "catatan": "Dijual, diganti sewa mesin."
+    },
+    {
+      "id": "22f764cb-6738-4cfd-b108-43385b60772d",
+      "kode": "AST-0012",
+      "nama": "AC 1,5 PK ruang studio",
+      "kategori": "Perabot",
+      "unit": "mcn",
+      "tanggal": "2022-10-10",
+      "nilai": 6200000,
+      "masa_manfaat": 60,
+      "residu": 0,
+      "status": "dipakai",
+      "pemegang": null,
+      "lokasi": "Studio MCN Lt. 2",
+      "transaksi": null,
+      "berakhir": null,
+      "catatan": ""
+    }
+  ],
+  "aset_riwayat": [
+    {
+      "kode": "AST-0001",
+      "pada": "2023-03-15",
+      "dari": null,
+      "ke": "dipakai",
+      "pemegang": "Rizky Ananda",
+      "oleh": "Laras Ayuningtyas",
+      "lokasi": "Studio MCN Lt. 2",
+      "catatan": "Diterima dari vendor, langsung dipakai produksi."
+    },
+    {
+      "kode": "AST-0001",
+      "pada": "2024-02-05",
+      "dari": "dipakai",
+      "ke": "dipakai",
+      "pemegang": "Fajar Ramadhan",
+      "oleh": "Galih Prakoso",
+      "lokasi": "Studio MCN Lt. 2",
+      "catatan": "Serah terima saat Rizky pindah ke tim riset."
+    },
+    {
+      "kode": "AST-0002",
+      "pada": "2023-06-02",
+      "dari": null,
+      "ke": "dipakai",
+      "pemegang": "Galih Prakoso",
+      "oleh": "Laras Ayuningtyas",
+      "lokasi": "Studio MCN Lt. 2",
+      "catatan": ""
+    },
+    {
+      "kode": "AST-0003",
+      "pada": "2024-10-12",
+      "dari": null,
+      "ke": "dipakai",
+      "pemegang": "Dewi Lestari",
+      "oleh": "Laras Ayuningtyas",
+      "lokasi": "Studio live Affiliator",
+      "catatan": "Dicatat dari transaksi aset yang sudah dibayar."
+    },
+    {
+      "kode": "AST-0004",
+      "pada": "2022-11-08",
+      "dari": null,
+      "ke": "dipakai",
+      "pemegang": "Dimas Maulana",
+      "oleh": "Farhan Pratama",
+      "lokasi": "Ruang kerja TAP",
+      "catatan": ""
+    },
+    {
+      "kode": "AST-0005",
+      "pada": "2023-01-20",
+      "dari": null,
+      "ke": "dipakai",
+      "pemegang": "Maya Safitri",
+      "oleh": "Laras Ayuningtyas",
+      "lokasi": "Studio MCN Lt. 2",
+      "catatan": ""
+    },
+    {
+      "kode": "AST-0005",
+      "pada": "2024-06-18",
+      "dari": "dipakai",
+      "ke": "cadangan",
+      "pemegang": null,
+      "oleh": "Galih Prakoso",
+      "lokasi": "Gudang Lt. 1",
+      "catatan": "Dikembalikan ke gudang setelah studio dirapikan."
+    },
+    {
+      "kode": "AST-0006",
+      "pada": "2023-08-14",
+      "dari": null,
+      "ke": "dipakai",
+      "pemegang": "Nabila Putri",
+      "oleh": "Laras Ayuningtyas",
+      "lokasi": "Dibawa pemegang",
+      "catatan": ""
+    },
+    {
+      "kode": "AST-0006",
+      "pada": "2024-05-02",
+      "dari": "dipakai",
+      "ke": "dipakai",
+      "pemegang": "Rian Hidayat",
+      "oleh": "Dewi Lestari",
+      "lokasi": "Dibawa pemegang",
+      "catatan": "Ikut pindah bersama PIC akun beauty."
+    },
+    {
+      "kode": "AST-0007",
+      "pada": "2022-09-01",
+      "dari": null,
+      "ke": "dipakai",
+      "pemegang": null,
+      "oleh": "Farhan Pratama",
+      "lokasi": "Kantor Lt. 1",
+      "catatan": "Perabot bersama, tidak dipegang perorangan."
+    },
+    {
+      "kode": "AST-0008",
+      "pada": "2023-05-11",
+      "dari": null,
+      "ke": "dipakai",
+      "pemegang": "Yoga Saputra",
+      "oleh": "Laras Ayuningtyas",
+      "lokasi": "Ruang kerja TAP",
+      "catatan": ""
+    },
+    {
+      "kode": "AST-0008",
+      "pada": "2024-10-09",
+      "dari": "dipakai",
+      "ke": "perbaikan",
+      "pemegang": "Yoga Saputra",
+      "oleh": "Dimas Maulana",
+      "lokasi": "Servis resmi Bandung",
+      "catatan": "Kanal kanan mati saat rekaman."
+    },
+    {
+      "kode": "AST-0009",
+      "pada": "2023-04-03",
+      "dari": null,
+      "ke": "dipakai",
+      "pemegang": "Maya Safitri",
+      "oleh": "Laras Ayuningtyas",
+      "lokasi": "Studio MCN Lt. 2",
+      "catatan": ""
+    },
+    {
+      "kode": "AST-0010",
+      "pada": "2022-07-19",
+      "dari": null,
+      "ke": "dipakai",
+      "pemegang": "Arif Setiawan",
+      "oleh": "Farhan Pratama",
+      "lokasi": "Dibawa pemegang",
+      "catatan": ""
+    },
+    {
+      "kode": "AST-0010",
+      "pada": "2023-11-06",
+      "dari": "dipakai",
+      "ke": "dipakai",
+      "pemegang": "Yusuf Ramadhan",
+      "oleh": "Dewi Lestari",
+      "lokasi": "Dibawa pemegang",
+      "catatan": "Serah terima antar staf, tanpa berita acara."
+    },
+    {
+      "kode": "AST-0010",
+      "pada": "2024-09-30",
+      "dari": "dipakai",
+      "ke": "hilang",
+      "pemegang": "Yusuf Ramadhan",
+      "oleh": "Farhan Pratama",
+      "lokasi": "Tidak diketahui",
+      "catatan": "Tidak kembali setelah pemegangnya berhenti."
+    },
+    {
+      "kode": "AST-0011",
+      "pada": "2021-12-05",
+      "dari": null,
+      "ke": "dipakai",
+      "pemegang": null,
+      "oleh": "Farhan Pratama",
+      "lokasi": "Kantor Lt. 1",
+      "catatan": ""
+    },
+    {
+      "kode": "AST-0011",
+      "pada": "2024-08-16",
+      "dari": "dipakai",
+      "ke": "dilepas",
+      "pemegang": null,
+      "oleh": "Laras Ayuningtyas",
+      "lokasi": "—",
+      "catatan": "Dijual, diganti sewa mesin."
+    },
+    {
+      "kode": "AST-0012",
+      "pada": "2022-10-10",
+      "dari": null,
+      "ke": "dipakai",
+      "pemegang": null,
+      "oleh": "Farhan Pratama",
+      "lokasi": "Studio MCN Lt. 2",
+      "catatan": ""
+    }
+  ],
+  "anggaran": [
+    {
+      "id": "112a417c-acec-4c73-9ec3-1f885aa4b19c",
+      "periode": "2024-09",
+      "unit": "affiliator",
+      "jenis": "direct_cost",
+      "jumlah": 25000000,
+      "catatan": "Iklan akun affiliator",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "7ee8ffa1-b0f4-4084-a0cd-a2f23c7cd3a6",
+      "periode": "2024-09",
+      "unit": "mcn",
+      "jenis": "creator_share",
+      "jumlah": 36000000,
+      "catatan": "Bagi hasil kreator MCN",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "67685b25-e698-4d9b-a9fb-03b66f8daa15",
+      "periode": "2024-09",
+      "unit": null,
+      "jenis": "beban",
+      "jumlah": 80000000,
+      "catatan": "Beban operasional kantor",
+      "disetujui": "Hafidz Alkahfi"
+    },
+    {
+      "id": "1e73014a-7f6f-4a2e-ac72-4c3c685a1b19",
+      "periode": "2024-10",
+      "unit": "affiliator",
+      "jenis": "direct_cost",
+      "jumlah": 22000000,
+      "catatan": "Iklan akun affiliator",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "bf088e90-4a9c-4259-8c59-99962124696b",
+      "periode": "2024-10",
+      "unit": "affiliator",
+      "jenis": "aset",
+      "jumlah": 20000000,
+      "catatan": "Perlengkapan studio live",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "cad72e06-1ffe-459b-8fae-cec15be859b1",
+      "periode": "2024-10",
+      "unit": "mcn",
+      "jenis": "creator_share",
+      "jumlah": 40000000,
+      "catatan": "Bagi hasil kreator MCN",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "90dc6504-ef53-40a0-809b-ec4e2a6170a8",
+      "periode": "2024-10",
+      "unit": "mcn",
+      "jenis": "beban",
+      "jumlah": 5000000,
+      "catatan": "Operasional harian MCN",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "23e01d82-8022-4333-9bdd-fc68acb41c0b",
+      "periode": "2024-10",
+      "unit": "tap",
+      "jenis": "beban",
+      "jumlah": 8000000,
+      "catatan": "Operasional harian TAP",
+      "disetujui": "Farhan Pratama"
+    },
+    {
+      "id": "d21db62d-0c75-4f62-b50d-89b4514344d8",
+      "periode": "2024-10",
+      "unit": null,
+      "jenis": "beban",
+      "jumlah": 120000000,
+      "catatan": "Gaji, sewa, dan langganan",
+      "disetujui": "Hafidz Alkahfi"
+    },
+    {
+      "id": "0c320479-83b3-44bb-b96b-a92ec7ad3b8f",
+      "periode": "2024-10",
+      "unit": null,
+      "jenis": "dividen",
+      "jumlah": 60000000,
+      "catatan": "Pembagian laba kuartal III",
+      "disetujui": "Hafidz Alkahfi"
+    }
+  ],
+  "alokasi_anggaran": [
+    {
+      "id": "81668421-791f-47c3-9fa8-58c05064efa5",
+      "periode": "2024-10",
+      "unit": "mcn",
+      "jenis": "beban",
+      "jumlah": 3000000,
+      "alasan": "Tambahan konsumsi rapat mingguan MMC selama Oktober.",
+      "status": "diajukan",
+      "diajukan": "Galih Prakoso",
+      "diputuskan": null,
+      "catatan_keputusan": "",
+      "pada": "2024-10-24"
+    },
+    {
+      "id": "1fa0c854-a718-4f2d-b7db-345ba40fc8aa",
+      "periode": "2024-10",
+      "unit": "affiliator",
+      "jenis": "direct_cost",
+      "jumlah": 5000000,
+      "alasan": "Iklan tambahan untuk akun fashion menjelang payday.",
+      "status": "disetujui",
+      "diajukan": "Dewi Lestari",
+      "diputuskan": "Farhan Pratama",
+      "catatan_keputusan": "Disetujui dengan catatan dievaluasi dua pekan.",
+      "pada": "2024-10-24"
+    },
+    {
+      "id": "c968ada8-bbb6-49ea-8240-2d94e7f473a6",
+      "periode": "2024-10",
+      "unit": "tap",
+      "jenis": "beban",
+      "jumlah": 4000000,
+      "alasan": "Sewa studio tambahan untuk kampanye brand ads.",
+      "status": "ditolak",
+      "diajukan": "Dimas Maulana",
+      "diputuskan": "Farhan Pratama",
+      "catatan_keputusan": "Pakai studio yang ada dulu; pagunya masih kosong.",
+      "pada": "2024-10-22"
+    }
+  ],
+  "notifications": [
+    {
+      "untuk": "Farhan Pratama",
+      "kategori": "tenggat",
+      "judul": "Tenggat hari ini: Cek 14 sesi live sore",
+      "pesan": "Jatuh tempo pukul 16.00 WIB.",
+      "tautan": "/tugas",
+      "dibuat": "2024-10-24T09:10:00+07:00",
+      "dibaca": null
+    },
+    {
+      "untuk": "Farhan Pratama",
+      "kategori": "transaksi",
+      "judul": "Laptop editor TAP menunggu persetujuanmu",
+      "pesan": "Rp 21,5 jt diajukan Laras Ayuningtyas.",
+      "tautan": "/keuangan/transaksi",
+      "dibuat": "2024-10-24T08:02:00+07:00",
+      "dibaca": null
+    },
+    {
+      "untuk": "Farhan Pratama",
+      "kategori": "masukan",
+      "judul": "Balasan pada bug absensi selfie",
+      "pesan": "Hendra Kusuma menambahkan keterangan baru.",
+      "tautan": "/masukan-masalah",
+      "dibuat": "2024-10-24T07:45:00+07:00",
+      "dibaca": "2024-10-24T07:50:00+07:00"
+    },
+    {
+      "untuk": "Farhan Pratama",
+      "kategori": "pengumuman",
+      "judul": "Pengumuman baru: Cutoff Partner Center",
+      "pesan": "Sinkronisasi GRD dipercepat jadi pukul 20.00 WIB.",
+      "tautan": "/pengumuman",
+      "dibuat": "2024-10-23T16:30:00+07:00",
+      "dibaca": null
+    },
+    {
+      "untuk": "Farhan Pratama",
+      "kategori": "izin",
+      "judul": "Pengajuan izin Nabila Putri menunggu keputusan",
+      "pesan": "Izin setengah hari, 25 Oktober.",
+      "tautan": "/absensi",
+      "dibuat": "2024-10-23T10:05:00+07:00",
+      "dibaca": "2024-10-23T11:00:00+07:00"
+    },
+    {
+      "untuk": "Farhan Pratama",
+      "kategori": "anggaran",
+      "judul": "Alokasi anggaran MCN Oktober disetujui",
+      "pesan": "Rp 8 jt dipindah dari pos cadangan.",
+      "tautan": "/keuangan/budget",
+      "dibuat": "2024-10-21T14:20:00+07:00",
+      "dibaca": "2024-10-21T15:00:00+07:00"
+    },
+    {
+      "untuk": "Farhan Pratama",
+      "kategori": "tugas",
+      "judul": "Tugas baru dari Hafidz Alkahfi",
+      "pesan": "Siapkan rekap GMV pekan ini untuk WRM.",
+      "tautan": "/tugas",
+      "dibuat": "2024-10-16T09:00:00+07:00",
+      "dibaca": "2024-10-16T09:30:00+07:00"
+    },
+    {
+      "untuk": "Rian Hidayat",
+      "kategori": "tugas",
+      "judul": "Tugas baru dari Dewi Lestari",
+      "pesan": "Naikkan konten beauty tiga kali sehari pekan ini.",
+      "tautan": "/tugas",
+      "dibuat": "2024-10-24T08:15:00+07:00",
+      "dibaca": null
+    },
+    {
+      "untuk": "Rian Hidayat",
+      "kategori": "tenggat",
+      "judul": "Laporan harian belum dikirim",
+      "pesan": "Batas pengisian pukul 21.00 WIB.",
+      "tautan": "/laporan-harian",
+      "dibuat": "2024-10-24T17:00:00+07:00",
+      "dibaca": null
+    },
+    {
+      "untuk": "Rian Hidayat",
+      "kategori": "pengumuman",
+      "judul": "Pengumuman baru: Cutoff Partner Center",
+      "pesan": "Sinkronisasi GRD dipercepat jadi pukul 20.00 WIB.",
+      "tautan": "/pengumuman",
+      "dibuat": "2024-10-23T16:30:00+07:00",
+      "dibaca": null
+    },
+    {
+      "untuk": "Rian Hidayat",
+      "kategori": "masukan",
+      "judul": "Masukanmu ditindaklanjuti",
+      "pesan": "Status berubah jadi dikerjakan.",
+      "tautan": "/masukan/saya",
+      "dibuat": "2024-10-18T13:10:00+07:00",
+      "dibaca": "2024-10-18T13:40:00+07:00"
+    },
+    {
+      "untuk": "Hafidz Alkahfi",
+      "kategori": "anggaran",
+      "judul": "Alokasi di atas Rp 10 jt menunggu keputusanmu",
+      "pesan": "Pemindahan anggaran TAP diajukan Finance.",
+      "tautan": "/keuangan/budget",
+      "dibuat": "2024-10-24T10:30:00+07:00",
+      "dibaca": null
+    },
+    {
+      "untuk": "Hafidz Alkahfi",
+      "kategori": "transaksi",
+      "judul": "Tiga transaksi menunggu pembayaran",
+      "pesan": "Sudah disetujui Manager, menunggu Finance.",
+      "tautan": "/keuangan/transaksi",
+      "dibuat": "2024-10-22T09:00:00+07:00",
+      "dibaca": null
+    },
+    {
+      "untuk": "Dewi Lestari",
+      "kategori": "tenggat",
+      "judul": "Lead measure pekan ini belum diisi",
+      "pesan": "Tiga anggota belum mengisi entri hariannya.",
+      "tautan": "/grd/lead-measure",
+      "dibuat": "2024-10-24T11:00:00+07:00",
+      "dibaca": null
+    },
+    {
+      "untuk": "Dewi Lestari",
+      "kategori": "tugas",
+      "judul": "QC menunggu keputusanmu",
+      "pesan": "Dua tugas selesai menunggu pemeriksaan.",
+      "tautan": "/tugas",
+      "dibuat": "2024-10-23T15:20:00+07:00",
+      "dibaca": null
+    }
+  ],
+  "notification_preferences": [
+    {
+      "untuk": "Farhan Pratama",
+      "kategori": "tugas",
+      "in_app": true,
+      "whatsapp": true
+    },
+    {
+      "untuk": "Farhan Pratama",
+      "kategori": "tenggat",
+      "in_app": true,
+      "whatsapp": true
+    },
+    {
+      "untuk": "Farhan Pratama",
+      "kategori": "pengumuman",
+      "in_app": false,
+      "whatsapp": false
+    },
+    {
+      "untuk": "Hafidz Alkahfi",
+      "kategori": "transaksi",
+      "in_app": true,
+      "whatsapp": true
+    },
+    {
+      "untuk": "Hafidz Alkahfi",
+      "kategori": "anggaran",
+      "in_app": true,
+      "whatsapp": true
+    },
+    {
+      "untuk": "Hafidz Alkahfi",
+      "kategori": "tugas",
+      "in_app": false,
+      "whatsapp": false
+    }
+  ],
+  "notification_delivery": [
+    {
+      "untuk": "Farhan Pratama",
+      "notifikasi": "Tenggat hari ini: Cek 14 sesi live sore",
+      "tujuan": "+6281234567890",
+      "status": "terkirim",
+      "percobaan": 1,
+      "galat": "",
+      "dikirim": "2024-10-24T09:10:20+07:00",
+      "dibuat": "2024-10-24T09:10:05+07:00"
+    },
+    {
+      "untuk": "Farhan Pratama",
+      "notifikasi": "Laptop editor TAP menunggu persetujuanmu",
+      "tujuan": "+6281234567890",
+      "status": "gagal",
+      "percobaan": 2,
+      "galat": "Gateway menolak: nomor tidak terdaftar di WhatsApp Business.",
+      "dikirim": null,
+      "dibuat": "2024-10-24T08:02:10+07:00"
+    },
+    {
+      "untuk": "Farhan Pratama",
+      "notifikasi": "Pengumuman baru: Cutoff Partner Center",
+      "tujuan": "+6281234567890",
+      "status": "antre",
+      "percobaan": 0,
+      "galat": "",
+      "dikirim": null,
+      "dibuat": "2024-10-23T16:30:05+07:00"
+    },
+    {
+      "untuk": "Hafidz Alkahfi",
+      "notifikasi": "Alokasi di atas Rp 10 jt menunggu keputusanmu",
+      "tujuan": "+6281122334455",
+      "status": "terkirim",
+      "percobaan": 1,
+      "galat": "",
+      "dikirim": "2024-10-24T10:30:12+07:00",
+      "dibuat": "2024-10-24T10:30:02+07:00"
+    }
+  ]
+}

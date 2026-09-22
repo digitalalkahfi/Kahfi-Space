@@ -1,0 +1,205 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { AlertTriangle, ChevronUp, Loader2 } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { calonAtasan, peringatanAtasan } from "@/lib/atasan";
+import { ubahAtasan } from "@/app/actions/anggota";
+import type { AnggotaTim, MataRantai } from "@/lib/types";
+
+/**
+ * Penetapan atasan.
+ *
+ * Atasan menentukan siapa yang boleh menugasi orang ini dan menyetujui
+ * izinnya, jadi akibat setiap pilihan ditulis sebelum disimpan — bukan
+ * ditemukan belakangan saat seseorang tak bisa mengajukan izin.
+ */
+export function DialogAtasan({
+  anggota,
+  semua,
+  rantai,
+  idBawahan,
+  buka,
+  onBuka,
+}: {
+  anggota: AnggotaTim;
+  semua: AnggotaTim[];
+  rantai: MataRantai[];
+  idBawahan: string[];
+  buka: boolean;
+  onBuka: (b: boolean) => void;
+}) {
+  const [pilih, setPilih] = useState<string | null>(anggota.atasanId);
+  const [menyimpan, mulai] = useTransition();
+  const [pesan, setPesan] = useState<string | null>(null);
+
+  const bawahan = new Set(idBawahan);
+  const calon = calonAtasan(semua, anggota, bawahan);
+  const terpilih = calon.find((c) => c.id === pilih) ?? null;
+  const peringatan = peringatanAtasan(anggota, terpilih);
+  const adaYangSalah = peringatan.some((p) => p.nada === "salah");
+
+  const simpan = () => {
+    if (menyimpan || adaYangSalah) return;
+    setPesan(null);
+    mulai(async () => {
+      const hasil = await ubahAtasan(anggota.id, pilih);
+      if (hasil.ok) {
+        onBuka(false);
+        return;
+      }
+      setPesan(hasil.pesan ?? null);
+    });
+  };
+
+  return (
+    <Dialog open={buka} onOpenChange={onBuka}>
+      <DialogContent className="max-h-[85dvh] overflow-y-auto rounded-3xl sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Atasan {anggota.nama}</DialogTitle>
+          <DialogDescription>
+            Atasan berwenang menugasi dan menyetujui izin orang ini.
+          </DialogDescription>
+        </DialogHeader>
+
+        {rantai.length > 0 ? (
+          <div className="rounded-2xl bg-muted px-3 py-2.5">
+            <p className="text-[11px] leading-[14px] font-semibold tracking-[0.06em] text-muted-foreground uppercase">
+              Garis pelaporan sekarang
+            </p>
+            <ul className="mt-1 space-y-0.5">
+              {rantai.map((m) => (
+                <li
+                  key={m.userId}
+                  className="flex items-center gap-1.5 text-[11px] leading-[16px]"
+                  style={{ paddingLeft: `${(m.tingkat - 1) * 10}px` }}
+                >
+                  <ChevronUp className="size-3 shrink-0 text-muted-foreground" />
+                  <span className="font-medium">{m.nama}</span>
+                  <span className="truncate text-muted-foreground">
+                    {m.jabatan}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {idBawahan.length > 0 ? (
+          <p className="rounded-2xl bg-info-fill px-3 py-2 text-[11px] leading-[14px] text-pretty text-info-text">
+            {idBawahan.length} orang melapor kepada {anggota.nama}. Mengubah
+            atasannya menggeser seluruh cabang ini, bukan satu orang saja.
+          </p>
+        ) : null}
+
+        <div className="max-h-64 space-y-1 overflow-y-auto">
+          {calon.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => setPilih(c.id)}
+              aria-pressed={pilih === c.id}
+              className={cn(
+                "baris-interaktif flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left",
+                pilih === c.id
+                  ? "bg-primary/10 ring-1 ring-primary/30"
+                  : "bg-muted/50",
+              )}
+            >
+              <Avatar className="size-8 shrink-0">
+                <AvatarFallback className="bg-card text-[11px] font-semibold text-muted-foreground">
+                  {c.inisial}
+                </AvatarFallback>
+              </Avatar>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[13px] leading-[18px] font-semibold">
+                  {c.nama}
+                </span>
+                <span className="block truncate text-[11px] leading-[14px] text-muted-foreground">
+                  {c.jabatan}
+                </span>
+              </span>
+              <span className="shrink-0 text-[11px] leading-[14px] text-muted-foreground">
+                {c.unitNama}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setPilih(null)}
+          aria-pressed={pilih === null}
+          className={cn(
+            "tekan-halus rounded-xl px-3 py-2 text-left text-[11px] leading-[14px] font-semibold",
+            pilih === null
+              ? "bg-warn-fill text-warn-text"
+              : "bg-muted text-muted-foreground",
+          )}
+        >
+          Tanpa atasan
+        </button>
+
+        {peringatan.length > 0 ? (
+          <ul className="space-y-1.5">
+            {peringatan.map((p) => (
+              <li
+                key={p.pesan}
+                className={cn(
+                  "flex items-start gap-2 rounded-xl px-3 py-2 text-[11px] leading-[14px] text-pretty",
+                  p.nada === "salah"
+                    ? "bg-danger-fill text-danger-text"
+                    : "bg-warn-fill text-warn-text",
+                )}
+              >
+                <AlertTriangle className="mt-0.5 size-3.5 shrink-0" />
+                {p.pesan}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+
+        {pesan ? (
+          <p
+            role="status"
+            className="rounded-xl bg-warn-fill px-3 py-2 text-[11px] leading-[14px] text-warn-text"
+          >
+            {pesan}
+          </p>
+        ) : null}
+
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button
+              type="button"
+              variant="outline"
+              className="tekan-halus rounded-full"
+            >
+              Batal
+            </Button>
+          </DialogClose>
+          <Button
+            type="button"
+            disabled={menyimpan || adaYangSalah || pilih === anggota.atasanId}
+            onClick={simpan}
+            className="tekan-halus rounded-full"
+          >
+            {menyimpan ? <Loader2 className="size-4 animate-spin" /> : null}
+            {menyimpan ? "Menyimpan…" : "Simpan atasan"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}

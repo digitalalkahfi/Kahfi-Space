@@ -1,0 +1,16 @@
+# .ngodingpakeaiignore — extra paths to keep out of NgodingPakeAI sync.
+# Uses .gitignore syntax. Secrets, node_modules, build output and .env files
+# are ALWAYS blocked by the CLI regardless of what is listed here.
+
+# Examples:
+# docs/internal/
+# *.snap
+# fixtures/
+
+# Dump HTML dari Google Stitch — referensi visual, bukan kode yang dipakai.
+# DESIGN.md sengaja TIDAK diabaikan karena berisi token sistem desain.
+desain_ui_aplikasi_prd/**/code.html
+
+# Lockfile & berkas perkakas yang tidak menambah konteks proyek.
+package-lock.json
+.claude/skills/

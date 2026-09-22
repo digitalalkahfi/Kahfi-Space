@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+
+<html lang="id"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><title>K-Space V2 - Al-Kahfi Corp</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-primary":"#ffffff","border-subtle":"#E2E8F0","inverse-surface":"#213145","tertiary-container":"#341100","tertiary":"#000000","on-secondary-fixed-variant":"#003ea8","on-surface-variant":"#45464d","secondary-container":"#316bf3","tertiary-fixed":"#ffdbca","on-primary-fixed-variant":"#3f465c","on-error-container":"#93000a","outline":"#76777d","on-tertiary-container":"#d95f00","surface-container-highest":"#d3e4fe","tertiary-fixed-dim":"#ffb690","on-error":"#ffffff","on-secondary":"#ffffff","on-primary-container":"#7c839b","on-background":"#0b1c30","canvas-bg":"#F4F5F9","background":"#f8f9ff","on-tertiary-fixed-variant":"#783200","primary":"#000000","secondary":"#0051d5","on-surface":"#0b1c30","surface-container-low":"#eff4ff","surface-container-high":"#dce9ff","inverse-primary":"#bec6e0","surface-container-lowest":"#ffffff","primary-fixed":"#dae2fd","on-tertiary":"#ffffff","on-secondary-fixed":"#00174b","surface-white":"#FFFFFF","status-green-badge":"#10B981","inverse-on-surface":"#eaf1ff","status-orange-text":"#C2410C","status-orange-fill":"#FFF7ED","primary-fixed-dim":"#bec6e0","status-green-fill":"#ECFDF5","surface-container":"#e5eeff","on-secondary-container":"#fefcff","status-blue-fill":"#EFF6FF","on-primary-fixed":"#131b2e","on-tertiary-fixed":"#341100","status-blue-text":"#1D4ED8","error-container":"#ffdad6","secondary-fixed-dim":"#b4c5ff","status-purple-text":"#7E22CE","primary-container":"#131b2e","surface":"#f8f9ff","surface-variant":"#d3e4fe","outline-variant":"#c6c6cd","surface-tint":"#565e74","status-red-text":"#B91C1C","status-red-badge":"#EF4444","surface-bright":"#f8f9ff","surface-dim":"#cbdbf5","status-red-fill":"#FEF2F2","error":"#ba1a1a","secondary-fixed":"#dbe1ff","status-green-text":"#047857","status-purple-fill":"#FAF5FF"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"gutter-desktop":"1.5rem","space-sm":"0.5rem","space-lg":"1.5rem","margin":"1rem","space-xl":"2rem","gutter":"1.25rem","space-xs":"0.25rem","space-md":"1rem","margin-desktop":"2rem","margin-tablet":"1.5rem"},"fontFamily":{"body-sm":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"label-lg":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"metric-value":["Plus Jakarta Sans"],"display":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"]},"fontSize":{"body-sm":["13px",{"lineHeight":"18px","fontWeight":"400"}],"headline-sm":["16px",{"lineHeight":"24px","fontWeight":"600"}],"label-lg":["13px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"600"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"headline-lg-mobile":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"700"}],"metric-value":["24px",{"lineHeight":"30px","letterSpacing":"-0.02em","fontWeight":"700"}],"display":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"14px","fontWeight":"500"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-lg":["15px",{"lineHeight":"22px","fontWeight":"400"}]}}}};</script></head><body class="bg-canvas-bg font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-20 bg-surface-white z-50 flex flex-col items-center py-space-lg shadow-[0_1px_8px_rgba(0,0,0,0.04)] justify-between"><div class="flex flex-col items-center gap-space-lg"><div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-sm"><span class="material-symbols-outlined text-[20px]">hub</span></div><nav class="flex flex-col items-center gap-space-sm" data-active-classes="bg-primary text-on-primary shadow-sm"><a aria-current="page" class="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 bg-primary text-on-primary shadow-sm" data-path="beranda" href="#" title="Beranda"><span class="material-symbols-outlined text-[22px]">space_dashboard</span></a><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="absensi" href="#" title="Absensi"><span class="material-symbols-outlined text-[22px]">fingerprint</span></a><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="tugas" href="#" title="Tugas"><span class="material-symbols-outlined text-[22px]">check_circle</span></a><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="laporan-harian" href="#" title="Laporan Harian"><span class="material-symbols-outlined text-[22px]">trending_up</span></a><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="grd" href="#" title="GRD"><span class="material-symbols-outlined text-[22px]">grid_view</span></a></nav></div><div class="flex flex-col items-center gap-space-sm"><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="pengaturan" href="#" title="Pengaturan"><span class="material-symbols-outlined text-[22px]">settings</span></a><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-status-red-fill hover:text-status-red-text transition-all duration-200" data-path="keluar" href="#" title="Keluar"><span class="material-symbols-outlined text-[22px]">logout</span></a></div></aside><div class="pl-20"><header class="fixed top-0 left-20 right-0 h-16 bg-surface-white/90 backdrop-blur-xl z-40 shadow-[0_1px_8px_rgba(0,0,0,0.03)]"><div class="h-16 w-full px-space-lg flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-sm pr-space-md"><img alt="K-Space V2 Brand Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WKmvH88VYAo8jHx2gNQWkTca1e4eGll31WpaH1aNWw4oUzjtpJCZyrleHuftBOqzjImm6nTLdMp4n059wmY6PURkWizBBurXxDKhxDhKQ2xb_SuVMB74Smk_UpfK5_VHRIVaTncViM3N7JreJTw2Gnr_Gh3DgAOgom2js8LJQ1HEk4fRLTaPfxyUirZyfgA5WXi64P5s5UbxwDGmr757DeNy0p0mGMIKubgTkNVUaNtLKX-vJWEaLyp5Y"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight tracking-tight">K-Space <span class="text-secondary font-bold">V2</span></span><span class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase">Al-Kahfi Corp</span></div></div><div class="hidden xl:flex items-center bg-canvas-bg p-1 rounded-full gap-1"><button class="px-3 py-1 rounded-full font-label-md text-label-md bg-primary text-on-primary shadow-sm" type="button">Hari Ini</button><button class="px-3 py-1 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">Minggu Ini</button><button class="px-3 py-1 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">Bulan Ini</button><button class="px-3 py-1 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">Laporan</button></div></div><div class="flex items-center gap-space-md"><div class="relative hidden md:block"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span><input class="w-64 lg:w-80 h-10 pl-9 pr-4 rounded-full bg-canvas-bg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-white focus:ring-2 focus:ring-secondary/20 transition-all duration-150" placeholder="Cari tiket, tugas, SOP, atau staf..." type="text"/></div><div class="flex items-center gap-space-xs"><button class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="Tambah Cepat" type="button"><span class="material-symbols-outlined text-[20px]">add</span></button><button class="relative w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="Notifikasi" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-status-red-badge"></span></button></div><div class="h-7 w-[1px] bg-border-subtle hidden sm:block"></div><div class="flex items-center gap-space-sm pl-1"><div class="text-right hidden sm:block"><div class="font-label-lg text-label-lg text-on-surface leading-tight">Farhan Pratama</div><div class="font-label-sm text-label-sm text-on-surface-variant leading-tight">Manager Operasional</div></div><div class="relative ring-2 ring-border-subtle rounded-full"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmO0jCeETuJAQNSC-GUSMrzdZntJ0U78Iex_66FxgLxDYIMfVAdIrIk93eLdi7LbCWOZe8yRQEngZmJEvanEJ6Ml72qa9b5R9VJspZAn3nRaHe7MTq7yRyfU5umbVYfNJF4qhCB2C5DndawHkAedBeil7sHY5xD3vOC4F1H954hAz3N8PT6QU9-9yZYDa1LWLSo99ZoasVIXxHiJEC6kYCLS2Fawr7lUXzZqJ0Ldlo56KCgTQqJht8"/><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-status-green-badge ring-2 ring-surface-white"></span></div></div></div></div></header><main class="w-full pt-16 bg-canvas-bg min-h-screen"><div class="flex flex-col w-full px-space-md sm:px-gutter-desktop py-space-md space-y-space-lg">
+<!-- Sub-Header Area matching Panze Clean Pill Structure -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md">
+<div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Dasbor Tim &amp; GMV</h1>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">Kelola performa harian tim Al-Kahfi Corp (25 anggota) &amp; pantau target real-time</p>
+</div>
+<!-- Filter & Action Controls -->
+<div class="flex items-center flex-wrap gap-space-sm">
+<div class="bg-surface-white rounded-full p-1 shadow-sm flex items-center gap-1">
+<button class="px-3.5 py-1.5 rounded-full font-label-md text-label-md bg-primary text-on-primary shadow-sm transition-colors" type="button">Hari Ini</button>
+<button class="px-3.5 py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">Minggu Ini</button>
+<button class="px-3.5 py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">Bulan Ini</button>
+<button class="px-3.5 py-1.5 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">Kuartal 1</button>
+</div>
+<div class="relative min-w-[240px]">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span>
+<input class="w-full h-10 pl-10 pr-4 rounded-full bg-surface-white font-body-sm text-body-sm text-on-surface shadow-sm placeholder:text-outline focus:outline-none focus:bg-surface-white focus:ring-2 focus:ring-secondary/20 transition-all duration-150" placeholder="Cari tiket, staf, unit..." type="text"/>
+</div>
+</div>
+</div>
+<!-- Operational WRM Matrix Status Banner (Corporate Al-Kahfi Requirement) -->
+<div class="w-full bg-surface-white rounded-3xl p-space-md sm:p-space-lg shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md bg-gradient-to-r from-surface-white via-surface-container-low to-surface-white">
+<div class="flex items-center gap-space-md">
+<div class="w-11 h-11 rounded-2xl bg-secondary-container/15 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[24px]">verified</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-sm text-headline-sm text-on-surface">Status Matriks WRM Hari Ini:</span>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-green-fill text-status-green-text font-label-md text-label-md tracking-wide">
+<span class="w-2 h-2 rounded-full bg-status-green-badge"></span>
+            LANJUT RITME
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Semua 3 lini bisnis mencatatkan capaian &gt;88% target prorata. Rekomendasi: Lanjutkan boost traffic TikTok malam.</p>
+</div>
+</div>
+<div class="flex items-center gap-space-sm self-end md:self-auto">
+<div class="text-right mr-2 hidden sm:block">
+<div class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Prorata Harian</div>
+<div class="font-metric-value text-metric-value text-secondary">Rp 34,20 Jt <span class="font-label-md text-label-md text-status-green-text">(↑ 18%)</span></div>
+</div>
+<button class="w-10 h-10 rounded-full bg-canvas-bg hover:bg-surface-container-high text-on-surface-variant flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+</button>
+</div>
+</div>
+<!-- Main 12-Column Dashboard Grid matching Panze Master Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT COLUMN: Tugas Hari Ini & Tiket QC (Span 3) -->
+<div class="lg:col-span-3 bg-surface-white rounded-3xl p-space-md sm:p-space-lg shadow-sm space-y-space-md">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Tugas Tim &amp; QC</h2>
+<button class="w-8 h-8 rounded-full bg-canvas-bg hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">add</span>
+</button>
+</div>
+<!-- Pill Task Switchers -->
+<div class="flex items-center gap-1.5">
+<button class="px-3 py-1 rounded-full font-label-md text-label-md bg-primary text-on-primary shadow-sm" type="button">Hari Ini</button>
+<button class="px-3 py-1 rounded-full font-label-md text-label-md bg-canvas-bg text-on-surface-variant hover:text-on-surface transition-colors" type="button">Besok</button>
+</div>
+<!-- Task Dropdown / Counter Pill -->
+<div class="flex items-center justify-between px-3 py-2 bg-canvas-bg rounded-2xl">
+<div class="flex items-center gap-2">
+<span class="w-5 h-5 rounded-full bg-primary text-on-primary font-label-sm text-[10px] flex items-center justify-center">8</span>
+<span class="font-label-md text-label-md text-on-surface">Tugas Sedang Berjalan</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px]">expand_more</span>
+</div>
+<!-- Task Stack with pastel fills from reference image -->
+<div class="space-y-space-sm">
+<!-- Card 1: Affiliator (Warm Peach / Orange) -->
+<div class="p-3.5 bg-status-orange-fill rounded-2xl flex flex-col gap-2 transition-transform hover:-translate-y-0.5 duration-200">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-xl bg-status-orange-text/10 text-status-orange-text flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">live_tv</span>
+</div>
+<div>
+<span class="font-label-lg text-label-lg text-on-surface leading-snug block">Affiliator Live TikTok</span>
+<span class="font-label-sm text-label-sm text-status-orange-text">Prioritas Tinggi</span>
+</div>
+</div>
+<button class="w-6 h-6 rounded-full bg-surface-white/80 text-status-orange-text flex items-center justify-center hover:bg-surface-white" type="button">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</button>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Monitoring 14 host sesi sore jam 16:00 - 21:00 WIB &amp; pastikan link flash-sale aktif.</p>
+<div class="flex items-center justify-between text-label-sm text-on-surface-variant pt-1">
+<span class="flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-[13px]">schedule</span> 15:45 WIB</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-white/90 text-on-surface font-label-sm">4 Host On Air</span>
+</div>
+</div>
+<!-- Card 2: MCN Bind (Soft Blue) -->
+<div class="p-3.5 bg-status-blue-fill rounded-2xl flex flex-col gap-2 transition-transform hover:-translate-y-0.5 duration-200">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-xl bg-status-blue-text/10 text-status-blue-text flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">link</span>
+</div>
+<div>
+<span class="font-label-lg text-label-lg text-on-surface leading-snug block">MCN Bind Kreator Baru</span>
+<span class="font-label-sm text-label-sm text-status-blue-text">Review Dokumen</span>
+</div>
+</div>
+<button class="w-6 h-6 rounded-full bg-surface-white/80 text-status-blue-text flex items-center justify-center hover:bg-surface-white" type="button">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</button>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Otorisasi 6 akun kreator beauty &amp; skincare masuk kontrak TikTok Partner.</p>
+<div class="flex items-center justify-between text-label-sm text-on-surface-variant pt-1">
+<span class="flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-[13px]">person_check</span> PIC: Dimas M.</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-white/90 text-on-surface font-label-sm">Sisa 2</span>
+</div>
+</div>
+<!-- Card 3: Rekap GMV Partner Center (Soft Purple) -->
+<div class="p-3.5 bg-status-purple-fill rounded-2xl flex flex-col gap-2 transition-transform hover:-translate-y-0.5 duration-200">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-xl bg-status-purple-text/10 text-status-purple-text flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">query_stats</span>
+</div>
+<div>
+<span class="font-label-lg text-label-lg text-on-surface leading-snug block">Sinkronisasi TAP Center</span>
+<span class="font-label-sm text-label-sm text-status-purple-text">Finance &amp; GMV</span>
+</div>
+</div>
+<button class="w-6 h-6 rounded-full bg-surface-white/80 text-status-purple-text flex items-center justify-center hover:bg-surface-white" type="button">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</button>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Rekonsiliasi data GMV dashboard vs invoice real-time TikTok Ads Agency.</p>
+<div class="flex items-center justify-between text-label-sm text-on-surface-variant pt-1">
+<span class="flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-[13px]">hourglass_bottom</span> Deadline: 18:00</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-white/90 text-status-green-text font-label-sm">Cocok</span>
+</div>
+</div>
+<!-- Card 4: QC Tiket Konten (Soft Green) -->
+<div class="p-3.5 bg-status-green-fill rounded-2xl flex flex-col gap-2 transition-transform hover:-translate-y-0.5 duration-200">
+<div class="flex items-start justify-between">
+<div class="flex items-center gap-2">
+<div class="w-7 h-7 rounded-xl bg-status-green-text/10 text-status-green-text flex items-center justify-center">
+<span class="material-symbols-outlined text-[16px]">fact_check</span>
+</div>
+<div>
+<span class="font-label-lg text-label-lg text-on-surface leading-snug block">QC Tiket Konten FYP</span>
+<span class="font-label-sm text-label-sm text-status-green-text">SOP GRD</span>
+</div>
+</div>
+<button class="w-6 h-6 rounded-full bg-surface-white/80 text-status-green-text flex items-center justify-center hover:bg-surface-white" type="button">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</button>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Verifikasi 12 video batch Ramadan sebelum jadwal posting jam 17:15.</p>
+<div class="flex items-center justify-between text-label-sm text-on-surface-variant pt-1">
+<span class="flex items-center gap-1 font-medium"><span class="material-symbols-outlined text-[13px]">check_circle</span> 9 Disetujui</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-white/90 text-on-surface font-label-sm">3 Revisi</span>
+</div>
+</div>
+</div>
+</div>
+<!-- MIDDLE COLUMN: GMV Analytics & Horizontal Bars (Span 6) -->
+<div class="lg:col-span-6 space-y-space-lg">
+<!-- Dual Top Cards (Donut Target + Line Chart) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
+<!-- Donut Card: Target GMV Bulan Ini -->
+<div class="bg-surface-white rounded-3xl p-space-md sm:p-space-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Target GMV Bulan Ini</h3>
+<button class="w-7 h-7 rounded-full bg-canvas-bg hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">north_east</span>
+</button>
+</div>
+<!-- Circular Chart Visualization -->
+<div class="relative flex items-center justify-center my-4">
+<svg class="w-36 h-36 -rotate-90 transform" viewbox="0 0 120 120">
+<!-- Background ring -->
+<circle class="text-canvas-bg" cx="60" cy="60" fill="none" r="48" stroke="currentColor" stroke-width="12"></circle>
+<!-- Affiliator: 36% (orange) -->
+<circle cx="60" cy="60" fill="none" r="48" stroke="#C2410C" stroke-dasharray="301.59" stroke-dashoffset="193" stroke-linecap="round" stroke-width="12"></circle>
+<!-- MCN: 22% (blue) -->
+<circle class="rotate-[130deg] origin-center" cx="60" cy="60" fill="none" r="48" stroke="#0051d5" stroke-dasharray="301.59" stroke-dashoffset="235" stroke-linecap="round" stroke-width="12"></circle>
+<!-- TAP: 10% (green) -->
+<circle class="rotate-[210deg] origin-center" cx="60" cy="60" fill="none" r="48" stroke="#10B981" stroke-dasharray="301.59" stroke-dashoffset="271" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="font-metric-value text-metric-value text-on-surface">68%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Tercapai</span>
+</div>
+</div>
+<!-- Targets Legend & Stats -->
+<div class="space-y-1.5 pt-2">
+<div class="flex items-center justify-between text-label-sm">
+<span class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="w-2.5 h-2.5 rounded-full bg-status-orange-text"></span> Affiliator: Rp 306 Jt
+              </span>
+<span class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span> MCN: Rp 187 Jt
+              </span>
+</div>
+<div class="flex items-center justify-between text-label-sm">
+<span class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="w-2.5 h-2.5 rounded-full bg-status-green-badge"></span> TAP: Rp 85 Jt
+              </span>
+<span class="font-medium text-on-surface">Sisa: 12 Hari</span>
+</div>
+</div>
+</div>
+<!-- Line Chart Card: Tren GMV Harian vs Kemarin -->
+<div class="bg-surface-white rounded-3xl p-space-md sm:p-space-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Tren GMV Harian</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Hari ini vs Kemarin</p>
+</div>
+<div class="flex items-center gap-1">
+<button class="w-7 h-7 rounded-full bg-canvas-bg hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">tune</span>
+</button>
+<button class="w-7 h-7 rounded-full bg-canvas-bg hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">north_east</span>
+</button>
+</div>
+</div>
+<!-- Panze Soft Floating Metric Badge -->
+<div class="flex justify-end my-1">
+<div class="inline-flex flex-col bg-surface-white px-3 py-1.5 rounded-2xl shadow-sm border border-border-subtle">
+<div class="flex items-center gap-1.5 text-label-sm">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="text-on-surface-variant">Hari Ini:</span>
+<span class="font-bold text-on-surface">Rp 34,2 Jt</span>
+</div>
+<div class="flex items-center gap-1.5 text-label-sm">
+<span class="w-2 h-2 rounded-full bg-status-orange-text"></span>
+<span class="text-on-surface-variant">Kemarin:</span>
+<span class="font-medium text-on-surface">Rp 28,9 Jt</span>
+</div>
+</div>
+</div>
+<!-- Wavy Curve Vector Chart -->
+<div class="h-28 w-full mt-2">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 260 90">
+<defs>
+<lineargradient id="gradientPrimary" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#0051d5" stop-opacity="0.22"></stop>
+<stop offset="100%" stop-color="#0051d5" stop-opacity="0.0"></stop>
+</lineargradient>
+<lineargradient id="gradientSecondary" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#C2410C" stop-opacity="0.15"></stop>
+<stop offset="100%" stop-color="#C2410C" stop-opacity="0.0"></stop>
+</lineargradient>
+</defs>
+<!-- Yesterday Area & Line -->
+<path d="M0,70 Q40,65 70,75 T140,55 T200,68 T260,60 L260,90 L0,90 Z" fill="url(#gradientSecondary)"></path>
+<path d="M0,70 Q40,65 70,75 T140,55 T200,68 T260,60" fill="none" stroke="#C2410C" stroke-dasharray="3,3" stroke-linecap="round" stroke-width="2"></path>
+<!-- Today Area & Line -->
+<path d="M0,58 Q35,28 75,45 T145,22 T205,38 T260,18 L260,90 L0,90 Z" fill="url(#gradientPrimary)"></path>
+<path d="M0,58 Q35,28 75,45 T145,22 T205,38 T260,18" fill="none" stroke="#0051d5" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- Active Day Focus Marker -->
+<line stroke="#76777d" stroke-dasharray="2,2" stroke-width="1" x1="170" x2="170" y1="10" y2="85"></line>
+<circle class="shadow-sm" cx="170" cy="30" fill="#0051d5" r="4"></circle>
+</svg>
+</div>
+<!-- Time axis labels -->
+<div class="flex justify-between text-label-sm text-outline px-1 pt-1">
+<span>08:00</span>
+<span>11:00</span>
+<span>14:00</span>
+<span>17:00</span>
+<span>20:00</span>
+<span>23:00</span>
+</div>
+</div>
+</div>
+<!-- BOTTOM WIDE CARD: GMV vs Target per Unit (Panze Invoice Overview Style) -->
+<div class="bg-surface-white rounded-3xl p-space-md sm:p-space-lg shadow-sm space-y-space-md">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">GMV vs Target per Unit Hari Ini</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Realisasi omzet per lini bisnis Al-Kahfi Corp sampai pukul 17:00 WIB</p>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md px-3 py-1 bg-status-green-fill text-status-green-text rounded-full">Total: Rp 34,2 / 37,5 Jt</span>
+<button class="w-8 h-8 rounded-full bg-canvas-bg hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">tune</span>
+</button>
+</div>
+</div>
+<div class="space-y-space-md pt-2">
+<!-- Row 1: Affiliator (Hijau / 92%) -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-status-green-badge"></span>
+<span class="font-label-lg text-label-lg text-on-surface">Affiliator Network</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">(14 Kreator On-Air)</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-label-md text-label-md text-on-surface">Rp 18,4 Jt <span class="text-on-surface-variant font-normal">/ Rp 20,0 Jt</span></span>
+<span class="font-label-md text-label-md text-status-green-text font-bold">92%</span>
+</div>
+</div>
+<div class="h-3.5 w-full bg-canvas-bg rounded-full overflow-hidden flex">
+<div class="bg-status-green-badge h-full rounded-full transition-all duration-700" style="width: 92%"></div>
+</div>
+</div>
+<!-- Row 2: MCN & MMC (Biru / 89.6%) -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary"></span>
+<span class="font-label-lg text-label-lg text-on-surface">MCN (incl. MMC Multi-Channel)</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">(8 Akun Terverifikasi)</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-label-md text-label-md text-on-surface">Rp 11,2 Jt <span class="text-on-surface-variant font-normal">/ Rp 12,5 Jt</span></span>
+<span class="font-label-md text-label-md text-secondary font-bold">89.6%</span>
+</div>
+</div>
+<div class="h-3.5 w-full bg-canvas-bg rounded-full overflow-hidden flex">
+<div class="bg-secondary h-full rounded-full transition-all duration-700" style="width: 89.6%"></div>
+</div>
+</div>
+<!-- Row 3: TAP (Ungu / 92%) -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-status-purple-text"></span>
+<span class="font-label-lg text-label-lg text-on-surface">TAP (TikTok Agency Partner)</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">(Brand Ads Campaign)</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-label-md text-label-md text-on-surface">Rp 4,6 Jt <span class="text-on-surface-variant font-normal">/ Rp 5,0 Jt</span></span>
+<span class="font-label-md text-label-md text-status-purple-text font-bold">92%</span>
+</div>
+</div>
+<div class="h-3.5 w-full bg-canvas-bg rounded-full overflow-hidden flex">
+<div class="bg-status-purple-text h-full rounded-full transition-all duration-700" style="width: 92%"></div>
+</div>
+</div>
+<!-- Row 4: Toko Fisik & Reseller (Orange / 78%) -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-status-orange-text"></span>
+<span class="font-label-lg text-label-lg text-on-surface">Grosir &amp; Direct Offline</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">(Store Fulfillment)</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="font-label-md text-label-md text-on-surface">Rp 3,9 Jt <span class="text-on-surface-variant font-normal">/ Rp 5,0 Jt</span></span>
+<span class="font-label-md text-label-md text-status-orange-text font-bold">78%</span>
+</div>
+</div>
+<div class="h-3.5 w-full bg-canvas-bg rounded-full overflow-hidden flex">
+<div class="bg-status-orange-text h-full rounded-full transition-all duration-700" style="width: 78%"></div>
+</div>
+</div>
+</div>
+<!-- Quick Summary Micro Pills Footer -->
+<div class="pt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border-subtle/50">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Update Otomatis: Tiap 15 Menit</span>
+<span class="w-1.5 h-1.5 rounded-full bg-status-green-badge animate-ping"></span>
+</div>
+<button class="font-label-md text-label-md text-secondary hover:underline flex items-center gap-1" type="button">
+            Lihat Rekapitulasi Lengkap <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN: Agenda, Kehadiran, & Tiket Support (Span 3) -->
+<div class="lg:col-span-3 space-y-space-lg">
+<!-- Widget 1: Agenda & Evaluasi Harian (Panze My Meetings Style) -->
+<div class="bg-surface-white rounded-3xl p-space-md sm:p-space-lg shadow-sm space-y-space-md">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Agenda &amp; Evaluasi</h2>
+<button class="w-8 h-8 rounded-full bg-canvas-bg hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">calendar_month</span>
+</button>
+</div>
+<div class="space-y-space-sm">
+<!-- Meeting 1 -->
+<div class="p-3 bg-canvas-bg/80 rounded-2xl flex items-center justify-between hover:bg-canvas-bg transition-colors">
+<div class="space-y-0.5">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider block">Standup Tim</span>
+<span class="font-label-lg text-label-lg text-on-surface block">Daily Evaluation Sales</span>
+<div class="flex items-center gap-1.5 text-label-sm text-on-surface-variant pt-1">
+<span class="material-symbols-outlined text-secondary text-[16px]">video_camera_front</span>
+<span>09:00 - Google Meet</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px]">north_east</span>
+</div>
+<!-- Meeting 2 -->
+<div class="p-3 bg-canvas-bg/80 rounded-2xl flex items-center justify-between hover:bg-canvas-bg transition-colors">
+<div class="space-y-0.5">
+<span class="font-label-sm text-label-sm text-outline uppercase tracking-wider block">Review Manager</span>
+<span class="font-label-lg text-label-lg text-on-surface block">Matriks WRM &amp; GMV Gap</span>
+<div class="flex items-center gap-1.5 text-label-sm text-on-surface-variant pt-1">
+<span class="material-symbols-outlined text-status-orange-text text-[16px]">meeting_room</span>
+<span>16:30 - Ruang Al-Fatih</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px]">north_east</span>
+</div>
+</div>
+<button class="w-full text-center font-label-md text-label-md text-on-surface-variant hover:text-on-surface py-1" type="button">
+          Lihat Semua Jadwal →
+        </button>
+</div>
+<!-- Widget 2: Status Kehadiran & Laporan Tim (Open Tickets Style) -->
+<div class="bg-surface-white rounded-3xl p-space-md sm:p-space-lg shadow-sm space-y-space-md">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Kehadiran &amp; Laporan</h2>
+<p class="font-label-sm text-label-sm text-on-surface-variant">22 dari 25 staf telah check-in</p>
+</div>
+<button class="w-8 h-8 rounded-full bg-canvas-bg hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors" type="button">
+<span class="material-symbols-outlined text-[18px]">group</span>
+</button>
+</div>
+<!-- Attendance mini-bars -->
+<div class="flex items-center gap-2 p-3 bg-surface-container-low/60 rounded-2xl">
+<div class="flex-1">
+<div class="flex justify-between font-label-sm text-label-sm mb-1">
+<span>Absensi Masuk</span>
+<span class="font-bold text-status-green-text">88%</span>
+</div>
+<div class="h-2 w-full bg-surface-white rounded-full overflow-hidden">
+<div class="bg-status-green-badge h-full rounded-full" style="width: 88%"></div>
+</div>
+</div>
+<div class="w-px h-8 bg-border-subtle"></div>
+<div class="flex-1">
+<div class="flex justify-between font-label-sm text-label-sm mb-1">
+<span>Laporan GMV</span>
+<span class="font-bold text-status-orange-text">72%</span>
+</div>
+<div class="h-2 w-full bg-surface-white rounded-full overflow-hidden">
+<div class="bg-status-orange-text h-full rounded-full" style="width: 72%"></div>
+</div>
+</div>
+</div>
+<!-- Member items needing action -->
+<div class="space-y-space-sm">
+<!-- Member 1 -->
+<div class="p-3 bg-canvas-bg/60 rounded-2xl flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="Close up professional portrait of a young Indonesian male creative content specialist wearing clean shirt with soft modern studio backdrop" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPgxRBnfFKGYiq8t-zEC-Ub8LbTY39LBEy16gQg4Zkt5ZSokpkD4tZUZx7KxvwyyhDBKmgwxJVS3xvyuVM5E7zqW4Oov4or6bjrKzL9LViEqnxQW-Ngvc0ELUqbokLlwrvy2DfEAauHGdVAlL2prYnYwBICU9X2R1gXxlmc9zBXQPswjUbJgj8LWjXAyMPUF3NRKkSpGtz569Hd3xbL6no_pmDIF3BtAD9EanuNUhafpnFFRN3rQRP"/>
+<div>
+<span class="font-label-lg text-label-lg text-on-surface block leading-tight">Rian Hidayat</span>
+<span class="font-label-sm text-label-sm text-status-orange-text">Belum kirim laporan GMV</span>
+</div>
+</div>
+<button class="px-2.5 py-1 rounded-full bg-surface-white text-on-surface text-label-sm hover:bg-primary hover:text-on-primary shadow-sm transition-colors" type="button">
+              Ingatkan
+            </button>
+</div>
+<!-- Member 2 -->
+<div class="p-3 bg-canvas-bg/60 rounded-2xl flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="Portrait photo of a young Indonesian female TikTok live streamer in neutral tone studio lighting wearing hijab with friendly expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0xOw7QdDw0DCR89UKM_EB1OvKCrbtVN5b1XVHAd8URWZOUJYR7s7Na5NW_rk_0LIRb_OegDGHjvF9tGOaLS8hQ8zMim4TUbPQjtgkRrfKFSGcBuBv7uZgIWWg5MhCQN6eeOVST1zyej3o7Fggbvj22s2YHD7oLpnW0puAHNZoil9mfUxr2HPzuKUS6slMlA1BgXOSWZB0aTIt5iMOxYfufon35KFcnYzPOO0pHIJAHukWlrALFfRh"/>
+<div>
+<span class="font-label-lg text-label-lg text-on-surface block leading-tight">Nabila Putri</span>
+<span class="font-label-sm text-label-sm text-status-red-text">Absen telat (Izin shift 2)</span>
+</div>
+</div>
+<button class="px-2.5 py-1 rounded-full bg-surface-white text-on-surface text-label-sm hover:bg-primary hover:text-on-primary shadow-sm transition-colors" type="button">
+              Cek
+            </button>
+</div>
+<!-- Member 3 -->
+<div class="p-3 bg-canvas-bg/60 rounded-2xl flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="Professional studio portrait of an Indonesian male digital media specialist wearing casual navy polo shirt" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHvets9Fuzxago3DCnd3nK0cIT1zpfAwFBw8Y39xvHso8QReLlQoHUt6pId7mjqOeSswb8RwCXnYkGcskZIZ24eEukRZToqgoxNB_SS0bT52hfPJkjQjunTsy7gIKm2-n2K86Dd_dnf1ofsCYGhusnZF0a1l-SPl8pG1c5ls0Ioi3XiFn0KEEwDjljSRSBk6MJXAciR_PJNfhtfdv-__ahGb3VTl-5wqE7olpgXDmCPiTvWotr8eXi"/>
+<div>
+<span class="font-label-lg text-label-lg text-on-surface block leading-tight">Bayu Nugraha</span>
+<span class="font-label-sm text-label-sm text-status-green-text">Laporan lengkap ✓</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-status-green-text text-[18px]">verified</span>
+</div>
+</div>
+</div>
+<!-- Widget 3: Pengumuman Manajemen Pekan Ini -->
+<div class="bg-primary text-on-primary rounded-3xl p-space-md sm:p-space-lg shadow-sm relative overflow-hidden">
+<div class="relative z-10 space-y-2">
+<div class="flex items-center justify-between">
+<span class="px-2.5 py-0.5 rounded-full bg-surface-white/20 text-on-primary font-label-sm tracking-wider uppercase">Info Operasional</span>
+<span class="material-symbols-outlined text-on-primary/60 text-[18px]">campaign</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-primary">Cutoff Partner Center</h3>
+<p class="font-body-sm text-body-sm text-on-primary/80">Penarikan komisi kreator MCN &amp; rekap GMV akhir pekan akan ditutup Jumat pukul 23:59 WIB. Pastikan tidak ada tiket tertunda.</p>
+<div class="pt-2">
+<button class="px-3.5 py-1.5 rounded-full bg-surface-white text-primary font-label-md text-label-md hover:bg-surface-container-high transition-colors" type="button">
+              Pelajari SOP Audit
+            </button>
+</div>
+</div>
+<!-- Decorative subtle gradient backdrop glow -->
+<div class="absolute -right-8 -bottom-8 w-32 h-32 rounded-full bg-secondary/30 blur-2xl pointer-events-none"></div>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Simple micro-interactions for pill tabs
+  document.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      if (this.parentElement && this.parentElement.classList.contains('bg-surface-white') && this.parentElement.classList.contains('rounded-full')) {
+        this.parentElement.querySelectorAll('button').forEach(b => {
+          b.classList.remove('bg-primary', 'text-on-primary');
+          b.classList.add('text-on-surface-variant');
+        });
+        this.classList.add('bg-primary', 'text-on-primary');
+        this.classList.remove('text-on-surface-variant');
+      }
+    });
+  });
+</script></main></div></body></html>

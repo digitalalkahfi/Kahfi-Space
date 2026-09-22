@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+
+<html lang="id"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><title>K-Space V2 - Al-Kahfi Corp</title><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"on-primary":"#ffffff","border-subtle":"#E2E8F0","inverse-surface":"#213145","tertiary-container":"#341100","tertiary":"#000000","on-secondary-fixed-variant":"#003ea8","on-surface-variant":"#45464d","secondary-container":"#316bf3","tertiary-fixed":"#ffdbca","on-primary-fixed-variant":"#3f465c","on-error-container":"#93000a","outline":"#76777d","on-tertiary-container":"#d95f00","surface-container-highest":"#d3e4fe","tertiary-fixed-dim":"#ffb690","on-error":"#ffffff","on-secondary":"#ffffff","on-primary-container":"#7c839b","on-background":"#0b1c30","canvas-bg":"#F4F5F9","background":"#f8f9ff","on-tertiary-fixed-variant":"#783200","primary":"#000000","secondary":"#0051d5","on-surface":"#0b1c30","surface-container-low":"#eff4ff","surface-container-high":"#dce9ff","inverse-primary":"#bec6e0","surface-container-lowest":"#ffffff","primary-fixed":"#dae2fd","on-tertiary":"#ffffff","on-secondary-fixed":"#00174b","surface-white":"#FFFFFF","status-green-badge":"#10B981","inverse-on-surface":"#eaf1ff","status-orange-text":"#C2410C","status-orange-fill":"#FFF7ED","primary-fixed-dim":"#bec6e0","status-green-fill":"#ECFDF5","surface-container":"#e5eeff","on-secondary-container":"#fefcff","status-blue-fill":"#EFF6FF","on-primary-fixed":"#131b2e","on-tertiary-fixed":"#341100","status-blue-text":"#1D4ED8","error-container":"#ffdad6","secondary-fixed-dim":"#b4c5ff","status-purple-text":"#7E22CE","primary-container":"#131b2e","surface":"#f8f9ff","surface-variant":"#d3e4fe","outline-variant":"#c6c6cd","surface-tint":"#565e74","status-red-text":"#B91C1C","status-red-badge":"#EF4444","surface-bright":"#f8f9ff","surface-dim":"#cbdbf5","status-red-fill":"#FEF2F2","error":"#ba1a1a","secondary-fixed":"#dbe1ff","status-green-text":"#047857","status-purple-fill":"#FAF5FF"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"gutter-desktop":"1.5rem","space-sm":"0.5rem","space-lg":"1.5rem","margin":"1rem","space-xl":"2rem","gutter":"1.25rem","space-xs":"0.25rem","space-md":"1rem","margin-desktop":"2rem","margin-tablet":"1.5rem"},"fontFamily":{"body-sm":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"label-lg":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"metric-value":["Plus Jakarta Sans"],"display":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"]},"fontSize":{"body-sm":["13px",{"lineHeight":"18px","fontWeight":"400"}],"headline-sm":["16px",{"lineHeight":"24px","fontWeight":"600"}],"label-lg":["13px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"600"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"headline-lg-mobile":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"700"}],"metric-value":["24px",{"lineHeight":"30px","letterSpacing":"-0.02em","fontWeight":"700"}],"display":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"600"}],"label-sm":["11px",{"lineHeight":"14px","fontWeight":"500"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-lg":["15px",{"lineHeight":"22px","fontWeight":"400"}]}}}};</script></head><body class="bg-canvas-bg font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-20 bg-surface-white z-50 flex flex-col items-center py-space-lg shadow-[0_1px_8px_rgba(0,0,0,0.04)] justify-between"><div class="flex flex-col items-center gap-space-lg"><div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-on-primary shadow-sm"><span class="material-symbols-outlined text-[20px]">hub</span></div><nav class="flex flex-col items-center gap-space-sm" data-active-classes="bg-primary text-on-primary shadow-sm"><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="beranda" href="#" title="Beranda"><span class="material-symbols-outlined text-[22px]">space_dashboard</span></a><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="absensi" href="#" title="Absensi"><span class="material-symbols-outlined text-[22px]">fingerprint</span></a><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="tugas" href="#" title="Tugas"><span class="material-symbols-outlined text-[22px]">check_circle</span></a><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="laporan-harian" href="#" title="Laporan Harian"><span class="material-symbols-outlined text-[22px]">trending_up</span></a><a aria-current="page" class="flex items-center justify-center w-11 h-11 rounded-full transition-all duration-200 bg-primary text-on-primary shadow-sm" data-path="grd" href="#" title="GRD"><span class="material-symbols-outlined text-[22px]">grid_view</span></a></nav></div><div class="flex flex-col items-center gap-space-sm"><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all duration-200" data-path="pengaturan" href="#" title="Pengaturan"><span class="material-symbols-outlined text-[22px]">settings</span></a><a class="flex items-center justify-center w-11 h-11 rounded-full text-on-surface-variant hover:bg-status-red-fill hover:text-status-red-text transition-all duration-200" data-path="keluar" href="#" title="Keluar"><span class="material-symbols-outlined text-[22px]">logout</span></a></div></aside><div class="pl-20"><header class="fixed top-0 left-20 right-0 h-16 bg-surface-white/90 backdrop-blur-xl z-40 shadow-[0_1px_8px_rgba(0,0,0,0.03)]"><div class="h-16 w-full px-space-lg flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><div class="flex items-center gap-space-sm pr-space-md"><img alt="K-Space V2 Brand Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WKmvH88VYAo8jHx2gNQWkTca1e4eGll31WpaH1aNWw4oUzjtpJCZyrleHuftBOqzjImm6nTLdMp4n059wmY6PURkWizBBurXxDKhxDhKQ2xb_SuVMB74Smk_UpfK5_VHRIVaTncViM3N7JreJTw2Gnr_Gh3DgAOgom2js8LJQ1HEk4fRLTaPfxyUirZyfgA5WXi64P5s5UbxwDGmr757DeNy0p0mGMIKubgTkNVUaNtLKX-vJWEaLyp5Y"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight tracking-tight">K-Space <span class="text-secondary font-bold">V2</span></span><span class="font-label-sm text-label-sm text-on-surface-variant tracking-wider uppercase">Al-Kahfi Corp</span></div></div><div class="hidden xl:flex items-center bg-canvas-bg p-1 rounded-full gap-1"><button class="px-3 py-1 rounded-full font-label-md text-label-md bg-primary text-on-primary shadow-sm" type="button">Hari Ini</button><button class="px-3 py-1 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">Minggu Ini</button><button class="px-3 py-1 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">Bulan Ini</button><button class="px-3 py-1 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors" type="button">Laporan</button></div></div><div class="flex items-center gap-space-md"><div class="relative hidden md:block"><span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">search</span><input class="w-64 lg:w-80 h-10 pl-9 pr-4 rounded-full bg-canvas-bg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-white focus:ring-2 focus:ring-secondary/20 transition-all duration-150" placeholder="Cari tiket, tugas, SOP, atau staf..." type="text"/></div><div class="flex items-center gap-space-xs"><button class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="Tambah Cepat" type="button"><span class="material-symbols-outlined text-[20px]">add</span></button><button class="relative w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-colors" title="Notifikasi" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-status-red-badge"></span></button></div><div class="h-7 w-[1px] bg-border-subtle hidden sm:block"></div><div class="flex items-center gap-space-sm pl-1"><div class="text-right hidden sm:block"><div class="font-label-lg text-label-lg text-on-surface leading-tight">Farhan Pratama</div><div class="font-label-sm text-label-sm text-on-surface-variant leading-tight">Manager Operasional</div></div><div class="relative ring-2 ring-border-subtle rounded-full"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmO0jCeETuJAQNSC-GUSMrzdZntJ0U78Iex_66FxgLxDYIMfVAdIrIk93eLdi7LbCWOZe8yRQEngZmJEvanEJ6Ml72qa9b5R9VJspZAn3nRaHe7MTq7yRyfU5umbVYfNJF4qhCB2C5DndawHkAedBeil7sHY5xD3vOC4F1H954hAz3N8PT6QU9-9yZYDa1LWLSo99ZoasVIXxHiJEC6kYCLS2Fawr7lUXzZqJ0Ldlo56KCgTQqJht8"/><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-status-green-badge ring-2 ring-surface-white"></span></div></div></div></div></header><main class="w-full pt-16 bg-canvas-bg min-h-screen"><div class="flex flex-col w-full">
+<div class="px-space-md md:px-space-lg lg:px-space-xl py-space-md flex flex-col gap-space-lg">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div>
+<div class="flex items-center gap-2">
+<span class="font-headline-lg text-headline-lg text-on-surface tracking-tight">GRD — Goal, Scoreboard &amp; KPI</span>
+<span class="bg-status-green-fill text-status-green-text font-label-sm text-label-sm px-2.5 py-0.5 rounded-full flex items-center gap-1.5 shadow-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-status-green-badge"></span>
+            Q1 2026 Aktif
+          </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">Roll-down target company ke Manager &amp; Leader, lead measure mingguan, dan evaluasi KPI skala 1.000 Al-Kahfi Corp</p>
+</div>
+<div class="flex items-center gap-space-sm self-start md:self-auto">
+<div class="bg-surface-white p-1 rounded-full flex items-center shadow-sm">
+<button class="px-3.5 py-1 rounded-full font-label-md text-label-md bg-primary text-on-primary shadow-sm transition-all duration-150" type="button">Minggu 11</button>
+<button class="px-3.5 py-1 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-all duration-150" type="button">Bulan Maret</button>
+<button class="px-3.5 py-1 rounded-full font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-all duration-150" type="button">Q1 Full</button>
+</div>
+<button class="flex items-center gap-1.5 px-4 py-2 rounded-full bg-surface-white hover:bg-surface-container-high text-on-surface font-label-md text-label-md shadow-sm transition-all duration-200" id="btn-snapshot" type="button">
+<span class="material-symbols-outlined text-[18px] text-secondary">lock</span>
+<span>Snapshot &amp; Kunci Bulan</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-space-md">
+<div class="bg-surface-white rounded-[24px] p-space-lg shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all duration-200">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Goal Company Q1 2026</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-metric-value text-metric-value text-on-surface">Rp 850 Jt</span>
+<span class="font-label-md text-label-md text-status-green-text font-semibold">Capaian 82%</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-full bg-surface-container-low flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[20px]">flag</span>
+</div>
+</div>
+<div class="mt-4 flex items-center gap-4">
+<div class="relative w-16 h-16 flex-shrink-0">
+<svg class="w-16 h-16 transform -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3.5"></path>
+<path class="text-secondary transition-all duration-500" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="82, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="font-label-md text-label-md text-on-surface font-bold">82%</span>
+</div>
+</div>
+<div class="flex-1 space-y-1">
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Base (Rp 750M)</span>
+<span class="text-status-green-text font-semibold">Tercapai</span>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-on-surface">Goal (Rp 850M)</span>
+<span class="text-secondary font-semibold">Rp 697 Jt</span>
+</div>
+<div class="flex justify-between font-label-sm text-label-sm">
+<span class="text-outline">Stretch (Rp 1.0M)</span>
+<span class="text-outline">Bobot 40%</span>
+</div>
+</div>
+</div>
+<div class="mt-4 pt-3 bg-surface-container-low -mx-space-lg -mb-space-lg px-space-lg py-2.5 flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Proyeksi Akhir Q1:</span>
+<span class="font-label-md text-label-md text-status-green-text font-bold">Rp 892.400.000 (Goal Tercapai)</span>
+</div>
+</div>
+<div class="bg-surface-white rounded-[24px] p-space-lg shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all duration-200">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">KPI Tim Rata-rata</span>
+<div class="flex items-baseline gap-2 mt-1">
+<span class="font-metric-value text-metric-value text-on-surface">842</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">/ 1.000 Skala</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-full bg-status-purple-fill flex items-center justify-center text-status-purple-text">
+<span class="material-symbols-outlined text-[20px]">military_tech</span>
+</div>
+</div>
+<div class="mt-4 flex items-center gap-3">
+<div class="bg-status-purple-fill text-status-purple-text px-3 py-1 rounded-full font-label-md text-label-md flex items-center gap-1.5 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-status-purple-text"></span>
+            Predikat: Istimewa (800 - 1.000)
+          </div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">+18 poin vs Feb</span>
+</div>
+<div class="mt-4">
+<div class="flex justify-between font-label-sm text-label-sm text-on-surface-variant mb-1.5">
+<span>Progress Pengisian Evaluasi</span>
+<span class="font-semibold text-on-surface">9 / 10 Anggota</span>
+</div>
+<div class="w-full bg-surface-container-high h-2.5 rounded-full overflow-hidden">
+<div class="bg-status-purple-text h-full rounded-full transition-all duration-300" style="width: 90%"></div>
+</div>
+</div>
+<div class="mt-4 pt-3 bg-surface-container-low -mx-space-lg -mb-space-lg px-space-lg py-2.5 flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Snapshot Terakhir:</span>
+<span class="font-label-md text-label-md text-on-surface font-medium">28 Feb 2026 • Farhan P.</span>
+</div>
+</div>
+<div class="bg-surface-white rounded-[24px] p-space-lg shadow-sm flex flex-col justify-between relative overflow-hidden group hover:shadow-md transition-all duration-200">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Laporan Mingguan (Matriks WRM)</span>
+<div class="flex items-center gap-2 mt-1">
+<span class="font-metric-value text-metric-value text-status-green-text">LANJUT</span>
+<span class="bg-status-green-fill text-status-green-text p-1 rounded-full flex items-center">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+</span>
+</div>
+</div>
+<div class="w-10 h-10 rounded-full bg-status-green-fill flex items-center justify-center text-status-green-text">
+<span class="material-symbols-outlined text-[20px]">sync</span>
+</div>
+</div>
+<div class="mt-3 grid grid-cols-2 gap-2">
+<div class="bg-status-green-fill/60 p-2.5 rounded-xl">
+<div class="font-label-sm text-label-sm text-on-surface-variant">Hasil GMV (Output)</div>
+<div class="font-label-md text-label-md text-status-green-text font-bold mt-0.5 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-status-green-badge"></span>
+              HIJAU (&gt;95%)
+            </div>
+</div>
+<div class="bg-status-green-fill/60 p-2.5 rounded-xl">
+<div class="font-label-sm text-label-sm text-on-surface-variant">KRI Lead Indicator</div>
+<div class="font-label-md text-label-md text-status-green-text font-bold mt-0.5 flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-status-green-badge"></span>
+              HIJAU (&gt;90%)
+            </div>
+</div>
+</div>
+<div class="mt-3 flex items-center justify-between text-on-surface font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Status Merah Beruntun:</span>
+<span class="bg-surface-container-high px-2.5 py-0.5 rounded-full font-label-md text-label-md font-semibold text-on-surface">0 Minggu Aman</span>
+</div>
+<div class="mt-4 pt-3 bg-surface-container-low -mx-space-lg -mb-space-lg px-space-lg py-2.5 flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Arahan Strategi:</span>
+<span class="font-label-md text-label-md text-status-green-text font-bold">Scale-up Budget Ad &amp; Talent</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md items-start">
+<div class="lg:col-span-5 bg-surface-white rounded-[24px] p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[18px]">account_tree</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Anak Tangga Bulanan</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Roll-down breakdown target tim</p>
+</div>
+</div>
+<span class="bg-status-blue-fill text-status-blue-text font-label-sm text-label-sm px-2.5 py-1 rounded-full font-semibold">Total Rp 850 Jt</span>
+</div>
+<div class="bg-surface-container-low rounded-2xl p-space-md flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-7 h-7 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-sm text-label-sm font-bold">M</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Manager Operasional</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Farhan Pratama</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-label-md text-label-md text-on-surface font-bold">Rp 850.000.000</div>
+<span class="font-label-sm text-label-sm text-status-green-text">100% Target Divisi</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-2.5 pl-3 border-l-2 border-surface-container-high ml-4">
+<div class="bg-surface-white hover:bg-surface-container-low transition-colors duration-150 p-space-sm rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-status-orange-fill text-status-orange-text flex items-center justify-center font-label-md text-label-md font-bold">L1</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Leader Affiliator</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">3 Akun Utama Live TikTok</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-label-md text-label-md text-on-surface font-bold">Rp 450 Jt</div>
+<div class="font-label-sm text-label-sm text-status-green-text font-medium">84.2% Capaian</div>
+</div>
+</div>
+<div class="bg-surface-white hover:bg-surface-container-low transition-colors duration-150 p-space-sm rounded-xl shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-status-blue-fill text-status-blue-text flex items-center justify-center font-label-md text-label-md font-bold">L2</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Leader MCN (Multi-Channel)</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Kreator Binds MMC Al-Kahfi</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-label-md text-label-md text-on-surface font-bold">Rp 280 Jt</div>
+<div class="font-label-sm text-label-sm text-status-green-text font-medium">78.5% Capaian</div>
+</div>
+</div>
+<div class="bg-surface-white hover:bg-surface-container-low transition-colors duration-150 p-space-sm rounded-xl border border-border-subtle/40 shadow-sm flex items-center justify-between">
+<div class="flex items-center gap-2.5">
+<div class="w-8 h-8 rounded-full bg-status-purple-fill text-status-purple-text flex items-center justify-center font-label-md text-label-md font-bold">L3</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface">Leader TAP (Traffic Ads Paid)</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Meta Ads &amp; TikTok GMV Max</div>
+</div>
+</div>
+<div class="text-right">
+<div class="font-label-md text-label-md text-on-surface font-bold">Rp 120 Jt</div>
+<div class="font-label-sm text-label-sm text-status-green-text font-medium">89.1% Capaian</div>
+</div>
+</div>
+</div>
+<div class="bg-status-orange-fill/60 p-3 rounded-2xl flex items-center gap-2.5 text-status-orange-text">
+<span class="material-symbols-outlined text-[20px] flex-shrink-0">verified_user</span>
+<span class="font-label-sm text-label-sm leading-tight">Audit Log: Target disahkan oleh CEO pada 02 Jan 2026. Penyesuaian angka membutuhkan approval formal.</span>
+</div>
+</div>
+<div class="lg:col-span-7 bg-surface-white rounded-[24px] p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[18px]">scoreboard</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Papan Skor Lead Measure Mingguan</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Metrik penentu hasil GMV (Lead vs Lag)</p>
+</div>
+</div>
+<span class="bg-status-green-fill text-status-green-text font-label-sm text-label-sm px-3 py-1 rounded-full font-semibold self-start sm:self-auto">94% Lead Compliance</span>
+</div>
+<div class="grid grid-cols-1 gap-space-md mt-1">
+<div class="bg-status-blue-fill/40 rounded-2xl p-4 flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-status-blue-text"></span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Durasi Live Stream TikTok</span>
+<span class="bg-status-blue-fill text-status-blue-text font-label-sm text-label-sm px-2 py-0.5 rounded-full">Affiliator Lead</span>
+</div>
+<div class="font-label-md text-label-md text-on-surface font-bold">38 <span class="font-label-sm text-label-sm text-on-surface-variant font-normal">/ 40 Jam (95%)</span></div>
+</div>
+<div class="w-full bg-surface-white h-3 rounded-full overflow-hidden p-0.5">
+<div class="bg-status-blue-text h-full rounded-full transition-all duration-300" style="width: 95%"></div>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>Host 1: 14 Jam • Host 2: 13 Jam • Host 3: 11 Jam</span>
+<span class="text-status-green-text font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span> Sisa 2 Jam
+              </span>
+</div>
+</div>
+<div class="bg-status-purple-fill/40 rounded-2xl p-4 flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-status-purple-text"></span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Creator Binding MMC Al-Kahfi</span>
+<span class="bg-status-purple-fill text-status-purple-text font-label-sm text-label-sm px-2 py-0.5 rounded-full">MCN Lead</span>
+</div>
+<div class="font-label-md text-label-md text-on-surface font-bold">14 <span class="font-label-sm text-label-sm text-on-surface-variant font-normal">/ 15 Akun (93%)</span></div>
+</div>
+<div class="w-full bg-surface-white h-3 rounded-full overflow-hidden p-0.5">
+<div class="bg-status-purple-text h-full rounded-full transition-all duration-300" style="width: 93%"></div>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>Target kreator tier Nano &amp; Micro terverifikasi</span>
+<span class="text-status-green-text font-semibold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">done</span> Sisa 1 Binding
+              </span>
+</div>
+</div>
+<div class="bg-status-orange-fill/40 rounded-2xl p-4 flex flex-col gap-2.5">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="w-2.5 h-2.5 rounded-full bg-status-orange-text"></span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Video Affiliate &amp; UGC Diunggah</span>
+<span class="bg-status-orange-fill text-status-orange-text font-label-sm text-label-sm px-2 py-0.5 rounded-full">Content Lead</span>
+</div>
+<div class="font-label-md text-label-md text-on-surface font-bold">185 <span class="font-label-sm text-label-sm text-on-surface-variant font-normal">/ 200 Video (92.5%)</span></div>
+</div>
+<div class="w-full bg-surface-white h-3 rounded-full overflow-hidden p-0.5">
+<div class="bg-status-orange-text h-full rounded-full transition-all duration-300" style="width: 92.5%"></div>
+</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>Rata-rata 26 video FYP / hari across akun korporat</span>
+<span class="text-status-orange-text font-semibold">Sisa 15 Video (2 hari)</span>
+</div>
+</div>
+</div>
+<div class="flex items-center justify-between pt-2">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Ritme Evaluasi WRM:</span>
+<span class="font-label-sm text-label-sm text-on-surface font-semibold">Setiap Hari Senin pk. 09.00 WIB</span>
+</div>
+<button class="text-secondary font-label-md text-label-md hover:underline flex items-center gap-1" type="button">
+<span>Buka Kalender WRM</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<div class="bg-surface-white rounded-[24px] p-space-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[18px]">table_chart</span>
+</div>
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Scorecard KPI per Jabatan (Skala 1.000)</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Matriks penilaian individual: Base (100%), Goal (120%), Stretch (150%)</p>
+</div>
+</div>
+<div class="flex items-center gap-2 self-end sm:self-auto">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Tampilkan:</span>
+<div class="bg-canvas-bg p-1 rounded-full flex items-center">
+<button class="px-3 py-0.5 rounded-full font-label-sm text-label-sm bg-primary text-on-primary" type="button">Semua</button>
+<button class="px-3 py-0.5 rounded-full font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface" type="button">Leader</button>
+<button class="px-3 py-0.5 rounded-full font-label-sm text-label-sm text-on-surface-variant hover:text-on-surface" type="button">Staff</button>
+</div>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-sm text-body-sm">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-md text-label-md rounded-xl">
+<th class="py-3 px-4 rounded-l-xl">Nama &amp; Jabatan</th>
+<th class="py-3 px-3">Divisi</th>
+<th class="py-3 px-3">Target Base / Goal</th>
+<th class="py-3 px-3">Bobot</th>
+<th class="py-3 px-3">Capaian Aktual</th>
+<th class="py-3 px-3">Skor (1.000)</th>
+<th class="py-3 px-4 rounded-r-xl">Predikat WRM</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-border-subtle/40 font-body-sm text-body-sm">
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-status-blue-fill text-status-blue-text font-bold flex items-center justify-center">AS</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface font-semibold">Anisa Safitri</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Host Affiliate Senior</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-3">
+<span class="bg-surface-container-high px-2.5 py-1 rounded-full font-label-sm text-label-sm text-on-surface">Affiliate TikTok</span>
+</td>
+<td class="py-3.5 px-3">
+<div class="text-on-surface font-medium">Rp 150 Jt / Rp 180 Jt</div>
+<div class="text-on-surface-variant font-label-sm text-label-sm">Stretch: Rp 220 Jt</div>
+</td>
+<td class="py-3.5 px-3 font-semibold text-on-surface">35%</td>
+<td class="py-3.5 px-3">
+<div class="text-status-green-text font-semibold">Rp 164.200.000</div>
+<div class="text-on-surface-variant font-label-sm text-label-sm">109% dari Base</div>
+</td>
+<td class="py-3.5 px-3">
+<span class="font-metric-value text-[18px] text-on-surface font-bold">890</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">/ 1000</span>
+</td>
+<td class="py-3.5 px-4">
+<span class="bg-status-green-fill text-status-green-text font-label-sm text-label-sm px-3 py-1 rounded-full font-semibold flex items-center gap-1.5 w-max">
+<span class="w-1.5 h-1.5 rounded-full bg-status-green-badge"></span>
+                  LANJUT (Istimewa)
+                </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-status-purple-fill text-status-purple-text font-bold flex items-center justify-center">RM</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface font-semibold">Rian Maulana</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Leader Multi-Channel Network</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-3">
+<span class="bg-surface-container-high px-2.5 py-1 rounded-full font-label-sm text-label-sm text-on-surface">MCN Agency</span>
+</td>
+<td class="py-3.5 px-3">
+<div class="text-on-surface font-medium">Rp 250 Jt / Rp 280 Jt</div>
+<div class="text-on-surface-variant font-label-sm text-label-sm">Stretch: Rp 320 Jt</div>
+</td>
+<td class="py-3.5 px-3 font-semibold text-on-surface">40%</td>
+<td class="py-3.5 px-3">
+<div class="text-status-blue-text font-semibold">Rp 248.500.000</div>
+<div class="text-on-surface-variant font-label-sm text-label-sm">99.4% dari Base</div>
+</td>
+<td class="py-3.5 px-3">
+<span class="font-metric-value text-[18px] text-on-surface font-bold">810</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">/ 1000</span>
+</td>
+<td class="py-3.5 px-4">
+<span class="bg-status-green-fill text-status-green-text font-label-sm text-label-sm px-3 py-1 rounded-full font-semibold flex items-center gap-1.5 w-max">
+<span class="w-1.5 h-1.5 rounded-full bg-status-green-badge"></span>
+                  LANJUT (Baik)
+                </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-status-orange-fill text-status-orange-text font-bold flex items-center justify-center">DA</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface font-semibold">Dinda Ayu</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Leader Paid Traffic &amp; Ads</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-3">
+<span class="bg-surface-container-high px-2.5 py-1 rounded-full font-label-sm text-label-sm text-on-surface">Traffic Paid</span>
+</td>
+<td class="py-3.5 px-3">
+<div class="text-on-surface font-medium">Rp 100 Jt / Rp 120 Jt</div>
+<div class="text-on-surface-variant font-label-sm text-label-sm">Stretch: Rp 150 Jt</div>
+</td>
+<td class="py-3.5 px-3 font-semibold text-on-surface">30%</td>
+<td class="py-3.5 px-3">
+<div class="text-status-green-text font-semibold">Rp 118.000.000</div>
+<div class="text-on-surface-variant font-label-sm text-label-sm">118% dari Base</div>
+</td>
+<td class="py-3.5 px-3">
+<span class="font-metric-value text-[18px] text-on-surface font-bold">865</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">/ 1000</span>
+</td>
+<td class="py-3.5 px-4">
+<span class="bg-status-green-fill text-status-green-text font-label-sm text-label-sm px-3 py-1 rounded-full font-semibold flex items-center gap-1.5 w-max">
+<span class="w-1.5 h-1.5 rounded-full bg-status-green-badge"></span>
+                  LANJUT (Istimewa)
+                </span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-3.5 px-4">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-surface-container-high text-on-surface-variant font-bold flex items-center justify-center">BP</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface font-semibold">Bagas Pamungkas</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Junior Content Creator</div>
+</div>
+</div>
+</td>
+<td class="py-3.5 px-3">
+<span class="bg-surface-container-high px-2.5 py-1 rounded-full font-label-sm text-label-sm text-on-surface">Affiliate Content</span>
+</td>
+<td class="py-3.5 px-3">
+<div class="text-on-surface font-medium">Rp 60 Jt / Rp 80 Jt</div>
+<div class="text-on-surface-variant font-label-sm text-label-sm">Stretch: Rp 100 Jt</div>
+</td>
+<td class="py-3.5 px-3 font-semibold text-on-surface">25%</td>
+<td class="py-3.5 px-3">
+<div class="text-status-orange-text font-semibold">Rp 52.100.000</div>
+<div class="text-on-surface-variant font-label-sm text-label-sm">86.8% dari Base</div>
+</td>
+<td class="py-3.5 px-3">
+<span class="font-metric-value text-[18px] text-status-orange-text font-bold">715</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm">/ 1000</span>
+</td>
+<td class="py-3.5 px-4">
+<span class="bg-status-orange-fill text-status-orange-text font-label-sm text-label-sm px-3 py-1 rounded-full font-semibold flex items-center gap-1.5 w-max">
+<span class="w-1.5 h-1.5 rounded-full bg-status-orange-text"></span>
+                  SABAR (Evaluasi)
+                </span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="flex flex-col sm:flex-row items-center justify-between gap-space-sm pt-2">
+<div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-status-green-badge"></span>
+<span>&gt;800: Istimewa (Bonus 120%)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-status-blue-text"></span>
+<span>700-799: Baik (Bonus 100%)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-status-orange-text"></span>
+<span>600-699: Cukup</span>
+</div>
+</div>
+<button class="px-4 py-2 rounded-full bg-primary text-on-primary hover:bg-inverse-surface font-label-md text-label-md flex items-center gap-2 shadow-sm transition-all duration-150" type="button">
+<span class="material-symbols-outlined text-[18px]">download</span>
+<span>Ekspor Laporan GRD (PDF)</span>
+</button>
+</div>
+</div>
+<div class="p-space-md rounded-[20px] bg-surface-white shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-status-green-fill text-status-green-text flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-[22px]">verified</span>
+</div>
+<div>
+<div class="font-label-md text-label-md text-on-surface font-semibold">Integritas Sinkronisasi KPI • K-Space V2</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Semua data terhubung langsung dengan modul Absensi harian dan rekap GMV dari TikTok Shop Seller Center.</div>
+</div>
+</div>
+<div class="flex items-center gap-2 flex-shrink-0">
+<button class="px-4 py-1.5 rounded-full bg-surface-container-high hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors" type="button">
+          Panduan WRM
+        </button>
+<button class="px-4 py-1.5 rounded-full bg-surface-container-high hover:bg-surface-container text-on-surface font-label-md text-label-md transition-colors" type="button">
+          Atur Skala Bobot
+        </button>
+</div>
+</div>
+</div>
+<div class="fixed bottom-6 right-6 bg-primary text-on-primary px-5 py-3 rounded-full shadow-xl flex items-center gap-3 opacity-0 pointer-events-none transition-all duration-300 transform translate-y-4 z-50" id="snapshot-toast">
+<span class="material-symbols-outlined text-status-green-badge text-[20px]">check_circle</span>
+<span class="font-label-md text-label-md">Snapshot GRD berhasil disimpan dan dikunci ke server.</span>
+</div>
+</div>
+<script>
+  const snapshotBtn = document.getElementById('btn-snapshot');
+  const toast = document.getElementById('snapshot-toast');
+
+  if (snapshotBtn && toast) {
+    snapshotBtn.addEventListener('click', () => {
+      toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-4');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-4');
+        toast.classList.remove('opacity-100', 'translate-y-0');
+      }, 3000);
+    });
+  }
+</script></main></div></body></html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+
+<html lang="id"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;background-color:#f8f9ff;}body{overscroll-behavior:none;font-family:'Plus Jakarta Sans',sans-serif;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"primary-fixed-dim":"#bec6e0","primary-container":"#131b2e","on-error-container":"#93000a","on-tertiary-fixed-variant":"#783200","status-red-badge":"#EF4444","status-orange-text":"#C2410C","surface-tint":"#565e74","surface-container-low":"#eff4ff","tertiary-fixed-dim":"#ffb690","on-primary-fixed":"#131b2e","on-surface-variant":"#45464d","status-blue-text":"#1D4ED8","status-red-fill":"#FEF2F2","primary":"#000000","surface-container-highest":"#d3e4fe","secondary-fixed-dim":"#b4c5ff","surface":"#f8f9ff","tertiary-fixed":"#ffdbca","status-green-text":"#047857","on-tertiary-container":"#d95f00","on-primary-fixed-variant":"#3f465c","on-secondary-container":"#fefcff","inverse-primary":"#bec6e0","secondary-container":"#316bf3","on-secondary-fixed":"#00174b","surface-variant":"#d3e4fe","status-red-text":"#B91C1C","outline":"#76777d","on-secondary-fixed-variant":"#003ea8","status-orange-fill":"#FFF7ED","tertiary":"#000000","outline-variant":"#c6c6cd","on-tertiary":"#ffffff","status-purple-text":"#7E22CE","border-subtle":"#E2E8F0","surface-container-lowest":"#ffffff","on-surface":"#0b1c30","secondary":"#0051d5","on-background":"#0b1c30","inverse-surface":"#213145","surface-dim":"#cbdbf5","surface-bright":"#f8f9ff","status-green-badge":"#10B981","surface-container":"#e5eeff","on-secondary":"#ffffff","surface-white":"#FFFFFF","status-blue-fill":"#EFF6FF","on-tertiary-fixed":"#341100","background":"#f8f9ff","on-primary-container":"#7c839b","error-container":"#ffdad6","on-error":"#ffffff","secondary-fixed":"#dbe1ff","surface-container-high":"#dce9ff","canvas-bg":"#F4F5F9","tertiary-container":"#341100","inverse-on-surface":"#eaf1ff","error":"#ba1a1a","status-green-fill":"#ECFDF5","primary-fixed":"#dae2fd","on-primary":"#ffffff","status-purple-fill":"#FAF5FF"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-xl":"2rem","gutter":"1.25rem","margin":"1rem","gutter-desktop":"1.5rem","margin-desktop":"2rem","space-sm":"0.5rem","margin-tablet":"1.5rem","space-lg":"1.5rem","space-md":"1rem","space-xs":"0.25rem"},"fontFamily":{"body-lg":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"metric-value":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"display":["Plus Jakarta Sans"],"label-lg":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"]},"fontSize":{"body-lg":["15px",{"lineHeight":"22px","fontWeight":"400"}],"headline-lg":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-md":["14px",{"lineHeight":"20px","fontWeight":"400"}],"headline-sm":["16px",{"lineHeight":"24px","fontWeight":"600"}],"headline-md":["20px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"600"}],"metric-value":["24px",{"lineHeight":"30px","letterSpacing":"-0.02em","fontWeight":"700"}],"body-sm":["13px",{"lineHeight":"18px","fontWeight":"400"}],"headline-lg-mobile":["22px",{"lineHeight":"28px","letterSpacing":"-0.01em","fontWeight":"700"}],"label-sm":["11px",{"lineHeight":"14px","fontWeight":"500"}],"display":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-lg":["13px",{"lineHeight":"18px","letterSpacing":"0.01em","fontWeight":"600"}],"label-md":["12px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"600"}]}}}};</script></head><body class="bg-surface text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter flex items-center justify-between"><div class="flex items-center gap-space-sm"><img alt="Brand logo. - Primary color: #0f172a
+- Font: plusJakartaSans
+- Mode: light
+- Roundness: rounded-md
+" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1WKmvH88VYAo8jHx2gNQWkTca1e4eGll31WpaH1aNWw4oUzjtpJCZyrleHuftBOqzjImm6nTLdMp4n059wmY6PURkWizBBurXxDKhxDhKQ2xb_SuVMB74Smk_UpfK5_VHRIVaTncViM3N7JreJTw2Gnr_Gh3DgAOgom2js8LJQ1HEk4fRLTaPfxyUirZyfgA5WXi64P5s5UbxwDGmr757DeNy0p0mGMIKubgTkNVUaNtLKX-vJWEaLyp5Y"/><div class="flex flex-col"><div class="flex items-center gap-1.5"><span class="font-headline-sm text-headline-sm text-on-surface leading-none">K-Space</span><span class="font-label-sm text-label-sm px-1.5 py-0.5 rounded-full bg-status-green-fill text-status-green-text leading-none font-semibold">V2</span></div><span class="font-label-sm text-label-sm text-on-surface-variant truncate max-w-[110px]">Tugas Harian</span></div></div><div class="flex items-center gap-space-sm"><button aria-label="Notifikasi Operasional" class="w-11 h-11 rounded-full flex items-center justify-center text-on-surface bg-surface-container-lowest shadow-[0_2px_8px_rgba(15,23,42,0.04)] hover:bg-surface-container transition-colors relative" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2.5 right-2.5 w-2 h-2 rounded-full bg-status-red-badge"></span></button><div class="flex items-center gap-2 pl-1"><img alt="Profile" class="w-8 h-8 rounded-full object-cover shadow-[0_2px_6px_rgba(15,23,42,0.06)]" src="https://lh3.googleusercontent.com/aida/AEtjO1WHD8-VHInLffa7EOxIN1uDkZZRrAOkARcFRJ27AUZumMk1mKT4SD-j7KWLQHClWv-8J_sZSJGhvJIpHaG1hWbe0bMYNmzAcXhrREK4gOnQ-vc_upilfkh_H3GWFTHE87wKqKB4sGkAlYd8fIPHLJO-Ak9kwkBXRu4r1b6Zj80Md2f3qaFkk0aeiYsqTjeQCIzfVcQ0RablHyT1kOoSmheqc6EUd3OgSSRcetqy2kbPx3ZgAQnFcr3texs"/><div class="hidden sm:flex flex-col text-left"><span class="font-label-md text-label-md text-on-surface leading-tight font-semibold">Farhan P.</span><span class="font-label-sm text-label-sm text-on-surface-variant leading-none">Al-Kahfi Corp</span></div></div></div></div></header><main class="flex flex-col relative w-full pt-16 pb-28 bg-surface"><div class="flex flex-col w-full px-margin pb-6 gap-space-md">
+<!-- Top Greeting & Operational Status Pill -->
+<div class="flex items-center justify-between pt-2">
+<div class="flex flex-col">
+<div class="flex items-center gap-1.5">
+<span class="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider font-semibold">Ruang Operasional</span>
+<span class="w-1.5 h-1.5 rounded-full bg-status-green-badge animate-pulse"></span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-bold">Tugas &amp; Tiket QC</h1>
+</div>
+<div class="flex items-center gap-2">
+<button aria-label="Cari Tugas" class="w-10 h-10 rounded-full bg-surface-container-lowest flex items-center justify-center text-on-surface shadow-sm active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</button>
+<button aria-label="Tambah Tugas Baru" class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md active:scale-95 transition-transform" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+<!-- Pill Tab Switcher (Horizontal Scrollable) -->
+<div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 -mx-margin px-margin">
+<button class="tab-pill px-4 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md font-semibold whitespace-nowrap shadow-sm active:scale-95 transition-all flex items-center gap-1.5" type="button">
+<span>Semua</span>
+<span class="px-1.5 py-0.5 rounded-full bg-surface-container-lowest/20 font-label-sm text-label-sm">18</span>
+</button>
+<button class="tab-pill px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md font-semibold whitespace-nowrap active:scale-95 transition-all flex items-center gap-1.5" type="button">
+<span>To-do Pribadi</span>
+<span class="px-1.5 py-0.5 rounded-full bg-surface-container text-on-surface font-label-sm text-label-sm">6</span>
+</button>
+<button class="tab-pill px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md font-semibold whitespace-nowrap active:scale-95 transition-all flex items-center gap-1.5" type="button">
+<span>Tiket Masuk</span>
+<span class="px-1.5 py-0.5 rounded-full bg-status-orange-fill text-status-orange-text font-label-sm text-label-sm">8</span>
+</button>
+<button class="tab-pill px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md font-semibold whitespace-nowrap active:scale-95 transition-all flex items-center gap-1.5" type="button">
+<span>Menunggu QC</span>
+<span class="px-1.5 py-0.5 rounded-full bg-status-blue-fill text-status-blue-text font-label-sm text-label-sm">4</span>
+</button>
+</div>
+<!-- Absen Pulang Prerequisite Alert Banner -->
+<div class="rounded-2xl bg-status-orange-fill p-3.5 flex items-start gap-3 shadow-sm">
+<div class="w-8 h-8 rounded-full bg-status-orange-text/10 flex items-center justify-center shrink-0 text-status-orange-text mt-0.5">
+<span class="material-symbols-outlined text-[18px]">lock_clock</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<div class="flex items-center gap-1.5">
+<span class="font-label-md text-label-md text-status-orange-text font-bold">Gerbang Absen Pulang</span>
+<span class="px-1.5 py-0.2 rounded-full bg-status-orange-text text-surface-white font-label-sm text-label-sm font-semibold">Syarat K-Space</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface mt-0.5 leading-snug">
+        Penyelesaian tiket QC aktif dan pelaporan GMV membuka kunci tombol absensi kepulangan Anda hari ini.
+      </p>
+</div>
+</div>
+<!-- KARTU UTAMA: Detail Ringkas QC (Tiket Aktif Sedang Dibuka) -->
+<div class="rounded-[24px] bg-surface-container-lowest p-5 flex flex-col gap-4 shadow-[0_4px_24px_-4px_rgba(15,23,42,0.06)] relative overflow-hidden">
+<!-- Accent soft background blotch -->
+<div class="absolute -right-10 -top-10 w-36 h-36 bg-status-blue-fill rounded-full pointer-events-none blur-2xl opacity-70"></div>
+<!-- Ticket Top Meta -->
+<div class="flex items-start justify-between relative z-10">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2 flex-wrap">
+<span class="font-label-md text-label-md font-bold text-on-surface tracking-wider">TK-1084</span>
+<span class="px-2 py-0.5 rounded-full bg-status-red-fill text-status-red-text font-label-sm text-label-sm font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-status-red-badge"></span>
+            HIGH URGENCY
+          </span>
+<span class="px-2 py-0.5 rounded-full bg-status-green-fill text-status-green-text font-label-sm text-label-sm font-semibold">
+            Divisi TikTok Beauty
+          </span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface mt-0.5">
+          Audit GMV Akun TikTok Beauty Campaign Q2
+        </h2>
+</div>
+<button aria-label="Menu Tiket" class="w-8 h-8 rounded-full bg-surface flex items-center justify-center text-on-surface-variant shrink-0 active:scale-90 transition-transform" type="button">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<!-- Submitter Profile Micro-strip -->
+<div class="flex items-center justify-between p-2.5 rounded-xl bg-surface">
+<div class="flex items-center gap-2.5">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="Portrait of an Indonesian young woman marketing specialist wearing professional office hijab with warm natural window lighting and soft neutral background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPX9_QXCMSkAxJeyEkj162lBicYNM-2ny7S9oNW2esRsh9UhXdCw40Gn-q5cV8mrO6DWqHCrzS7T3Emh_kOZwyMTPGWRSTB6kmYGD6PiGR_DpjmDd1Dnu2hxvRkJSisBJaML1iu3qqsuOElSMFYJdl0wPsICMSTMghrh104-63cEafgoBfe3BLiztDCIjZEg3ENYrtyPUkRxdKtep5du6KQ9yMML-bE8yF8AHt1NR_yVTVKrIc-p-S"/>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md text-on-surface font-semibold leading-tight">Nabila Safitri</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Staff TikTok Ads • Diajukan 14:10 WIB</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded-full bg-surface-container-highest text-secondary font-semibold">
+        SLA 45 Menit
+      </span>
+</div>
+<!-- Stepper Mini Alur QC -->
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm font-bold uppercase tracking-wider text-on-surface-variant">Proses Validasi Tiket</span>
+<span class="font-label-sm text-label-sm font-bold text-secondary">Langkah 3 dari 4</span>
+</div>
+<div class="grid grid-cols-4 gap-1.5 items-center">
+<!-- Step 1 Done -->
+<div class="flex flex-col gap-1.5">
+<div class="h-1.5 w-full rounded-full bg-status-green-badge"></div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-status-green-text">check_circle</span>
+<span class="font-label-sm text-label-sm text-on-surface truncate">1. Dibuat</span>
+</div>
+</div>
+<!-- Step 2 Done -->
+<div class="flex flex-col gap-1.5">
+<div class="h-1.5 w-full rounded-full bg-status-green-badge"></div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-status-green-text">check_circle</span>
+<span class="font-label-sm text-label-sm text-on-surface truncate">2. Pengerjaan</span>
+</div>
+</div>
+<!-- Step 3 Active Review -->
+<div class="flex flex-col gap-1.5">
+<div class="h-1.5 w-full rounded-full bg-secondary"></div>
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-secondary shrink-0 animate-ping"></span>
+<span class="font-label-sm text-label-sm text-secondary font-bold truncate">3. Review QC</span>
+</div>
+</div>
+<!-- Step 4 Pending -->
+<div class="flex flex-col gap-1.5 opacity-40">
+<div class="h-1.5 w-full rounded-full bg-surface-container-highest"></div>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-on-surface-variant">radio_button_unchecked</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant truncate">4. Selesai</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Catatan Pengerjaan & Mini Lampiran -->
+<div class="rounded-xl bg-status-blue-fill p-3.5 flex flex-col gap-2.5">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-status-blue-text">rate_review</span>
+<span class="font-label-md text-label-md text-status-blue-text font-bold">Catatan Pengerjaan Tim</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface leading-relaxed">
+        "Audit GMV menunjukkan peningkatan 18.4% setelah rotasi hook video kolaborasi kreator micro. Matriks WRM hari ini masuk status <strong class="text-status-green-text">LANJUT</strong> dengan ROAS 4.1."
+      </p>
+<!-- Attached Files Chips -->
+<div class="flex flex-wrap gap-2 pt-1">
+<a class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-sm active:scale-95 transition-transform" href="#view-file">
+<span class="material-symbols-outlined text-[16px] text-status-green-text">table_view</span>
+<span class="font-semibold truncate max-w-[130px]">Audit_TikTok_Q2.xlsx</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">download</span>
+</a>
+<a class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-label-sm text-label-sm shadow-sm active:scale-95 transition-transform" href="#view-image">
+<span class="material-symbols-outlined text-[16px] text-secondary">image</span>
+<span class="font-semibold truncate max-w-[120px]">Proof_GMV_Live.png</span>
+<span class="material-symbols-outlined text-[14px] text-on-surface-variant">visibility</span>
+</a>
+</div>
+</div>
+<!-- Interactive Quality Control Actions Box -->
+<div class="flex flex-col gap-2.5 pt-1">
+<label class="font-label-md text-label-md font-bold text-on-surface flex items-center justify-between" for="qc-feedback-input">
+<span>Instruksi / Catatan QC Atasan</span>
+<span class="font-label-sm text-label-sm font-normal text-on-surface-variant">Opsional jika disetujui</span>
+</label>
+<div class="relative">
+<textarea class="w-full rounded-2xl bg-surface p-3 font-body-sm text-body-sm text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary/30 transition-all resize-none" id="qc-feedback-input" placeholder="Tulis instruksi perbaikan atau apresiasi hasil kerja..." rows="2"></textarea>
+</div>
+<!-- Action Buttons Grid -->
+<div class="grid grid-cols-2 gap-2.5 pt-1">
+<button class="py-3 px-3 rounded-2xl bg-status-red-fill text-status-red-text font-label-md text-label-md font-bold flex items-center justify-center gap-1.5 active:scale-95 transition-all" id="btn-request-revision" type="button">
+<span class="material-symbols-outlined text-[18px]">replay</span>
+<span>Minta Revisi</span>
+</button>
+<button class="py-3 px-3 rounded-2xl bg-primary text-on-primary font-label-md text-label-md font-bold flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all" id="btn-approve-qc" type="button">
+<span class="material-symbols-outlined text-[18px] text-status-green-badge">task_alt</span>
+<span>Setujui &amp; Selesai</span>
+</button>
+</div>
+</div>
+</div>
+<!-- SECTION: Checklist To-Do Pribadi -->
+<div class="rounded-[24px] bg-surface-container-lowest p-5 flex flex-col gap-3.5 shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary">checklist</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">To-Do Prioritas Saya</h3>
+</div>
+<span class="font-label-sm text-label-sm font-semibold px-2 py-0.5 rounded-full bg-surface-container text-on-surface">
+        4 Sisa Hari Ini
+      </span>
+</div>
+<!-- Task List Stack -->
+<div class="flex flex-col gap-2">
+<!-- Item 1: Checked -->
+<label class="todo-item flex items-center justify-between p-3 rounded-xl bg-status-green-fill cursor-pointer transition-all active:scale-[0.99]">
+<div class="flex items-center gap-3 min-w-0">
+<input checked="" class="w-5 h-5 rounded-lg accent-primary cursor-pointer shrink-0" type="checkbox"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-semibold line-through opacity-60 truncate">Cek sampel produk lip serum batch 4</span>
+<span class="font-label-sm text-label-sm text-status-green-text font-medium">Selesai 11:20 WIB • Gudang BSD</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[18px] text-status-green-text shrink-0">verified</span>
+</label>
+<!-- Item 2: Active Urgent -->
+<label class="todo-item flex items-center justify-between p-3 rounded-xl bg-status-orange-fill cursor-pointer transition-all active:scale-[0.99]">
+<div class="flex items-center gap-3 min-w-0">
+<input class="w-5 h-5 rounded-lg accent-primary cursor-pointer shrink-0" type="checkbox"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Sinkronisasi Matriks WRM dengan Spv Media</span>
+<span class="font-label-sm text-label-sm text-status-orange-text font-medium">Tenggat 16:30 WIB • Menentukan Budget Ads</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm font-bold text-status-orange-text bg-surface-white px-2 py-0.5 rounded-full shadow-xs shrink-0">Penting</span>
+</label>
+<!-- Item 3: Regular Task -->
+<label class="todo-item flex items-center justify-between p-3 rounded-xl bg-surface cursor-pointer transition-all active:scale-[0.99]">
+<div class="flex items-center gap-3 min-w-0">
+<input class="w-5 h-5 rounded-lg accent-primary cursor-pointer shrink-0" type="checkbox"/>
+<div class="flex flex-col min-w-0">
+<span class="font-label-md text-label-md text-on-surface font-semibold truncate">Rekap komparasi omzet harian per host live</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Sebelum absen pulang • Input Dashboard GMV</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant shrink-0">schedule</span>
+</label>
+</div>
+</div>
+<!-- SECTION: Komitmen Mingguan & KPI Tracker (Progress Ring & Visuals) -->
+<div class="rounded-[24px] bg-surface-container-lowest p-5 flex flex-col gap-3.5 shadow-sm">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Target Mingguan Tim</h3>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Siklus Sprint W-18 Al-Kahfi Corp</p>
+</div>
+<span class="font-label-sm text-label-sm px-2.5 py-1 rounded-full bg-status-purple-fill text-status-purple-text font-bold">
+        Sprint Berjalan
+      </span>
+</div>
+<!-- Progress Card -->
+<div class="p-3.5 rounded-2xl bg-surface flex items-center justify-between gap-3">
+<div class="flex flex-col gap-1 min-w-0">
+<span class="font-label-md text-label-md font-bold text-on-surface truncate">Bind 5 Kreator Baru via MMC</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">4 dari 5 kreator telah terikat kontrak eksklusif</span>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden mt-1.5">
+<div class="bg-primary h-full rounded-full transition-all duration-500" style="width: 80%"></div>
+</div>
+</div>
+<!-- Radial Progress Mini Inline SVG -->
+<div class="relative w-14 h-14 shrink-0 flex items-center justify-center">
+<svg class="w-14 h-14 transform -rotate-90" viewbox="0 0 48 48">
+<circle class="text-surface-container" cx="24" cy="24" fill="none" r="20" stroke="currentColor" stroke-width="4"></circle>
+<circle class="text-primary" cx="24" cy="24" fill="none" r="20" stroke="currentColor" stroke-dasharray="125.6" stroke-dashoffset="25.12" stroke-linecap="round" stroke-width="4"></circle>
+</svg>
+<span class="absolute font-label-md text-label-md font-bold text-on-surface">80%</span>
+</div>
+</div>
+</div>
+<!-- SECTION: Antrean Tiket Anggota Lainnya -->
+<div class="rounded-[24px] bg-surface-container-lowest p-5 flex flex-col gap-3.5 shadow-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-secondary">assignment_late</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Tiket Tim Menunggu Validasi</h3>
+</div>
+<a class="font-label-sm text-label-sm font-semibold text-secondary flex items-center gap-0.5" href="#lihat-semua">
+        Semua (3) <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</a>
+</div>
+<div class="flex flex-col gap-2.5">
+<!-- Member Ticket 1 -->
+<div class="p-3.5 rounded-2xl bg-surface flex items-center justify-between gap-3 active:scale-[0.99] transition-transform">
+<div class="flex items-center gap-3 min-w-0">
+<img class="w-10 h-10 rounded-full object-cover shrink-0" data-alt="Portrait of an energetic Indonesian male creative designer with glasses and smart casual shirt smiling softly in a bright modern studio setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6uLzGbDfEQWPS8Ddn2VmHrsLcBlzBcl2aNwSmSBqPVvTsACVolXUl3HRNVMPJBDYGcUl17mQj5t8dd607tvL7gXLfy2qofUi0wLu3yN2XARmthwq-af40ERS55Di07eROnq1bIO3ZuW_sdweHpo6yqy0knwEl4l6BBm8WvYl8ry6XFTV9mnuk4yPvyzwXEW0MRP-8Zcwofe3he3ufLtjXNwzM2ImzRQKJ3z9k0qwdu9FP2qj5R4MK"/>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-label-md text-label-md font-bold text-on-surface truncate">Rizky Ramadhan</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.2 rounded-full bg-status-green-fill text-status-green-text font-bold">LANJUT</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Upload 12 Aset Video UGC Skincare</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant/70">Durasi: 32 menit lalu</span>
+</div>
+</div>
+<button class="px-3 py-1.5 rounded-full bg-surface-container-lowest text-on-surface font-label-md text-label-md font-semibold shadow-xs flex items-center gap-1 shrink-0 active:bg-primary active:text-on-primary transition-colors" type="button">
+<span>Periksa</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</button>
+</div>
+<!-- Member Ticket 2 -->
+<div class="p-3.5 rounded-2xl bg-surface flex items-center justify-between gap-3 active:scale-[0.99] transition-transform">
+<div class="flex items-center gap-3 min-w-0">
+<img class="w-10 h-10 rounded-full object-cover shrink-0" data-alt="Portrait of a focused Indonesian female affiliate specialist wearing pastel hijab working on laptop in contemporary corporate office ambient lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVtec0xeZ20WytRc8UmX3auk757WfRKKATEHzyTDsEX4dJXNrNrIEUvccvyH7IaJVWdq-DJeJ2RQvup6ClN2dIuuoBVFM4GALk2s9heHIkAEKpbcVyc3wYEEURBbw1ep39wV2qmCki77otVDk-w141nw0migUzNwn-mBtrruNLZeUckb4TgB05cpuOx3L0RxAyFgvZy4zxuzEsehGgF2CIazxN2nnFPoJJA_J7548RGqgiLuuldt3U"/>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-1.5">
+<span class="font-label-md text-label-md font-bold text-on-surface truncate">Dinda Larasati</span>
+<span class="font-label-sm text-label-sm px-1.5 py-0.2 rounded-full bg-status-orange-fill text-status-orange-text font-bold">SABAR</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Pengajuan Sample Affiliate Top 20</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant/70">Durasi: 1 jam lalu</span>
+</div>
+</div>
+<button class="px-3 py-1.5 rounded-full bg-surface-container-lowest text-on-surface font-label-md text-label-md font-semibold shadow-xs flex items-center gap-1 shrink-0 active:bg-primary active:text-on-primary transition-colors" type="button">
+<span>Periksa</span>
+<span class="material-symbols-outlined text-[14px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- SECTION: Tim QC Performance Stats Bar (Bottom Delight Module) -->
+<div class="rounded-2xl bg-surface-container-lowest p-4 flex items-center justify-between shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-status-green-fill flex items-center justify-center text-status-green-text">
+<span class="material-symbols-outlined text-[22px]">speed</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Akurasi QC Tim Hari Ini</span>
+<span class="font-metric-value text-metric-value text-on-surface font-bold">94.8%</span>
+</div>
+</div>
+<div class="h-8 w-px bg-surface-container"></div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-status-blue-fill flex items-center justify-center text-status-blue-text">
+<span class="material-symbols-outlined text-[22px]">timer</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Waktu Respon Rata-rata</span>
+<span class="font-metric-value text-metric-value text-on-surface font-bold">18 <span class="text-headline-sm font-normal text-on-surface-variant">Mnt</span></span>
+</div>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    // Interactive Tab Switcher
+    const tabs = document.querySelectorAll('.tab-pill');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => {
+          t.className = 'tab-pill px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface-variant font-label-md text-label-md font-semibold whitespace-nowrap active:scale-95 transition-all flex items-center gap-1.5';
+        });
+        tab.className = 'tab-pill px-4 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md font-semibold whitespace-nowrap shadow-sm active:scale-95 transition-all flex items-center gap-1.5';
+      });
+    });
+
+    // QC Approve Micro-interaction
+    const approveBtn = document.getElementById('btn-approve-qc');
+    const revisionBtn = document.getElementById('btn-request-revision');
+    const feedbackInput = document.getElementById('qc-feedback-input');
+
+    if (approveBtn) {
+      approveBtn.addEventListener('click', () => {
+        approveBtn.innerHTML = '<span class="material-symbols-outlined text-[18px] animate-spin">sync</span><span>Memproses...</span>';
+        setTimeout(() => {
+          approveBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">done_all</span><span>Telah Disetujui!</span>';
+          approveBtn.className = 'py-3 px-3 rounded-2xl bg-status-green-fill text-status-green-text font-label-md text-label-md font-bold flex items-center justify-center gap-1.5 col-span-2 transition-all';
+          if (revisionBtn) revisionBtn.style.display = 'none';
+          if (feedbackInput) {
+            feedbackInput.placeholder = 'Tiket berhasil divalidasi. Syarat absen pulang terbuka.';
+            feedbackInput.disabled = true;
+          }
+        }, 600);
+      });
+    }
+
+    if (revisionBtn) {
+      revisionBtn.addEventListener('click', () => {
+        if (!feedbackInput.value.trim()) {
+          feedbackInput.focus();
+          feedbackInput.placeholder = 'Harap isi catatan revisi sebelum mengirim...';
+          feedbackInput.classList.add('ring-2', 'ring-status-red-badge');
+          setTimeout(() => {
+            feedbackInput.classList.remove('ring-2', 'ring-status-red-badge');
+          }, 1500);
+          return;
+        }
+        revisionBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">send</span><span>Dikirim...</span>';
+        setTimeout(() => {
+          revisionBtn.innerText = 'Revisi Diminta';
+          revisionBtn.className = 'py-3 px-3 rounded-2xl bg-surface-container text-on-surface-variant font-label-md text-label-md font-bold flex items-center justify-center gap-1.5';
+          if (approveBtn) approveBtn.disabled = true;
+        }, 500);
+      });
+    }
+  })();
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe pointer-events-none flex justify-center" data-active-classes="bg-primary text-on-primary shadow-sm font-semibold"><div class="pointer-events-auto w-full max-w-md px-margin mb-3"><div class="h-16 px-2 bg-surface-white/95 backdrop-blur-xl rounded-full shadow-[0_12px_32px_-4px_rgba(15,23,42,0.08),0_4px_12px_-2px_rgba(15,23,42,0.03)] flex items-center justify-around"><a class="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-on-surface-variant hover:text-on-surface transition-all min-h-[44px] min-w-[44px] justify-center" data-path="beranda" href="#"><span class="material-symbols-outlined text-[22px]">home</span><span class="font-label-md text-label-md hidden xs:inline">Beranda</span></a><a class="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-on-surface-variant hover:text-on-surface transition-all min-h-[44px] min-w-[44px] justify-center" data-path="absensi-dan-lapor" href="#"><span class="material-symbols-outlined text-[22px]">assignment_turned_in</span><span class="font-label-md text-label-md hidden xs:inline">Absensi</span></a><a aria-current="page" class="flex items-center gap-1.5 px-3.5 py-2 rounded-full transition-all min-h-[44px] min-w-[44px] justify-center bg-primary text-on-primary shadow-sm font-semibold" data-path="tugas-harian" href="#"><span class="material-symbols-outlined text-[22px]">checklist</span><span class="font-label-md text-label-md hidden xs:inline">Tugas</span></a><a class="flex items-center gap-1.5 px-3.5 py-2 rounded-full text-on-surface-variant hover:text-on-surface transition-all min-h-[44px] min-w-[44px] justify-center" data-path="matriks-grd" href="#"><span class="material-symbols-outlined text-[22px]">monitoring</span><span class="font-label-md text-label-md hidden xs:inline">GRD</span></a></div></div></nav></body></html>

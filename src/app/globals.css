@@ -1,0 +1,251 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ------------------------------------------------------------------ *
+ * Warm Modern Corporate — token layer (desain_ui_aplikasi_prd/DESIGN.md)
+ * Semua warna/ukuran dipakai lewat token Tailwind, bukan nilai mentah.
+ * ------------------------------------------------------------------ */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-sans);
+
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+
+  /* Kanvas & garis */
+  --color-canvas: var(--canvas);
+  --color-border-subtle: var(--border-subtle);
+
+  /* Warna unit pelaporan (Affiliator / MCN / TAP / lainnya) */
+  --color-unit-affiliator: #f97316;
+  --color-unit-mcn: #2563eb;
+  --color-unit-tap: #8b5cf6;
+  --color-unit-grosir: #c2410c;
+
+  /* Status operasional (Matriks WRM, absensi, tiket) */
+  --color-ok: #10b981;
+  --color-ok-fill: #ecfdf5;
+  --color-ok-text: #047857;
+  --color-warn: #f97316;
+  --color-warn-fill: #fff7ed;
+  --color-warn-text: #c2410c;
+  --color-danger: #ef4444;
+  --color-danger-fill: #fef2f2;
+  --color-danger-text: #b91c1c;
+  --color-info-fill: #eff6ff;
+  --color-info-text: #1d4ed8;
+  --color-accentmuted-fill: #faf5ff;
+  --color-accentmuted-text: #7e22ce;
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-3xl: 1.75rem;
+  --radius-4xl: 9999px;
+
+  /* Elevation: tonal layering, bukan drop shadow berat */
+  --shadow-card:
+    0 4px 20px -2px rgb(15 23 42 / 0.03), 0 2px 6px -1px rgb(15 23 42 / 0.02);
+  --shadow-overlay:
+    0 12px 32px -4px rgb(15 23 42 / 0.08), 0 4px 12px -2px rgb(15 23 42 / 0.03);
+}
+
+:root {
+  --canvas: #f4f5f9;
+  --background: #f4f5f9;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --primary: #0f172a;
+  --primary-foreground: #ffffff;
+  --secondary: #2563eb;
+  --secondary-foreground: #ffffff;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #eff6ff;
+  --accent-foreground: #1d4ed8;
+  --destructive: #ef4444;
+  --border: #e2e8f0;
+  --border-subtle: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #2563eb;
+  --radius: 1rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-canvas text-foreground;
+    font-feature-settings: "tnum" off;
+  }
+  html {
+    @apply font-sans antialiased;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Angka GMV / KPI sejajar vertikal antar kartu */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ------------------------------------------------------------------ *
+ * Lapisan gerak — hanya transform & opacity, semua tunduk pada
+ * prefers-reduced-motion. Tidak ada animasi yang menunda interaksi.
+ * ------------------------------------------------------------------ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Dock bawah / app-bar tidak menutupi target anchor. */
+    scroll-padding-block: 5rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Kartu: terangkat sedikit saat disentuh kursor, kembali rata saat ditekan. */
+  .kartu-interaktif {
+    transition:
+      transform 180ms cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 180ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .kartu-interaktif:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-overlay);
+    }
+  }
+  .kartu-interaktif:active {
+    transform: translateY(0);
+  }
+
+  /* Tombol & pill: respons taktil singkat. */
+  .tekan-halus {
+    transition:
+      transform 140ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 140ms ease,
+      color 140ms ease,
+      box-shadow 140ms ease;
+  }
+  .tekan-halus:active {
+    transform: scale(0.97);
+  }
+
+  /* Item daftar di dalam kartu: geser tipis saat hover. */
+  .baris-interaktif {
+    transition:
+      transform 160ms cubic-bezier(0.22, 1, 0.36, 1),
+      background-color 160ms ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .baris-interaktif:hover {
+      transform: translateX(2px);
+    }
+  }
+
+  /*
+   * Perbesar area sentuh tanpa mengubah ukuran visual.
+   * Dipakai pada pill, tombol bulat, dan tautan teks yang secara desain
+   * lebih kecil dari 44px — ambang nyaman untuk jempol di lapangan.
+   */
+  @media (pointer: coarse) {
+    .sentuh-nyaman {
+      position: relative;
+    }
+    .sentuh-nyaman::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 100%;
+      min-width: 44px;
+      min-height: 44px;
+      transform: translate(-50%, -50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kartu-interaktif:hover,
+    .baris-interaktif:hover,
+    .tekan-halus:active,
+    .kartu-interaktif:active {
+      transform: none;
+    }
+  }
+}
+
+/**
+ * Cetak: hanya area berlabel `.area-cetak` yang ikut ke kertas.
+ *
+ * Stiker QR ditempel pada barang fisik, jadi yang dicetak harus benar-benar
+ * hanya stikernya — bukan sidebar, dock, dan seluruh halaman aplikasi.
+ * `visibility` dipakai, bukan `display: none`, supaya tata letak di dalam
+ * area cetaknya tidak ikut runtuh.
+ */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  .area-cetak,
+  .area-cetak * {
+    visibility: visible;
+  }
+
+  .area-cetak {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #ffffff;
+    color: #0f172a;
+  }
+
+  /* Warna pekat apa adanya: QR yang dicetak abu-abu sulit terbaca. */
+  .area-cetak svg {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  @page {
+    margin: 12mm;
+  }
+}
