@@ -35,7 +35,13 @@ export async function orangLamaEkspor(): Promise<OrangLama[]> {
     .map((o) => ({
       id: typeof o.id === "string" ? o.id : "",
       nama: typeof o.name === "string" ? o.name : "",
-      email: typeof o.email === "string" ? o.email : null,
+      // Ekspor lama yang sebenarnya menyebut surel sebagai `gmail`.
+      email:
+        typeof o.email === "string"
+          ? o.email
+          : typeof o.gmail === "string"
+            ? o.gmail
+            : null,
     }))
     .filter((o) => o.id !== "");
 }

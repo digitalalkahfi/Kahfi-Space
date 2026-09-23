@@ -17,6 +17,8 @@ const STATUS: Record<string, StatusTugas> = {
   open: "todo",
   berjalan: "berjalan",
   "in progress": "berjalan",
+  in_progress: "berjalan",
+  "in-progress": "berjalan",
   dikerjakan: "berjalan",
   doing: "berjalan",
   menunggu_qc: "menunggu_qc",
@@ -103,5 +105,26 @@ export function jejakQcV1(nilai: unknown): JejakQc {
     olehLama: typeof o.checkedById === "string" ? o.checkedById : null,
     pada: typeof o.checkedAt === "string" ? o.checkedAt : null,
     catatan: typeof o.notes === "string" ? o.notes : "",
+  };
+}
+
+/**
+ * Jejak QC yang ditulis rata di baris tugasnya (`qcResult`, `qcNote`,
+ * `qcDecidedById`, `qcDecidedAt`) — bentuk ekspor K-Space lama yang
+ * sebenarnya. Dikembalikan dalam bentuk objek yang dikenal `jejakQcV1`,
+ * atau null bila tidak satu pun medannya ada.
+ */
+export function jejakQcDatar(
+  baris: Record<string, unknown>,
+): Record<string, unknown> | null {
+  const ada = ["qcResult", "qcNote", "qcDecidedById", "qcDecidedAt"].some(
+    (m) => baris[m] !== undefined && baris[m] !== null && baris[m] !== "",
+  );
+  if (!ada) return null;
+  return {
+    result: baris.qcResult,
+    notes: baris.qcNote,
+    checkedById: baris.qcDecidedById,
+    checkedAt: baris.qcDecidedAt,
   };
 }

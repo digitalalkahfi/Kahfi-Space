@@ -47,3 +47,6 @@ next-env.d.ts
 .ngodingpakeai/pending.json
 .ngodingpakeai/summaries.json
 .tmp/
+
+# Supabase CLI — berkas kerja hasil `supabase link`.
+supabase/.temp/

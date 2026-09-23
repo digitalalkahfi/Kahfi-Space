@@ -45,6 +45,96 @@ export function persetujuanIzin(
   return "diajukan";
 }
 
+/** Tanggal (YYYY-MM-DD) sebuah waktu menurut zona Asia/Jakarta. */
+export function tanggalWib(iso: unknown): string | null {
+  if (typeof iso !== "string") return null;
+  const t = new Date(iso);
+  if (Number.isNaN(t.getTime())) return null;
+  // WIB tidak mengenal daylight saving, jadi geser tetap +7 jam cukup.
+  return new Date(t.getTime() + 7 * 3600_000).toISOString().slice(0, 10);
+}
+
+/** Satu hari kehadiran, bentuk yang dibaca mesin migrasi. */
+export type HariKehadiran = {
+  id: string;
+  userId: string;
+  date: string;
+  checkIn: string | null;
+  checkOut: string | null;
+  status: "hadir" | "terlambat";
+  checkInLocation: { lat: number | null; lng: number | null } | null;
+};
+
+/**
+ * Membentangkan kejadian absen menjadi satu baris per orang per hari.
+ *
+ * Ekspor K-Space lama yang sebenarnya tidak menyimpan kehadiran per hari:
+ * ia menyimpan KEJADIAN — satu baris untuk absen masuk (`type: "in"`),
+ * satu lagi untuk pulang (`type: "out"`), masing-masing dengan
+ * `timestamp` UTC. V2 menyimpan satu baris per hari, jadi kejadian yang
+ * jatuh pada hari yang sama (menurut WIB, bukan UTC — absen pulang jam
+ * 22.00 masih hari yang sama) disatukan: masuk terawal, pulang terakhir.
+ *
+ * Penanda barisnya `userId#tanggal`, bukan id salah satu kejadiannya,
+ * supaya pengulangan dengan ekspor yang lebih baru tetap mengenali hari
+ * yang sama. Baris yang sudah berbentuk harian (punya `date`) dibiarkan
+ * apa adanya, jadi ekspor gaya lama maupun contoh tetap terbaca.
+ */
+export function hariDariKejadian(daftar: unknown[]): unknown[] {
+  const lolos: unknown[] = [];
+  const perHari = new Map<string, HariKehadiran>();
+
+  for (const k of daftar) {
+    if (k === null || typeof k !== "object") continue;
+    const b = k as Record<string, unknown>;
+    if (typeof b.timestamp !== "string" || typeof b.date === "string") {
+      lolos.push(k);
+      continue;
+    }
+
+    const userId = typeof b.userId === "string" ? b.userId : "";
+    const tanggal = tanggalWib(b.timestamp);
+    if (userId === "" || tanggal === null) {
+      // Diteruskan sebagai baris harian yang cacat supaya tetap tercatat
+      // sebagai tertahan beserta sebabnya, bukan hilang diam-diam.
+      lolos.push({ id: b.id, userId, date: tanggal ?? "" });
+      continue;
+    }
+
+    const kunci = `${userId}#${tanggal}`;
+    const hari = perHari.get(kunci) ?? {
+      id: kunci,
+      userId,
+      date: tanggal,
+      checkIn: null,
+      checkOut: null,
+      status: "hadir",
+      checkInLocation: null,
+    };
+
+    const jenis = typeof b.type === "string" ? b.type.toLowerCase() : "in";
+    if (jenis === "out") {
+      if (hari.checkOut === null || b.timestamp > hari.checkOut) {
+        hari.checkOut = b.timestamp;
+      }
+    } else if (hari.checkIn === null || b.timestamp < hari.checkIn) {
+      hari.checkIn = b.timestamp;
+      hari.checkInLocation = {
+        lat: typeof b.latitude === "number" ? b.latitude : null,
+        lng: typeof b.longitude === "number" ? b.longitude : null,
+      };
+      hari.status = b.late === true ? "terlambat" : "hadir";
+    }
+
+    perHari.set(kunci, hari);
+  }
+
+  const harian = [...perHari.values()].sort(
+    (a, b) => a.date.localeCompare(b.date) || a.userId.localeCompare(b.userId),
+  );
+  return [...lolos, ...harian];
+}
+
 /** Setiap hari dalam rentang izin, sebagai daftar tanggal. */
 export function hariIzin(mulai: string, selesai: string, batas = 62): string[] {
   const awal = new Date(`${mulai}T00:00:00Z`);

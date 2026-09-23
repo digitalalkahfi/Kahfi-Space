@@ -6,17 +6,28 @@ import { klienServer } from "@/lib/supabase/server";
 import { isiEksporLama } from "@/lib/data/migrasi";
 import { golonganKunci } from "@/lib/ekspor-v1";
 import { resolusiOrangV1 } from "@/lib/data/resolusi";
-import { peranV1, statusV1, unitV1 } from "@/lib/peran-v1";
+import { kontakV1, peranV1, programV1, statusV1, unitV1 } from "@/lib/peran-v1";
 import { keAngka, keTanggal } from "@/lib/impor";
-import { catatanLaporan } from "@/lib/laporan-v1";
+import {
+  bakuAkun,
+  catatanLaporan,
+  medanLaporan,
+  ratakanLaporan,
+} from "@/lib/laporan-v1";
 import { orangDitunggu } from "@/lib/rekap-pemetaan";
 import {
+  hariDariKejadian,
   hariIzin,
   koordinat,
   persetujuanIzin,
   statusHadir,
 } from "@/lib/izin-v1";
-import { jejakQcV1, prioritasV1, statusTugasV1 } from "@/lib/tugas-v1";
+import {
+  jejakQcDatar,
+  jejakQcV1,
+  prioritasV1,
+  statusTugasV1,
+} from "@/lib/tugas-v1";
 import { arahV1, jenisKeluarV1, keteranganKas } from "@/lib/keuangan-v1";
 import { PEMETAAN_V1 } from "@/lib/pemetaan-v1";
 import type { Peran } from "@/lib/types";
@@ -59,24 +70,43 @@ type KlienDb = Awaited<ReturnType<typeof klienServer>>;
  * migrasi — akun dengan username yang sama, misalnya. Tanpa itu, migrasi
  * akan membuat duplikat dari data yang sudah diketik orang sendiri.
  */
+type OpsiTulis = {
+  kelompok: string;
+  idLama: string;
+  tabel: TabelTujuan;
+  isi: Record<string, unknown>;
+  peta: Map<string, string>;
+  cariLama?: () => Promise<string | null>;
+  /**
+   * Penulis khusus, untuk tabel yang aturan hariannya menutup jalur
+   * biasa — kehadiran, laporan, dan arus kas (0158). Mengembalikan id
+   * barisnya, atau null bila barisnya memang sudah ada.
+   */
+  lewatJalur?: (
+    idSekarang: string | null,
+  ) => Promise<{ id: string | null } | { galat: string }>;
+};
+
 async function tulisIdempoten(
   sb: KlienDb,
-  opsi: {
-    kelompok: string;
-    idLama: string;
-    tabel: TabelTujuan;
-    isi: Record<string, unknown>;
-    peta: Map<string, string>;
-    cariLama?: () => Promise<string | null>;
-    /**
-     * Penulis khusus, untuk tabel yang aturan hariannya menutup jalur
-     * biasa — kehadiran, laporan, dan arus kas (0158). Mengembalikan id
-     * barisnya, atau null bila barisnya memang sudah ada.
-     */
-    lewatJalur?: (
-      idSekarang: string | null,
-    ) => Promise<{ id: string | null } | { galat: string }>;
-  },
+  opsi: OpsiTulis,
+): Promise<{ id: string } | { galat: string }> {
+  // Satu catatan yang gagal — termasuk karena jaringan putus di tengah
+  // permintaan — tidak boleh menghentikan seluruh kelompoknya. Galatnya
+  // dikembalikan sebagai hasil supaya tercatat dengan id lamanya.
+  try {
+    return await tulisIdempotenInti(sb, opsi);
+  } catch (e) {
+    return {
+      galat:
+        e instanceof Error ? e.message : "Kegagalan tak terduga saat menulis.",
+    };
+  }
+}
+
+async function tulisIdempotenInti(
+  sb: KlienDb,
+  opsi: OpsiTulis,
 ): Promise<{ id: string } | { galat: string }> {
   const sudah =
     opsi.peta.get(opsi.idLama) ??
@@ -170,13 +200,33 @@ async function tulisIdempoten(
   return { id: baris.id };
 }
 
-/** Membaca peta sebuah kelompok sekali, untuk dipakai berulang. */
+/** Berapa baris peta ditarik sekali jalan; PostgREST memotong di 1000. */
+const HALAMAN_PETA = 1000;
+
+/**
+ * Membaca peta sebuah kelompok sekali, untuk dipakai berulang.
+ *
+ * Ditarik per halaman: satu kelompok bisa lebih dari seribu catatan, dan
+ * peta yang terpotong membuat catatan di luar potongan dianggap belum
+ * pernah pindah — lalu dibuat lagi. Kegagalan membacanya dilempar, bukan
+ * dikembalikan sebagai peta kosong, dengan alasan yang sama.
+ */
 async function bacaPeta(sb: KlienDb, kelompok: string) {
-  const { data } = await sb
-    .from("migrasi_peta")
-    .select("id_lama, id_baru")
-    .eq("kelompok", kelompok);
-  return new Map((data ?? []).map((p) => [p.id_lama, p.id_baru]));
+  const peta = new Map<string, string>();
+  for (let dari = 0; ; dari += HALAMAN_PETA) {
+    const { data, error } = await sb
+      .from("migrasi_peta")
+      .select("id_lama, id_baru")
+      .eq("kelompok", kelompok)
+      .order("id_lama")
+      .range(dari, dari + HALAMAN_PETA - 1);
+    if (error) {
+      throw new Error(`Gagal membaca peta ${kelompok}: ${error.message}`);
+    }
+    for (const p of data ?? []) peta.set(p.id_lama, p.id_baru);
+    if (!data || data.length < HALAMAN_PETA) break;
+  }
+  return peta;
 }
 
 export type HasilTerap = {
@@ -197,8 +247,11 @@ type BarisOrang = {
   jabatan: string | null;
   role: Peran | null;
   unitKode: string | null;
+  /** Nama program V2 yang tersirat dari divisi lama (mis. Mabit Scholar). */
+  program: string | null;
   kontak: string | null;
-  status: "aktif" | "nonaktif";
+  /** Null bila data lama tidak menyebut status; yang di V2 dibiarkan. */
+  status: "aktif" | "nonaktif" | null;
   atasanLama: string | null;
 };
 
@@ -226,7 +279,7 @@ function bacaOrang(
       continue;
     }
 
-    const role = peranV1(baris.role);
+    const role = peranV1(baris.role, baris.division);
     if (baris.role !== undefined && baris.role !== null && role === null) {
       // Peran yang tidak dikenali tidak ditebak: yang lain tetap
       // diperbarui, perannya saja yang dibiarkan seperti semula.
@@ -239,11 +292,26 @@ function bacaOrang(
     siap.push({
       idLama,
       idBaru,
-      jabatan: typeof baris.position === "string" ? baris.position : null,
+      // Ekspor lama yang sebenarnya menyebut jabatan sebagai `jobTitle`.
+      jabatan:
+        typeof baris.position === "string"
+          ? baris.position
+          : typeof baris.jobTitle === "string"
+            ? baris.jobTitle
+            : null,
       role,
       unitKode: unitV1(baris.division),
-      kontak: typeof baris.phone === "string" ? baris.phone : null,
-      status: statusV1(baris.active),
+      program: programV1(baris.division),
+      // Nomor dibakukan ke +62…; yang tidak bisa dibakukan dibiarkan.
+      kontak: kontakV1(baris.phone),
+      // Status hanya dipindahkan bila data lama memang menyebutnya. Ekspor
+      // yang sebenarnya tidak punya medan `active` sama sekali — menganggap
+      // semuanya aktif akan mengaktifkan kembali orang yang sudah
+      // dinonaktifkan di V2.
+      status:
+        baris.active === undefined || baris.active === null
+          ? null
+          : statusV1(baris.active),
       atasanLama: typeof baris.leaderId === "string" ? baris.leaderId : null,
     });
   }
@@ -285,18 +353,52 @@ export async function terapkanUsersList(
 
   const sb = await klienServer();
 
-  // Kode unit → id, dibaca sekali.
-  const { data: unitDb } = await sb.from("units").select("id, kode");
+  // Kode unit → id, program per unit, dan peran V2 saat ini, dibaca sekali.
+  const [{ data: unitDb }, { data: programDb }, { data: peranDb }] =
+    await Promise.all([
+      sb.from("units").select("id, kode"),
+      sb.from("programs").select("id, nama, unit_id"),
+      sb.from("users").select("id, role"),
+    ]);
   const unitId = new Map<string, string>(
     (unitDb ?? []).map((u) => [u.kode as string, u.id]),
   );
+  // Program dikenali per (unit, nama): "Reguler" ada di tiap unit.
+  const programId = new Map<string, string>(
+    (programDb ?? []).map((p) => [`${p.unit_id}#${p.nama}`, p.id]),
+  );
+  const peranSekarang = new Map<string, string>(
+    (peranDb ?? []).map((u) => [u.id, u.role as string]),
+  );
 
   for (const o of siap) {
-    const patch: Record<string, unknown> = { status: o.status };
+    const patch: Record<string, unknown> = {};
+    if (o.status !== null) patch.status = o.status;
     if (o.jabatan !== null) patch.jabatan = o.jabatan;
-    if (o.role !== null) patch.role = o.role;
+    if (o.role !== null) {
+      // Pemilik sistem tidak diturunkan oleh migrasi: sebutan peran di
+      // sistem lama tidak lebih benar daripada wewenang yang sudah
+      // ditetapkan di V2, dan CEO yang kehilangan perannya tidak bisa
+      // memperbaikinya sendiri.
+      if (peranSekarang.get(o.idBaru) === "CEO" && o.role !== "CEO") {
+        hasil.catatan.push({
+          idLama: o.idLama,
+          pesan: `Di V2 orang ini CEO; peran lama '${o.role}' tidak diterapkan.`,
+        });
+      } else {
+        patch.role = o.role;
+      }
+    }
     if (o.kontak !== null) patch.kontak = o.kontak;
-    if (o.unitKode !== null) patch.unit_id = unitId.get(o.unitKode) ?? null;
+    if (o.unitKode !== null) {
+      const unit = unitId.get(o.unitKode) ?? null;
+      patch.unit_id = unit;
+      // Program hanya dipasang bila memang ada di unitnya (0043).
+      if (unit && o.program !== null) {
+        const program = programId.get(`${unit}#${o.program}`);
+        if (program) patch.program_id = program;
+      }
+    }
 
     const { error } = await sb
       .from("users")
@@ -381,6 +483,14 @@ export async function terapkanUsersList(
 const PLATFORM_LAMA = "TikTok Shop";
 
 /**
+ * Unit akun yang ekspornya tidak menyebut divisi.
+ *
+ * Ekspor K-Space lama yang sebenarnya tidak punya medan divisi pada akun
+ * sama sekali: seluruh akun affiliator memang akun unit affiliator.
+ */
+const UNIT_AKUN_BAWAAN = "affiliator";
+
+/**
  * Menerapkan `affiliate-accounts:all`.
  *
  * Berbeda dari orang, akun boleh dibuat dari sini: id-nya tidak terikat
@@ -425,9 +535,18 @@ export async function terapkanAkun(
     if (a === null || typeof a !== "object") continue;
     const baris = a as Record<string, unknown>;
     const idLama = typeof baris.id === "string" ? baris.id : "";
+    // Ekspor lama yang sebenarnya menyebut username akun sebagai `name`.
     const username =
-      typeof baris.username === "string" ? baris.username.trim() : "";
-    const unitKode = unitV1(baris.division);
+      typeof baris.username === "string"
+        ? baris.username.trim()
+        : typeof baris.name === "string"
+          ? baris.name.trim()
+          : "";
+    const divisiDisebut =
+      baris.division !== undefined &&
+      baris.division !== null &&
+      baris.division !== "";
+    const unitKode = divisiDisebut ? unitV1(baris.division) : UNIT_AKUN_BAWAAN;
 
     if (idLama === "" || username === "") {
       hasil.tertahan += 1;
@@ -446,6 +565,13 @@ export async function terapkanAkun(
         pesan: `Divisi '${String(baris.division ?? "")}' tidak dikenali; unit wajib diisi.`,
       });
       continue;
+    }
+
+    if (!divisiDisebut) {
+      hasil.catatan.push({
+        idLama,
+        pesan: `Divisi tidak disebut; akun masuk ke unit ${UNIT_AKUN_BAWAAN}.`,
+      });
     }
 
     const picLama = typeof baris.picId === "string" ? baris.picId : null;
@@ -472,9 +598,10 @@ export async function terapkanAkun(
   if (tahap === "uji_coba" || modeData() === "demo") return hasil;
 
   const sb = await klienServer();
-  const [unitDb, programDb, peta] = await Promise.all([
+  const [unitDb, programDb, orangDb, peta] = await Promise.all([
     sb.from("units").select("id, kode"),
     sb.from("programs").select("id, nama"),
+    sb.from("users").select("id, nama, role, unit_id, status"),
     bacaPeta(sb, "affiliate-accounts:all"),
   ]);
 
@@ -484,6 +611,33 @@ export async function terapkanAkun(
   const programId = new Map<string, string>(
     (programDb.data ?? []).map((p) => [p.nama, p.id]),
   );
+  const orangDbId = new Map((orangDb.data ?? []).map((o) => [o.id, o]));
+
+  /**
+   * Penanggung jawab hanya dipasang bila V2 menerimanya (0038, 0061):
+   * PIC harus Staff aktif di unit akun, co-leader harus Leader/Co-Leader
+   * aktif di unit yang sama. Yang belum memenuhi syarat — semua orang
+   * masih nonaktif sebelum ditempatkan — dibiarkan kosong beserta
+   * catatannya, supaya akunnya tetap terbentuk dan orangnya bisa
+   * dipasang sesudah aktivasi, bukan akunnya yang tertahan.
+   */
+  const layak = (
+    idBaru: string | null,
+    unit: string,
+    peranBoleh: readonly string[],
+  ): { id: string | null; sebab: string | null } => {
+    if (!idBaru) return { id: null, sebab: null };
+    const o = orangDbId.get(idBaru);
+    if (!o) return { id: null, sebab: "tidak ditemukan di V2" };
+    if (o.status !== "aktif")
+      return { id: null, sebab: `${o.nama} masih nonaktif` };
+    if (!peranBoleh.includes(o.role as string)) {
+      return { id: null, sebab: `${o.nama} berperan ${o.role}` };
+    }
+    if (o.unit_id !== unit)
+      return { id: null, sebab: `${o.nama} bukan anggota unit ini` };
+    return { id: idBaru, sebab: null };
+  };
 
   for (const a of siap) {
     const unit = unitId.get(a.unitKode);
@@ -496,6 +650,21 @@ export async function terapkanAkun(
       continue;
     }
 
+    const pic = layak(a.pic, unit, ["Staff"]);
+    if (pic.sebab) {
+      hasil.catatan.push({
+        idLama: a.idLama,
+        pesan: `PIC belum dipasang: ${pic.sebab}; pasang lewat layar Akun setelah orangnya aktif.`,
+      });
+    }
+    const coLeader = layak(a.coLeader, unit, ["Leader", "Co-Leader"]);
+    if (coLeader.sebab) {
+      hasil.catatan.push({
+        idLama: a.idLama,
+        pesan: `Co-leader belum dipasang: ${coLeader.sebab}.`,
+      });
+    }
+
     const tulis = await tulisIdempoten(sb, {
       kelompok: "affiliate-accounts:all",
       idLama: a.idLama,
@@ -506,8 +675,8 @@ export async function terapkanAkun(
         username: a.username,
         unit_id: unit,
         program_id: a.program ? (programId.get(a.program) ?? null) : null,
-        pic_user_id: a.pic,
-        co_leader_id: a.coLeader,
+        pic_user_id: pic.id,
+        co_leader_id: coLeader.id,
         status: a.status,
       },
       // Akun dengan username yang sama adalah akun yang sama — itulah
@@ -585,22 +754,38 @@ export async function terapkanLaporan(
     hasil.catatan.push({ idLama, pesan });
   };
 
+  // Divisi tiap orang di data lama. Laporan yang tidak menyebut akun
+  // masuk sebagai laporan unit, dan ekspor yang sebenarnya tidak pernah
+  // menyebut unit di laporannya — unitnya diambil dari divisi pelapor.
+  const divisiOrang = new Map<string, unknown>();
+  const daftarOrang = Array.isArray(isi["users:list"]) ? isi["users:list"] : [];
+  for (const o of daftarOrang) {
+    if (o === null || typeof o !== "object") continue;
+    const u = o as Record<string, unknown>;
+    if (typeof u.id === "string") divisiOrang.set(u.id, u.division);
+  }
+
   for (const l of daftar) {
     if (l === null || typeof l !== "object") continue;
-    const baris = l as Record<string, unknown>;
-    const idLama = typeof baris.id === "string" ? baris.id : "";
+    const mentah = l as Record<string, unknown>;
+    const idLama = typeof mentah.id === "string" ? mentah.id : "";
     if (idLama === "") continue;
 
-    const tanggal = keTanggal(baris["Tanggal Laporan"]);
+    // Jawaban formulir lama diratakan menjadi medan berjudul
+    // pertanyaannya, lalu medan intinya dicari apa pun ejaan judulnya.
+    const baris = ratakanLaporan(mentah);
+    const medan = medanLaporan(baris);
+
+    const tanggal = keTanggal(medan.tanggal);
     if (!tanggal) {
       tahan(
         idLama,
-        `Tanggal '${String(baris["Tanggal Laporan"] ?? "")}' tidak terbaca; laporan tanpa tanggal tidak bisa ditempatkan.`,
+        `Tanggal '${String(medan.tanggal ?? "")}' tidak terbaca; laporan tanpa tanggal tidak bisa ditempatkan.`,
       );
       continue;
     }
 
-    const userLama = typeof baris.userId === "string" ? baris.userId : "";
+    const userLama = typeof medan.user === "string" ? medan.user : "";
     if (!userLama || !orang.has(userLama)) {
       tahan(
         idLama,
@@ -611,17 +796,48 @@ export async function terapkanLaporan(
       continue;
     }
 
-    const akun = typeof baris.Akun === "string" ? baris.Akun.trim() : null;
-    const unitKode = akun ? null : unitV1(baris.Unit);
+    const akun = bakuAkun(medan.akun);
+    const divisi = medan.unit ?? divisiOrang.get(userLama);
+    const unitKode = akun ? null : unitV1(divisi);
     if (!akun && !unitKode) {
-      tahan(idLama, "Laporan tidak menyebut akun maupun unit yang dikenali.");
+      tahan(
+        idLama,
+        `Laporan tidak menyebut akun, dan divisi pelapornya ('${String(divisi ?? "")}') tidak punya unit di V2.`,
+      );
       continue;
     }
 
-    const gmv = keAngka(baris.GMV);
+    // GMV yang kosong berarti tidak ada GMV, bukan angka yang rusak.
+    const gmvKosong =
+      medan.gmv === undefined || medan.gmv === null || medan.gmv === "";
+    const gmv = gmvKosong ? 0 : keAngka(medan.gmv);
     if (akun && gmv === null) {
-      tahan(idLama, `GMV '${String(baris.GMV ?? "")}' bukan angka yang sah.`);
+      tahan(idLama, `GMV '${String(medan.gmv ?? "")}' bukan angka yang sah.`);
       continue;
+    }
+
+    // Komisi tidak boleh melebihi GMV (kendala V2). Angka lama yang
+    // melanggarnya tidak dibuang: komisinya dikosongkan dan nilai aslinya
+    // ditulis di catatan, supaya laporannya tetap masuk dan angkanya
+    // tetap bisa diperiksa orang.
+    const gmvAkhir = akun ? (gmv ?? 0) : 0;
+    let komisi = keAngka(medan.komisi);
+    let catatan = catatanLaporan(baris, medan.dipakai);
+    if (komisi !== null && komisi > gmvAkhir) {
+      catatan =
+        `${catatan}\nKomisi lama: ${komisi} (lebih besar dari GMV ${gmvAkhir}; dikosongkan saat migrasi)`
+          .trim()
+          .slice(0, 2000);
+      komisi = null;
+    }
+    // Jumlah upload V2 dibatasi 0–500 per hari (kendala yang sama).
+    let upload = keAngka(medan.upload);
+    if (upload !== null && (upload < 0 || upload > 500)) {
+      catatan =
+        `${catatan}\nJumlah upload lama: ${upload} (di luar batas 0–500; dikosongkan saat migrasi)`
+          .trim()
+          .slice(0, 2000);
+      upload = null;
     }
 
     siap.push({
@@ -631,11 +847,11 @@ export async function terapkanLaporan(
       akun,
       unitKode,
       // Laporan unit masuk dengan nol; angkanya dihitung dari akun.
-      gmv: akun ? (gmv ?? 0) : 0,
-      komisi: keAngka(baris.Komisi),
-      upload: keAngka(baris["Jumlah Upload"]),
-      catatan: catatanLaporan(baris),
-      dikirim: typeof baris.createdAt === "string" ? baris.createdAt : null,
+      gmv: gmvAkhir,
+      komisi,
+      upload,
+      catatan,
+      dikirim: typeof medan.dikirim === "string" ? medan.dikirim : null,
     });
   }
 
@@ -651,7 +867,14 @@ export async function terapkanLaporan(
   const unitId = new Map<string, string>(
     (unitDb.data ?? []).map((u) => [u.kode as string, u.id]),
   );
-  const akunId = new Map((akunDb.data ?? []).map((a) => [a.username, a.id]));
+  // Dicari lewat bentuk bakunya: formulir lama menulis "naimanurr" untuk
+  // akun "naimanurr_". Yang terdaftar lebih dulu menang bila dua akun
+  // bakunya sama.
+  const akunId = new Map<string, string>();
+  for (const a of akunDb.data ?? []) {
+    const baku = bakuAkun(a.username);
+    if (baku && !akunId.has(baku)) akunId.set(baku, a.id);
+  }
 
   for (const l of siap) {
     const accountId = l.akun ? (akunId.get(l.akun) ?? null) : null;
@@ -671,7 +894,31 @@ export async function terapkanLaporan(
       tabel: "daily_reports",
       peta,
       isi: {},
-      lewatJalur: async () => {
+      lewatJalur: async (idSekarang) => {
+        // Laporan yang sudah pernah pindah diperbarui di tempat, bukan
+        // dibuat lagi: pemetaan sebelumnya bisa saja menaruhnya sebagai
+        // laporan unit tanpa GMV, dan menulis baris kedua akan
+        // menggandakannya. Baris yang ternyata sudah dihapus dibuat ulang.
+        if (idSekarang) {
+          const { data: ada, error: galatUbah } = await sb
+            .from("daily_reports")
+            .update({
+              user_id: orang.get(l.userLama) as string,
+              tanggal: l.tanggal,
+              account_id: accountId,
+              unit_id: accountId ? null : unit,
+              gmv: l.gmv,
+              komisi: l.komisi,
+              jumlah_upload: l.upload,
+              catatan: l.catatan,
+            })
+            .eq("id", idSekarang)
+            .select("id")
+            .maybeSingle();
+          if (galatUbah) return { galat: galatUbah.message };
+          if (ada) return { id: ada.id };
+        }
+
         const { data, error } = await sb.rpc("migrasi_tulis_laporan", {
           p_user: orang.get(l.userLama) as string,
           p_tanggal: l.tanggal,
@@ -810,8 +1057,10 @@ export async function terapkanKehadiran(
   ]);
 
   const orang = new Map(resolusi.padanan.map((p) => [p.idLama, p.idBaru]));
+  // Ekspor lama yang sebenarnya menyimpan kejadian masuk/pulang, bukan
+  // hari; disatukan dulu menjadi satu baris per orang per hari.
   const daftar = Array.isArray(isi["attendance:all"])
-    ? (isi["attendance:all"] as unknown[])
+    ? hariDariKejadian(isi["attendance:all"] as unknown[])
     : [];
 
   const hasil: HasilTerap = {
@@ -940,12 +1189,16 @@ export async function terapkanPengaturanAbsensi(
   }
 
   const o = config as Record<string, unknown>;
-  const { lat, lng } = koordinat(o.lokasi);
+  // Ekspor lama yang sebenarnya menulis koordinat dan radius rata:
+  // `lokasiLat`, `lokasiLng`, `radiusM`.
+  const { lat, lng } = koordinat(
+    o.lokasi ?? { lat: o.lokasiLat, lng: o.lokasiLng },
+  );
   const patch: Record<string, unknown> = {};
   if (typeof o.jamMasuk === "string") patch.jam_masuk = o.jamMasuk;
   const toleransi = keAngka(o.toleransiMenit);
   if (toleransi !== null) patch.toleransi_menit = toleransi;
-  const radius = keAngka(o.radiusMeter);
+  const radius = keAngka(o.radiusMeter ?? o.radiusM);
   if (radius !== null) patch.radius_meter = radius;
   if (lat !== null) patch.kantor_lat = lat;
   if (lng !== null) patch.kantor_lng = lng;
@@ -1006,8 +1259,25 @@ export async function terapkanIzin(
     catatan: [],
   };
 
+  // Hari yang orangnya tercatat absen masuk. Izin yang jatuh pada hari
+  // itu tidak menimpa kehadirannya: bukti hadir lebih kuat daripada
+  // pengajuan — apalagi pengajuan yang ditolak.
+  const hariHadir = new Set<string>();
+  const kejadian = Array.isArray(isi["attendance:all"])
+    ? hariDariKejadian(isi["attendance:all"] as unknown[])
+    : [];
+  for (const h of kejadian) {
+    if (h === null || typeof h !== "object") continue;
+    const b = h as Record<string, unknown>;
+    const tanggal = keTanggal(b.date);
+    if (typeof b.userId === "string" && tanggal) {
+      hariHadir.add(`${b.userId}#${tanggal}`);
+    }
+  }
+
   type SiapIzin = {
     idLama: string;
+    userLama: string;
     userId: string;
     hari: string[];
     mulai: string;
@@ -1025,8 +1295,10 @@ export async function terapkanIzin(
     const idLama = typeof baris.id === "string" ? baris.id : "";
     if (idLama === "") continue;
 
-    const mulai = keTanggal(baris.startDate);
-    const selesai = keTanggal(baris.endDate) ?? mulai;
+    // Ekspor lama yang sebenarnya menulis rentangnya sebagai `date` dan
+    // `dateEnd` (yang kedua hanya ada pada izin beberapa hari).
+    const mulai = keTanggal(baris.startDate ?? baris.date);
+    const selesai = keTanggal(baris.endDate ?? baris.dateEnd) ?? mulai;
     const userLama = typeof baris.userId === "string" ? baris.userId : "";
     const userId = userLama ? orang.get(userLama) : undefined;
 
@@ -1046,14 +1318,21 @@ export async function terapkanIzin(
     const pemutusLama =
       typeof baris.decidedById === "string" ? baris.decidedById : null;
 
+    // Alasan dan catatan tambahan digabung; keduanya ditulis orang.
+    const alasan = [baris.reason, baris.note]
+      .filter((t): t is string => typeof t === "string" && t.trim() !== "")
+      .map((t) => t.trim())
+      .join(" — ");
+
     siap.push({
       idLama,
+      userLama,
       userId,
       hari: hariIzin(mulai, selesai),
       mulai,
       selesai,
       status: jenis === "sakit" || jenis === "sick" ? "sakit" : "izin",
-      alasan: typeof baris.reason === "string" ? baris.reason : "",
+      alasan,
       persetujuan: persetujuanIzin(baris.status),
       pemutus: pemutusLama ? (orang.get(pemutusLama) ?? null) : null,
     });
@@ -1070,6 +1349,15 @@ export async function terapkanIzin(
       // Tiap hari punya penanda sendiri supaya pengulangan tidak
       // membuat baris kedua untuk hari yang sama.
       const idHari = z.hari.length > 1 ? `${z.idLama}#${tanggal}` : z.idLama;
+
+      if (hariHadir.has(`${z.userLama}#${tanggal}`)) {
+        gagalHari += 1;
+        hasil.catatan.push({
+          idLama: idHari,
+          pesan: `Orangnya tercatat absen masuk pada ${tanggal}; kehadirannya dipertahankan dan izin (${z.persetujuan}) untuk hari itu tidak ditulis.`,
+        });
+        continue;
+      }
 
       const tulis = await tulisIdempoten(sb, {
         kelompok: "leave-requests:all",
@@ -1154,11 +1442,14 @@ export async function terapkanTugas(
       continue;
     }
 
-    // Todo pribadi: pembuat dan penerimanya orang yang sama.
+    // Todo pribadi: pembuat dan penerimanya orang yang sama. Ekspor lama
+    // yang sebenarnya menyebut pemiliknya sebagai `ownerId`.
     const penerimaLama = opsi.todo
       ? typeof baris.userId === "string"
         ? baris.userId
-        : ""
+        : typeof baris.ownerId === "string"
+          ? baris.ownerId
+          : ""
       : typeof baris.assigneeId === "string"
         ? baris.assigneeId
         : "";
@@ -1182,10 +1473,21 @@ export async function terapkanTugas(
       continue;
     }
 
-    const qc = opsi.todo ? null : jejakQcV1(baris.qc);
+    // Jejak QC bisa berupa objek `qc` (contoh) atau medan-medan rata
+    // `qcResult`, `qcNote`, … (ekspor yang sebenarnya).
+    const qc = opsi.todo ? null : jejakQcV1(baris.qc ?? jejakQcDatar(baris));
+    // Todo lama punya `status` (todo/in_progress/done) di samping `done`.
+    const statusLama =
+      typeof baris.status === "string" ? statusTugasV1(baris.status) : null;
     const selesai = opsi.todo
-      ? baris.done === true
-      : statusTugasV1(baris.status) === "selesai";
+      ? baris.done === true || statusLama === "selesai"
+      : statusLama === "selesai";
+    // Tenggat: `dueDate` (contoh) atau `deadline` (ekspor sebenarnya).
+    // Teks kosong berarti tidak ada tenggat, bukan waktu yang rusak.
+    const waktu = (v: unknown) =>
+      typeof v === "string" && v.trim() !== "" ? v : null;
+    const tenggat =
+      waktu(baris.dueDate) ?? waktu(baris.deadline) ?? waktu(baris.createdAt);
 
     siap.push({
       idLama,
@@ -1197,35 +1499,24 @@ export async function terapkanTugas(
         konteks: typeof baris.context === "string" ? baris.context : "",
         pembuat_id: pembuat,
         penerima_id: penerima,
-        tenggat:
-          typeof baris.dueDate === "string"
-            ? baris.dueDate
-            : typeof baris.createdAt === "string"
-              ? baris.createdAt
-              : null,
-        prioritas: opsi.todo ? "sedang" : prioritasV1(baris.priority),
+        tenggat,
+        prioritas:
+          opsi.todo && typeof baris.priority !== "string"
+            ? "sedang"
+            : prioritasV1(baris.priority),
         status: opsi.todo
           ? selesai
             ? "selesai"
-            : "todo"
+            : (statusLama ?? "todo")
           : statusTugasV1(baris.status),
         // Tanpa waktu selesai, tugas lama yang sudah beres tetap
         // terhitung sebagai tunggakan pada rekap mingguan.
-        ...(selesai
-          ? {
-              selesai_at:
-                (typeof baris.completedAt === "string"
-                  ? baris.completedAt
-                  : null) ??
-                (typeof baris.dueDate === "string" ? baris.dueDate : null) ??
-                (typeof baris.createdAt === "string" ? baris.createdAt : null),
-            }
-          : {}),
+        ...(selesai ? { selesai_at: waktu(baris.completedAt) ?? tenggat } : {}),
         ...(qc
           ? {
               qc_status: qc.status,
               qc_by: qc.olehLama ? (orang.get(qc.olehLama) ?? null) : null,
-              qc_at: qc.pada,
+              qc_at: waktu(qc.pada),
               qc_note: qc.catatan,
             }
           : {}),
@@ -1238,23 +1529,99 @@ export async function terapkanTugas(
   const sb = await klienServer();
   const peta = await bacaPeta(sb, kunci);
 
-  for (const t of siap) {
-    const tulis = await tulisIdempoten(sb, {
-      kelompok: kunci,
-      idLama: t.idLama,
-      tabel: "tasks",
-      peta,
-      isi: t.isi,
-    });
+  // Tugas lama tidak boleh membunyikan lonceng "Tugas baru" di ponsel
+  // orang: notifikasinya dibungkam selama penulisan, lalu dipulihkan.
+  const penerima = new Set(
+    siap
+      .filter((t) => t.isi.penerima_id !== t.isi.pembuat_id)
+      .map((t) => t.isi.penerima_id as string),
+  );
+  const pulihkan = await bungkamNotifikasiTugas(sb, [...penerima]);
 
-    if ("galat" in tulis) {
-      hasil.catatan.push({ idLama: t.idLama, pesan: tulis.galat });
-      continue;
+  try {
+    for (const t of siap) {
+      const tulis = await tulisIdempoten(sb, {
+        kelompok: kunci,
+        idLama: t.idLama,
+        tabel: "tasks",
+        peta,
+        isi: t.isi,
+      });
+
+      if ("galat" in tulis) {
+        hasil.catatan.push({ idLama: t.idLama, pesan: tulis.galat });
+        continue;
+      }
+      hasil.ditulis += 1;
     }
-    hasil.ditulis += 1;
+  } finally {
+    const galatPulih = await pulihkan();
+    if (galatPulih) hasil.catatan.push({ idLama: "-", pesan: galatPulih });
   }
 
   return hasil;
+}
+
+/**
+ * Mematikan notifikasi in-app kategori tugas untuk sejumlah orang, dan
+ * mengembalikan cara memulihkannya.
+ *
+ * `terbitkan_notifikasi` (0116) menghormati `notification_preferences`:
+ * bila in-app-nya mati, tidak ada baris notifikasi yang lahir sama
+ * sekali — bukan lahir lalu dihapus. Preferensi yang sudah ada
+ * dikembalikan persis; yang belum ada dikembalikan ke nilai bawaannya.
+ */
+async function bungkamNotifikasiTugas(
+  sb: KlienDb,
+  userIds: string[],
+): Promise<() => Promise<string | null>> {
+  if (userIds.length === 0) return async () => null;
+
+  const { data: semula, error: galatBaca } = await sb
+    .from("notification_preferences")
+    .select("user_id, in_app, whatsapp")
+    .eq("kategori", "tugas")
+    .in("user_id", userIds);
+  if (galatBaca) {
+    throw new Error(
+      `Gagal membaca preferensi notifikasi: ${galatBaca.message}`,
+    );
+  }
+
+  const { error: galatBungkam } = await sb
+    .from("notification_preferences")
+    .upsert(
+      userIds.map((user_id) => ({
+        user_id,
+        kategori: "tugas" as const,
+        in_app: false,
+        // WhatsApp tidak boleh menyala tanpa in-app (0115).
+        whatsapp: false,
+      })),
+      { onConflict: "user_id,kategori" },
+    );
+  if (galatBungkam) {
+    throw new Error(`Gagal membungkam notifikasi: ${galatBungkam.message}`);
+  }
+
+  const asli = new Map((semula ?? []).map((p) => [p.user_id, p]));
+  return async () => {
+    const { error } = await sb.from("notification_preferences").upsert(
+      userIds.map((user_id) => {
+        const p = asli.get(user_id);
+        return {
+          user_id,
+          kategori: "tugas" as const,
+          in_app: p ? p.in_app : true,
+          whatsapp: p ? p.whatsapp : false,
+        };
+      }),
+      { onConflict: "user_id,kategori" },
+    );
+    return error
+      ? `Preferensi notifikasi tugas belum pulih (${error.message}); nyalakan kembali in-app kategori tugas untuk ${userIds.length} orang.`
+      : null;
+  };
 }
 
 /**
@@ -1315,26 +1682,31 @@ export async function terapkanKas(
     const idLama = typeof baris.id === "string" ? baris.id : "";
     if (idLama === "") continue;
 
-    const tanggal = keTanggal(baris.date);
-    const jumlah = keAngka(baris.amount);
+    // Ekspor lama yang sebenarnya menulis medannya dalam bahasa Indonesia:
+    // `tanggal`, `tipe`, `jumlah`, `kategori`, `keterangan`, `divisi`.
+    const tanggalMentah = baris.date ?? baris.tanggal;
+    const jumlahMentah = baris.amount ?? baris.jumlah;
+    const kategori = baris.category ?? baris.kategori;
+    const tanggal = keTanggal(tanggalMentah);
+    const jumlah = keAngka(jumlahMentah);
 
     if (!tanggal || jumlah === null || jumlah < 0) {
       hasil.tertahan += 1;
       hasil.catatan.push({
         idLama,
         pesan: !tanggal
-          ? `Tanggal '${String(baris.date ?? "")}' tidak terbaca.`
-          : `Jumlah '${String(baris.amount ?? "")}' bukan angka yang sah.`,
+          ? `Tanggal '${String(tanggalMentah ?? "")}' tidak terbaca.`
+          : `Jumlah '${String(jumlahMentah ?? "")}' bukan angka yang sah.`,
       });
       continue;
     }
 
-    const arah = arahV1(baris.type);
-    const jenis = arah === "keluar" ? jenisKeluarV1(baris.category) : null;
+    const arah = arahV1(baris.type ?? baris.tipe);
+    const jenis = arah === "keluar" ? jenisKeluarV1(kategori) : null;
     if (arah === "keluar" && !jenis) {
       hasil.catatan.push({
         idLama,
-        pesan: `Kategori '${String(baris.category ?? "")}' tidak dikenali; masuk sebagai beban dan kategori aslinya ditulis di keterangan.`,
+        pesan: `Kategori '${String(kategori ?? "")}' tidak dikenali; masuk sebagai beban dan kategori aslinya ditulis di keterangan.`,
       });
     }
 
@@ -1343,7 +1715,7 @@ export async function terapkanKas(
 
     siap.push({
       idLama,
-      unitKode: unitV1(baris.division),
+      unitKode: unitV1(baris.division ?? baris.divisi),
       isi: {
         tanggal,
         arah,
@@ -1352,8 +1724,8 @@ export async function terapkanKas(
         jenis: arah === "keluar" ? (jenis ?? "beban") : null,
         jumlah,
         keterangan: keteranganKas(
-          baris.description,
-          baris.category,
+          baris.description ?? baris.keterangan,
+          kategori,
           jenis !== null,
         ),
         // Semuanya sudah terjadi: tidak melewati antrean persetujuan.
@@ -1382,6 +1754,28 @@ export async function terapkanKas(
       peta,
       isi: {},
       lewatJalur: async (idSekarang) => {
+        // Pemasukan tidak melewati persetujuan: trigger 0097 langsung
+        // menandainya dibayar saat dibuat, sehingga jalur khusus (0158)
+        // — yang menaikkan status tahap demi tahap — menolaknya. Ditulis
+        // langsung; yang sudah pernah pindah dibiarkan apa adanya.
+        if (k.isi.arah === "masuk") {
+          if (idSekarang) return { id: idSekarang };
+          const { data: masuk, error: galatMasuk } = await sb
+            .from("transactions")
+            .insert({
+              tanggal: k.isi.tanggal as string,
+              arah: "masuk",
+              jenis: null,
+              jumlah: k.isi.jumlah as number,
+              keterangan: k.isi.keterangan as string,
+              unit_id: k.unitKode ? (unitId.get(k.unitKode) ?? null) : null,
+              diajukan_id: k.isi.diajukan_id as string | null,
+            })
+            .select("id")
+            .single();
+          return galatMasuk ? { galat: galatMasuk.message } : { id: masuk.id };
+        }
+
         const { data, error } = await sb.rpc("migrasi_tulis_transaksi", {
           p_tanggal: k.isi.tanggal as string,
           p_arah: k.isi.arah as "masuk" | "keluar",

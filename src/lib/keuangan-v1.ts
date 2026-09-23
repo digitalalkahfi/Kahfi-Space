@@ -17,6 +17,20 @@ const JENIS: Record<string, JenisKeluar> = {
   operational: "beban",
   gaji: "beban",
   payroll: "beban",
+  // Kategori yang benar-benar dipakai arus kas K-Space lama.
+  "gaji & bonus": "beban",
+  "administrasi bank": "beban",
+  "beban lain": "beban",
+  "transportasi & pengiriman": "beban",
+  "konsumsi & meeting": "beban",
+  "software & langganan": "beban",
+  "internet & komunikasi": "beban",
+  "iklan & promosi": "beban",
+  "kesejahteraan karyawan": "beban",
+  pajak: "beban",
+  "aset & peralatan": "aset",
+  "komisi affiliate": "creator_share",
+  deviden: "dividen",
   aset: "aset",
   asset: "aset",
   inventaris: "aset",
@@ -60,10 +74,15 @@ export function keteranganKas(
   kategori: unknown,
   dikenali: boolean,
 ): string {
+  const mentah = typeof keterangan === "string" ? keterangan.trim() : "";
+  // Keterangan V2 wajib lima huruf atau lebih (0097); yang terlalu
+  // pendek ("TAP") tetap dibawa, hanya diberi keterangan asalnya.
   const dasar =
-    typeof keterangan === "string" && keterangan.trim() !== ""
-      ? keterangan.trim()
-      : "Transaksi dari K-Space lama";
+    mentah === ""
+      ? "Transaksi dari K-Space lama"
+      : mentah.length < 5
+        ? `${mentah} (dari K-Space lama)`
+        : mentah;
   const kat =
     typeof kategori === "string" && kategori.trim() !== ""
       ? kategori.trim()
