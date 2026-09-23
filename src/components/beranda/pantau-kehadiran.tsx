@@ -18,7 +18,7 @@ const labelStatus: Record<StatusAbsen, { teks: string; kelas: string }> = {
   belum_absen: { teks: "Belum absen", kelas: "text-danger-text" },
 };
 
-type Saringan = "belum_absen" | "belum_lapor";
+type Saringan = "belum_absen" | "belum_lapor" | "kurang_upload";
 
 /**
  * "Pantau Kehadiran" (PRD §3 Beranda): siapa yang belum absen dan siapa yang
@@ -28,7 +28,7 @@ export function PantauKehadiran({ tim }: { tim: AnggotaKehadiran[] }) {
   const [saringan, setSaringan] = useState<Saringan>("belum_lapor");
   const [diingatkan, setDiingatkan] = useState<string[]>([]);
 
-  const { belumAbsen, belumLapor, sudahAbsen } = useMemo(() => {
+  const { belumAbsen, belumLapor, kurangUpload, sudahAbsen } = useMemo(() => {
     const hadir = tim.filter(
       (a) => a.statusAbsen === "hadir" || a.statusAbsen === "terlambat",
     );
@@ -39,10 +39,25 @@ export function PantauKehadiran({ tim }: { tim: AnggotaKehadiran[] }) {
       ),
       // Hanya yang memang punya sasaran laporan yang pantas ditagih.
       belumLapor: hadir.filter((a) => a.wajibLapor && !a.sudahLapor),
+      // Yang SUDAH melapor tapi unggahannya di bawah minimum. Yang belum
+      // melapor sama sekali tidak masuk sini — ia sudah ada di daftar
+      // sebelahnya, dan menagihnya dua kali hanya membuat kedua daftar
+      // itu sama-sama diabaikan.
+      kurangUpload: hadir.filter(
+        (a) =>
+          a.minimumUnggahan !== null &&
+          a.unggahanHariIni !== null &&
+          a.unggahanHariIni < a.minimumUnggahan,
+      ),
     };
   }, [tim]);
 
-  const daftar = saringan === "belum_absen" ? belumAbsen : belumLapor;
+  const daftar =
+    saringan === "belum_absen"
+      ? belumAbsen
+      : saringan === "kurang_upload"
+        ? kurangUpload
+        : belumLapor;
 
   // Izin & sakit sudah disetujui atasan — tidak perlu ditagih.
   const perluDitagih = daftar.filter(
@@ -64,6 +79,17 @@ export function PantauKehadiran({ tim }: { tim: AnggotaKehadiran[] }) {
   const tab: { kunci: Saringan; label: string; jumlah: number }[] = [
     { kunci: "belum_lapor", label: "Belum lapor", jumlah: belumLapor.length },
     { kunci: "belum_absen", label: "Belum absen", jumlah: belumAbsen.length },
+    // Hanya muncul bila ada akun berlevel di cakupan Leader ini —
+    // unit MCN & TAP tidak punya batas minimum sama sekali.
+    ...(tim.some((a) => a.minimumUnggahan !== null)
+      ? [
+          {
+            kunci: "kurang_upload" as const,
+            label: "Di bawah minimum",
+            jumlah: kurangUpload.length,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -125,7 +151,9 @@ export function PantauKehadiran({ tim }: { tim: AnggotaKehadiran[] }) {
         <p className="px-5 text-[13px] leading-[18px] text-ok-text">
           {saringan === "belum_lapor"
             ? "Semua laporan harian sudah masuk."
-            : "Seluruh tim sudah absen hari ini."}
+            : saringan === "kurang_upload"
+              ? "Semua unggahan hari ini sudah memenuhi batas minimum."
+              : "Seluruh tim sudah absen hari ini."}
         </p>
       ) : (
         <ScrollArea className="max-h-[17rem] px-5">
@@ -153,9 +181,27 @@ export function PantauKehadiran({ tim }: { tim: AnggotaKehadiran[] }) {
                     <p className="truncate text-[11px] leading-[14px]">
                       <span className={status.kelas}>{status.teks}</span>
                       <span className="text-muted-foreground">
-                        {a.jamMasuk ? ` ${jamWib(a.jamMasuk)}` : ""} · {a.unit}
+                        {a.jamMasuk ? ` ${jamWib(a.jamMasuk)}` : ""}
+                        {/* Menit telat sudah memperhitungkan izin berjam
+                            yang disetujui, jadi angkanya bisa lebih kecil
+                            dari selisih terhadap jam kerja normal. */}
+                        {a.menitTelat > 0 ? ` · telat ${a.menitTelat} mnt` : ""}
+                        {a.izinSampai
+                          ? ` · izin s.d. ${a.izinSampai.slice(0, 5)}`
+                          : ""}{" "}
+                        · {a.unit}
                       </span>
                     </p>
+                    {/* Angkanya hanya ditampilkan pada daftar yang
+                        memang menanyakannya; di dua daftar lain ia
+                        cuma menambah teks yang harus dilewati mata. */}
+                    {saringan === "kurang_upload" ? (
+                      <p className="tabular truncate text-[11px] leading-[14px] font-semibold text-warn-text">
+                        {a.unggahanHariIni} dari {a.minimumUnggahan} unggahan ·
+                        kurang{" "}
+                        {(a.minimumUnggahan ?? 0) - (a.unggahanHariIni ?? 0)}
+                      </p>
+                    ) : null}
                   </div>
 
                   {bisaDitagih ? (

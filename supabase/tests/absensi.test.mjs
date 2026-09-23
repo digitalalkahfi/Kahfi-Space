@@ -16,14 +16,15 @@ const { uji, jalankan } = buatSuite("Absensi");
 
 const TGL = "2024-10-24";
 const idUser = async (n) =>
-  (await sebagaiAdmin(db, `select id from users where nama = $1`, [n])).rows[0].id;
+  (await sebagaiAdmin(db, `select id from users where nama = $1`, [n])).rows[0]
+    .id;
 
 const U = {
   manager: await idUser("Farhan Pratama"),
-  rian: await idUser("Rian Hidayat"),     // sudah absen, BELUM lapor
-  nabila: await idUser("Nabila Putri"),   // PIC @fashion_hijab, belum lapor hari ini
-  eko: await idUser("Eko Prasetyo"),      // belum absen sama sekali
-  yoga: await idUser("Yoga Saputra"),     // terlambat & di luar radius
+  rian: await idUser("Rian Hidayat"), // sudah absen, BELUM lapor
+  nabila: await idUser("Nabila Putri"), // PIC @fashion_hijab, belum lapor hari ini
+  eko: await idUser("Eko Prasetyo"), // belum absen sama sekali
+  yoga: await idUser("Yoga Saputra"), // terlambat & di luar radius
 };
 
 uji("seed absensi idempoten", async () => {
@@ -179,21 +180,24 @@ uji("Staff tidak bisa absen atas nama orang lain", async () => {
   );
 });
 
-uji("status_tim_harian melaporkan 25 orang dengan status laporannya", async () => {
-  const { rows } = await sebagai(
-    db,
-    U.manager,
-    `select * from status_tim_harian($1::date)`,
-    [TGL],
-  );
-  harusSama(rows.length, 25, "semua anggota aktif harus muncul");
-  const eko = rows.find((r) => r.nama === "Eko Prasetyo");
-  harusSama(eko.status, "alpa", "yang belum absen berstatus alpa");
-  const belumLapor = rows.filter(
-    (r) => !r.sudah_lapor && ["hadir", "terlambat"].includes(r.status),
-  );
-  harus(belumLapor.length > 0, "harus ada yang belum lapor untuk ditagih");
-});
+uji(
+  "status_tim_harian melaporkan 25 orang dengan status laporannya",
+  async () => {
+    const { rows } = await sebagai(
+      db,
+      U.manager,
+      `select * from status_tim_harian($1::date)`,
+      [TGL],
+    );
+    harusSama(rows.length, 25, "semua anggota aktif harus muncul");
+    const eko = rows.find((r) => r.nama === "Eko Prasetyo");
+    harusSama(eko.status, "alpa", "yang belum absen berstatus alpa");
+    const belumLapor = rows.filter(
+      (r) => !r.sudah_lapor && ["hadir", "terlambat"].includes(r.status),
+    );
+    harus(belumLapor.length > 0, "harus ada yang belum lapor untuk ditagih");
+  },
+);
 
 uji("yang TIDAK wajib lapor boleh absen pulang tanpa laporan", async () => {
   // Anisa staf Affiliator tanpa akun — ia tidak punya sasaran laporan,
@@ -236,6 +240,52 @@ uji("hanya PIC akun & Leader unit yang wajib lapor", async () => {
   harusSama(tidakWajib.wajib_lapor, false, "staf tanpa akun tidak wajib lapor");
 });
 
-const gagal = await jalankan();
+const gagal = uji(
+  "status tim membawa unggahan hari ini dan batas minimumnya",
+  async () => {
+    // Kolom ini yang dipakai kartu Pantau Kehadiran untuk menyaring
+    // "di bawah minimum" tanpa memanggil rekap terpisah (migrasi 0145).
+    const { rows } = await sebagai(
+      db,
+      U.manager,
+      `select nama, unggahan_hari_ini, minimum_unggahan
+       from status_tim_harian('2024-10-24')
+      where nama = 'Rian Hidayat'`,
+    );
+    const b = rows[0];
+
+    const akun = await sebagaiAdmin(
+      db,
+      `select coalesce(sum(batas_minimum(a.level)),0)::int as minimum,
+            coalesce(sum(r.jumlah_upload),0)::int as unggahan
+       from accounts a
+       left join daily_reports r
+         on r.account_id = a.id and r.tanggal = '2024-10-24'
+      where a.pic_user_id = (select id from users where nama='Rian Hidayat')
+        and a.status = 'aktif'`,
+    );
+
+    harusSama(
+      b.minimum_unggahan,
+      akun.rows[0].minimum,
+      "jumlah seluruh akunnya",
+    );
+    harusSama(b.unggahan_hari_ini, akun.rows[0].unggahan);
+  },
+);
+
+uji("orang tanpa akun berlevel tidak dinilai unggahannya", async () => {
+  const { rows } = await sebagai(
+    db,
+    U.manager,
+    `select minimum_unggahan, unggahan_hari_ini
+       from status_tim_harian('2024-10-24')
+      where nama = 'Galih Prakoso'`,
+  );
+  harusSama(rows[0].minimum_unggahan, null, "Leader MCN melapor per unit");
+  harusSama(rows[0].unggahan_hari_ini, null, "bukan nol; memang tidak dinilai");
+});
+
+await jalankan();
 await db.close();
 process.exit(gagal > 0 ? 1 : 0);

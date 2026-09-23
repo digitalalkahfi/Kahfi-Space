@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { modeData } from "@/lib/supabase/config";
+import { klienServer } from "@/lib/supabase/server";
 import { sesiSaatIni } from "@/lib/data/sesi";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
 import {
@@ -10,17 +11,16 @@ import {
   periksaAnggaran,
   type MasukanAnggaran,
 } from "@/lib/budget";
-import { daftarAnggaran } from "@/lib/data/budget";
+import { daftarAnggaran, idUnitDariKode } from "@/lib/data/budget";
 import { bolehLihatKeuangan } from "@/lib/keuangan";
 
 /**
  * Menetapkan atau membetulkan pagu anggaran.
  *
- * BELUM MENYIMPAN: tabel anggaran menyusul di lapisan backend Fase 3.
- * Yang dikerjakan di sini pemeriksaan isian, wewenang, dan bentrokan
- * pagu — dan balasannya menyebut batas itu apa adanya, sebab form yang
- * diam-diam tidak menyimpan apa pun jauh lebih merugikan daripada form
- * yang mengatakannya.
+ * Satu pos (periode + unit + jenis) hanya boleh punya satu pagu; itu
+ * dijaga dua kali — di sini supaya pesannya bisa dibaca manusia, dan
+ * oleh unique constraint di database supaya dua penyimpanan bersamaan
+ * tidak bisa menyelinap di antara pemeriksaan dan penulisan.
  */
 export async function simpanAnggaran(
   input: MasukanAnggaran,
@@ -51,7 +51,39 @@ export async function simpanAnggaran(
 
   if (modeData() === "demo") return BALASAN_DEMO;
 
-  revalidatePath("/keuangan/budget");
+  const sb = await klienServer();
+  const unitId = await idUnitDariKode(input.unitKode);
+  if (input.unitKode !== null && unitId === null) {
+    return gagal("Unit tidak dikenali.", "validasi");
+  }
+
+  const baris = {
+    periode: input.periode,
+    unit_id: unitId,
+    jenis: input.jenis,
+    jumlah: input.jumlah,
+    catatan: input.catatan,
+  };
+
+  const { error } = anggaranId
+    ? await sb.from("budgets").update(baris).eq("id", anggaranId)
+    : await sb.from("budgets").insert({ ...baris, dibuat_oleh: pengguna.id });
+
+  if (error) {
+    // 23505 = unique violation: ada yang menyimpan pos yang sama lebih
+    // dulu, di antara pemeriksaan di atas dan penulisan ini.
+    if (error.code === "23505") {
+      return gagal(
+        "Pos itu baru saja diberi pagu oleh orang lain. Muat ulang halamannya, lalu betulkan pagunya.",
+        "validasi",
+      );
+    }
+    return error.code === "42501"
+      ? gagal("Kamu tidak berhak menetapkan anggaran.", "izin")
+      : gagal(`Gagal menyimpan: ${error.message}`);
+  }
+
+  segarkan();
 
   const nama = judulAnggaran({
     ...input,
@@ -62,6 +94,11 @@ export async function simpanAnggaran(
 
   return sukses(
     undefined,
-    `Isian anggaran ${nama} sudah sah, tetapi belum tersimpan: tabel anggaran menyusul di lapisan backend.`,
+    anggaranId ? `Pagu ${nama} diperbarui.` : `Pagu ${nama} ditetapkan.`,
   );
+}
+
+function segarkan() {
+  revalidatePath("/keuangan/budget");
+  revalidatePath("/keuangan/budget/riwayat");
 }

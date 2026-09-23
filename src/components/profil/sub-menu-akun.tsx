@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 const MENU = [
   { href: "/profil", label: "Profil" },
   { href: "/keamanan", label: "Keamanan akun" },
+  { href: "/tampilan", label: "Tampilan" },
 ];
 
 export function SubMenuAkun() {

@@ -14,20 +14,28 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { MAKS_LEAD_MEASURE } from "@/lib/goal";
 import { tambahLeadMeasure } from "@/app/actions/lead-measure";
 
-export type PilihanGoalLead = { id: string; judul: string };
+export type PilihanGoalLead = {
+  id: string;
+  judul: string;
+  /** Lead measure aktif yang sudah menempel pada goal ini. */
+  jumlahAktif: number;
+};
 
 /**
  * Menyusun langkah kunci baru untuk sebuah goal.
  *
- * PRD membatasi tiga lead measure aktif per goal; batas itu dijaga database,
- * jadi dialog ini tidak menyembunyikan goal yang sudah penuh — penolakannya
- * datang dengan alasan yang jelas.
+ * PRD membatasi tiga lead measure aktif per goal; batasnya tetap dijaga
+ * database, tetapi goal yang sudah penuh ditandai dan dimatikan di sini
+ * juga — penolakan yang bisa diperkirakan tidak perlu menunggu kiriman.
  */
 export function DialogTambahLeadMeasure({ goal }: { goal: PilihanGoalLead[] }) {
   const [buka, setBuka] = useState(false);
-  const [goalId, setGoalId] = useState<string | null>(goal[0]?.id ?? null);
+  const [goalId, setGoalId] = useState<string | null>(
+    goal.find((g) => g.jumlahAktif < MAKS_LEAD_MEASURE)?.id ?? null,
+  );
   const [judul, setJudul] = useState("");
   const [satuan, setSatuan] = useState("");
   const [target, setTarget] = useState("");
@@ -96,25 +104,46 @@ export function DialogTambahLeadMeasure({ goal }: { goal: PilihanGoalLead[] }) {
               Goal
             </legend>
             <div className="max-h-40 space-y-1 overflow-y-auto">
-              {goal.map((g) => (
-                <button
-                  key={g.id}
-                  type="button"
-                  onClick={() => setGoalId(g.id)}
-                  aria-pressed={g.id === goalId}
-                  className={cn(
-                    "baris-interaktif w-full rounded-xl px-3 py-2 text-left text-[13px] leading-[18px] font-medium",
-                    g.id === goalId
-                      ? "bg-primary/10 ring-1 ring-primary/30"
-                      : "bg-muted/50",
-                  )}
-                >
-                  {g.judul}
-                </button>
-              ))}
+              {goal.map((g) => {
+                // Goal yang sudah penuh dimatikan di sini, bukan dibiarkan
+                // dipilih lalu ditolak database: penolakan yang bisa
+                // diperkirakan sebaiknya terlihat sebelum orangnya
+                // mengetik judul dan target.
+                const penuh = g.jumlahAktif >= MAKS_LEAD_MEASURE;
+                return (
+                  <button
+                    key={g.id}
+                    type="button"
+                    disabled={penuh}
+                    onClick={() => setGoalId(g.id)}
+                    aria-pressed={g.id === goalId}
+                    className={cn(
+                      "baris-interaktif flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2 text-left text-[13px] leading-[18px] font-medium",
+                      penuh
+                        ? "cursor-not-allowed bg-muted/30 text-muted-foreground"
+                        : g.id === goalId
+                          ? "bg-primary/10 ring-1 ring-primary/30"
+                          : "bg-muted/50",
+                    )}
+                  >
+                    <span className="min-w-0 truncate">{g.judul}</span>
+                    <span
+                      className={cn(
+                        "tabular shrink-0 rounded-full px-1.5 text-[10px] leading-[16px] font-semibold",
+                        penuh
+                          ? "bg-warn-fill text-warn-text"
+                          : "bg-card text-muted-foreground",
+                      )}
+                    >
+                      {g.jumlahAktif}/{MAKS_LEAD_MEASURE}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
             <p className="text-[11px] leading-[14px] text-muted-foreground">
-              Maksimal 3 lead measure aktif per goal.
+              Maksimal {MAKS_LEAD_MEASURE} lead measure aktif per goal; yang
+              sudah penuh tidak bisa dipilih.
             </p>
           </fieldset>
 

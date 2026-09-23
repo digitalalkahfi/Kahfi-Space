@@ -7,11 +7,28 @@ import { sesiSaatIni } from "@/lib/data/sesi";
 import {
   bolehMigrasi,
   eksporKvStore,
+  isiEksporLama,
   persetujuanPemetaan,
 } from "@/lib/data/migrasi";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
-import { PEMETAAN, versiPemetaan } from "@/lib/pemetaan";
-import { siapkanSemua, type Kamus } from "@/lib/impor";
+import { versiPemetaan } from "@/lib/pemetaan";
+import { PEMETAAN_V1 } from "@/lib/pemetaan-v1";
+import { rekapPemetaan } from "@/lib/rekap-pemetaan";
+import {
+  catatKunciTakDipetakan,
+  kumpulkanOrangPending,
+  terapkanAkun,
+  terapkanIzin,
+  terapkanKas,
+  terapkanKehadiran,
+  terapkanLaporan,
+  terapkanPengaturanAbsensi,
+  terapkanTodo,
+  terapkanTugas,
+  terapkanUsersList,
+  type HasilTerap,
+} from "@/lib/data/terapkan-migrasi";
+import { bacaEksporV1, tolakBerkas, type RingkasUnggah } from "@/lib/ekspor-v1";
 import type { TahapMigrasi } from "@/lib/migrasi";
 
 /**
@@ -21,11 +38,16 @@ import type { TahapMigrasi } from "@/lib/migrasi";
  * bukan diterima dari browser: kalau tidak, halaman lama yang masih
  * terbuka bisa menyetujui pemetaan yang sudah berubah.
  */
+/** Mencari pemetaan sebuah kelompok ekspor V1. */
+function cariPemetaan(entitas: string) {
+  return PEMETAAN_V1.find((p) => p.kunci === entitas);
+}
+
 export async function setujuiPemetaan(
   entitas: string,
   catatan: string,
 ): Promise<Hasil> {
-  const pemetaan = PEMETAAN.find((p) => p.kunci === entitas);
+  const pemetaan = cariPemetaan(entitas);
   if (!pemetaan) return gagal("Entitas tidak dikenali.", "validasi");
   if (modeData() === "demo") return BALASAN_DEMO;
 
@@ -38,6 +60,17 @@ export async function setujuiPemetaan(
     );
   }
 
+  // Angka yang dilihat saat menyetujui ikut disimpan.
+  //
+  // Persetujuan atas pemetaan tanpa angkanya hanya menyetujui bentuk;
+  // yang sebenarnya diputuskan orang adalah "pemetaan ini, untuk data
+  // sebanyak ini, dengan sekian yang masih menunggu keputusan". Kalau
+  // angkanya berubah sesudah itu — ekspor diunggah ulang, misalnya —
+  // perbedaannya harus bisa dilihat, bukan ditebak.
+  const rekapSaatIni = rekapPemetaan(await isiEksporLama(), PEMETAAN_V1).find(
+    (r) => r.kunci === entitas,
+  );
+
   const sb = await klienServer();
   const { error } = await sb.from("migrasi_persetujuan").insert({
     entitas,
@@ -46,7 +79,16 @@ export async function setujuiPemetaan(
     // Isinya ikut disalin: versi hanya sidik, dan pemetaan di kode akan
     // berubah — tanpa salinan ini tidak ada cara mengetahui bentuk yang
     // pernah disetujui.
-    pemetaan,
+    pemetaan: {
+      ...pemetaan,
+      rekap: rekapSaatIni
+        ? {
+            ekspor: rekapSaatIni.ekspor,
+            terpetakan: rekapSaatIni.terpetakan,
+            butuhKeputusan: rekapSaatIni.butuhKeputusan,
+          }
+        : null,
+    },
     catatan: catatan.trim().slice(0, 500),
   });
 
@@ -66,7 +108,7 @@ export async function setujuiPemetaan(
 
 /** Tarik kembali persetujuan sebuah entitas. */
 export async function tarikPersetujuan(entitas: string): Promise<Hasil> {
-  const pemetaan = PEMETAAN.find((p) => p.kunci === entitas);
+  const pemetaan = cariPemetaan(entitas);
   if (!pemetaan) return gagal("Entitas tidak dikenali.", "validasi");
   if (modeData() === "demo") return BALASAN_DEMO;
 
@@ -101,23 +143,6 @@ export async function tarikPersetujuan(entitas: string): Promise<Hasil> {
 // Menjalankan impor
 // ---------------------------------------------------------------------
 
-/** Tabel tujuan tiap entitas, beserta kolom yang menentukan keunikannya. */
-const TUJUAN: Record<
-  string,
-  {
-    tabel:
-      "users" | "accounts" | "goals" | "daily_reports" | "attendance" | "tasks";
-    kunci: string;
-  }
-> = {
-  user: { tabel: "users", kunci: "id" },
-  account: { tabel: "accounts", kunci: "username" },
-  goal: { tabel: "goals", kunci: "id" },
-  report: { tabel: "daily_reports", kunci: "tanggal" },
-  attendance: { tabel: "attendance", kunci: "tanggal" },
-  task: { tabel: "tasks", kunci: "judul" },
-};
-
 /**
  * Jalankan impor dari ekspor kv_store.
  *
@@ -144,7 +169,7 @@ export async function jalankanMigrasi(
 
   if (tahap === "sungguhan") {
     const disetujui = await persetujuanPemetaan();
-    const kurang = PEMETAAN.filter(
+    const kurang = PEMETAAN_V1.filter(
       (p) =>
         !disetujui.some(
           (s) => s.entitas === p.kunci && s.versi === versiPemetaan(p),
@@ -158,21 +183,19 @@ export async function jalankanMigrasi(
     }
   }
 
-  const [ekspor, kamus] = await Promise.all([eksporKvStore(), bangunKamus()]);
+  const ekspor = await eksporKvStore();
 
-  // Selagi `kv_store_lama` kosong, yang terbaca adalah berkas contoh di
+  // Selagi `kv_store_lama` kosong, yang terbaca adalah contoh ekspor di
   // repositori. Itu benar untuk uji coba dan berbahaya untuk sungguhan:
-  // baris karangan akan tertulis ke tabel sungguhan, dan migrasi
-  // sungguhan hanya boleh sekali. Database menolaknya juga (0122); di
-  // sini supaya pesannya sampai sebelum satu baris pun disentuh.
+  // baris contoh akan tertulis ke tabel sungguhan, dan migrasi sungguhan
+  // hanya boleh sekali. Database menolaknya juga (0122); di sini supaya
+  // pesannya sampai sebelum satu baris pun disentuh.
   if (tahap === "sungguhan" && ekspor.tiruan) {
     return gagal(
-      "Yang terbaca masih data contoh, bukan data sistem lama. Salin dulu kv_store lama ke tabel kv_store_lama sebelum menjalankan migrasi sungguhan.",
+      "Yang terbaca masih contoh ekspor, bukan data sistem lama. Unggah dulu ekspor K-Space lama sebelum menjalankan migrasi sungguhan.",
       "validasi",
     );
   }
-
-  const hasil = siapkanSemua(ekspor.entri, kamus);
 
   // Dimulai lewat fungsi database supaya seluruh syaratnya berlaku lewat
   // jalur mana pun: satu jalan terbuka, sungguhan sekali saja, dan wajib
@@ -182,7 +205,7 @@ export async function jalankanMigrasi(
     {
       p_tahap: tahap,
       p_sumber: ekspor.sumber,
-      p_pemetaan: PEMETAAN,
+      p_pemetaan: PEMETAAN_V1,
       p_catatan:
         tahap === "uji_coba"
           ? "Uji coba: tidak ada baris yang ditulis ke tabel tujuan."
@@ -194,40 +217,81 @@ export async function jalankanMigrasi(
     return gagal(galatJalan?.message ?? "Gagal memulai migrasi.", "validasi");
   }
 
-  // Penulisan sungguhan dikerjakan berurutan sesuai ketergantungan
-  // entitas — `siapkanSemua` sudah mengurutkannya.
-  if (tahap === "sungguhan") {
-    for (const h of hasil) {
-      if (h.status !== "berhasil" || !h.data) continue;
-      const tujuan = TUJUAN[h.entitas];
-      if (!tujuan) continue;
+  // Urutannya bukan hiasan: akun menunjuk orang, laporan menunjuk
+  // keduanya, dan seluruh data operasional menunjuk orang. Yang
+  // dijalankan lebih dulu adalah pengumpulan orang yang menunggu —
+  // supaya yang tidak tertaut sudah terdaftar sebelum barisnya ditemui.
+  const langkah: { label: string; jalankan: () => Promise<HasilTerap> }[] = [
+    { label: "Orang menunggu", jalankan: () => kumpulkanOrangPending(tahap) },
+    { label: "Anggota tim", jalankan: () => terapkanUsersList(tahap) },
+    { label: "Akun affiliator", jalankan: () => terapkanAkun(tahap) },
+    { label: "Laporan harian", jalankan: () => terapkanLaporan(tahap) },
+    { label: "Kehadiran", jalankan: () => terapkanKehadiran(tahap) },
+    { label: "Pengajuan izin", jalankan: () => terapkanIzin(tahap) },
+    { label: "Tugas & QC", jalankan: () => terapkanTugas(tahap) },
+    { label: "Todo", jalankan: () => terapkanTodo(tahap) },
+    { label: "Arus kas", jalankan: () => terapkanKas(tahap) },
+    {
+      label: "Pengaturan absensi",
+      jalankan: () => terapkanPengaturanAbsensi(tahap),
+    },
+    // Tidak menulis apa pun; hanya menuliskan keputusannya ke catatan.
+    { label: "Kunci tak dipetakan", jalankan: catatKunciTakDipetakan },
+  ];
 
-      const { error } = await sb
-        .from(tujuan.tabel)
-        .upsert(h.data as never, { onConflict: tujuan.kunci });
-
-      if (error) {
-        h.status = "gagal";
-        h.pesan = error.message;
-      }
+  const hasil: HasilTerap[] = [];
+  for (const l of langkah) {
+    try {
+      hasil.push(await l.jalankan());
+    } catch (e) {
+      // Satu kelompok yang gagal tidak boleh menghentikan sisanya:
+      // migrasi yang berhenti di tengah meninggalkan keadaan setengah
+      // jadi yang lebih sulit dijelaskan daripada kegagalan penuh.
+      hasil.push({
+        kelompok: l.label,
+        diperiksa: 0,
+        ditulis: 0,
+        tertahan: 0,
+        catatan: [
+          {
+            idLama: "-",
+            pesan: e instanceof Error ? e.message : "Kegagalan tak terduga.",
+          },
+        ],
+      });
     }
   }
 
-  const catatan = hasil.map((h) => ({
-    jalan_id: jalan.id,
-    entitas: h.entitas,
-    kunci_lama: h.kunciLama,
-    // Id baris barunya ikut dicatat: tanpa itu verifikasi hanya bisa
-    // membandingkan jumlah, bukan membuktikan barisnya benar-benar ada.
-    id_baru:
-      h.status === "berhasil" && h.data && typeof h.data === "object"
-        ? ((h.data as { id?: string }).id ?? null)
-        : null,
-    status: h.status,
-    pesan: h.pesan.slice(0, 500),
-  }));
+  // Hasil tiap kelompok disimpan sebagai angka, bukan disimpulkan dari
+  // catatan: yang berhasil tidak dicatat per entri, jadi jumlahnya tidak
+  // bisa dihitung dari sana.
+  const { error: galatRingkas } = await sb.from("migrasi_ringkas").insert(
+    hasil.map((h) => ({
+      jalan_id: jalan.id,
+      kelompok: h.kelompok,
+      diperiksa: h.diperiksa,
+      ditulis: h.ditulis,
+      tertahan: h.tertahan,
+    })),
+  );
+  if (galatRingkas) {
+    return gagal(`Gagal mencatat ringkasan migrasi: ${galatRingkas.message}`);
+  }
 
-  // Dimasukkan bertahap supaya satu permintaan tidak membawa ribuan baris.
+  // Tiap catatan yang tidak jadi ditulis disimpan beserta alasannya:
+  // migrasi yang berhenti di entri ke-3.000 tanpa penjelasan jauh lebih
+  // mahal daripada yang melaporkan semuanya.
+  const catatan = hasil.flatMap((h) =>
+    h.catatan.slice(0, 500).map((c) => ({
+      jalan_id: jalan.id,
+      entitas: h.kelompok,
+      kunci_lama: c.idLama,
+      id_baru: null,
+      status: "dilewati" as const,
+      pesan: c.pesan.slice(0, 500),
+    })),
+  );
+
   for (let i = 0; i < catatan.length; i += 200) {
     const { error } = await sb
       .from("migrasi_catatan")
@@ -249,36 +313,19 @@ export async function jalankanMigrasi(
   }
 
   revalidatePath("/migrasi");
+  revalidatePath("/migrasi/pemetaan");
+  revalidatePath("/migrasi/verifikasi");
 
-  const berhasil = hasil.filter((h) => h.status === "berhasil").length;
-  const gagalJumlah = hasil.filter((h) => h.status === "gagal").length;
+  const ditulis = hasil.reduce((a, h) => a + h.ditulis, 0);
+  const tertahan = hasil.reduce((a, h) => a + h.tertahan, 0);
+  const diperiksa = hasil.reduce((a, h) => a + h.diperiksa, 0);
 
   return sukses(
-    { jalanId: jalan.id, berhasil, gagal: gagalJumlah },
+    { jalanId: jalan.id, berhasil: ditulis, gagal: tertahan },
     tahap === "uji_coba"
-      ? `Uji coba selesai: ${berhasil} entri siap, ${gagalJumlah} bermasalah. Tidak ada yang ditulis.`
-      : `Migrasi selesai: ${berhasil} entri masuk, ${gagalJumlah} gagal.`,
+      ? `Uji coba selesai: ${diperiksa} catatan diperiksa, ${tertahan} tertahan. Tidak ada yang ditulis.`
+      : `Migrasi selesai: ${ditulis} baris ditulis, ${tertahan} tertahan. Aman diulang — catatan yang sudah pindah tidak dibuat dua kali.`,
   );
-}
-
-/** Padanan nama/kode lama → id, dibaca dari database saat itu juga. */
-async function bangunKamus(): Promise<Kamus> {
-  const sb = await klienServer();
-  const [unit, program, orang, akun] = await Promise.all([
-    sb.from("units").select("id, kode"),
-    sb.from("programs").select("id, nama"),
-    sb.from("users").select("id, nama"),
-    sb.from("accounts").select("id, username"),
-  ]);
-
-  return {
-    unit: Object.fromEntries((unit.data ?? []).map((u) => [u.kode, u.id])),
-    program: Object.fromEntries(
-      (program.data ?? []).map((p) => [p.nama, p.id]),
-    ),
-    pengguna: Object.fromEntries((orang.data ?? []).map((u) => [u.nama, u.id])),
-    akun: Object.fromEntries((akun.data ?? []).map((a) => [a.username, a.id])),
-  };
 }
 
 /**
@@ -362,4 +409,321 @@ export async function tutupMigrasi(jalanId: string): Promise<Hasil> {
 
   revalidatePath("/migrasi");
   return sukses(undefined, "Jalan migrasi ditutup.");
+}
+
+// ---------------------------------------------------------------------
+// Unggah ekspor K-Space lama
+// ---------------------------------------------------------------------
+
+/**
+ * Menerima berkas ekspor K-Space lama dan mengisi `kv_store_lama`.
+ *
+ * Sebelum ini satu-satunya jalan mengisi tabel itu adalah menempel SQL
+ * langsung ke basis data — pekerjaan yang tidak masuk akal diminta dari
+ * orang yang justru berhak melakukannya, dan yang membuat migrasi
+ * sungguhan tidak pernah punya jalan masuk sama sekali.
+ *
+ * Kata sandi dibuang di sini, sebelum satu baris pun dikirim
+ * (`buangKredensial`). Basis data menolaknya juga (0152); yang di sini
+ * supaya berkas yang wajar tetap bisa diunggah tanpa disunting manual,
+ * yang di sana supaya tidak ada jalan lain yang melewatkannya.
+ */
+export async function unggahEksporV1(
+  data: FormData,
+): Promise<Hasil<RingkasUnggah>> {
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (!bolehMigrasi(pengguna)) {
+    return gagal(
+      "Hanya CEO atau Manager yang boleh mengunggah ekspor sistem lama.",
+      "izin",
+    );
+  }
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const berkas = data.get("berkas");
+  if (!(berkas instanceof File)) {
+    return gagal("Tidak ada berkas yang terkirim.", "validasi");
+  }
+
+  // Aturannya sama persis dengan yang dipakai browser; yang mengikat
+  // adalah yang di sini.
+  const tolakan = tolakBerkas({ nama: berkas.name, ukuran: berkas.size });
+  if (tolakan) return gagal(tolakan, "validasi");
+
+  let mentah: unknown;
+  try {
+    mentah = JSON.parse(await berkas.text());
+  } catch {
+    return gagal(
+      "Berkasnya bukan JSON yang utuh. Pastikan yang diunggah berkas ekspor, bukan potongannya.",
+      "validasi",
+    );
+  }
+
+  const dibaca = bacaEksporV1(mentah);
+  if (!dibaca.ok) return gagal(dibaca.sebab, "validasi");
+
+  const disimpan = dibaca.isi.filter((i) => i.disimpan);
+  const sb = await klienServer();
+
+  const { data: unggahan, error: galatUnggahan } = await sb
+    .from("kv_unggahan")
+    .insert({
+      berkas: berkas.name,
+      meta: dibaca.meta?.mentah ?? {},
+      jumlah_kunci: disimpan.length,
+      jumlah_entri: disimpan.reduce((a, i) => a + i.jumlah, 0),
+      oleh: pengguna.id,
+    })
+    .select("id")
+    .single();
+
+  if (galatUnggahan || !unggahan) {
+    return galatUnggahan?.code === "42501"
+      ? gagal("Kamu tidak berhak mengunggah ekspor sistem lama.", "izin")
+      : gagal(
+          `Gagal mencatat unggahan: ${galatUnggahan?.message ?? "tidak diketahui"}`,
+        );
+  }
+
+  // Ditulis satu kunci per permintaan: satu kunci saja — `daily-reports:all`
+  // misalnya — bisa berisi belasan megabita, dan menumpuknya jadi satu
+  // permintaan hanya membuat kegagalannya tidak bisa ditelusuri ke kunci
+  // mana pun.
+  const masuk: string[] = [];
+  for (const isi of disimpan) {
+    const { error } = await sb.from("kv_store_lama").upsert(
+      {
+        key: isi.kunci,
+        value: isi.nilai,
+        unggahan_id: unggahan.id,
+      },
+      { onConflict: "key" },
+    );
+
+    if (!error) {
+      masuk.push(isi.kunci);
+      continue;
+    }
+
+    // Penjagaan terakhir di basis data (0152). Kalau sampai di sini,
+    // ejaan medan kata sandinya belum dikenali `buangKredensial`.
+    const sebab = /kata sandi/i.test(error.message)
+      ? `Kunci ${isi.kunci} masih memuat medan kata sandi yang belum dikenali. Laporkan kuncinya supaya daftarnya ditambah — jangan disunting manual.`
+      : `Gagal menyimpan kunci ${isi.kunci}: ${error.message}`;
+
+    // Yang sudah telanjur masuk disebut apa adanya. Unggahan yang
+    // berhenti di tengah meninggalkan tabel setengah terisi, dan orang
+    // yang tidak tahu bagian mana akan mengulang seluruhnya atau — lebih
+    // buruk — mengira semuanya gagal lalu memetakan yang setengah itu.
+    const sudah =
+      masuk.length > 0
+        ? ` ${masuk.length} kunci sebelumnya sudah tersimpan (${masuk.join(", ")}); mengunggah ulang berkas yang sama aman dan akan menimpanya.`
+        : " Belum ada satu kunci pun yang tersimpan.";
+
+    if (masuk.length === 0) {
+      // Tidak ada gunanya menyimpan catatan unggahan yang tidak membawa
+      // sebaris pun data.
+      await sb.from("kv_unggahan").delete().eq("id", unggahan.id);
+    } else {
+      await sb
+        .from("kv_unggahan")
+        .update({
+          jumlah_kunci: masuk.length,
+          jumlah_entri: disimpan
+            .filter((i) => masuk.includes(i.kunci))
+            .reduce((a, i) => a + i.jumlah, 0),
+        })
+        .eq("id", unggahan.id);
+    }
+
+    return gagal(`${sebab}${sudah}`, "validasi");
+  }
+
+  revalidatePath("/migrasi");
+  revalidatePath("/migrasi/pemetaan");
+  revalidatePath("/migrasi/verifikasi");
+
+  const dilewati = dibaca.isi.length - disimpan.length;
+
+  // Kunci dari unggahan sebelumnya yang tidak ada di berkas ini tetap
+  // tinggal — sengaja, karena bisa jadi ia datang dari ekspor lain yang
+  // masih dibutuhkan. Tetapi ia harus disebut: kunci lama yang diam-diam
+  // ikut terbaca sebagai bagian dari ekspor baru adalah campuran dua
+  // ekspor yang tidak pernah diminta siapa pun.
+  const { data: semua } = await sb
+    .from("kv_store_lama")
+    .select("key")
+    .neq("unggahan_id", unggahan.id);
+  const tertinggal = (semua ?? []).map((b) => b.key);
+
+  return sukses(
+    {
+      berkas: berkas.name,
+      meta: dibaca.meta,
+      baris: dibaca.isi.map(({ kunci, golongan, jumlah, disimpan }) => ({
+        kunci,
+        golongan,
+        jumlah,
+        disimpan,
+      })),
+    },
+    `${disimpan.length} kunci tersimpan${dilewati > 0 ? `, ${dilewati} dilewatkan` : ""}.${
+      tertinggal.length > 0
+        ? ` ${tertinggal.length} kunci dari unggahan sebelumnya masih tersimpan dan ikut dipetakan (${tertinggal.slice(0, 5).join(", ")}${tertinggal.length > 5 ? ", …" : ""}).`
+        : ""
+    } Data lama siap dipetakan.`,
+  );
+}
+
+// ---------------------------------------------------------------------
+// Menautkan orang V1 ke orang V2
+// ---------------------------------------------------------------------
+
+/**
+ * Menautkan seorang V1 ke profil V2, atau mencabut tautannya.
+ *
+ * Penautan menentukan siapa pemilik laporan, tugas, dan kehadiran yang
+ * ikut pindah. Salah tautan tidak menimbulkan galat apa pun — datanya
+ * tetap masuk, hanya menempel pada orang yang keliru — jadi setiap
+ * keputusan mencatat siapa yang mengambilnya (0154).
+ */
+export async function tautkanOrang(
+  idLama: string,
+  userId: string | null,
+): Promise<Hasil> {
+  if (!idLama.trim()) return gagal("Orang lama tidak dikenali.", "validasi");
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (!bolehMigrasi(pengguna)) {
+    return gagal("Hanya CEO atau Manager yang boleh menautkan orang.", "izin");
+  }
+
+  const sb = await klienServer();
+  const { data, error } = await sb
+    .from("migrasi_orang_pending")
+    .update({
+      user_id: userId,
+      diabaikan: false,
+      diputuskan_oleh: userId ? pengguna.id : null,
+    })
+    .eq("id_lama", idLama)
+    .select("id_lama");
+
+  if (error) {
+    if (error.code === "42501") {
+      return gagal("Kamu tidak berhak menautkan orang.", "izin");
+    }
+    // Satu orang V2 hanya boleh menjadi padanan satu orang V1 (0160):
+    // dua yang menunjuk orang yang sama akan menyatukan riwayat kerja
+    // dua orang, dan itu tidak bisa dipisahkan lagi sesudahnya.
+    if (error.code === "23505") {
+      return gagal(
+        "Orang V2 itu sudah menjadi padanan orang lama yang lain. Cabut tautan yang itu dulu kalau yang ini yang benar.",
+        "validasi",
+      );
+    }
+    return gagal(`Gagal menyimpan: ${error.message}`);
+  }
+  if ((data ?? []).length === 0) {
+    return gagal(
+      "Orang itu tidak ada di daftar yang menunggu keputusan.",
+      "validasi",
+    );
+  }
+
+  revalidatePath("/migrasi/orang");
+  revalidatePath("/migrasi/pemetaan");
+  return sukses(
+    undefined,
+    userId ? "Tautan disimpan." : "Tautan dicabut; orangnya kembali menunggu.",
+  );
+}
+
+/**
+ * Menandai seorang V1 sengaja tidak ditautkan.
+ *
+ * Bukan hal yang sama dengan membiarkannya menunggu: data yang
+ * menunjuknya tetap masuk tanpa penunjuk orang, dan itu keputusan yang
+ * harus ada pemiliknya.
+ */
+export async function abaikanOrang(idLama: string): Promise<Hasil> {
+  if (!idLama.trim()) return gagal("Orang lama tidak dikenali.", "validasi");
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (!bolehMigrasi(pengguna)) {
+    return gagal("Hanya CEO atau Manager yang boleh memutuskan ini.", "izin");
+  }
+
+  const sb = await klienServer();
+  const { data, error } = await sb
+    .from("migrasi_orang_pending")
+    .update({ user_id: null, diabaikan: true, diputuskan_oleh: pengguna.id })
+    .eq("id_lama", idLama)
+    .select("id_lama");
+
+  if (error) {
+    return error.code === "42501"
+      ? gagal("Kamu tidak berhak memutuskan ini.", "izin")
+      : gagal(`Gagal menyimpan: ${error.message}`);
+  }
+  if ((data ?? []).length === 0) {
+    return gagal(
+      "Orang itu tidak ada di daftar yang menunggu keputusan.",
+      "validasi",
+    );
+  }
+
+  revalidatePath("/migrasi/orang");
+  revalidatePath("/migrasi/pemetaan");
+  return sukses(
+    undefined,
+    "Ditandai sengaja tidak ditautkan. Data yang menunjuknya masuk tanpa penunjuk orang.",
+  );
+}
+
+/**
+ * Menyegarkan daftar orang yang menunggu keputusan.
+ *
+ * Daftar ini biasanya terisi saat migrasi dijalankan, tetapi orang perlu
+ * bisa melihatnya lebih dulu — sebelum menjalankan apa pun — untuk tahu
+ * berapa banyak yang harus diputuskan. Menjalankan uji coba penuh hanya
+ * untuk itu terlalu mahal, dan orang yang enggan menjalankannya akan
+ * mengerjakan penautannya belakangan, saat sudah terburu-buru.
+ */
+export async function segarkanOrangPending(): Promise<
+  Hasil<{ ditulis: number; menunggu: number }>
+> {
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (!bolehMigrasi(pengguna)) {
+    return gagal(
+      "Hanya CEO atau Manager yang boleh memeriksa daftar ini.",
+      "izin",
+    );
+  }
+
+  const hasil = await kumpulkanOrangPending("sungguhan");
+  if (hasil.ditulis === 0 && hasil.diperiksa > 0) {
+    return gagal(
+      `Gagal menyimpan daftar: ${hasil.catatan[0]?.pesan ?? "sebab tidak diketahui"}`,
+    );
+  }
+
+  revalidatePath("/migrasi/orang");
+  revalidatePath("/migrasi/pemetaan");
+
+  return sukses(
+    { ditulis: hasil.ditulis, menunggu: hasil.diperiksa },
+    hasil.diperiksa === 0
+      ? "Tidak ada orang yang menunggu keputusan — seluruh rujukan di data lama sudah punya padanan."
+      : `${hasil.diperiksa} orang menunggu keputusan; daftarnya diperbarui.`,
+  );
 }

@@ -2,11 +2,13 @@ import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import {
   medanTakTerpetakan,
-  PEMETAAN,
   ringkasPemetaan,
   versiPemetaan,
   type PemetaanEntitas,
 } from "../pemetaan.ts";
+import { PEMETAAN_V1 } from "../pemetaan-v1.ts";
+import { kolomTanpaSumber } from "../migrasi.ts";
+import { KUNCI_DIKENAL } from "../ekspor-v1.ts";
 
 const contoh: PemetaanEntitas = {
   kunci: "uji",
@@ -19,27 +21,14 @@ const contoh: PemetaanEntitas = {
   dibuang: [{ medanLama: "c", alasan: "tidak dipakai lagi" }],
 };
 
-test("setiap entitas kv_store punya pemetaan", () => {
-  const kunci = PEMETAAN.map((p) => p.kunci).sort();
-  assert.deepEqual(kunci, [
-    "account",
-    "attendance",
-    "goal",
-    "report",
-    "task",
-    "user",
-  ]);
-});
-
-test("tidak ada kolom tujuan yang ganda dalam satu entitas", () => {
-  for (const p of PEMETAAN) {
-    const kolom = p.baris.map((b) => b.kolomBaru);
-    assert.equal(
-      new Set(kolom).size,
-      kolom.length,
-      `kolom ganda pada entitas ${p.kunci}`,
-    );
+test("setiap kunci ekspor yang dikenali punya pemetaan", () => {
+  // Kunci yang dinyatakan dipetakan tetapi tidak punya pemetaan akan
+  // tersimpan tanpa pernah dipindahkan ke mana pun.
+  const dipetakan = new Set(PEMETAAN_V1.map((p) => p.kunci));
+  for (const k of KUNCI_DIKENAL) {
+    assert.ok(dipetakan.has(k.kunci), `kunci ${k.kunci} belum punya pemetaan`);
   }
+  assert.equal(PEMETAAN_V1.length, KUNCI_DIKENAL.length);
 });
 
 test("medan asing terdeteksi", () => {
@@ -80,7 +69,29 @@ test("versi tetap sama bila pemetaan tidak berubah", () => {
 });
 
 test("versi berbentuk sidik heksadesimal delapan digit", () => {
-  for (const p of PEMETAAN) {
+  for (const p of PEMETAAN_V1) {
     assert.match(versiPemetaan(p), /^[0-9a-f]{8}$/);
   }
+});
+
+test("kolom laporan harian ikut terpetakan", () => {
+  // Kolom yang tidak disebut pemetaan tidak akan pernah ditinjau orang
+  // sebelum migrasi dijalankan.
+  const laporan = PEMETAAN_V1.find((p) => p.kunci === "daily-reports:all");
+  assert.ok(laporan);
+  const kolom = laporan.baris.map((b) => b.kolomBaru);
+  for (const wajibAda of ["gmv", "komisi", "jumlah_upload", "catatan"]) {
+    assert.ok(kolom.includes(wajibAda), `kolom ${wajibAda} belum dipetakan`);
+  }
+});
+
+test("kolomTanpaSumber hanya menyebut kolom yang benar-benar dibiarkan kosong", () => {
+  // `department_id` tidak ada di data lama dan tidak diisi nilai bawaan.
+  assert.deepEqual(kolomTanpaSumber("users:list"), ["department_id"]);
+  // `platform` bawaan tapi diisi nilai, jadi bukan kolom kosong.
+  assert.equal(
+    kolomTanpaSumber("affiliate-accounts:all").includes("platform"),
+    false,
+  );
+  assert.deepEqual(kolomTanpaSumber("kunci-yang-tidak-ada"), []);
 });

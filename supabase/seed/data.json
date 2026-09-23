@@ -475,7 +475,8 @@
       "co_leader": "Dewi Lestari",
       "unit": "affiliator",
       "program": "Reguler",
-      "target_harian": 4500000
+      "target_harian": 4500000,
+      "level": 0
     },
     {
       "id": "6bc1d8ed-0115-50a0-a6b5-ae5570c9a925",
@@ -484,7 +485,8 @@
       "co_leader": "Dewi Lestari",
       "unit": "affiliator",
       "program": "Mabit Scholar",
-      "target_harian": 3000000
+      "target_harian": 3000000,
+      "level": 1
     },
     {
       "id": "341fd812-5440-518a-af7c-d9e589d9cc39",
@@ -493,7 +495,8 @@
       "co_leader": "Dewi Lestari",
       "unit": "affiliator",
       "program": "Reguler",
-      "target_harian": 3500000
+      "target_harian": 3500000,
+      "level": 2
     },
     {
       "id": "4bcb8165-a584-5d5b-a194-859250042d96",
@@ -502,7 +505,8 @@
       "co_leader": "Dewi Lestari",
       "unit": "affiliator",
       "program": "Reguler",
-      "target_harian": 4000000
+      "target_harian": 4000000,
+      "level": 0
     },
     {
       "id": "8fedddaa-ad4e-5faa-b7a0-9aa815be177f",
@@ -511,7 +515,8 @@
       "co_leader": "Dewi Lestari",
       "unit": "affiliator",
       "program": "Mabit Scholar",
-      "target_harian": 2500000
+      "target_harian": 2500000,
+      "level": 0
     },
     {
       "id": "87969379-7771-5c7a-bc4b-d4e5983b59be",
@@ -520,7 +525,8 @@
       "co_leader": "Dewi Lestari",
       "unit": "affiliator",
       "program": "Reguler",
-      "target_harian": 2500000
+      "target_harian": 2500000,
+      "level": 1
     }
   ],
   "announcements": [
@@ -898,7 +904,9 @@
       "gmv": 4176000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:18"
+      "jam": "18:18",
+      "komisi": 543000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@beauty_daily.id",
@@ -908,7 +916,9 @@
       "gmv": 2784000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:32"
+      "jam": "19:32",
+      "komisi": 223000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@fashion_hijab",
@@ -918,7 +928,9 @@
       "gmv": 3248000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:18"
+      "jam": "17:18",
+      "komisi": 292000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@gadget_daily",
@@ -928,7 +940,9 @@
       "gmv": 3712000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:05"
+      "jam": "18:05",
+      "komisi": 334000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@snack_nusantara",
@@ -938,7 +952,9 @@
       "gmv": 2320000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:47"
+      "jam": "19:47",
+      "komisi": 209000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@home_essentials",
@@ -948,7 +964,9 @@
       "gmv": 2320000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:47"
+      "jam": "18:47",
+      "komisi": 209000,
+      "jumlah_upload": 5
     },
     {
       "akun": null,
@@ -978,7 +996,9 @@
       "gmv": 4146000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:47"
+      "jam": "17:47",
+      "komisi": 332000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@beauty_daily.id",
@@ -988,7 +1008,9 @@
       "gmv": 2763000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:05"
+      "jam": "18:05",
+      "komisi": 249000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@fashion_hijab",
@@ -998,7 +1020,9 @@
       "gmv": 3223000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:47"
+      "jam": "18:47",
+      "komisi": 322000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@gadget_daily",
@@ -1008,7 +1032,9 @@
       "gmv": 3684000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:18"
+      "jam": "19:18",
+      "komisi": 368000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@snack_nusantara",
@@ -1018,7 +1044,9 @@
       "gmv": 2302000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:32"
+      "jam": "17:32",
+      "komisi": 230000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@home_essentials",
@@ -1028,7 +1056,9 @@
       "gmv": 2302000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:32"
+      "jam": "17:32",
+      "komisi": 230000,
+      "jumlah_upload": 5
     },
     {
       "akun": null,
@@ -1058,7 +1088,9 @@
       "gmv": 4416000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:47"
+      "jam": "19:47",
+      "komisi": 397000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@beauty_daily.id",
@@ -1068,7 +1100,9 @@
       "gmv": 2943000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:05"
+      "jam": "19:05",
+      "komisi": 294000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@fashion_hijab",
@@ -1078,7 +1112,9 @@
       "gmv": 3433000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:18"
+      "jam": "17:18",
+      "komisi": 378000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@gadget_daily",
@@ -1088,7 +1124,9 @@
       "gmv": 3924000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:47"
+      "jam": "19:47",
+      "komisi": 432000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@snack_nusantara",
@@ -1098,7 +1136,9 @@
       "gmv": 2452000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:18"
+      "jam": "17:18",
+      "komisi": 270000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@home_essentials",
@@ -1108,7 +1148,9 @@
       "gmv": 2452000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:47"
+      "jam": "18:47",
+      "komisi": 270000,
+      "jumlah_upload": 5
     },
     {
       "akun": null,
@@ -1138,7 +1180,9 @@
       "gmv": 3903000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:18"
+      "jam": "19:18",
+      "komisi": 390000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@beauty_daily.id",
@@ -1148,7 +1192,9 @@
       "gmv": 2601000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:47"
+      "jam": "18:47",
+      "komisi": 286000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@fashion_hijab",
@@ -1158,7 +1204,9 @@
       "gmv": 3034000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:32"
+      "jam": "17:32",
+      "komisi": 364000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@gadget_daily",
@@ -1168,7 +1216,9 @@
       "gmv": 3468000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:32"
+      "jam": "19:32",
+      "komisi": 416000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@snack_nusantara",
@@ -1178,7 +1228,9 @@
       "gmv": 2167000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:18"
+      "jam": "17:18",
+      "komisi": 260000,
+      "jumlah_upload": 5
     },
     {
       "akun": "@home_essentials",
@@ -1188,7 +1240,9 @@
       "gmv": 2167000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:05"
+      "jam": "18:05",
+      "komisi": 260000,
+      "jumlah_upload": 5
     },
     {
       "akun": null,
@@ -1218,7 +1272,9 @@
       "gmv": 3726000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:32"
+      "jam": "19:32",
+      "komisi": 410000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@beauty_daily.id",
@@ -1228,7 +1284,9 @@
       "gmv": 2482000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:05"
+      "jam": "19:05",
+      "komisi": 298000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@fashion_hijab",
@@ -1238,7 +1296,9 @@
       "gmv": 2896000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:32"
+      "jam": "17:32",
+      "komisi": 376000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@gadget_daily",
@@ -1248,7 +1308,9 @@
       "gmv": 3310000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:18"
+      "jam": "17:18",
+      "komisi": 430000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@snack_nusantara",
@@ -1258,7 +1320,9 @@
       "gmv": 2068000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:47"
+      "jam": "17:47",
+      "komisi": 269000,
+      "jumlah_upload": 5
     },
     {
       "akun": "@home_essentials",
@@ -1268,7 +1332,9 @@
       "gmv": 2068000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:05"
+      "jam": "18:05",
+      "komisi": 269000,
+      "jumlah_upload": 6
     },
     {
       "akun": null,
@@ -1298,7 +1364,9 @@
       "gmv": 3748000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:32"
+      "jam": "19:32",
+      "komisi": 487000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@beauty_daily.id",
@@ -1308,7 +1376,9 @@
       "gmv": 2497000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:32"
+      "jam": "19:32",
+      "komisi": 200000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@fashion_hijab",
@@ -1318,7 +1388,9 @@
       "gmv": 2913000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:47"
+      "jam": "17:47",
+      "komisi": 262000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@gadget_daily",
@@ -1328,7 +1400,9 @@
       "gmv": 3330000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:32"
+      "jam": "19:32",
+      "komisi": 300000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@snack_nusantara",
@@ -1338,7 +1412,9 @@
       "gmv": 2081000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:05"
+      "jam": "18:05",
+      "komisi": 187000,
+      "jumlah_upload": 5
     },
     {
       "akun": "@home_essentials",
@@ -1348,7 +1424,9 @@
       "gmv": 2081000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:47"
+      "jam": "19:47",
+      "komisi": 187000,
+      "jumlah_upload": 6
     },
     {
       "akun": null,
@@ -1378,7 +1456,9 @@
       "gmv": 3852000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:05"
+      "jam": "18:05",
+      "komisi": 308000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@beauty_daily.id",
@@ -1388,7 +1468,9 @@
       "gmv": 2566000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:32"
+      "jam": "19:32",
+      "komisi": 231000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@fashion_hijab",
@@ -1398,7 +1480,9 @@
       "gmv": 2994000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:18"
+      "jam": "18:18",
+      "komisi": 299000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@gadget_daily",
@@ -1408,7 +1492,9 @@
       "gmv": 3422000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:05"
+      "jam": "17:05",
+      "komisi": 342000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@snack_nusantara",
@@ -1418,7 +1504,9 @@
       "gmv": 2138000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:32"
+      "jam": "18:32",
+      "komisi": 214000,
+      "jumlah_upload": 5
     },
     {
       "akun": "@home_essentials",
@@ -1428,7 +1516,9 @@
       "gmv": 2138000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:47"
+      "jam": "18:47",
+      "komisi": 214000,
+      "jumlah_upload": 6
     },
     {
       "akun": null,
@@ -1458,7 +1548,9 @@
       "gmv": 4632000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:18"
+      "jam": "19:18",
+      "komisi": 417000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@beauty_daily.id",
@@ -1468,7 +1560,9 @@
       "gmv": 3087000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:18"
+      "jam": "17:18",
+      "komisi": 309000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@fashion_hijab",
@@ -1478,7 +1572,9 @@
       "gmv": 3601000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:05"
+      "jam": "19:05",
+      "komisi": 396000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@gadget_daily",
@@ -1488,7 +1584,9 @@
       "gmv": 4116000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:18"
+      "jam": "18:18",
+      "komisi": 453000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@snack_nusantara",
@@ -1498,7 +1596,9 @@
       "gmv": 2572000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:05"
+      "jam": "18:05",
+      "komisi": 283000,
+      "jumlah_upload": 5
     },
     {
       "akun": "@home_essentials",
@@ -1508,7 +1608,9 @@
       "gmv": 2572000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:05"
+      "jam": "17:05",
+      "komisi": 283000,
+      "jumlah_upload": 6
     },
     {
       "akun": null,
@@ -1538,7 +1640,9 @@
       "gmv": 3852000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:18"
+      "jam": "19:18",
+      "komisi": 501000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@beauty_daily.id",
@@ -1548,7 +1652,9 @@
       "gmv": 2566000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:47"
+      "jam": "17:47",
+      "komisi": 205000,
+      "jumlah_upload": 6
     },
     {
       "akun": "@fashion_hijab",
@@ -1558,7 +1664,9 @@
       "gmv": 2994000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:32"
+      "jam": "17:32",
+      "komisi": 269000,
+      "jumlah_upload": 6
     },
     {
       "akun": "@gadget_daily",
@@ -1568,7 +1676,9 @@
       "gmv": 3422000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:32"
+      "jam": "18:32",
+      "komisi": 308000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@snack_nusantara",
@@ -1578,7 +1688,9 @@
       "gmv": 2138000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:32"
+      "jam": "19:32",
+      "komisi": 192000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@home_essentials",
@@ -1588,7 +1700,9 @@
       "gmv": 2138000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:32"
+      "jam": "19:32",
+      "komisi": 192000,
+      "jumlah_upload": 4
     },
     {
       "akun": null,
@@ -1618,7 +1732,9 @@
       "gmv": 4581000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:47"
+      "jam": "17:47",
+      "komisi": 366000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@beauty_daily.id",
@@ -1628,7 +1744,9 @@
       "gmv": 3052000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:18"
+      "jam": "19:18",
+      "komisi": 275000,
+      "jumlah_upload": 6
     },
     {
       "akun": "@fashion_hijab",
@@ -1638,7 +1756,9 @@
       "gmv": 3561000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:18"
+      "jam": "17:18",
+      "komisi": 356000,
+      "jumlah_upload": 6
     },
     {
       "akun": "@gadget_daily",
@@ -1648,7 +1768,9 @@
       "gmv": 4070000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:18"
+      "jam": "17:18",
+      "komisi": 407000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@snack_nusantara",
@@ -1658,7 +1780,9 @@
       "gmv": 2543000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:32"
+      "jam": "19:32",
+      "komisi": 254000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@home_essentials",
@@ -1668,7 +1792,9 @@
       "gmv": 2543000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:18"
+      "jam": "17:18",
+      "komisi": 254000,
+      "jumlah_upload": 4
     },
     {
       "akun": null,
@@ -1698,7 +1824,9 @@
       "gmv": 4149000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:05"
+      "jam": "19:05",
+      "komisi": 373000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@beauty_daily.id",
@@ -1708,7 +1836,9 @@
       "gmv": 2764000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:47"
+      "jam": "18:47",
+      "komisi": 276000,
+      "jumlah_upload": 6
     },
     {
       "akun": "@fashion_hijab",
@@ -1718,7 +1848,9 @@
       "gmv": 3225000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:32"
+      "jam": "17:32",
+      "komisi": 355000,
+      "jumlah_upload": 6
     },
     {
       "akun": "@gadget_daily",
@@ -1728,7 +1860,9 @@
       "gmv": 3686000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:05"
+      "jam": "19:05",
+      "komisi": 405000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@snack_nusantara",
@@ -1738,7 +1872,9 @@
       "gmv": 2303000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:05"
+      "jam": "17:05",
+      "komisi": 253000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@home_essentials",
@@ -1748,7 +1884,9 @@
       "gmv": 2303000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:32"
+      "jam": "17:32",
+      "komisi": 253000,
+      "jumlah_upload": 5
     },
     {
       "akun": null,
@@ -1778,7 +1916,9 @@
       "gmv": 5094000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:32"
+      "jam": "18:32",
+      "komisi": 560000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@beauty_daily.id",
@@ -1788,7 +1928,9 @@
       "gmv": 3396000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:05"
+      "jam": "17:05",
+      "komisi": 408000,
+      "jumlah_upload": 6
     },
     {
       "akun": "@fashion_hijab",
@@ -1798,7 +1940,9 @@
       "gmv": 3962000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:47"
+      "jam": "17:47",
+      "komisi": 515000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@gadget_daily",
@@ -1808,7 +1952,9 @@
       "gmv": 4528000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:05"
+      "jam": "18:05",
+      "komisi": 589000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@snack_nusantara",
@@ -1818,7 +1964,9 @@
       "gmv": 2830000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:18"
+      "jam": "17:18",
+      "komisi": 368000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@home_essentials",
@@ -1828,7 +1976,9 @@
       "gmv": 2830000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:18"
+      "jam": "17:18",
+      "komisi": 368000,
+      "jumlah_upload": 5
     },
     {
       "akun": null,
@@ -1858,7 +2008,9 @@
       "gmv": 4491000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:18"
+      "jam": "19:18",
+      "komisi": 539000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@beauty_daily.id",
@@ -1868,7 +2020,9 @@
       "gmv": 2992000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:05"
+      "jam": "19:05",
+      "komisi": 389000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@fashion_hijab",
@@ -1878,7 +2032,9 @@
       "gmv": 3491000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:05"
+      "jam": "17:05",
+      "komisi": 279000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@gadget_daily",
@@ -1888,7 +2044,9 @@
       "gmv": 3990000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:32"
+      "jam": "17:32",
+      "komisi": 319000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@snack_nusantara",
@@ -1898,7 +2056,9 @@
       "gmv": 2493000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:47"
+      "jam": "19:47",
+      "komisi": 199000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@home_essentials",
@@ -1908,7 +2068,9 @@
       "gmv": 2493000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:05"
+      "jam": "18:05",
+      "komisi": 199000,
+      "jumlah_upload": 5
     },
     {
       "akun": null,
@@ -1938,7 +2100,9 @@
       "gmv": 4707000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:18"
+      "jam": "19:18",
+      "komisi": 612000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@beauty_daily.id",
@@ -1948,7 +2112,9 @@
       "gmv": 3138000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:32"
+      "jam": "17:32",
+      "komisi": 251000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@fashion_hijab",
@@ -1958,7 +2124,9 @@
       "gmv": 3661000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:32"
+      "jam": "17:32",
+      "komisi": 329000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@gadget_daily",
@@ -1968,7 +2136,9 @@
       "gmv": 4184000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:05"
+      "jam": "19:05",
+      "komisi": 377000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@snack_nusantara",
@@ -1978,7 +2148,9 @@
       "gmv": 2615000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:32"
+      "jam": "18:32",
+      "komisi": 235000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@home_essentials",
@@ -1988,7 +2160,9 @@
       "gmv": 2615000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:47"
+      "jam": "18:47",
+      "komisi": 235000,
+      "jumlah_upload": 5
     },
     {
       "akun": null,
@@ -2018,7 +2192,9 @@
       "gmv": 4221000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:05"
+      "jam": "18:05",
+      "komisi": 338000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@beauty_daily.id",
@@ -2028,7 +2204,9 @@
       "gmv": 2814000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:18"
+      "jam": "18:18",
+      "komisi": 253000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@fashion_hijab",
@@ -2038,7 +2216,9 @@
       "gmv": 3283000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:05"
+      "jam": "18:05",
+      "komisi": 328000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@gadget_daily",
@@ -2048,7 +2228,9 @@
       "gmv": 3752000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:32"
+      "jam": "18:32",
+      "komisi": 375000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@snack_nusantara",
@@ -2058,7 +2240,9 @@
       "gmv": 2345000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:18"
+      "jam": "17:18",
+      "komisi": 234000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@home_essentials",
@@ -2068,7 +2252,9 @@
       "gmv": 2345000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:05"
+      "jam": "18:05",
+      "komisi": 234000,
+      "jumlah_upload": 5
     },
     {
       "akun": null,
@@ -2098,7 +2284,9 @@
       "gmv": 4515000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:05"
+      "jam": "17:05",
+      "komisi": 406000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@beauty_daily.id",
@@ -2108,7 +2296,9 @@
       "gmv": 3009000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:32"
+      "jam": "19:32",
+      "komisi": 301000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@fashion_hijab",
@@ -2118,7 +2308,9 @@
       "gmv": 3510000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:05"
+      "jam": "18:05",
+      "komisi": 386000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@gadget_daily",
@@ -2128,7 +2320,9 @@
       "gmv": 4012000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:47"
+      "jam": "19:47",
+      "komisi": 441000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@snack_nusantara",
@@ -2138,7 +2332,9 @@
       "gmv": 2507000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:32"
+      "jam": "17:32",
+      "komisi": 276000,
+      "jumlah_upload": 5
     },
     {
       "akun": "@home_essentials",
@@ -2148,7 +2344,9 @@
       "gmv": 2507000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:18"
+      "jam": "17:18",
+      "komisi": 276000,
+      "jumlah_upload": 5
     },
     {
       "akun": null,
@@ -2178,7 +2376,9 @@
       "gmv": 3930000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:18"
+      "jam": "17:18",
+      "komisi": 393000,
+      "jumlah_upload": 4
     },
     {
       "akun": "@beauty_daily.id",
@@ -2188,7 +2388,9 @@
       "gmv": 2619000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:47"
+      "jam": "17:47",
+      "komisi": 288000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@fashion_hijab",
@@ -2198,7 +2400,9 @@
       "gmv": 3055000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:18"
+      "jam": "17:18",
+      "komisi": 367000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@gadget_daily",
@@ -2208,7 +2412,9 @@
       "gmv": 3492000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:32"
+      "jam": "18:32",
+      "komisi": 419000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@snack_nusantara",
@@ -2218,7 +2424,9 @@
       "gmv": 2182000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:05"
+      "jam": "19:05",
+      "komisi": 262000,
+      "jumlah_upload": 5
     },
     {
       "akun": "@home_essentials",
@@ -2228,7 +2436,9 @@
       "gmv": 2182000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:05"
+      "jam": "19:05",
+      "komisi": 262000,
+      "jumlah_upload": 6
     },
     {
       "akun": null,
@@ -2258,7 +2468,9 @@
       "gmv": 3775000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:05"
+      "jam": "18:05",
+      "komisi": 340000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@beauty_daily.id",
@@ -2268,7 +2480,9 @@
       "gmv": 2515000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:47"
+      "jam": "19:47",
+      "komisi": 252000,
+      "jumlah_upload": 5
     },
     {
       "akun": "@fashion_hijab",
@@ -2278,7 +2492,9 @@
       "gmv": 2934000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:32"
+      "jam": "17:32",
+      "komisi": 323000,
+      "jumlah_upload": 6
     },
     {
       "akun": "@gadget_daily",
@@ -2288,7 +2504,9 @@
       "gmv": 3354000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:32"
+      "jam": "18:32",
+      "komisi": 369000,
+      "jumlah_upload": 6
     },
     {
       "akun": "@snack_nusantara",
@@ -2298,7 +2516,9 @@
       "gmv": 2096000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:47"
+      "jam": "19:47",
+      "komisi": 231000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@home_essentials",
@@ -2308,7 +2528,9 @@
       "gmv": 2096000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:18"
+      "jam": "18:18",
+      "komisi": 231000,
+      "jumlah_upload": 4
     },
     {
       "akun": null,
@@ -2338,7 +2560,9 @@
       "gmv": 5130000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:18"
+      "jam": "18:18",
+      "komisi": 513000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@beauty_daily.id",
@@ -2348,7 +2572,9 @@
       "gmv": 3418000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:32"
+      "jam": "18:32",
+      "komisi": 376000,
+      "jumlah_upload": 6
     },
     {
       "akun": "@fashion_hijab",
@@ -2358,7 +2584,9 @@
       "gmv": 3988000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:47"
+      "jam": "19:47",
+      "komisi": 479000,
+      "jumlah_upload": 6
     },
     {
       "akun": "@gadget_daily",
@@ -2368,7 +2596,9 @@
       "gmv": 4558000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:18"
+      "jam": "18:18",
+      "komisi": 547000,
+      "jumlah_upload": 6
     },
     {
       "akun": "@snack_nusantara",
@@ -2378,7 +2608,9 @@
       "gmv": 2848000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:05"
+      "jam": "18:05",
+      "komisi": 342000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@home_essentials",
@@ -2388,7 +2620,9 @@
       "gmv": 2848000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:47"
+      "jam": "17:47",
+      "komisi": 342000,
+      "jumlah_upload": 4
     },
     {
       "akun": null,
@@ -2418,7 +2652,9 @@
       "gmv": 3510000,
       "catatan": "Live 4 jam, bundling serum + toner jalan. Stok toner tinggal 40 pcs.",
       "status": "terkirim",
-      "jam": "18:47"
+      "jam": "18:47",
+      "komisi": 386000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@beauty_daily.id",
@@ -2428,7 +2664,9 @@
       "gmv": 2340000,
       "catatan": "Host pengganti, ritme masih menyesuaikan.",
       "status": "terkirim",
-      "jam": "19:18"
+      "jam": "19:18",
+      "komisi": 281000,
+      "jumlah_upload": 6
     },
     {
       "akun": "@fashion_hijab",
@@ -2438,7 +2676,9 @@
       "gmv": 2730000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:32"
+      "jam": "19:32",
+      "komisi": 355000,
+      "jumlah_upload": 6
     },
     {
       "akun": "@gadget_daily",
@@ -2448,7 +2688,9 @@
       "gmv": 3120000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:18"
+      "jam": "18:18",
+      "komisi": 406000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@snack_nusantara",
@@ -2458,7 +2700,9 @@
       "gmv": 1950000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:47"
+      "jam": "17:47",
+      "komisi": 254000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@home_essentials",
@@ -2468,7 +2712,9 @@
       "gmv": 1950000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "18:05"
+      "jam": "18:05",
+      "komisi": 254000,
+      "jumlah_upload": 4
     },
     {
       "akun": null,
@@ -2498,7 +2744,9 @@
       "gmv": 4784000,
       "catatan": "Live streaming 3 jam stabil, konversi paket glowing bundle naik 22%.",
       "status": "terkirim",
-      "jam": "19:47"
+      "jam": "19:47",
+      "komisi": 574000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@beauty_daily.id",
@@ -2508,7 +2756,9 @@
       "gmv": 3404000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:18"
+      "jam": "17:18",
+      "komisi": 443000,
+      "jumlah_upload": 6
     },
     {
       "akun": "@gadget_daily",
@@ -2518,7 +2768,9 @@
       "gmv": 4324000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "19:32"
+      "jam": "19:32",
+      "komisi": 346000,
+      "jumlah_upload": 2
     },
     {
       "akun": "@snack_nusantara",
@@ -2528,7 +2780,9 @@
       "gmv": 2944000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:32"
+      "jam": "17:32",
+      "komisi": 236000,
+      "jumlah_upload": 3
     },
     {
       "akun": "@home_essentials",
@@ -2538,7 +2792,9 @@
       "gmv": 2944000,
       "catatan": "",
       "status": "terkirim",
-      "jam": "17:32"
+      "jam": "17:32",
+      "komisi": 236000,
+      "jumlah_upload": 4
     },
     {
       "akun": null,
@@ -3795,6 +4051,446 @@
   ],
   "attendance": [
     {
+      "user": "Anisa Larasati",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:44:00+07:00",
+      "lat": -6.261269,
+      "lng": 106.809988
+    },
+    {
+      "user": "Arif Setiawan",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T08:02:00+07:00",
+      "lat": -6.260478,
+      "lng": 106.810396
+    },
+    {
+      "user": "Bagas Adriansyah",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:46:00+07:00",
+      "lat": -6.260775,
+      "lng": 106.81028
+    },
+    {
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:34:00+07:00",
+      "lat": -6.26144,
+      "lng": 106.810494
+    },
+    {
+      "user": "Dewi Lestari",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:36:00+07:00",
+      "lat": -6.260624,
+      "lng": 106.8099
+    },
+    {
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:43:00+07:00",
+      "lat": -6.261388,
+      "lng": 106.809945
+    },
+    {
+      "user": "Fajar Ramadhan",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T08:01:00+07:00",
+      "lat": -6.260126,
+      "lng": 106.810263
+    },
+    {
+      "user": "Farhan Pratama",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:55:00+07:00",
+      "lat": -6.260982,
+      "lng": 106.810041
+    },
+    {
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:49:00+07:00",
+      "lat": -6.261405,
+      "lng": 106.81013
+    },
+    {
+      "user": "Hafidz Alkahfi",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:23:00+07:00",
+      "lat": -6.260459,
+      "lng": 106.809916
+    },
+    {
+      "user": "Hendra Kusuma",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:53:00+07:00",
+      "lat": -6.261006,
+      "lng": 106.811106
+    },
+    {
+      "user": "Intan Permata",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:40:00+07:00",
+      "lat": -6.260496,
+      "lng": 106.811316
+    },
+    {
+      "user": "Laras Ayuningtyas",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:50:00+07:00",
+      "lat": -6.260229,
+      "lng": 106.810918
+    },
+    {
+      "user": "Maya Safitri",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:47:00+07:00",
+      "lat": -6.260821,
+      "lng": 106.811123
+    },
+    {
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T09:17:00+07:00",
+      "lat": -6.261407,
+      "lng": 106.810612
+    },
+    {
+      "user": "Putri Amelia",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:39:00+07:00",
+      "lat": -6.261211,
+      "lng": 106.810731
+    },
+    {
+      "user": "Rendi Firmansyah",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T08:25:00+07:00",
+      "lat": -6.260997,
+      "lng": 106.810737
+    },
+    {
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:51:00+07:00",
+      "lat": -6.260643,
+      "lng": 106.810385
+    },
+    {
+      "user": "Rizky Ananda",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:58:00+07:00",
+      "lat": -6.261302,
+      "lng": 106.810157
+    },
+    {
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:32:00+07:00",
+      "lat": -6.259938,
+      "lng": 106.809875
+    },
+    {
+      "user": "Vina Oktaviani",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T07:55:00+07:00",
+      "lat": -6.260411,
+      "lng": 106.810484
+    },
+    {
+      "user": "Yoga Saputra",
+      "tanggal": "2024-10-22",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-22T08:50:00+07:00",
+      "lat": -6.256577,
+      "lng": 106.810435
+    },
+    {
+      "user": "Anisa Larasati",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:39:00+07:00",
+      "lat": -6.261269,
+      "lng": 106.809988
+    },
+    {
+      "user": "Arif Setiawan",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:57:00+07:00",
+      "lat": -6.260478,
+      "lng": 106.810396
+    },
+    {
+      "user": "Bagas Adriansyah",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:41:00+07:00",
+      "lat": -6.260775,
+      "lng": 106.81028
+    },
+    {
+      "user": "Bayu Nugraha",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:29:00+07:00",
+      "lat": -6.26144,
+      "lng": 106.810494
+    },
+    {
+      "user": "Dewi Lestari",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:31:00+07:00",
+      "lat": -6.260624,
+      "lng": 106.8099
+    },
+    {
+      "user": "Dimas Maulana",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:38:00+07:00",
+      "lat": -6.261388,
+      "lng": 106.809945
+    },
+    {
+      "user": "Fajar Ramadhan",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:56:00+07:00",
+      "lat": -6.260126,
+      "lng": 106.810263
+    },
+    {
+      "user": "Farhan Pratama",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:50:00+07:00",
+      "lat": -6.260982,
+      "lng": 106.810041
+    },
+    {
+      "user": "Galih Prakoso",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:44:00+07:00",
+      "lat": -6.261405,
+      "lng": 106.81013
+    },
+    {
+      "user": "Hafidz Alkahfi",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:18:00+07:00",
+      "lat": -6.260459,
+      "lng": 106.809916
+    },
+    {
+      "user": "Hendra Kusuma",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:48:00+07:00",
+      "lat": -6.261006,
+      "lng": 106.811106
+    },
+    {
+      "user": "Intan Permata",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:35:00+07:00",
+      "lat": -6.260496,
+      "lng": 106.811316
+    },
+    {
+      "user": "Laras Ayuningtyas",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:45:00+07:00",
+      "lat": -6.260229,
+      "lng": 106.810918
+    },
+    {
+      "user": "Maya Safitri",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:42:00+07:00",
+      "lat": -6.260821,
+      "lng": 106.811123
+    },
+    {
+      "user": "Nabila Putri",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T09:12:00+07:00",
+      "lat": -6.261407,
+      "lng": 106.810612
+    },
+    {
+      "user": "Putri Amelia",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:34:00+07:00",
+      "lat": -6.261211,
+      "lng": 106.810731
+    },
+    {
+      "user": "Rendi Firmansyah",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T08:20:00+07:00",
+      "lat": -6.260997,
+      "lng": 106.810737
+    },
+    {
+      "user": "Rian Hidayat",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:46:00+07:00",
+      "lat": -6.260643,
+      "lng": 106.810385
+    },
+    {
+      "user": "Rizky Ananda",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:53:00+07:00",
+      "lat": -6.261302,
+      "lng": 106.810157
+    },
+    {
+      "user": "Salsabila Rahma",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:27:00+07:00",
+      "lat": -6.259938,
+      "lng": 106.809875
+    },
+    {
+      "user": "Vina Oktaviani",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T07:50:00+07:00",
+      "lat": -6.260411,
+      "lng": 106.810484
+    },
+    {
+      "user": "Yoga Saputra",
+      "tanggal": "2024-10-23",
+      "status": "hadir",
+      "alasan": "",
+      "persetujuan": null,
+      "jam_masuk": "2024-10-23T08:45:00+07:00",
+      "lat": -6.256577,
+      "lng": 106.810435
+    },
+    {
       "user": "Farhan Pratama",
       "tanggal": "2024-10-24",
       "status": "hadir",
@@ -3827,12 +4523,15 @@
     {
       "user": "Nabila Putri",
       "tanggal": "2024-10-24",
-      "status": "terlambat",
-      "alasan": "",
-      "persetujuan": null,
+      "status": "hadir",
+      "alasan": "Mengantar anak ke dokter, masuk setelah itu.",
+      "persetujuan": "disetujui",
       "jam_masuk": "2024-10-24T09:14:00+07:00",
       "lat": -6.261407,
-      "lng": 106.810612
+      "lng": 106.810612,
+      "izin_jenis": "jam",
+      "izin_mulai": "08:00",
+      "izin_selesai": "09:00"
     },
     {
       "user": "Bayu Nugraha",
@@ -3988,11 +4687,14 @@
       "user": "Rendi Firmansyah",
       "tanggal": "2024-10-24",
       "status": "terlambat",
-      "alasan": "",
-      "persetujuan": null,
+      "alasan": "Mengurus perpanjangan STNK, kembali sebelum siang.",
+      "persetujuan": "diajukan",
       "jam_masuk": "2024-10-24T08:22:00+07:00",
       "lat": -6.260997,
-      "lng": 106.810737
+      "lng": 106.810737,
+      "izin_jenis": "jam",
+      "izin_mulai": "08:00",
+      "izin_selesai": "09:00"
     },
     {
       "user": "Bagas Adriansyah",
@@ -4041,6 +4743,33 @@
       "status": "sakit",
       "alasan": "Radang tenggorokan, sudah periksa ke klinik pagi ini.",
       "persetujuan": "diajukan"
+    },
+    {
+      "user": "Yoga Saputra",
+      "tanggal": "2024-10-28",
+      "status": "izin",
+      "alasan": "Menghadiri pernikahan keluarga di luar kota.",
+      "persetujuan": "diajukan",
+      "izin_jenis": "terencana",
+      "izin_induk": null
+    },
+    {
+      "user": "Yoga Saputra",
+      "tanggal": "2024-10-29",
+      "status": "izin",
+      "alasan": "Menghadiri pernikahan keluarga di luar kota.",
+      "persetujuan": "diajukan",
+      "izin_jenis": "terencana",
+      "izin_induk": "2024-10-28"
+    },
+    {
+      "user": "Yoga Saputra",
+      "tanggal": "2024-10-30",
+      "status": "izin",
+      "alasan": "Menghadiri pernikahan keluarga di luar kota.",
+      "persetujuan": "diajukan",
+      "izin_jenis": "terencana",
+      "izin_induk": "2024-10-28"
     }
   ],
   "lead_measures": [
@@ -4070,6 +4799,16 @@
       "target_mingguan": 200,
       "label_pendukung": null,
       "urutan": 1
+    },
+    {
+      "id": "2c1f9d64-7a83-5ae1-bb02-91d4f0c67a15",
+      "unit": "affiliator",
+      "judul": "Upload Konten Harian",
+      "satuan": "konten",
+      "target_mingguan": 140,
+      "label_pendukung": null,
+      "urutan": 2,
+      "sumber_laporan": "jumlah_upload"
     }
   ],
   "lead_measure_entries": [
@@ -4960,6 +5699,18 @@
     }
   ],
   "sample_scans": [
+    {
+      "kode": "SMP-0002",
+      "oleh": "Rian Hidayat",
+      "dikenali": true,
+      "lalu_hari": 0
+    },
+    {
+      "kode": "SMP-0001",
+      "oleh": "Rian Hidayat",
+      "dikenali": true,
+      "lalu_hari": 0
+    },
     {
       "kode": "SMP-0003",
       "oleh": "Nabila Putri",
@@ -5975,6 +6726,88 @@
       "galat": "",
       "dikirim": "2024-10-24T10:30:12+07:00",
       "dibuat": "2024-10-24T10:30:02+07:00"
+    }
+  ],
+  "level_events": [
+    {
+      "akun": "@skincare_official",
+      "dari": null,
+      "ke": 0,
+      "oleh": "Farhan Pratama",
+      "alasan": "Akun baru, mulai dari level dasar",
+      "pada": "2024-07-01T09:10:00+07:00"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "dari": null,
+      "ke": 0,
+      "oleh": "Farhan Pratama",
+      "alasan": "Akun baru, mulai dari level dasar",
+      "pada": "2024-07-01T09:12:00+07:00"
+    },
+    {
+      "akun": "@beauty_daily.id",
+      "dari": 0,
+      "ke": 1,
+      "oleh": "Farhan Pratama",
+      "alasan": "Tiga bulan berturut melewati minimum, ritme unggahan stabil",
+      "pada": "2024-10-01T08:40:00+07:00"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "dari": null,
+      "ke": 0,
+      "oleh": "Farhan Pratama",
+      "alasan": "Akun baru, mulai dari level dasar",
+      "pada": "2024-07-01T09:14:00+07:00"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "dari": 0,
+      "ke": 3,
+      "oleh": "Hafidz Alkahfi",
+      "alasan": "Target dinaikkan mengikuti kampanye Ramadan",
+      "pada": "2024-09-02T10:05:00+07:00"
+    },
+    {
+      "akun": "@fashion_hijab",
+      "dari": 3,
+      "ke": 2,
+      "oleh": "Farhan Pratama",
+      "alasan": "Diturunkan setelah dua bulan tidak pernah menyentuh minimum",
+      "pada": "2024-10-14T16:20:00+07:00"
+    },
+    {
+      "akun": "@gadget_daily",
+      "dari": null,
+      "ke": 0,
+      "oleh": "Farhan Pratama",
+      "alasan": "Akun baru, mulai dari level dasar",
+      "pada": "2024-07-01T09:16:00+07:00"
+    },
+    {
+      "akun": "@snack_nusantara",
+      "dari": null,
+      "ke": 0,
+      "oleh": "Farhan Pratama",
+      "alasan": "Akun baru, mulai dari level dasar",
+      "pada": "2024-07-01T09:18:00+07:00"
+    },
+    {
+      "akun": "@home_essentials",
+      "dari": null,
+      "ke": 0,
+      "oleh": "Farhan Pratama",
+      "alasan": "Akun baru, mulai dari level dasar",
+      "pada": "2024-07-01T09:20:00+07:00"
+    },
+    {
+      "akun": "@home_essentials",
+      "dari": 0,
+      "ke": 1,
+      "oleh": "Farhan Pratama",
+      "alasan": "Volume unggahan naik stabil sejak kampanye peralatan rumah",
+      "pada": "2024-09-16T11:30:00+07:00"
     }
   ]
 }

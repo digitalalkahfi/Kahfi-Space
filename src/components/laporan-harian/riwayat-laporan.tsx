@@ -2,7 +2,10 @@ import Link from "next/link";
 import { History, PencilLine } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { GAYA_CAPAIAN, warnaCapaian } from "@/lib/capaian";
+import { GAYA_MINIMUM, statusTerkirim } from "@/lib/batas-minimum";
 import {
+  bilangan,
   persen,
   rasioCapaian,
   rupiahPenuh,
@@ -36,13 +39,18 @@ export function RiwayatLaporan({
       <ul className="space-y-2 px-5">
         {riwayat.slice(0, 3).map((r) => {
           const rasio = rasioCapaian(r.gmv, r.target);
-          const tercapai = r.gmv >= r.target;
+          const warna = warnaCapaian(rasio, r.target > 0);
+          const statusUpload = statusTerkirim(r.jumlahUpload, r.minimumUpload);
           return (
             <li
               key={r.id}
               className={cn(
                 "baris-interaktif rounded-2xl p-3.5",
-                tercapai ? "bg-ok-fill/60" : "bg-warn-fill/60",
+                warna === "hijau"
+                  ? "bg-ok-fill/60"
+                  : warna === "merah"
+                    ? "bg-danger-fill/50"
+                    : "bg-warn-fill/60",
               )}
             >
               <div className="flex items-start justify-between gap-3">
@@ -57,14 +65,36 @@ export function RiwayatLaporan({
                 <span
                   className={cn(
                     "tabular shrink-0 rounded-full px-2.5 py-1 text-[11px] leading-[14px] font-semibold",
-                    tercapai
-                      ? "bg-ok-fill text-ok-text"
-                      : "bg-warn-fill text-warn-text",
+                    warna
+                      ? GAYA_CAPAIAN[warna].pil
+                      : "bg-muted text-muted-foreground",
                   )}
                 >
-                  {persen(rasio)}
+                  {r.target > 0 ? persen(rasio) : "—"}
                 </span>
               </div>
+
+              {/* Unggahan terhadap batas minimumnya ikut di sini: GMV
+                  sudah tercapai bukan alasan unggahan boleh sepi, dan
+                  dua angka itu memang dinilai terpisah. */}
+              {statusUpload ? (
+                <p
+                  className={cn(
+                    "tabular mt-1.5 inline-flex items-center gap-1 rounded-full px-2 py-0.5",
+                    "text-[11px] leading-[14px] font-semibold",
+                    GAYA_MINIMUM[statusUpload].pil,
+                  )}
+                >
+                  {bilangan(r.jumlahUpload ?? 0)} /{" "}
+                  {bilangan(r.minimumUpload ?? 0)} upload
+                  <span className="sr-only">
+                    —{" "}
+                    {statusUpload === "terpenuhi"
+                      ? "memenuhi batas minimum"
+                      : "di bawah batas minimum"}
+                  </span>
+                </p>
+              ) : null}
 
               <p className="mt-1.5 line-clamp-2 text-[11px] leading-[14px] text-muted-foreground">
                 {r.catatan}

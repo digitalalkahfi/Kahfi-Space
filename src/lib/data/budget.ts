@@ -3,22 +3,58 @@ import "server-only";
 
 import { dataContoh } from "@/lib/data/contoh";
 import { modeData } from "@/lib/supabase/config";
+import { klienServer } from "@/lib/supabase/server";
 import type { AlokasiAnggaran, Anggaran, StatusAlokasi } from "@/lib/budget";
 import type { JenisKeluar } from "@/lib/keuangan";
 import type { KodeUnit, Pengguna } from "@/lib/types";
 
+/** Nama unit tanpa keterangan dalam kurung; null berarti perusahaan. */
+function namaUnit(nama: string | null | undefined) {
+  return nama ? nama.split(" (")[0] : "Perusahaan";
+}
+
 /**
- * Daftar anggaran.
+ * Daftar pagu anggaran.
  *
- * SEMENTARA: tabelnya menyusul di lapisan backend Fase 3. Sampai itu
- * angkanya dibaca dari data contoh — realisasinya sendiri sudah nyata,
- * dihitung dari transaksi yang tersimpan, jadi yang tiruan hanya
- * pagunya.
+ * Mode Supabase membaca tabel `budgets` (migrasi 0148); RLS yang
+ * menentukan siapa melihat apa. Mode demo tetap dari seed.
  */
 export async function daftarAnggaran(pengguna: Pengguna): Promise<Anggaran[]> {
-  void pengguna;
-  void modeData();
+  if (modeData() === "demo") return anggaranDemo();
 
+  void pengguna;
+  const sb = await klienServer();
+  const { data, error } = await sb
+    .from("budgets")
+    .select(
+      `id, periode, unit_id, jenis, jumlah, catatan,
+       unit:units (kode, nama),
+       disetujui:users!budgets_disetujui_id_fkey (nama)`,
+    )
+    .order("periode", { ascending: false });
+
+  if (error) throw new Error(`Gagal memuat anggaran: ${error.message}`);
+
+  return (data ?? [])
+    .map((a) => ({
+      id: a.id,
+      periode: a.periode,
+      unitKode: (a.unit?.kode as KodeUnit) ?? null,
+      unitNama: namaUnit(a.unit?.nama),
+      jenis: a.jenis as JenisKeluar,
+      jumlah: Number(a.jumlah),
+      catatan: a.catatan,
+      disetujuiNama: a.disetujui?.nama ?? null,
+    }))
+    .sort(
+      (x, y) =>
+        y.periode.localeCompare(x.periode) ||
+        x.unitNama.localeCompare(y.unitNama),
+    );
+}
+
+/** Padanan `budgets` untuk mode demo, dari seed. */
+function anggaranDemo(): Anggaran[] {
   const { units } = dataContoh;
 
   return (dataContoh.anggaran ?? [])
@@ -28,7 +64,7 @@ export async function daftarAnggaran(pengguna: Pengguna): Promise<Anggaran[]> {
         id: a.id,
         periode: a.periode,
         unitKode: (a.unit as KodeUnit) ?? null,
-        unitNama: unit?.nama ? unit.nama.split(" (")[0] : "Perusahaan",
+        unitNama: namaUnit(unit?.nama),
         jenis: a.jenis as JenisKeluar,
         jumlah: a.jumlah,
         catatan: a.catatan,
@@ -43,15 +79,50 @@ export async function daftarAnggaran(pengguna: Pengguna): Promise<Anggaran[]> {
 }
 
 /**
- * Pengajuan alokasi tambahan.
+ * Pengajuan alokasi tambahan beserta keputusannya.
  *
- * SEMENTARA: seperti pagunya, tabelnya menyusul di lapisan backend
- * Fase 3.
+ * Mode Supabase membaca `budget_allocations` (migrasi 0148). Pimpinan
+ * unit ikut melihat pengajuan supaya tahu miliknya sudah diputuskan
+ * atau belum — itu diatur RLS, bukan di sini.
  */
 export async function daftarAlokasi(
   pengguna: Pengguna,
 ): Promise<AlokasiAnggaran[]> {
+  if (modeData() === "demo") return alokasiDemo();
+
   void pengguna;
+  const sb = await klienServer();
+  const { data, error } = await sb
+    .from("budget_allocations")
+    .select(
+      `id, periode, unit_id, jenis, jumlah, alasan, status,
+       catatan_keputusan, created_at,
+       unit:units (kode, nama),
+       diajukan:users!budget_allocations_diajukan_id_fkey (nama),
+       diputuskan:users!budget_allocations_diputuskan_id_fkey (nama)`,
+    )
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(`Gagal memuat alokasi: ${error.message}`);
+
+  return (data ?? []).map((a) => ({
+    id: a.id,
+    periode: a.periode,
+    unitKode: (a.unit?.kode as KodeUnit) ?? null,
+    unitNama: namaUnit(a.unit?.nama),
+    jenis: a.jenis as JenisKeluar,
+    jumlah: Number(a.jumlah),
+    alasan: a.alasan,
+    status: a.status as StatusAlokasi,
+    diajukanNama: a.diajukan?.nama ?? null,
+    diputuskanNama: a.diputuskan?.nama ?? null,
+    catatanKeputusan: a.catatan_keputusan,
+    pada: a.created_at,
+  }));
+}
+
+/** Padanan `budget_allocations` untuk mode demo, dari seed. */
+function alokasiDemo(): AlokasiAnggaran[] {
   const { units } = dataContoh;
 
   return (dataContoh.alokasi_anggaran ?? [])
@@ -61,7 +132,7 @@ export async function daftarAlokasi(
         id: a.id,
         periode: a.periode,
         unitKode: (a.unit as KodeUnit) ?? null,
-        unitNama: unit?.nama ? unit.nama.split(" (")[0] : "Perusahaan",
+        unitNama: namaUnit(unit?.nama),
         jenis: a.jenis as JenisKeluar,
         jumlah: a.jumlah,
         alasan: a.alasan,
@@ -73,4 +144,21 @@ export async function daftarAlokasi(
       } satisfies AlokasiAnggaran;
     })
     .sort((x, y) => y.pada.localeCompare(x.pada));
+}
+
+/** Id unit dari kode unitnya; null berarti pagu perusahaan. */
+export async function idUnitDariKode(
+  kode: KodeUnit | null,
+): Promise<string | null> {
+  if (kode === null) return null;
+
+  const sb = await klienServer();
+  const { data, error } = await sb
+    .from("units")
+    .select("id")
+    .eq("kode", kode)
+    .maybeSingle();
+
+  if (error) throw new Error(`Gagal memuat unit: ${error.message}`);
+  return data?.id ?? null;
 }

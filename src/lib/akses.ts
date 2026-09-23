@@ -7,6 +7,7 @@ import type {
 
 /** Blok yang bisa muncul di Beranda. */
 export type WidgetBeranda =
+  | "capaianPribadi"
   | "wrm"
   | "targetBulanan"
   | "gmvUnit"
@@ -49,6 +50,7 @@ export const widgetPerPeran: Record<Peran, WidgetBeranda[]> = {
     "pengumuman",
   ],
   Leader: [
+    "capaianPribadi",
     "wrm",
     "targetBulanan",
     "gmvUnit",
@@ -60,6 +62,7 @@ export const widgetPerPeran: Record<Peran, WidgetBeranda[]> = {
     "pengumuman",
   ],
   "Co-Leader": [
+    "capaianPribadi",
     "wrm",
     "gmvUnit",
     "statusTim",
@@ -69,7 +72,15 @@ export const widgetPerPeran: Record<Peran, WidgetBeranda[]> = {
     "pengumuman",
   ],
   // Staff hanya melihat capaian unitnya sendiri, bukan kehadiran orang lain.
-  Staff: ["wrm", "gmvUnit", "toDo", "tugas", "agenda", "pengumuman"],
+  Staff: [
+    "capaianPribadi",
+    "wrm",
+    "gmvUnit",
+    "toDo",
+    "tugas",
+    "agenda",
+    "pengumuman",
+  ],
   // Finance memantau angka, bukan kehadiran operasional harian.
   Finance: [
     "posisiKas",

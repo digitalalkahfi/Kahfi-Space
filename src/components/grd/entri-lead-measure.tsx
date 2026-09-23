@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Loader2, Save } from "lucide-react";
+import Link from "next/link";
+import { FileText, Loader2, Save } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BarCapaian } from "@/components/motion/bar-capaian";
@@ -11,6 +12,13 @@ import { catatLeadMeasure } from "@/app/actions/lead-measure";
 import type { LeadDetail } from "@/lib/data/grd";
 
 const ANGKA = new Intl.NumberFormat("id-ID", { maximumFractionDigits: 1 });
+
+/** Sebutan kolom laporan yang bisa dibaca orang di papan. */
+const SEBUTAN_SUMBER: Record<string, string> = {
+  gmv: "nilai GMV",
+  komisi: "komisi",
+  jumlah_upload: "jumlah upload",
+};
 
 /**
  * Papan skor satu lead measure: capaian pekan berjalan, entri harian yang
@@ -107,7 +115,24 @@ export function EntriLeadMeasure({
         </ul>
       ) : null}
 
-      {bolehIsi ? (
+      {lead.sumberLaporan ? (
+        /* Angkanya milik laporan harian (migrasi 0130). Menawarkan kotak
+           isian di sini hanya menghasilkan penolakan dari trigger, dan
+           membuat orang mengira ada dua tempat mengisi angka yang sama. */
+        <div className="border-t border-border-subtle px-5 pt-3">
+          <p className="flex items-start gap-2 rounded-xl bg-info-fill px-3 py-2 text-[11px] leading-[14px] text-info-text">
+            <FileText className="mt-0.5 size-3.5 shrink-0" />
+            <span>
+              Terisi otomatis dari {SEBUTAN_SUMBER[lead.sumberLaporan]} pada
+              laporan harian. Perbaiki lewat{" "}
+              <Link href="/laporan-harian" className="font-semibold underline">
+                Laporan Harian
+              </Link>
+              , bukan di sini.
+            </span>
+          </p>
+        </div>
+      ) : bolehIsi ? (
         <form
           className="space-y-2 border-t border-border-subtle px-5 pt-3"
           onSubmit={(e) => {

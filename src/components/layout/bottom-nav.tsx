@@ -3,10 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { menuUtama } from "@/lib/navigasi";
-import { MenuLainnya } from "@/components/layout/menu-lainnya";
+import { menuPendampingTerlihat, menuUtama } from "@/lib/navigasi";
+import { MenuLainnya, type IsiLaci } from "@/components/layout/menu-lainnya";
+import { useSusunan } from "@/components/tampilan/penyedia-tampilan";
+import { pecahDock } from "@/lib/tampilan";
 
-/** Dock navigasi bawah — hanya tampil di mobile (DESIGN.md §Layout). */
+/**
+ * Dock navigasi bawah — hanya tampil di mobile (DESIGN.md §Layout).
+ *
+ * Dock dan laci dibagi dari SATU daftar terurut: lima teratas jadi
+ * ikon, sisanya isi laci. Batas lima itu lebar layar, bukan selera —
+ * slot keenam sudah dipakai tombol laci.
+ */
 export function BottomNav({
   bolehKeuangan,
   bolehMigrasi,
@@ -15,6 +23,23 @@ export function BottomNav({
   bolehMigrasi: boolean;
 }) {
   const pathname = usePathname();
+  const urut = useSusunan("dock");
+
+  const semua: IsiLaci[] = [
+    ...menuUtama.map((m) => ({
+      href: m.href,
+      label: m.label,
+      keterangan: "Menu utama",
+      icon: m.icon,
+    })),
+    ...menuPendampingTerlihat({
+      keuangan: bolehKeuangan,
+      migrasi: bolehMigrasi,
+    }),
+  ];
+
+  const { dock, laci } = pecahDock(urut(semua));
+  const pendek = new Map(menuUtama.map((m) => [m.href, m.labelPendek]));
 
   return (
     <nav
@@ -22,7 +47,7 @@ export function BottomNav({
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border-subtle bg-card/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
     >
       <ul className="mx-auto flex max-w-lg items-stretch justify-between px-2 py-2">
-        {menuUtama.map((menu) => {
+        {dock.map((menu) => {
           const aktif = pathname.startsWith(menu.href);
           const Icon = menu.icon;
           return (
@@ -48,19 +73,18 @@ export function BottomNav({
                     aktif ? "text-foreground" : "text-muted-foreground",
                   )}
                 >
-                  {menu.labelPendek}
+                  {pendek.get(menu.href) ?? menu.label}
                 </span>
               </Link>
             </li>
           );
         })}
 
-        <li className="flex-1">
-          <MenuLainnya
-            bolehKeuangan={bolehKeuangan}
-            bolehMigrasi={bolehMigrasi}
-          />
-        </li>
+        {laci.length > 0 ? (
+          <li className="flex-1">
+            <MenuLainnya menu={laci} />
+          </li>
+        ) : null}
       </ul>
     </nav>
   );

@@ -1,0 +1,7344 @@
+{
+  "_meta": {
+    "version": "1.9.2",
+    "exportedAt": "2024-10-25T09:00:00+07:00",
+    "exportedBy": "owner@contoh.id",
+    "source": "kspace-v1",
+    "totalKeys": 15,
+    "catatan": "Contoh bentuk ekspor K-Space V1. Isinya data demo; tidak memuat medan kata sandi."
+  },
+  "users:list": [
+    {
+      "id": "usr_001",
+      "name": "Farhan Pratama",
+      "email": "farhan@contoh.id",
+      "role": "Manager",
+      "position": "Manager Operasional Al-Kahfi Corp",
+      "division": null,
+      "phone": "0812-3456-7890",
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_002"
+    },
+    {
+      "id": "usr_002",
+      "name": "Hafidz Alkahfi",
+      "email": "hafidz@contoh.id",
+      "role": "CEO",
+      "position": "CEO Al-Kahfi Corp",
+      "division": null,
+      "phone": "+62 811 2233 4455",
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": null
+    },
+    {
+      "id": "usr_003",
+      "name": "Rian Hidayat",
+      "email": "rian@contoh.id",
+      "role": "Staff",
+      "position": "Staff Affiliator · PIC akun beauty",
+      "division": "affiliator",
+      "phone": "085700112233",
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_017"
+    },
+    {
+      "id": "usr_004",
+      "name": "Nabila Putri",
+      "email": "nabila@contoh.id",
+      "role": "Staff",
+      "position": "Staff Affiliator",
+      "division": "affiliator",
+      "phone": "62 813 9988 7766",
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_017"
+    },
+    {
+      "id": "usr_005",
+      "name": "Bayu Nugraha",
+      "email": "bayu@contoh.id",
+      "role": "Staff",
+      "position": "Staff Affiliator",
+      "division": "affiliator",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_017"
+    },
+    {
+      "id": "usr_006",
+      "name": "Dimas Maulana",
+      "email": "dimas@contoh.id",
+      "role": "Leader",
+      "position": "Leader TAP",
+      "division": "tap",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_001"
+    },
+    {
+      "id": "usr_007",
+      "name": "Maya Safitri",
+      "email": "maya@contoh.id",
+      "role": "Co-Leader",
+      "position": "Co-Leader MCN",
+      "division": "mcn",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_018"
+    },
+    {
+      "id": "usr_008",
+      "name": "Rizky Ananda",
+      "email": "rizky@contoh.id",
+      "role": "Staff",
+      "position": "Staff MCN",
+      "division": "mcn",
+      "phone": "0857-1122-3344",
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_018"
+    },
+    {
+      "id": "usr_009",
+      "name": "Intan Permata",
+      "email": "intan@contoh.id",
+      "role": "Staff",
+      "position": "Staff Affiliator",
+      "division": "affiliator",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_017"
+    },
+    {
+      "id": "usr_010",
+      "name": "Yoga Saputra",
+      "email": "yoga@contoh.id",
+      "role": "Staff",
+      "position": "Staff TAP",
+      "division": "tap",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_006"
+    },
+    {
+      "id": "usr_011",
+      "name": "Salsabila Rahma",
+      "email": "salsabila@contoh.id",
+      "role": "Staff",
+      "position": "Staff Affiliator · Mabit Scholar",
+      "division": "affiliator",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_017"
+    },
+    {
+      "id": "usr_012",
+      "name": "Fajar Ramadhan",
+      "email": "fajar@contoh.id",
+      "role": "Staff",
+      "position": "Staff MCN",
+      "division": "mcn",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_018"
+    },
+    {
+      "id": "usr_013",
+      "name": "Anisa Larasati",
+      "email": "anisa@contoh.id",
+      "role": "Staff",
+      "position": "Staff Affiliator",
+      "division": "affiliator",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_017"
+    },
+    {
+      "id": "usr_014",
+      "name": "Hendra Kusuma",
+      "email": "hendra@contoh.id",
+      "role": "Staff",
+      "position": "Staff TAP",
+      "division": "tap",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_006"
+    },
+    {
+      "id": "usr_015",
+      "name": "Putri Amelia",
+      "email": "putri@contoh.id",
+      "role": "Staff",
+      "position": "Staff MCN",
+      "division": "mcn",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_018"
+    },
+    {
+      "id": "usr_016",
+      "name": "Arif Setiawan",
+      "email": "arif@contoh.id",
+      "role": "Staff",
+      "position": "Staff Affiliator",
+      "division": "affiliator",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_017"
+    },
+    {
+      "id": "usr_017",
+      "name": "Dewi Lestari",
+      "email": "dewi@contoh.id",
+      "role": "Leader",
+      "position": "Leader Affiliator",
+      "division": "affiliator",
+      "phone": "0821-5566-7788",
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_001"
+    },
+    {
+      "id": "usr_018",
+      "name": "Galih Prakoso",
+      "email": "galih@contoh.id",
+      "role": "Leader",
+      "position": "Leader MCN",
+      "division": "mcn",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_001"
+    },
+    {
+      "id": "usr_019",
+      "name": "Vina Oktaviani",
+      "email": "vina@contoh.id",
+      "role": "Staff",
+      "position": "Staff TAP",
+      "division": "tap",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_006"
+    },
+    {
+      "id": "usr_020",
+      "name": "Rendi Firmansyah",
+      "email": "rendi@contoh.id",
+      "role": "Staff",
+      "position": "Staff Affiliator",
+      "division": "affiliator",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_017"
+    },
+    {
+      "id": "usr_021",
+      "name": "Bagas Adriansyah",
+      "email": "bagas@contoh.id",
+      "role": "Staff",
+      "position": "Staff Affiliator · Mabit Scholar",
+      "division": "affiliator",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_017"
+    },
+    {
+      "id": "usr_022",
+      "name": "Laras Ayuningtyas",
+      "email": "laras@contoh.id",
+      "role": "Finance",
+      "position": "Finance Al-Kahfi Corp",
+      "division": null,
+      "phone": "081199887766",
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_001"
+    },
+    {
+      "id": "usr_023",
+      "name": "Teguh Wibowo",
+      "email": "teguh@contoh.id",
+      "role": "Staff",
+      "position": "Staff Affiliator",
+      "division": "affiliator",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_017"
+    },
+    {
+      "id": "usr_024",
+      "name": "Sinta Maharani",
+      "email": "sinta@contoh.id",
+      "role": "Staff",
+      "position": "Staff MCN",
+      "division": "mcn",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_018"
+    },
+    {
+      "id": "usr_025",
+      "name": "Eko Prasetyo",
+      "email": "eko@contoh.id",
+      "role": "Staff",
+      "position": "Staff TAP",
+      "division": "tap",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_006"
+    },
+    {
+      "id": "usr_026",
+      "name": "Yusuf Ramadhan",
+      "email": "yusuf@contoh.id",
+      "role": "Staff",
+      "position": "Staff Affiliator",
+      "division": "affiliator",
+      "phone": null,
+      "joinDate": "2024-01-15",
+      "active": true,
+      "leaderId": "usr_017"
+    }
+  ],
+  "affiliate-accounts:all": [
+    {
+      "id": "acc_001",
+      "username": "@skincare_official",
+      "division": "affiliator",
+      "program": "Reguler",
+      "picId": "usr_003",
+      "coLeaderId": "usr_017",
+      "dailyTarget": "4.500.000",
+      "active": true
+    },
+    {
+      "id": "acc_002",
+      "username": "@beauty_daily.id",
+      "division": "affiliator",
+      "program": "Mabit Scholar",
+      "picId": "usr_003",
+      "coLeaderId": "usr_017",
+      "dailyTarget": "3.000.000",
+      "active": true
+    },
+    {
+      "id": "acc_003",
+      "username": "@fashion_hijab",
+      "division": "affiliator",
+      "program": "Reguler",
+      "picId": "usr_004",
+      "coLeaderId": "usr_017",
+      "dailyTarget": "3.500.000",
+      "active": true
+    },
+    {
+      "id": "acc_004",
+      "username": "@gadget_daily",
+      "division": "affiliator",
+      "program": "Reguler",
+      "picId": "usr_005",
+      "coLeaderId": "usr_017",
+      "dailyTarget": "4.000.000",
+      "active": true
+    },
+    {
+      "id": "acc_005",
+      "username": "@snack_nusantara",
+      "division": "affiliator",
+      "program": "Mabit Scholar",
+      "picId": "usr_009",
+      "coLeaderId": "usr_017",
+      "dailyTarget": "2.500.000",
+      "active": true
+    },
+    {
+      "id": "acc_006",
+      "username": "@home_essentials",
+      "division": "affiliator",
+      "program": "Reguler",
+      "picId": "usr_011",
+      "coLeaderId": "usr_017",
+      "dailyTarget": "2.500.000",
+      "active": true
+    }
+  ],
+  "daily-reports:all": [
+    {
+      "id": "rep_001",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-01",
+      "createdAt": "2024-10-01T18:18:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "4.176.000",
+      "Komisi": "543.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_002",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-01",
+      "createdAt": "2024-10-01T19:32:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "2.784.000",
+      "Komisi": "223.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_003",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-01",
+      "createdAt": "2024-10-01T17:18:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "3.248.000",
+      "Komisi": "292.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_004",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-01",
+      "createdAt": "2024-10-01T18:05:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "3.712.000",
+      "Komisi": "334.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_005",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-01",
+      "createdAt": "2024-10-01T19:47:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.320.000",
+      "Komisi": "209.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_006",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-01",
+      "createdAt": "2024-10-01T18:47:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.320.000",
+      "Komisi": "209.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_007",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-01",
+      "createdAt": "2024-10-01T17:55:00+07:00",
+      "Unit": "mcn",
+      "GMV": "13.160.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_008",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-01",
+      "createdAt": "2024-10-01T17:25:00+07:00",
+      "Unit": "tap",
+      "GMV": "5.020.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_009",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-02",
+      "createdAt": "2024-10-02T17:47:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "4.146.000",
+      "Komisi": "332.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_010",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-02",
+      "createdAt": "2024-10-02T18:05:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "2.763.000",
+      "Komisi": "249.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_011",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-02",
+      "createdAt": "2024-10-02T18:47:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "3.223.000",
+      "Komisi": "322.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_012",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-02",
+      "createdAt": "2024-10-02T19:18:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "3.684.000",
+      "Komisi": "368.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_013",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-02",
+      "createdAt": "2024-10-02T17:32:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.302.000",
+      "Komisi": "230.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_014",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-02",
+      "createdAt": "2024-10-02T17:32:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.302.000",
+      "Komisi": "230.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_015",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-02",
+      "createdAt": "2024-10-02T18:25:00+07:00",
+      "Unit": "mcn",
+      "GMV": "12.770.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_016",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-02",
+      "createdAt": "2024-10-02T19:25:00+07:00",
+      "Unit": "tap",
+      "GMV": "4.390.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_017",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-03",
+      "createdAt": "2024-10-03T19:47:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "4.416.000",
+      "Komisi": "397.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_018",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-03",
+      "createdAt": "2024-10-03T19:05:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "2.943.000",
+      "Komisi": "294.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_019",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-03",
+      "createdAt": "2024-10-03T17:18:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "3.433.000",
+      "Komisi": "378.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_020",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-03",
+      "createdAt": "2024-10-03T19:47:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "3.924.000",
+      "Komisi": "432.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_021",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-03",
+      "createdAt": "2024-10-03T17:18:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.452.000",
+      "Komisi": "270.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_022",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-03",
+      "createdAt": "2024-10-03T18:47:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.452.000",
+      "Komisi": "270.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_023",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-03",
+      "createdAt": "2024-10-03T19:40:00+07:00",
+      "Unit": "mcn",
+      "GMV": "11.380.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_024",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-03",
+      "createdAt": "2024-10-03T17:25:00+07:00",
+      "Unit": "tap",
+      "GMV": "4.740.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_025",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-04",
+      "createdAt": "2024-10-04T19:18:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "3.903.000",
+      "Komisi": "390.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_026",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-04",
+      "createdAt": "2024-10-04T18:47:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "2.601.000",
+      "Komisi": "286.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_027",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-04",
+      "createdAt": "2024-10-04T17:32:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "3.034.000",
+      "Komisi": "364.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_028",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-04",
+      "createdAt": "2024-10-04T19:32:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "3.468.000",
+      "Komisi": "416.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_029",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-04",
+      "createdAt": "2024-10-04T17:18:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.167.000",
+      "Komisi": "260.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_030",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-04",
+      "createdAt": "2024-10-04T18:05:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.167.000",
+      "Komisi": "260.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_031",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-04",
+      "createdAt": "2024-10-04T19:25:00+07:00",
+      "Unit": "mcn",
+      "GMV": "12.620.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_032",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-04",
+      "createdAt": "2024-10-04T18:10:00+07:00",
+      "Unit": "tap",
+      "GMV": "4.160.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_033",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-05",
+      "createdAt": "2024-10-05T19:32:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "3.726.000",
+      "Komisi": "410.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_034",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-05",
+      "createdAt": "2024-10-05T19:05:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "2.482.000",
+      "Komisi": "298.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_035",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-05",
+      "createdAt": "2024-10-05T17:32:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "2.896.000",
+      "Komisi": "376.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_036",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-05",
+      "createdAt": "2024-10-05T17:18:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "3.310.000",
+      "Komisi": "430.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_037",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-05",
+      "createdAt": "2024-10-05T17:47:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.068.000",
+      "Komisi": "269.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_038",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-05",
+      "createdAt": "2024-10-05T18:05:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.068.000",
+      "Komisi": "269.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_039",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-05",
+      "createdAt": "2024-10-05T19:40:00+07:00",
+      "Unit": "mcn",
+      "GMV": "13.080.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_040",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-05",
+      "createdAt": "2024-10-05T17:25:00+07:00",
+      "Unit": "tap",
+      "GMV": "4.820.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_041",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-07",
+      "createdAt": "2024-10-07T19:32:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "3.748.000",
+      "Komisi": "487.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_042",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-07",
+      "createdAt": "2024-10-07T19:32:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "2.497.000",
+      "Komisi": "200.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_043",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-07",
+      "createdAt": "2024-10-07T17:47:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "2.913.000",
+      "Komisi": "262.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_044",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-07",
+      "createdAt": "2024-10-07T19:32:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "3.330.000",
+      "Komisi": "300.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_045",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-07",
+      "createdAt": "2024-10-07T18:05:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.081.000",
+      "Komisi": "187.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_046",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-07",
+      "createdAt": "2024-10-07T19:47:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.081.000",
+      "Komisi": "187.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_047",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-07",
+      "createdAt": "2024-10-07T17:40:00+07:00",
+      "Unit": "mcn",
+      "GMV": "11.510.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_048",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-07",
+      "createdAt": "2024-10-07T17:55:00+07:00",
+      "Unit": "tap",
+      "GMV": "4.270.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_049",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-08",
+      "createdAt": "2024-10-08T18:05:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "3.852.000",
+      "Komisi": "308.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_050",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-08",
+      "createdAt": "2024-10-08T19:32:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "2.566.000",
+      "Komisi": "231.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_051",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-08",
+      "createdAt": "2024-10-08T18:18:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "2.994.000",
+      "Komisi": "299.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_052",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-08",
+      "createdAt": "2024-10-08T17:05:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "3.422.000",
+      "Komisi": "342.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_053",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-08",
+      "createdAt": "2024-10-08T18:32:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.138.000",
+      "Komisi": "214.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_054",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-08",
+      "createdAt": "2024-10-08T18:47:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.138.000",
+      "Komisi": "214.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_055",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-08",
+      "createdAt": "2024-10-08T19:55:00+07:00",
+      "Unit": "mcn",
+      "GMV": "12.590.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_056",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-08",
+      "createdAt": "2024-10-08T19:10:00+07:00",
+      "Unit": "tap",
+      "GMV": "4.190.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_057",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-09",
+      "createdAt": "2024-10-09T19:18:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "4.632.000",
+      "Komisi": "417.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_058",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-09",
+      "createdAt": "2024-10-09T17:18:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "3.087.000",
+      "Komisi": "309.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_059",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-09",
+      "createdAt": "2024-10-09T19:05:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "3.601.000",
+      "Komisi": "396.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_060",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-09",
+      "createdAt": "2024-10-09T18:18:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "4.116.000",
+      "Komisi": "453.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_061",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-09",
+      "createdAt": "2024-10-09T18:05:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.572.000",
+      "Komisi": "283.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_062",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-09",
+      "createdAt": "2024-10-09T17:05:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.572.000",
+      "Komisi": "283.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_063",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-09",
+      "createdAt": "2024-10-09T17:40:00+07:00",
+      "Unit": "mcn",
+      "GMV": "11.540.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_064",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-09",
+      "createdAt": "2024-10-09T19:55:00+07:00",
+      "Unit": "tap",
+      "GMV": "4.790.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_065",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-10",
+      "createdAt": "2024-10-10T19:18:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "3.852.000",
+      "Komisi": "501.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_066",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-10",
+      "createdAt": "2024-10-10T17:47:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "2.566.000",
+      "Komisi": "205.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_067",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-10",
+      "createdAt": "2024-10-10T17:32:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "2.994.000",
+      "Komisi": "269.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_068",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-10",
+      "createdAt": "2024-10-10T18:32:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "3.422.000",
+      "Komisi": "308.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_069",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-10",
+      "createdAt": "2024-10-10T19:32:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.138.000",
+      "Komisi": "192.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_070",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-10",
+      "createdAt": "2024-10-10T19:32:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.138.000",
+      "Komisi": "192.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_071",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-10",
+      "createdAt": "2024-10-10T17:40:00+07:00",
+      "Unit": "mcn",
+      "GMV": "12.580.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_072",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-10",
+      "createdAt": "2024-10-10T17:10:00+07:00",
+      "Unit": "tap",
+      "GMV": "4.550.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_073",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-11",
+      "createdAt": "2024-10-11T17:47:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "4.581.000",
+      "Komisi": "366.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_074",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-11",
+      "createdAt": "2024-10-11T19:18:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "3.052.000",
+      "Komisi": "275.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_075",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-11",
+      "createdAt": "2024-10-11T17:18:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "3.561.000",
+      "Komisi": "356.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_076",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-11",
+      "createdAt": "2024-10-11T17:18:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "4.070.000",
+      "Komisi": "407.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_077",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-11",
+      "createdAt": "2024-10-11T19:32:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.543.000",
+      "Komisi": "254.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_078",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-11",
+      "createdAt": "2024-10-11T17:18:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.543.000",
+      "Komisi": "254.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_079",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-11",
+      "createdAt": "2024-10-11T17:55:00+07:00",
+      "Unit": "mcn",
+      "GMV": "13.910.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_080",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-11",
+      "createdAt": "2024-10-11T17:40:00+07:00",
+      "Unit": "tap",
+      "GMV": "5.300.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_081",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-12",
+      "createdAt": "2024-10-12T19:05:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "4.149.000",
+      "Komisi": "373.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_082",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-12",
+      "createdAt": "2024-10-12T18:47:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "2.764.000",
+      "Komisi": "276.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_083",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-12",
+      "createdAt": "2024-10-12T17:32:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "3.225.000",
+      "Komisi": "355.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_084",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-12",
+      "createdAt": "2024-10-12T19:05:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "3.686.000",
+      "Komisi": "405.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_085",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-12",
+      "createdAt": "2024-10-12T17:05:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.303.000",
+      "Komisi": "253.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_086",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-12",
+      "createdAt": "2024-10-12T17:32:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.303.000",
+      "Komisi": "253.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_087",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-12",
+      "createdAt": "2024-10-12T18:40:00+07:00",
+      "Unit": "mcn",
+      "GMV": "12.640.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_088",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-12",
+      "createdAt": "2024-10-12T17:10:00+07:00",
+      "Unit": "tap",
+      "GMV": "4.540.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_089",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-14",
+      "createdAt": "2024-10-14T18:32:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "5.094.000",
+      "Komisi": "560.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_090",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-14",
+      "createdAt": "2024-10-14T17:05:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "3.396.000",
+      "Komisi": "408.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_091",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-14",
+      "createdAt": "2024-10-14T17:47:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "3.962.000",
+      "Komisi": "515.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_092",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-14",
+      "createdAt": "2024-10-14T18:05:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "4.528.000",
+      "Komisi": "589.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_093",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-14",
+      "createdAt": "2024-10-14T17:18:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.830.000",
+      "Komisi": "368.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_094",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-14",
+      "createdAt": "2024-10-14T17:18:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.830.000",
+      "Komisi": "368.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_095",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-14",
+      "createdAt": "2024-10-14T19:10:00+07:00",
+      "Unit": "mcn",
+      "GMV": "13.860.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_096",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-14",
+      "createdAt": "2024-10-14T17:55:00+07:00",
+      "Unit": "tap",
+      "GMV": "4.250.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_097",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-15",
+      "createdAt": "2024-10-15T19:18:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "4.491.000",
+      "Komisi": "539.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_098",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-15",
+      "createdAt": "2024-10-15T19:05:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "2.992.000",
+      "Komisi": "389.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_099",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-15",
+      "createdAt": "2024-10-15T17:05:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "3.491.000",
+      "Komisi": "279.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_100",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-15",
+      "createdAt": "2024-10-15T17:32:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "3.990.000",
+      "Komisi": "319.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_101",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-15",
+      "createdAt": "2024-10-15T19:47:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.493.000",
+      "Komisi": "199.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_102",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-15",
+      "createdAt": "2024-10-15T18:05:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.493.000",
+      "Komisi": "199.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_103",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-15",
+      "createdAt": "2024-10-15T18:55:00+07:00",
+      "Unit": "mcn",
+      "GMV": "10.760.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_104",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-15",
+      "createdAt": "2024-10-15T19:10:00+07:00",
+      "Unit": "tap",
+      "GMV": "5.020.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_105",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-16",
+      "createdAt": "2024-10-16T19:18:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "4.707.000",
+      "Komisi": "612.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_106",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-16",
+      "createdAt": "2024-10-16T17:32:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "3.138.000",
+      "Komisi": "251.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_107",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-16",
+      "createdAt": "2024-10-16T17:32:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "3.661.000",
+      "Komisi": "329.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_108",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-16",
+      "createdAt": "2024-10-16T19:05:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "4.184.000",
+      "Komisi": "377.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_109",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-16",
+      "createdAt": "2024-10-16T18:32:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.615.000",
+      "Komisi": "235.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_110",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-16",
+      "createdAt": "2024-10-16T18:47:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.615.000",
+      "Komisi": "235.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_111",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-16",
+      "createdAt": "2024-10-16T19:10:00+07:00",
+      "Unit": "mcn",
+      "GMV": "11.580.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_112",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-16",
+      "createdAt": "2024-10-16T19:10:00+07:00",
+      "Unit": "tap",
+      "GMV": "5.630.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_113",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-17",
+      "createdAt": "2024-10-17T18:05:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "4.221.000",
+      "Komisi": "338.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_114",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-17",
+      "createdAt": "2024-10-17T18:18:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "2.814.000",
+      "Komisi": "253.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_115",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-17",
+      "createdAt": "2024-10-17T18:05:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "3.283.000",
+      "Komisi": "328.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_116",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-17",
+      "createdAt": "2024-10-17T18:32:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "3.752.000",
+      "Komisi": "375.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_117",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-17",
+      "createdAt": "2024-10-17T17:18:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.345.000",
+      "Komisi": "234.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_118",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-17",
+      "createdAt": "2024-10-17T18:05:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.345.000",
+      "Komisi": "234.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_119",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-17",
+      "createdAt": "2024-10-17T18:40:00+07:00",
+      "Unit": "mcn",
+      "GMV": "10.600.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_120",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-17",
+      "createdAt": "2024-10-17T17:25:00+07:00",
+      "Unit": "tap",
+      "GMV": "4.810.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_121",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-18",
+      "createdAt": "2024-10-18T17:05:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "4.515.000",
+      "Komisi": "406.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_122",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-18",
+      "createdAt": "2024-10-18T19:32:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "3.009.000",
+      "Komisi": "301.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_123",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-18",
+      "createdAt": "2024-10-18T18:05:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "3.510.000",
+      "Komisi": "386.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_124",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-18",
+      "createdAt": "2024-10-18T19:47:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "4.012.000",
+      "Komisi": "441.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_125",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-18",
+      "createdAt": "2024-10-18T17:32:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.507.000",
+      "Komisi": "276.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_126",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-18",
+      "createdAt": "2024-10-18T17:18:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.507.000",
+      "Komisi": "276.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_127",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-18",
+      "createdAt": "2024-10-18T17:40:00+07:00",
+      "Unit": "mcn",
+      "GMV": "11.000.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_128",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-18",
+      "createdAt": "2024-10-18T17:55:00+07:00",
+      "Unit": "tap",
+      "GMV": "5.480.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_129",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-19",
+      "createdAt": "2024-10-19T17:18:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "3.930.000",
+      "Komisi": "393.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_130",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-19",
+      "createdAt": "2024-10-19T17:47:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "2.619.000",
+      "Komisi": "288.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_131",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-19",
+      "createdAt": "2024-10-19T17:18:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "3.055.000",
+      "Komisi": "367.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_132",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-19",
+      "createdAt": "2024-10-19T18:32:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "3.492.000",
+      "Komisi": "419.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_133",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-19",
+      "createdAt": "2024-10-19T19:05:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.182.000",
+      "Komisi": "262.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_134",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-19",
+      "createdAt": "2024-10-19T19:05:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.182.000",
+      "Komisi": "262.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_135",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-19",
+      "createdAt": "2024-10-19T17:25:00+07:00",
+      "Unit": "mcn",
+      "GMV": "12.050.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_136",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-19",
+      "createdAt": "2024-10-19T17:10:00+07:00",
+      "Unit": "tap",
+      "GMV": "5.410.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_137",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-21",
+      "createdAt": "2024-10-21T18:05:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "3.775.000",
+      "Komisi": "340.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_138",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-21",
+      "createdAt": "2024-10-21T19:47:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "2.515.000",
+      "Komisi": "252.000",
+      "Jumlah Upload": 5,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_139",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-21",
+      "createdAt": "2024-10-21T17:32:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "2.934.000",
+      "Komisi": "323.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_140",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-21",
+      "createdAt": "2024-10-21T18:32:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "3.354.000",
+      "Komisi": "369.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_141",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-21",
+      "createdAt": "2024-10-21T19:47:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.096.000",
+      "Komisi": "231.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_142",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-21",
+      "createdAt": "2024-10-21T18:18:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.096.000",
+      "Komisi": "231.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_143",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-21",
+      "createdAt": "2024-10-21T17:25:00+07:00",
+      "Unit": "mcn",
+      "GMV": "11.870.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_144",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-21",
+      "createdAt": "2024-10-21T17:40:00+07:00",
+      "Unit": "tap",
+      "GMV": "4.780.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_145",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-22",
+      "createdAt": "2024-10-22T18:18:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "5.130.000",
+      "Komisi": "513.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_146",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-22",
+      "createdAt": "2024-10-22T18:32:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "3.418.000",
+      "Komisi": "376.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_147",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-22",
+      "createdAt": "2024-10-22T19:47:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "3.988.000",
+      "Komisi": "479.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_148",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-22",
+      "createdAt": "2024-10-22T18:18:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "4.558.000",
+      "Komisi": "547.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_149",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-22",
+      "createdAt": "2024-10-22T18:05:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.848.000",
+      "Komisi": "342.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_150",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-22",
+      "createdAt": "2024-10-22T17:47:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.848.000",
+      "Komisi": "342.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_151",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-22",
+      "createdAt": "2024-10-22T17:55:00+07:00",
+      "Unit": "mcn",
+      "GMV": "14.220.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_152",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-22",
+      "createdAt": "2024-10-22T19:40:00+07:00",
+      "Unit": "tap",
+      "GMV": "4.260.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_153",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-23",
+      "createdAt": "2024-10-23T18:47:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "3.510.000",
+      "Komisi": "386.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": "Live 4 jam, bundling serum + toner jalan. Stok toner tinggal 40 pcs."
+    },
+    {
+      "id": "rep_154",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-23",
+      "createdAt": "2024-10-23T19:18:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "2.340.000",
+      "Komisi": "281.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": "Host pengganti, ritme masih menyesuaikan."
+    },
+    {
+      "id": "rep_155",
+      "userId": "usr_004",
+      "Tanggal Laporan": "2024-10-23",
+      "createdAt": "2024-10-23T19:32:00+07:00",
+      "Akun": "@fashion_hijab",
+      "GMV": "2.730.000",
+      "Komisi": "355.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_156",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-23",
+      "createdAt": "2024-10-23T18:18:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "3.120.000",
+      "Komisi": "406.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_157",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-23",
+      "createdAt": "2024-10-23T17:47:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "1.950.000",
+      "Komisi": "254.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_158",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-23",
+      "createdAt": "2024-10-23T18:05:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "1.950.000",
+      "Komisi": "254.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_159",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-23",
+      "createdAt": "2024-10-23T18:55:00+07:00",
+      "Unit": "mcn",
+      "GMV": "9.400.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_160",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-23",
+      "createdAt": "2024-10-23T18:40:00+07:00",
+      "Unit": "tap",
+      "GMV": "3.900.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_161",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-24",
+      "createdAt": "2024-10-24T19:47:00+07:00",
+      "Akun": "@skincare_official",
+      "GMV": "4.784.000",
+      "Komisi": "574.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": "Live streaming 3 jam stabil, konversi paket glowing bundle naik 22%."
+    },
+    {
+      "id": "rep_162",
+      "userId": "usr_003",
+      "Tanggal Laporan": "2024-10-24",
+      "createdAt": "2024-10-24T17:18:00+07:00",
+      "Akun": "@beauty_daily.id",
+      "GMV": "3.404.000",
+      "Komisi": "443.000",
+      "Jumlah Upload": 6,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_163",
+      "userId": "usr_005",
+      "Tanggal Laporan": "2024-10-24",
+      "createdAt": "2024-10-24T19:32:00+07:00",
+      "Akun": "@gadget_daily",
+      "GMV": "4.324.000",
+      "Komisi": "346.000",
+      "Jumlah Upload": 2,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_164",
+      "userId": "usr_009",
+      "Tanggal Laporan": "2024-10-24",
+      "createdAt": "2024-10-24T17:32:00+07:00",
+      "Akun": "@snack_nusantara",
+      "GMV": "2.944.000",
+      "Komisi": "236.000",
+      "Jumlah Upload": 3,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_165",
+      "userId": "usr_011",
+      "Tanggal Laporan": "2024-10-24",
+      "createdAt": "2024-10-24T17:32:00+07:00",
+      "Akun": "@home_essentials",
+      "GMV": "2.944.000",
+      "Komisi": "236.000",
+      "Jumlah Upload": 4,
+      "Target GMV": "4.500.000",
+      "Kendala": ""
+    },
+    {
+      "id": "rep_166",
+      "userId": "usr_018",
+      "Tanggal Laporan": "2024-10-24",
+      "createdAt": "2024-10-24T18:40:00+07:00",
+      "Unit": "mcn",
+      "GMV": "11.200.000",
+      "Catatan": ""
+    },
+    {
+      "id": "rep_167",
+      "userId": "usr_006",
+      "Tanggal Laporan": "2024-10-24",
+      "createdAt": "2024-10-24T18:25:00+07:00",
+      "Unit": "tap",
+      "GMV": "4.600.000",
+      "Catatan": ""
+    }
+  ],
+  "gmv:daily": [
+    {
+      "id": "gmv_001",
+      "date": "2024-10-01",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "4.176.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_002",
+      "date": "2024-10-01",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "2.784.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_003",
+      "date": "2024-10-01",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "3.248.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_004",
+      "date": "2024-10-01",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "3.712.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_005",
+      "date": "2024-10-01",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.320.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_006",
+      "date": "2024-10-01",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.320.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_007",
+      "date": "2024-10-01",
+      "division": "mcn",
+      "gmv": "13.160.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_008",
+      "date": "2024-10-01",
+      "division": "tap",
+      "gmv": "5.020.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_009",
+      "date": "2024-10-02",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "4.146.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_010",
+      "date": "2024-10-02",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "2.763.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_011",
+      "date": "2024-10-02",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "3.223.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_012",
+      "date": "2024-10-02",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "3.684.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_013",
+      "date": "2024-10-02",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.302.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_014",
+      "date": "2024-10-02",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.302.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_015",
+      "date": "2024-10-02",
+      "division": "mcn",
+      "gmv": "12.770.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_016",
+      "date": "2024-10-02",
+      "division": "tap",
+      "gmv": "4.390.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_017",
+      "date": "2024-10-03",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "4.416.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_018",
+      "date": "2024-10-03",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "2.943.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_019",
+      "date": "2024-10-03",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "3.433.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_020",
+      "date": "2024-10-03",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "3.924.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_021",
+      "date": "2024-10-03",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.452.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_022",
+      "date": "2024-10-03",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.452.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_023",
+      "date": "2024-10-03",
+      "division": "mcn",
+      "gmv": "11.380.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_024",
+      "date": "2024-10-03",
+      "division": "tap",
+      "gmv": "4.740.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_025",
+      "date": "2024-10-04",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "3.903.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_026",
+      "date": "2024-10-04",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "2.601.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_027",
+      "date": "2024-10-04",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "3.034.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_028",
+      "date": "2024-10-04",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "3.468.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_029",
+      "date": "2024-10-04",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.167.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_030",
+      "date": "2024-10-04",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.167.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_031",
+      "date": "2024-10-04",
+      "division": "mcn",
+      "gmv": "12.620.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_032",
+      "date": "2024-10-04",
+      "division": "tap",
+      "gmv": "4.160.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_033",
+      "date": "2024-10-05",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "3.726.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_034",
+      "date": "2024-10-05",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "2.482.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_035",
+      "date": "2024-10-05",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "2.896.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_036",
+      "date": "2024-10-05",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "3.310.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_037",
+      "date": "2024-10-05",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.068.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_038",
+      "date": "2024-10-05",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.068.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_039",
+      "date": "2024-10-05",
+      "division": "mcn",
+      "gmv": "13.080.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_040",
+      "date": "2024-10-05",
+      "division": "tap",
+      "gmv": "4.820.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_041",
+      "date": "2024-10-07",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "3.748.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_042",
+      "date": "2024-10-07",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "2.497.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_043",
+      "date": "2024-10-07",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "2.913.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_044",
+      "date": "2024-10-07",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "3.330.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_045",
+      "date": "2024-10-07",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.081.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_046",
+      "date": "2024-10-07",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.081.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_047",
+      "date": "2024-10-07",
+      "division": "mcn",
+      "gmv": "11.510.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_048",
+      "date": "2024-10-07",
+      "division": "tap",
+      "gmv": "4.270.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_049",
+      "date": "2024-10-08",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "3.852.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_050",
+      "date": "2024-10-08",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "2.566.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_051",
+      "date": "2024-10-08",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "2.994.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_052",
+      "date": "2024-10-08",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "3.422.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_053",
+      "date": "2024-10-08",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.138.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_054",
+      "date": "2024-10-08",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.138.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_055",
+      "date": "2024-10-08",
+      "division": "mcn",
+      "gmv": "12.590.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_056",
+      "date": "2024-10-08",
+      "division": "tap",
+      "gmv": "4.190.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_057",
+      "date": "2024-10-09",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "4.632.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_058",
+      "date": "2024-10-09",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "3.087.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_059",
+      "date": "2024-10-09",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "3.601.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_060",
+      "date": "2024-10-09",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "4.116.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_061",
+      "date": "2024-10-09",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.572.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_062",
+      "date": "2024-10-09",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.572.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_063",
+      "date": "2024-10-09",
+      "division": "mcn",
+      "gmv": "11.540.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_064",
+      "date": "2024-10-09",
+      "division": "tap",
+      "gmv": "4.790.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_065",
+      "date": "2024-10-10",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "3.852.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_066",
+      "date": "2024-10-10",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "2.566.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_067",
+      "date": "2024-10-10",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "2.994.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_068",
+      "date": "2024-10-10",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "3.422.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_069",
+      "date": "2024-10-10",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.138.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_070",
+      "date": "2024-10-10",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.138.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_071",
+      "date": "2024-10-10",
+      "division": "mcn",
+      "gmv": "12.580.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_072",
+      "date": "2024-10-10",
+      "division": "tap",
+      "gmv": "4.550.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_073",
+      "date": "2024-10-11",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "4.581.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_074",
+      "date": "2024-10-11",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "3.052.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_075",
+      "date": "2024-10-11",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "3.561.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_076",
+      "date": "2024-10-11",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "4.070.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_077",
+      "date": "2024-10-11",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.543.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_078",
+      "date": "2024-10-11",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.543.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_079",
+      "date": "2024-10-11",
+      "division": "mcn",
+      "gmv": "13.910.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_080",
+      "date": "2024-10-11",
+      "division": "tap",
+      "gmv": "5.300.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_081",
+      "date": "2024-10-12",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "4.149.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_082",
+      "date": "2024-10-12",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "2.764.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_083",
+      "date": "2024-10-12",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "3.225.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_084",
+      "date": "2024-10-12",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "3.686.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_085",
+      "date": "2024-10-12",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.303.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_086",
+      "date": "2024-10-12",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.303.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_087",
+      "date": "2024-10-12",
+      "division": "mcn",
+      "gmv": "12.640.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_088",
+      "date": "2024-10-12",
+      "division": "tap",
+      "gmv": "4.540.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_089",
+      "date": "2024-10-14",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "5.094.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_090",
+      "date": "2024-10-14",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "3.396.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_091",
+      "date": "2024-10-14",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "3.962.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_092",
+      "date": "2024-10-14",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "4.528.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_093",
+      "date": "2024-10-14",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.830.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_094",
+      "date": "2024-10-14",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.830.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_095",
+      "date": "2024-10-14",
+      "division": "mcn",
+      "gmv": "13.860.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_096",
+      "date": "2024-10-14",
+      "division": "tap",
+      "gmv": "4.250.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_097",
+      "date": "2024-10-15",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "4.491.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_098",
+      "date": "2024-10-15",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "2.992.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_099",
+      "date": "2024-10-15",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "3.491.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_100",
+      "date": "2024-10-15",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "3.990.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_101",
+      "date": "2024-10-15",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.493.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_102",
+      "date": "2024-10-15",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.493.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_103",
+      "date": "2024-10-15",
+      "division": "mcn",
+      "gmv": "10.760.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_104",
+      "date": "2024-10-15",
+      "division": "tap",
+      "gmv": "5.020.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_105",
+      "date": "2024-10-16",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "4.707.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_106",
+      "date": "2024-10-16",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "3.138.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_107",
+      "date": "2024-10-16",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "3.661.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_108",
+      "date": "2024-10-16",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "4.184.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_109",
+      "date": "2024-10-16",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.615.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_110",
+      "date": "2024-10-16",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.615.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_111",
+      "date": "2024-10-16",
+      "division": "mcn",
+      "gmv": "11.580.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_112",
+      "date": "2024-10-16",
+      "division": "tap",
+      "gmv": "5.630.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_113",
+      "date": "2024-10-17",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "4.221.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_114",
+      "date": "2024-10-17",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "2.814.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_115",
+      "date": "2024-10-17",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "3.283.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_116",
+      "date": "2024-10-17",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "3.752.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_117",
+      "date": "2024-10-17",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.345.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_118",
+      "date": "2024-10-17",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.345.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_119",
+      "date": "2024-10-17",
+      "division": "mcn",
+      "gmv": "10.600.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_120",
+      "date": "2024-10-17",
+      "division": "tap",
+      "gmv": "4.810.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_121",
+      "date": "2024-10-18",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "4.515.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_122",
+      "date": "2024-10-18",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "3.009.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_123",
+      "date": "2024-10-18",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "3.510.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_124",
+      "date": "2024-10-18",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "4.012.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_125",
+      "date": "2024-10-18",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.507.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_126",
+      "date": "2024-10-18",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.507.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_127",
+      "date": "2024-10-18",
+      "division": "mcn",
+      "gmv": "11.000.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_128",
+      "date": "2024-10-18",
+      "division": "tap",
+      "gmv": "5.480.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_129",
+      "date": "2024-10-19",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "3.930.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_130",
+      "date": "2024-10-19",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "2.619.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_131",
+      "date": "2024-10-19",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "3.055.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_132",
+      "date": "2024-10-19",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "3.492.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_133",
+      "date": "2024-10-19",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.182.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_134",
+      "date": "2024-10-19",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.182.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_135",
+      "date": "2024-10-19",
+      "division": "mcn",
+      "gmv": "12.050.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_136",
+      "date": "2024-10-19",
+      "division": "tap",
+      "gmv": "5.410.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_137",
+      "date": "2024-10-21",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "3.775.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_138",
+      "date": "2024-10-21",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "2.515.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_139",
+      "date": "2024-10-21",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "2.934.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_140",
+      "date": "2024-10-21",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "3.354.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_141",
+      "date": "2024-10-21",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.096.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_142",
+      "date": "2024-10-21",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.096.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_143",
+      "date": "2024-10-21",
+      "division": "mcn",
+      "gmv": "11.870.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_144",
+      "date": "2024-10-21",
+      "division": "tap",
+      "gmv": "4.780.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_145",
+      "date": "2024-10-22",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "5.130.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_146",
+      "date": "2024-10-22",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "3.418.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_147",
+      "date": "2024-10-22",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "3.988.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_148",
+      "date": "2024-10-22",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "4.558.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_149",
+      "date": "2024-10-22",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.848.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_150",
+      "date": "2024-10-22",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.848.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_151",
+      "date": "2024-10-22",
+      "division": "mcn",
+      "gmv": "14.220.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_152",
+      "date": "2024-10-22",
+      "division": "tap",
+      "gmv": "4.260.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_153",
+      "date": "2024-10-23",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "3.510.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_154",
+      "date": "2024-10-23",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "2.340.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_155",
+      "date": "2024-10-23",
+      "division": "affiliator",
+      "accountId": "acc_003",
+      "gmv": "2.730.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_156",
+      "date": "2024-10-23",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "3.120.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_157",
+      "date": "2024-10-23",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "1.950.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_158",
+      "date": "2024-10-23",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "1.950.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_159",
+      "date": "2024-10-23",
+      "division": "mcn",
+      "gmv": "9.400.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_160",
+      "date": "2024-10-23",
+      "division": "tap",
+      "gmv": "3.900.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_161",
+      "date": "2024-10-24",
+      "division": "affiliator",
+      "accountId": "acc_001",
+      "gmv": "4.784.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_162",
+      "date": "2024-10-24",
+      "division": "affiliator",
+      "accountId": "acc_002",
+      "gmv": "3.404.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_163",
+      "date": "2024-10-24",
+      "division": "affiliator",
+      "accountId": "acc_004",
+      "gmv": "4.324.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_164",
+      "date": "2024-10-24",
+      "division": "affiliator",
+      "accountId": "acc_005",
+      "gmv": "2.944.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_165",
+      "date": "2024-10-24",
+      "division": "affiliator",
+      "accountId": "acc_006",
+      "gmv": "2.944.000",
+      "autoSynced": true
+    },
+    {
+      "id": "gmv_166",
+      "date": "2024-10-24",
+      "division": "mcn",
+      "gmv": "11.200.000",
+      "autoSynced": false
+    },
+    {
+      "id": "gmv_167",
+      "date": "2024-10-24",
+      "division": "tap",
+      "gmv": "4.600.000",
+      "autoSynced": false
+    }
+  ],
+  "affiliate-gmv:daily": [
+    {
+      "id": "agm_001",
+      "date": "2024-10-01",
+      "accountId": "acc_001",
+      "gmv": "4.176.000",
+      "commission": "543.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_002",
+      "date": "2024-10-01",
+      "accountId": "acc_002",
+      "gmv": "2.784.000",
+      "commission": "223.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_003",
+      "date": "2024-10-01",
+      "accountId": "acc_003",
+      "gmv": "3.248.000",
+      "commission": "292.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_004",
+      "date": "2024-10-01",
+      "accountId": "acc_004",
+      "gmv": "3.712.000",
+      "commission": "334.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_005",
+      "date": "2024-10-01",
+      "accountId": "acc_005",
+      "gmv": "2.320.000",
+      "commission": "209.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_006",
+      "date": "2024-10-01",
+      "accountId": "acc_006",
+      "gmv": "2.320.000",
+      "commission": "209.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_009",
+      "date": "2024-10-02",
+      "accountId": "acc_001",
+      "gmv": "4.146.000",
+      "commission": "332.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_010",
+      "date": "2024-10-02",
+      "accountId": "acc_002",
+      "gmv": "2.763.000",
+      "commission": "249.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_011",
+      "date": "2024-10-02",
+      "accountId": "acc_003",
+      "gmv": "3.223.000",
+      "commission": "322.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_012",
+      "date": "2024-10-02",
+      "accountId": "acc_004",
+      "gmv": "3.684.000",
+      "commission": "368.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_013",
+      "date": "2024-10-02",
+      "accountId": "acc_005",
+      "gmv": "2.302.000",
+      "commission": "230.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_014",
+      "date": "2024-10-02",
+      "accountId": "acc_006",
+      "gmv": "2.302.000",
+      "commission": "230.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_017",
+      "date": "2024-10-03",
+      "accountId": "acc_001",
+      "gmv": "4.416.000",
+      "commission": "397.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_018",
+      "date": "2024-10-03",
+      "accountId": "acc_002",
+      "gmv": "2.943.000",
+      "commission": "294.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_019",
+      "date": "2024-10-03",
+      "accountId": "acc_003",
+      "gmv": "3.433.000",
+      "commission": "378.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_020",
+      "date": "2024-10-03",
+      "accountId": "acc_004",
+      "gmv": "3.924.000",
+      "commission": "432.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_021",
+      "date": "2024-10-03",
+      "accountId": "acc_005",
+      "gmv": "2.452.000",
+      "commission": "270.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_022",
+      "date": "2024-10-03",
+      "accountId": "acc_006",
+      "gmv": "2.452.000",
+      "commission": "270.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_025",
+      "date": "2024-10-04",
+      "accountId": "acc_001",
+      "gmv": "3.903.000",
+      "commission": "390.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_026",
+      "date": "2024-10-04",
+      "accountId": "acc_002",
+      "gmv": "2.601.000",
+      "commission": "286.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_027",
+      "date": "2024-10-04",
+      "accountId": "acc_003",
+      "gmv": "3.034.000",
+      "commission": "364.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_028",
+      "date": "2024-10-04",
+      "accountId": "acc_004",
+      "gmv": "3.468.000",
+      "commission": "416.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_029",
+      "date": "2024-10-04",
+      "accountId": "acc_005",
+      "gmv": "2.167.000",
+      "commission": "260.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_030",
+      "date": "2024-10-04",
+      "accountId": "acc_006",
+      "gmv": "2.167.000",
+      "commission": "260.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_033",
+      "date": "2024-10-05",
+      "accountId": "acc_001",
+      "gmv": "3.726.000",
+      "commission": "410.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_034",
+      "date": "2024-10-05",
+      "accountId": "acc_002",
+      "gmv": "2.482.000",
+      "commission": "298.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_035",
+      "date": "2024-10-05",
+      "accountId": "acc_003",
+      "gmv": "2.896.000",
+      "commission": "376.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_036",
+      "date": "2024-10-05",
+      "accountId": "acc_004",
+      "gmv": "3.310.000",
+      "commission": "430.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_037",
+      "date": "2024-10-05",
+      "accountId": "acc_005",
+      "gmv": "2.068.000",
+      "commission": "269.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_038",
+      "date": "2024-10-05",
+      "accountId": "acc_006",
+      "gmv": "2.068.000",
+      "commission": "269.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_041",
+      "date": "2024-10-07",
+      "accountId": "acc_001",
+      "gmv": "3.748.000",
+      "commission": "487.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_042",
+      "date": "2024-10-07",
+      "accountId": "acc_002",
+      "gmv": "2.497.000",
+      "commission": "200.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_043",
+      "date": "2024-10-07",
+      "accountId": "acc_003",
+      "gmv": "2.913.000",
+      "commission": "262.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_044",
+      "date": "2024-10-07",
+      "accountId": "acc_004",
+      "gmv": "3.330.000",
+      "commission": "300.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_045",
+      "date": "2024-10-07",
+      "accountId": "acc_005",
+      "gmv": "2.081.000",
+      "commission": "187.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_046",
+      "date": "2024-10-07",
+      "accountId": "acc_006",
+      "gmv": "2.081.000",
+      "commission": "187.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_049",
+      "date": "2024-10-08",
+      "accountId": "acc_001",
+      "gmv": "3.852.000",
+      "commission": "308.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_050",
+      "date": "2024-10-08",
+      "accountId": "acc_002",
+      "gmv": "2.566.000",
+      "commission": "231.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_051",
+      "date": "2024-10-08",
+      "accountId": "acc_003",
+      "gmv": "2.994.000",
+      "commission": "299.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_052",
+      "date": "2024-10-08",
+      "accountId": "acc_004",
+      "gmv": "3.422.000",
+      "commission": "342.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_053",
+      "date": "2024-10-08",
+      "accountId": "acc_005",
+      "gmv": "2.138.000",
+      "commission": "214.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_054",
+      "date": "2024-10-08",
+      "accountId": "acc_006",
+      "gmv": "2.138.000",
+      "commission": "214.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_057",
+      "date": "2024-10-09",
+      "accountId": "acc_001",
+      "gmv": "4.632.000",
+      "commission": "417.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_058",
+      "date": "2024-10-09",
+      "accountId": "acc_002",
+      "gmv": "3.087.000",
+      "commission": "309.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_059",
+      "date": "2024-10-09",
+      "accountId": "acc_003",
+      "gmv": "3.601.000",
+      "commission": "396.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_060",
+      "date": "2024-10-09",
+      "accountId": "acc_004",
+      "gmv": "4.116.000",
+      "commission": "453.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_061",
+      "date": "2024-10-09",
+      "accountId": "acc_005",
+      "gmv": "2.572.000",
+      "commission": "283.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_062",
+      "date": "2024-10-09",
+      "accountId": "acc_006",
+      "gmv": "2.572.000",
+      "commission": "283.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_065",
+      "date": "2024-10-10",
+      "accountId": "acc_001",
+      "gmv": "3.852.000",
+      "commission": "501.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_066",
+      "date": "2024-10-10",
+      "accountId": "acc_002",
+      "gmv": "2.566.000",
+      "commission": "205.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_067",
+      "date": "2024-10-10",
+      "accountId": "acc_003",
+      "gmv": "2.994.000",
+      "commission": "269.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_068",
+      "date": "2024-10-10",
+      "accountId": "acc_004",
+      "gmv": "3.422.000",
+      "commission": "308.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_069",
+      "date": "2024-10-10",
+      "accountId": "acc_005",
+      "gmv": "2.138.000",
+      "commission": "192.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_070",
+      "date": "2024-10-10",
+      "accountId": "acc_006",
+      "gmv": "2.138.000",
+      "commission": "192.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_073",
+      "date": "2024-10-11",
+      "accountId": "acc_001",
+      "gmv": "4.581.000",
+      "commission": "366.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_074",
+      "date": "2024-10-11",
+      "accountId": "acc_002",
+      "gmv": "3.052.000",
+      "commission": "275.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_075",
+      "date": "2024-10-11",
+      "accountId": "acc_003",
+      "gmv": "3.561.000",
+      "commission": "356.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_076",
+      "date": "2024-10-11",
+      "accountId": "acc_004",
+      "gmv": "4.070.000",
+      "commission": "407.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_077",
+      "date": "2024-10-11",
+      "accountId": "acc_005",
+      "gmv": "2.543.000",
+      "commission": "254.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_078",
+      "date": "2024-10-11",
+      "accountId": "acc_006",
+      "gmv": "2.543.000",
+      "commission": "254.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_081",
+      "date": "2024-10-12",
+      "accountId": "acc_001",
+      "gmv": "4.149.000",
+      "commission": "373.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_082",
+      "date": "2024-10-12",
+      "accountId": "acc_002",
+      "gmv": "2.764.000",
+      "commission": "276.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_083",
+      "date": "2024-10-12",
+      "accountId": "acc_003",
+      "gmv": "3.225.000",
+      "commission": "355.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_084",
+      "date": "2024-10-12",
+      "accountId": "acc_004",
+      "gmv": "3.686.000",
+      "commission": "405.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_085",
+      "date": "2024-10-12",
+      "accountId": "acc_005",
+      "gmv": "2.303.000",
+      "commission": "253.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_086",
+      "date": "2024-10-12",
+      "accountId": "acc_006",
+      "gmv": "2.303.000",
+      "commission": "253.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_089",
+      "date": "2024-10-14",
+      "accountId": "acc_001",
+      "gmv": "5.094.000",
+      "commission": "560.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_090",
+      "date": "2024-10-14",
+      "accountId": "acc_002",
+      "gmv": "3.396.000",
+      "commission": "408.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_091",
+      "date": "2024-10-14",
+      "accountId": "acc_003",
+      "gmv": "3.962.000",
+      "commission": "515.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_092",
+      "date": "2024-10-14",
+      "accountId": "acc_004",
+      "gmv": "4.528.000",
+      "commission": "589.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_093",
+      "date": "2024-10-14",
+      "accountId": "acc_005",
+      "gmv": "2.830.000",
+      "commission": "368.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_094",
+      "date": "2024-10-14",
+      "accountId": "acc_006",
+      "gmv": "2.830.000",
+      "commission": "368.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_097",
+      "date": "2024-10-15",
+      "accountId": "acc_001",
+      "gmv": "4.491.000",
+      "commission": "539.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_098",
+      "date": "2024-10-15",
+      "accountId": "acc_002",
+      "gmv": "2.992.000",
+      "commission": "389.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_099",
+      "date": "2024-10-15",
+      "accountId": "acc_003",
+      "gmv": "3.491.000",
+      "commission": "279.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_100",
+      "date": "2024-10-15",
+      "accountId": "acc_004",
+      "gmv": "3.990.000",
+      "commission": "319.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_101",
+      "date": "2024-10-15",
+      "accountId": "acc_005",
+      "gmv": "2.493.000",
+      "commission": "199.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_102",
+      "date": "2024-10-15",
+      "accountId": "acc_006",
+      "gmv": "2.493.000",
+      "commission": "199.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_105",
+      "date": "2024-10-16",
+      "accountId": "acc_001",
+      "gmv": "4.707.000",
+      "commission": "612.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_106",
+      "date": "2024-10-16",
+      "accountId": "acc_002",
+      "gmv": "3.138.000",
+      "commission": "251.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_107",
+      "date": "2024-10-16",
+      "accountId": "acc_003",
+      "gmv": "3.661.000",
+      "commission": "329.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_108",
+      "date": "2024-10-16",
+      "accountId": "acc_004",
+      "gmv": "4.184.000",
+      "commission": "377.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_109",
+      "date": "2024-10-16",
+      "accountId": "acc_005",
+      "gmv": "2.615.000",
+      "commission": "235.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_110",
+      "date": "2024-10-16",
+      "accountId": "acc_006",
+      "gmv": "2.615.000",
+      "commission": "235.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_113",
+      "date": "2024-10-17",
+      "accountId": "acc_001",
+      "gmv": "4.221.000",
+      "commission": "338.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_114",
+      "date": "2024-10-17",
+      "accountId": "acc_002",
+      "gmv": "2.814.000",
+      "commission": "253.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_115",
+      "date": "2024-10-17",
+      "accountId": "acc_003",
+      "gmv": "3.283.000",
+      "commission": "328.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_116",
+      "date": "2024-10-17",
+      "accountId": "acc_004",
+      "gmv": "3.752.000",
+      "commission": "375.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_117",
+      "date": "2024-10-17",
+      "accountId": "acc_005",
+      "gmv": "2.345.000",
+      "commission": "234.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_118",
+      "date": "2024-10-17",
+      "accountId": "acc_006",
+      "gmv": "2.345.000",
+      "commission": "234.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_121",
+      "date": "2024-10-18",
+      "accountId": "acc_001",
+      "gmv": "4.515.000",
+      "commission": "406.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_122",
+      "date": "2024-10-18",
+      "accountId": "acc_002",
+      "gmv": "3.009.000",
+      "commission": "301.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_123",
+      "date": "2024-10-18",
+      "accountId": "acc_003",
+      "gmv": "3.510.000",
+      "commission": "386.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_124",
+      "date": "2024-10-18",
+      "accountId": "acc_004",
+      "gmv": "4.012.000",
+      "commission": "441.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_125",
+      "date": "2024-10-18",
+      "accountId": "acc_005",
+      "gmv": "2.507.000",
+      "commission": "276.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_126",
+      "date": "2024-10-18",
+      "accountId": "acc_006",
+      "gmv": "2.507.000",
+      "commission": "276.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_129",
+      "date": "2024-10-19",
+      "accountId": "acc_001",
+      "gmv": "3.930.000",
+      "commission": "393.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_130",
+      "date": "2024-10-19",
+      "accountId": "acc_002",
+      "gmv": "2.619.000",
+      "commission": "288.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_131",
+      "date": "2024-10-19",
+      "accountId": "acc_003",
+      "gmv": "3.055.000",
+      "commission": "367.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_132",
+      "date": "2024-10-19",
+      "accountId": "acc_004",
+      "gmv": "3.492.000",
+      "commission": "419.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_133",
+      "date": "2024-10-19",
+      "accountId": "acc_005",
+      "gmv": "2.182.000",
+      "commission": "262.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_134",
+      "date": "2024-10-19",
+      "accountId": "acc_006",
+      "gmv": "2.182.000",
+      "commission": "262.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_137",
+      "date": "2024-10-21",
+      "accountId": "acc_001",
+      "gmv": "3.775.000",
+      "commission": "340.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_138",
+      "date": "2024-10-21",
+      "accountId": "acc_002",
+      "gmv": "2.515.000",
+      "commission": "252.000",
+      "uploads": 5
+    },
+    {
+      "id": "agm_139",
+      "date": "2024-10-21",
+      "accountId": "acc_003",
+      "gmv": "2.934.000",
+      "commission": "323.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_140",
+      "date": "2024-10-21",
+      "accountId": "acc_004",
+      "gmv": "3.354.000",
+      "commission": "369.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_141",
+      "date": "2024-10-21",
+      "accountId": "acc_005",
+      "gmv": "2.096.000",
+      "commission": "231.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_142",
+      "date": "2024-10-21",
+      "accountId": "acc_006",
+      "gmv": "2.096.000",
+      "commission": "231.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_145",
+      "date": "2024-10-22",
+      "accountId": "acc_001",
+      "gmv": "5.130.000",
+      "commission": "513.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_146",
+      "date": "2024-10-22",
+      "accountId": "acc_002",
+      "gmv": "3.418.000",
+      "commission": "376.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_147",
+      "date": "2024-10-22",
+      "accountId": "acc_003",
+      "gmv": "3.988.000",
+      "commission": "479.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_148",
+      "date": "2024-10-22",
+      "accountId": "acc_004",
+      "gmv": "4.558.000",
+      "commission": "547.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_149",
+      "date": "2024-10-22",
+      "accountId": "acc_005",
+      "gmv": "2.848.000",
+      "commission": "342.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_150",
+      "date": "2024-10-22",
+      "accountId": "acc_006",
+      "gmv": "2.848.000",
+      "commission": "342.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_153",
+      "date": "2024-10-23",
+      "accountId": "acc_001",
+      "gmv": "3.510.000",
+      "commission": "386.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_154",
+      "date": "2024-10-23",
+      "accountId": "acc_002",
+      "gmv": "2.340.000",
+      "commission": "281.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_155",
+      "date": "2024-10-23",
+      "accountId": "acc_003",
+      "gmv": "2.730.000",
+      "commission": "355.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_156",
+      "date": "2024-10-23",
+      "accountId": "acc_004",
+      "gmv": "3.120.000",
+      "commission": "406.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_157",
+      "date": "2024-10-23",
+      "accountId": "acc_005",
+      "gmv": "1.950.000",
+      "commission": "254.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_158",
+      "date": "2024-10-23",
+      "accountId": "acc_006",
+      "gmv": "1.950.000",
+      "commission": "254.000",
+      "uploads": 4
+    },
+    {
+      "id": "agm_161",
+      "date": "2024-10-24",
+      "accountId": "acc_001",
+      "gmv": "4.784.000",
+      "commission": "574.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_162",
+      "date": "2024-10-24",
+      "accountId": "acc_002",
+      "gmv": "3.404.000",
+      "commission": "443.000",
+      "uploads": 6
+    },
+    {
+      "id": "agm_163",
+      "date": "2024-10-24",
+      "accountId": "acc_004",
+      "gmv": "4.324.000",
+      "commission": "346.000",
+      "uploads": 2
+    },
+    {
+      "id": "agm_164",
+      "date": "2024-10-24",
+      "accountId": "acc_005",
+      "gmv": "2.944.000",
+      "commission": "236.000",
+      "uploads": 3
+    },
+    {
+      "id": "agm_165",
+      "date": "2024-10-24",
+      "accountId": "acc_006",
+      "gmv": "2.944.000",
+      "commission": "236.000",
+      "uploads": 4
+    }
+  ],
+  "attendance:all": [
+    {
+      "id": "att_001",
+      "userId": "usr_013",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:44:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_001",
+      "checkInLocation": {
+        "lat": -6.261269,
+        "lng": 106.809988
+      }
+    },
+    {
+      "id": "att_002",
+      "userId": "usr_016",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T08:02:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_002",
+      "checkInLocation": {
+        "lat": -6.260478,
+        "lng": 106.810396
+      }
+    },
+    {
+      "id": "att_003",
+      "userId": "usr_021",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:46:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_003",
+      "checkInLocation": {
+        "lat": -6.260775,
+        "lng": 106.81028
+      }
+    },
+    {
+      "id": "att_004",
+      "userId": "usr_005",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:34:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_004",
+      "checkInLocation": {
+        "lat": -6.26144,
+        "lng": 106.810494
+      }
+    },
+    {
+      "id": "att_005",
+      "userId": "usr_017",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:36:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_005",
+      "checkInLocation": {
+        "lat": -6.260624,
+        "lng": 106.8099
+      }
+    },
+    {
+      "id": "att_006",
+      "userId": "usr_006",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:43:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_006",
+      "checkInLocation": {
+        "lat": -6.261388,
+        "lng": 106.809945
+      }
+    },
+    {
+      "id": "att_007",
+      "userId": "usr_012",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T08:01:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_007",
+      "checkInLocation": {
+        "lat": -6.260126,
+        "lng": 106.810263
+      }
+    },
+    {
+      "id": "att_008",
+      "userId": "usr_001",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:55:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_008",
+      "checkInLocation": {
+        "lat": -6.260982,
+        "lng": 106.810041
+      }
+    },
+    {
+      "id": "att_009",
+      "userId": "usr_018",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:49:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_009",
+      "checkInLocation": {
+        "lat": -6.261405,
+        "lng": 106.81013
+      }
+    },
+    {
+      "id": "att_010",
+      "userId": "usr_002",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:23:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_010",
+      "checkInLocation": {
+        "lat": -6.260459,
+        "lng": 106.809916
+      }
+    },
+    {
+      "id": "att_011",
+      "userId": "usr_014",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:53:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_011",
+      "checkInLocation": {
+        "lat": -6.261006,
+        "lng": 106.811106
+      }
+    },
+    {
+      "id": "att_012",
+      "userId": "usr_009",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:40:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_012",
+      "checkInLocation": {
+        "lat": -6.260496,
+        "lng": 106.811316
+      }
+    },
+    {
+      "id": "att_013",
+      "userId": "usr_022",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:50:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_013",
+      "checkInLocation": {
+        "lat": -6.260229,
+        "lng": 106.810918
+      }
+    },
+    {
+      "id": "att_014",
+      "userId": "usr_007",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:47:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_014",
+      "checkInLocation": {
+        "lat": -6.260821,
+        "lng": 106.811123
+      }
+    },
+    {
+      "id": "att_015",
+      "userId": "usr_004",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T09:17:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_015",
+      "checkInLocation": {
+        "lat": -6.261407,
+        "lng": 106.810612
+      }
+    },
+    {
+      "id": "att_016",
+      "userId": "usr_015",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:39:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_016",
+      "checkInLocation": {
+        "lat": -6.261211,
+        "lng": 106.810731
+      }
+    },
+    {
+      "id": "att_017",
+      "userId": "usr_020",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T08:25:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_017",
+      "checkInLocation": {
+        "lat": -6.260997,
+        "lng": 106.810737
+      }
+    },
+    {
+      "id": "att_018",
+      "userId": "usr_003",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:51:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_018",
+      "checkInLocation": {
+        "lat": -6.260643,
+        "lng": 106.810385
+      }
+    },
+    {
+      "id": "att_019",
+      "userId": "usr_008",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:58:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_019",
+      "checkInLocation": {
+        "lat": -6.261302,
+        "lng": 106.810157
+      }
+    },
+    {
+      "id": "att_020",
+      "userId": "usr_011",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:32:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_020",
+      "checkInLocation": {
+        "lat": -6.259938,
+        "lng": 106.809875
+      }
+    },
+    {
+      "id": "att_021",
+      "userId": "usr_019",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T07:55:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_021",
+      "checkInLocation": {
+        "lat": -6.260411,
+        "lng": 106.810484
+      }
+    },
+    {
+      "id": "att_022",
+      "userId": "usr_010",
+      "date": "2024-10-22",
+      "checkIn": "2024-10-22T08:50:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_022",
+      "checkInLocation": {
+        "lat": -6.256577,
+        "lng": 106.810435
+      }
+    },
+    {
+      "id": "att_023",
+      "userId": "usr_013",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:39:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_023",
+      "checkInLocation": {
+        "lat": -6.261269,
+        "lng": 106.809988
+      }
+    },
+    {
+      "id": "att_024",
+      "userId": "usr_016",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:57:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_024",
+      "checkInLocation": {
+        "lat": -6.260478,
+        "lng": 106.810396
+      }
+    },
+    {
+      "id": "att_025",
+      "userId": "usr_021",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:41:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_025",
+      "checkInLocation": {
+        "lat": -6.260775,
+        "lng": 106.81028
+      }
+    },
+    {
+      "id": "att_026",
+      "userId": "usr_005",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:29:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_026",
+      "checkInLocation": {
+        "lat": -6.26144,
+        "lng": 106.810494
+      }
+    },
+    {
+      "id": "att_027",
+      "userId": "usr_017",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:31:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_027",
+      "checkInLocation": {
+        "lat": -6.260624,
+        "lng": 106.8099
+      }
+    },
+    {
+      "id": "att_028",
+      "userId": "usr_006",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:38:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_028",
+      "checkInLocation": {
+        "lat": -6.261388,
+        "lng": 106.809945
+      }
+    },
+    {
+      "id": "att_029",
+      "userId": "usr_012",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:56:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_029",
+      "checkInLocation": {
+        "lat": -6.260126,
+        "lng": 106.810263
+      }
+    },
+    {
+      "id": "att_030",
+      "userId": "usr_001",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:50:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_030",
+      "checkInLocation": {
+        "lat": -6.260982,
+        "lng": 106.810041
+      }
+    },
+    {
+      "id": "att_031",
+      "userId": "usr_018",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:44:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_031",
+      "checkInLocation": {
+        "lat": -6.261405,
+        "lng": 106.81013
+      }
+    },
+    {
+      "id": "att_032",
+      "userId": "usr_002",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:18:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_032",
+      "checkInLocation": {
+        "lat": -6.260459,
+        "lng": 106.809916
+      }
+    },
+    {
+      "id": "att_033",
+      "userId": "usr_014",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:48:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_033",
+      "checkInLocation": {
+        "lat": -6.261006,
+        "lng": 106.811106
+      }
+    },
+    {
+      "id": "att_034",
+      "userId": "usr_009",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:35:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_034",
+      "checkInLocation": {
+        "lat": -6.260496,
+        "lng": 106.811316
+      }
+    },
+    {
+      "id": "att_035",
+      "userId": "usr_022",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:45:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_035",
+      "checkInLocation": {
+        "lat": -6.260229,
+        "lng": 106.810918
+      }
+    },
+    {
+      "id": "att_036",
+      "userId": "usr_007",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:42:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_036",
+      "checkInLocation": {
+        "lat": -6.260821,
+        "lng": 106.811123
+      }
+    },
+    {
+      "id": "att_037",
+      "userId": "usr_004",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T09:12:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_037",
+      "checkInLocation": {
+        "lat": -6.261407,
+        "lng": 106.810612
+      }
+    },
+    {
+      "id": "att_038",
+      "userId": "usr_015",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:34:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_038",
+      "checkInLocation": {
+        "lat": -6.261211,
+        "lng": 106.810731
+      }
+    },
+    {
+      "id": "att_039",
+      "userId": "usr_020",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T08:20:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_039",
+      "checkInLocation": {
+        "lat": -6.260997,
+        "lng": 106.810737
+      }
+    },
+    {
+      "id": "att_040",
+      "userId": "usr_003",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:46:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_040",
+      "checkInLocation": {
+        "lat": -6.260643,
+        "lng": 106.810385
+      }
+    },
+    {
+      "id": "att_041",
+      "userId": "usr_008",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:53:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_041",
+      "checkInLocation": {
+        "lat": -6.261302,
+        "lng": 106.810157
+      }
+    },
+    {
+      "id": "att_042",
+      "userId": "usr_011",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:27:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_042",
+      "checkInLocation": {
+        "lat": -6.259938,
+        "lng": 106.809875
+      }
+    },
+    {
+      "id": "att_043",
+      "userId": "usr_019",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T07:50:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_043",
+      "checkInLocation": {
+        "lat": -6.260411,
+        "lng": 106.810484
+      }
+    },
+    {
+      "id": "att_044",
+      "userId": "usr_010",
+      "date": "2024-10-23",
+      "checkIn": "2024-10-23T08:45:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_044",
+      "checkInLocation": {
+        "lat": -6.256577,
+        "lng": 106.810435
+      }
+    },
+    {
+      "id": "att_045",
+      "userId": "usr_001",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:52:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_045",
+      "checkInLocation": {
+        "lat": -6.260982,
+        "lng": 106.810041
+      }
+    },
+    {
+      "id": "att_046",
+      "userId": "usr_002",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:20:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_046",
+      "checkInLocation": {
+        "lat": -6.260459,
+        "lng": 106.809916
+      }
+    },
+    {
+      "id": "att_047",
+      "userId": "usr_003",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:48:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_047",
+      "checkInLocation": {
+        "lat": -6.260643,
+        "lng": 106.810385
+      }
+    },
+    {
+      "id": "att_048",
+      "userId": "usr_004",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T09:14:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_048",
+      "checkInLocation": {
+        "lat": -6.261407,
+        "lng": 106.810612
+      }
+    },
+    {
+      "id": "att_049",
+      "userId": "usr_005",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:31:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_049",
+      "checkInLocation": {
+        "lat": -6.26144,
+        "lng": 106.810494
+      }
+    },
+    {
+      "id": "att_050",
+      "userId": "usr_006",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:40:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_050",
+      "checkInLocation": {
+        "lat": -6.261388,
+        "lng": 106.809945
+      }
+    },
+    {
+      "id": "att_051",
+      "userId": "usr_007",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:44:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_051",
+      "checkInLocation": {
+        "lat": -6.260821,
+        "lng": 106.811123
+      }
+    },
+    {
+      "id": "att_052",
+      "userId": "usr_008",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:55:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_052",
+      "checkInLocation": {
+        "lat": -6.261302,
+        "lng": 106.810157
+      }
+    },
+    {
+      "id": "att_053",
+      "userId": "usr_009",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:37:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_053",
+      "checkInLocation": {
+        "lat": -6.260496,
+        "lng": 106.811316
+      }
+    },
+    {
+      "id": "att_054",
+      "userId": "usr_010",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T08:47:00+07:00",
+      "checkOut": null,
+      "status": "terlambat",
+      "checkInSelfie": "img:store/sf_054",
+      "checkInLocation": {
+        "lat": -6.256577,
+        "lng": 106.810435
+      }
+    },
+    {
+      "id": "att_055",
+      "userId": "usr_011",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:29:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_055",
+      "checkInLocation": {
+        "lat": -6.259938,
+        "lng": 106.809875
+      }
+    },
+    {
+      "id": "att_056",
+      "userId": "usr_012",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:58:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_056",
+      "checkInLocation": {
+        "lat": -6.260126,
+        "lng": 106.810263
+      }
+    },
+    {
+      "id": "att_057",
+      "userId": "usr_013",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:41:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_057",
+      "checkInLocation": {
+        "lat": -6.261269,
+        "lng": 106.809988
+      }
+    },
+    {
+      "id": "att_058",
+      "userId": "usr_014",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:50:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_058",
+      "checkInLocation": {
+        "lat": -6.261006,
+        "lng": 106.811106
+      }
+    },
+    {
+      "id": "att_059",
+      "userId": "usr_015",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:36:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_059",
+      "checkInLocation": {
+        "lat": -6.261211,
+        "lng": 106.810731
+      }
+    },
+    {
+      "id": "att_060",
+      "userId": "usr_016",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:59:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_060",
+      "checkInLocation": {
+        "lat": -6.260478,
+        "lng": 106.810396
+      }
+    },
+    {
+      "id": "att_061",
+      "userId": "usr_017",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:33:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_061",
+      "checkInLocation": {
+        "lat": -6.260624,
+        "lng": 106.8099
+      }
+    },
+    {
+      "id": "att_062",
+      "userId": "usr_018",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:46:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_062",
+      "checkInLocation": {
+        "lat": -6.261405,
+        "lng": 106.81013
+      }
+    },
+    {
+      "id": "att_063",
+      "userId": "usr_019",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:52:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_063",
+      "checkInLocation": {
+        "lat": -6.260411,
+        "lng": 106.810484
+      }
+    },
+    {
+      "id": "att_064",
+      "userId": "usr_020",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T08:22:00+07:00",
+      "checkOut": null,
+      "status": "terlambat",
+      "checkInSelfie": "img:store/sf_064",
+      "checkInLocation": {
+        "lat": -6.260997,
+        "lng": 106.810737
+      }
+    },
+    {
+      "id": "att_065",
+      "userId": "usr_021",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:43:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_065",
+      "checkInLocation": {
+        "lat": -6.260775,
+        "lng": 106.81028
+      }
+    },
+    {
+      "id": "att_066",
+      "userId": "usr_022",
+      "date": "2024-10-24",
+      "checkIn": "2024-10-24T07:47:00+07:00",
+      "checkOut": null,
+      "status": "hadir",
+      "checkInSelfie": "img:store/sf_066",
+      "checkInLocation": {
+        "lat": -6.260229,
+        "lng": 106.810918
+      }
+    }
+  ],
+  "attendance:config": {
+    "jamMasuk": "07:30",
+    "jamPulang": "17:00",
+    "toleransiMenit": 15,
+    "radiusMeter": 150,
+    "lokasi": {
+      "lat": -6.2607,
+      "lng": 106.8102,
+      "nama": "Kantor Pusat"
+    },
+    "hariKerja": [
+      "senin",
+      "selasa",
+      "rabu",
+      "kamis",
+      "jumat",
+      "sabtu"
+    ]
+  },
+  "leave-requests:all": [
+    {
+      "id": "lve_001",
+      "userId": "usr_023",
+      "type": "izin",
+      "startDate": "2024-10-24",
+      "endDate": "2024-10-24",
+      "reason": "Mengurus dokumen keluarga di luar kota.",
+      "status": "disetujui",
+      "decidedById": "usr_001"
+    },
+    {
+      "id": "lve_002",
+      "userId": "usr_024",
+      "type": "sakit",
+      "startDate": "2024-10-24",
+      "endDate": "2024-10-24",
+      "reason": "Demam sejak semalam, istirahat sesuai anjuran klinik.",
+      "status": "disetujui",
+      "decidedById": "usr_001"
+    },
+    {
+      "id": "lve_003",
+      "userId": "usr_025",
+      "type": "izin",
+      "startDate": "2024-10-25",
+      "endDate": "2024-10-25",
+      "reason": "Mengurus administrasi BPJS keluarga, kembali besok siang.",
+      "status": "diajukan",
+      "decidedById": "usr_001"
+    },
+    {
+      "id": "lve_004",
+      "userId": "usr_012",
+      "type": "sakit",
+      "startDate": "2024-10-25",
+      "endDate": "2024-10-25",
+      "reason": "Radang tenggorokan, sudah periksa ke klinik pagi ini.",
+      "status": "diajukan",
+      "decidedById": "usr_001"
+    },
+    {
+      "id": "lve_005",
+      "userId": "usr_010",
+      "type": "izin",
+      "startDate": "2024-10-28",
+      "endDate": "2024-10-28",
+      "reason": "Menghadiri pernikahan keluarga di luar kota.",
+      "status": "diajukan",
+      "decidedById": "usr_001"
+    },
+    {
+      "id": "lve_006",
+      "userId": "usr_010",
+      "type": "izin",
+      "startDate": "2024-10-29",
+      "endDate": "2024-10-29",
+      "reason": "Menghadiri pernikahan keluarga di luar kota.",
+      "status": "diajukan",
+      "decidedById": "usr_001"
+    },
+    {
+      "id": "lve_007",
+      "userId": "usr_010",
+      "type": "izin",
+      "startDate": "2024-10-30",
+      "endDate": "2024-10-30",
+      "reason": "Menghadiri pernikahan keluarga di luar kota.",
+      "status": "diajukan",
+      "decidedById": "usr_001"
+    }
+  ],
+  "tasks:all": [
+    {
+      "id": "tsk_001",
+      "title": "Audit GMV Akun Beauty",
+      "description": "Penyesuaian deviasi nominal komisi kreator top 5 kategori skincare.",
+      "context": "Prioritas Tinggi",
+      "createdById": "usr_001",
+      "assigneeId": "usr_003",
+      "dueDate": "2024-10-24T15:00:00+07:00",
+      "priority": "tinggi",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_002",
+      "title": "Otorisasi Akun MMC Baru",
+      "description": "Persetujuan token akses multi-channel TikTok Shop untuk 12 kreator batch Ramadan.",
+      "context": "Approval",
+      "createdById": "usr_001",
+      "assigneeId": "usr_007",
+      "dueDate": "2024-10-24T16:30:00+07:00",
+      "priority": "sedang",
+      "status": "menunggu_qc",
+      "qc": null
+    },
+    {
+      "id": "tsk_003",
+      "title": "Sinkronisasi TAP Center",
+      "description": "Rekonsiliasi data GMV dasbor terhadap invoice real-time TikTok Ads Agency.",
+      "context": "Finance & GMV",
+      "createdById": "usr_001",
+      "assigneeId": "usr_006",
+      "dueDate": "2024-10-24T18:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_004",
+      "title": "QC Tiket Konten FYP",
+      "description": "Verifikasi 12 video batch Ramadan sebelum jadwal posting jam 17.15.",
+      "context": "SOP GRD",
+      "createdById": "usr_017",
+      "assigneeId": "usr_005",
+      "dueDate": "2024-10-24T17:15:00+07:00",
+      "priority": "sedang",
+      "status": "menunggu_qc",
+      "qc": null
+    },
+    {
+      "id": "tsk_005",
+      "title": "Rapikan stok sampel skincare",
+      "description": "Hitung ulang sisa sampel serum dan toner, cocokkan dengan catatan gudang.",
+      "context": "Operasional",
+      "createdById": "usr_017",
+      "assigneeId": "usr_009",
+      "dueDate": "2024-10-23T17:00:00+07:00",
+      "priority": "rendah",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-23T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_006",
+      "title": "Naikkan konversi live Affiliator 5%",
+      "description": "Fokus pada bundling dan voucher toko di dua jam pertama tiap sesi.",
+      "context": "Komitmen pekan ini",
+      "createdById": "usr_001",
+      "assigneeId": "usr_017",
+      "dueDate": "2024-10-27T23:59:00+07:00",
+      "priority": "tinggi",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_007",
+      "title": "Rapikan katalog produk pekan ini — Rian",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_003",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_008",
+      "title": "Kurasi 10 kreator baru — Rian",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_003",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_009",
+      "title": "Susun jadwal live sepekan — Rian",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_003",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_010",
+      "title": "Tindak lanjut order pending — Rian",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_003",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_011",
+      "title": "Rapikan katalog produk pekan ini — Nabila",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_004",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_012",
+      "title": "Kurasi 10 kreator baru — Nabila",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_004",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "todo",
+      "qc": null
+    },
+    {
+      "id": "tsk_013",
+      "title": "Susun jadwal live sepekan — Nabila",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_004",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "todo",
+      "qc": null
+    },
+    {
+      "id": "tsk_014",
+      "title": "Tindak lanjut order pending — Nabila",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_004",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_015",
+      "title": "Rapikan katalog produk pekan ini — Bayu",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_005",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_016",
+      "title": "Kurasi 10 kreator baru — Bayu",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_005",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_017",
+      "title": "Susun jadwal live sepekan — Bayu",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_005",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_018",
+      "title": "Tindak lanjut order pending — Bayu",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_005",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_019",
+      "title": "Validasi dokumen agency — Dimas",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_001",
+      "assigneeId": "usr_006",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_001",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_020",
+      "title": "Rekap pencairan komisi — Dimas",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_001",
+      "assigneeId": "usr_006",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_001",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_021",
+      "title": "Tinjau pengajuan sampel — Dimas",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_001",
+      "assigneeId": "usr_006",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_001",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_022",
+      "title": "Susun laporan kemitraan — Dimas",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_001",
+      "assigneeId": "usr_006",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_023",
+      "title": "Verifikasi binding kreator — Maya",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_007",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_018",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_024",
+      "title": "Rekap kehadiran MMC — Maya",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_007",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_018",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_025",
+      "title": "Tindak lanjut kreator pasif — Maya",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_007",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_018",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_026",
+      "title": "Siapkan materi kelas MMC — Maya",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_007",
+      "dueDate": "2024-10-22T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_018",
+        "checkedAt": "2024-10-22T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_027",
+      "title": "Verifikasi binding kreator — Rizky",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_008",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_018",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_028",
+      "title": "Rekap kehadiran MMC — Rizky",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_008",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_018",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_029",
+      "title": "Tindak lanjut kreator pasif — Rizky",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_008",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_018",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_030",
+      "title": "Siapkan materi kelas MMC — Rizky",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_008",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_031",
+      "title": "Rapikan katalog produk pekan ini — Intan",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_009",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_032",
+      "title": "Kurasi 10 kreator baru — Intan",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_009",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_033",
+      "title": "Susun jadwal live sepekan — Intan",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_009",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_034",
+      "title": "Tindak lanjut order pending — Intan",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_009",
+      "dueDate": "2024-10-22T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-22T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_035",
+      "title": "Validasi dokumen agency — Yoga",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_006",
+      "assigneeId": "usr_010",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_006",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_036",
+      "title": "Rekap pencairan komisi — Yoga",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_006",
+      "assigneeId": "usr_010",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_006",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_037",
+      "title": "Tinjau pengajuan sampel — Yoga",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_006",
+      "assigneeId": "usr_010",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "todo",
+      "qc": null
+    },
+    {
+      "id": "tsk_038",
+      "title": "Susun laporan kemitraan — Yoga",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_006",
+      "assigneeId": "usr_010",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_039",
+      "title": "Rapikan katalog produk pekan ini — Salsabila",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_011",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_040",
+      "title": "Kurasi 10 kreator baru — Salsabila",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_011",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_041",
+      "title": "Susun jadwal live sepekan — Salsabila",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_011",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_042",
+      "title": "Tindak lanjut order pending — Salsabila",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_011",
+      "dueDate": "2024-10-22T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-22T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_043",
+      "title": "Verifikasi binding kreator — Fajar",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_012",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_018",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_044",
+      "title": "Rekap kehadiran MMC — Fajar",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_012",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_018",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_045",
+      "title": "Tindak lanjut kreator pasif — Fajar",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_012",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_018",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_046",
+      "title": "Siapkan materi kelas MMC — Fajar",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_012",
+      "dueDate": "2024-10-22T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_018",
+        "checkedAt": "2024-10-22T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_047",
+      "title": "Rapikan katalog produk pekan ini — Anisa",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_013",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_048",
+      "title": "Kurasi 10 kreator baru — Anisa",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_013",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_049",
+      "title": "Susun jadwal live sepekan — Anisa",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_013",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_050",
+      "title": "Tindak lanjut order pending — Anisa",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_013",
+      "dueDate": "2024-10-22T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-22T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_051",
+      "title": "Validasi dokumen agency — Hendra",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_006",
+      "assigneeId": "usr_014",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_006",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_052",
+      "title": "Rekap pencairan komisi — Hendra",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_006",
+      "assigneeId": "usr_014",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_006",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_053",
+      "title": "Tinjau pengajuan sampel — Hendra",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_006",
+      "assigneeId": "usr_014",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_006",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_054",
+      "title": "Susun laporan kemitraan — Hendra",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_006",
+      "assigneeId": "usr_014",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_055",
+      "title": "Verifikasi binding kreator — Putri",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_015",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_018",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_056",
+      "title": "Rekap kehadiran MMC — Putri",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_015",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_018",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_057",
+      "title": "Tindak lanjut kreator pasif — Putri",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_015",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_018",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_058",
+      "title": "Siapkan materi kelas MMC — Putri",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_015",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_059",
+      "title": "Rapikan katalog produk pekan ini — Arif",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_016",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_060",
+      "title": "Kurasi 10 kreator baru — Arif",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_016",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_061",
+      "title": "Susun jadwal live sepekan — Arif",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_016",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_062",
+      "title": "Tindak lanjut order pending — Arif",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_016",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_063",
+      "title": "Rapikan katalog produk pekan ini — Dewi",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_001",
+      "assigneeId": "usr_017",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_001",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_064",
+      "title": "Kurasi 10 kreator baru — Dewi",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_001",
+      "assigneeId": "usr_017",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_001",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_065",
+      "title": "Susun jadwal live sepekan — Dewi",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_001",
+      "assigneeId": "usr_017",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_001",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_066",
+      "title": "Tindak lanjut order pending — Dewi",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_001",
+      "assigneeId": "usr_017",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_067",
+      "title": "Verifikasi binding kreator — Galih",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_001",
+      "assigneeId": "usr_018",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_001",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_068",
+      "title": "Rekap kehadiran MMC — Galih",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_001",
+      "assigneeId": "usr_018",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_001",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_069",
+      "title": "Tindak lanjut kreator pasif — Galih",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_001",
+      "assigneeId": "usr_018",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_001",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_070",
+      "title": "Siapkan materi kelas MMC — Galih",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_001",
+      "assigneeId": "usr_018",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_071",
+      "title": "Validasi dokumen agency — Vina",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_006",
+      "assigneeId": "usr_019",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_006",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_072",
+      "title": "Rekap pencairan komisi — Vina",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_006",
+      "assigneeId": "usr_019",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_006",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_073",
+      "title": "Tinjau pengajuan sampel — Vina",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_006",
+      "assigneeId": "usr_019",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_006",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_074",
+      "title": "Susun laporan kemitraan — Vina",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_006",
+      "assigneeId": "usr_019",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_075",
+      "title": "Rapikan katalog produk pekan ini — Rendi",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_020",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_076",
+      "title": "Kurasi 10 kreator baru — Rendi",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_020",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "todo",
+      "qc": null
+    },
+    {
+      "id": "tsk_077",
+      "title": "Susun jadwal live sepekan — Rendi",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_020",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "todo",
+      "qc": null
+    },
+    {
+      "id": "tsk_078",
+      "title": "Tindak lanjut order pending — Rendi",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_020",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_079",
+      "title": "Rapikan katalog produk pekan ini — Bagas",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_021",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_080",
+      "title": "Kurasi 10 kreator baru — Bagas",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_021",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_081",
+      "title": "Susun jadwal live sepekan — Bagas",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_021",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_082",
+      "title": "Tindak lanjut order pending — Bagas",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_021",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_083",
+      "title": "Rekonsiliasi kas operasional — Laras",
+      "description": "",
+      "context": "Keuangan",
+      "createdById": "usr_001",
+      "assigneeId": "usr_022",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_001",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_084",
+      "title": "Verifikasi bukti pengeluaran — Laras",
+      "description": "",
+      "context": "Keuangan",
+      "createdById": "usr_001",
+      "assigneeId": "usr_022",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_001",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_085",
+      "title": "Susun laporan arus kas — Laras",
+      "description": "",
+      "context": "Keuangan",
+      "createdById": "usr_001",
+      "assigneeId": "usr_022",
+      "dueDate": "2024-10-18T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_001",
+        "checkedAt": "2024-10-18T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_086",
+      "title": "Tinjau pengajuan reimburse — Laras",
+      "description": "",
+      "context": "Keuangan",
+      "createdById": "usr_001",
+      "assigneeId": "usr_022",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_087",
+      "title": "Rapikan katalog produk pekan ini — Teguh",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_023",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_088",
+      "title": "Kurasi 10 kreator baru — Teguh",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_023",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_017",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_089",
+      "title": "Susun jadwal live sepekan — Teguh",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_023",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "todo",
+      "qc": null
+    },
+    {
+      "id": "tsk_090",
+      "title": "Tindak lanjut order pending — Teguh",
+      "description": "",
+      "context": "Unit AFFILIATOR",
+      "createdById": "usr_017",
+      "assigneeId": "usr_023",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_091",
+      "title": "Verifikasi binding kreator — Sinta",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_024",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_018",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_092",
+      "title": "Rekap kehadiran MMC — Sinta",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_024",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_018",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_093",
+      "title": "Tindak lanjut kreator pasif — Sinta",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_024",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "todo",
+      "qc": null
+    },
+    {
+      "id": "tsk_094",
+      "title": "Siapkan materi kelas MMC — Sinta",
+      "description": "",
+      "context": "Unit MCN",
+      "createdById": "usr_018",
+      "assigneeId": "usr_024",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    },
+    {
+      "id": "tsk_095",
+      "title": "Validasi dokumen agency — Eko",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_006",
+      "assigneeId": "usr_025",
+      "dueDate": "2024-10-08T17:00:00+07:00",
+      "priority": "tinggi",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_006",
+        "checkedAt": "2024-10-08T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_096",
+      "title": "Rekap pencairan komisi — Eko",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_006",
+      "assigneeId": "usr_025",
+      "dueDate": "2024-10-14T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "selesai",
+      "qc": {
+        "result": "lolos",
+        "checkedById": "usr_006",
+        "checkedAt": "2024-10-14T17:00:00+07:00",
+        "notes": "Sesuai standar."
+      }
+    },
+    {
+      "id": "tsk_097",
+      "title": "Tinjau pengajuan sampel — Eko",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_006",
+      "assigneeId": "usr_025",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "todo",
+      "qc": null
+    },
+    {
+      "id": "tsk_098",
+      "title": "Susun laporan kemitraan — Eko",
+      "description": "",
+      "context": "Unit TAP",
+      "createdById": "usr_006",
+      "assigneeId": "usr_025",
+      "dueDate": "2024-10-24T17:00:00+07:00",
+      "priority": "sedang",
+      "status": "berjalan",
+      "qc": null
+    }
+  ],
+  "todos:all": [
+    {
+      "id": "tdo_001",
+      "userId": "usr_001",
+      "title": "Cek 14 sesi live sore",
+      "done": false,
+      "createdAt": "2024-10-24T16:00:00+07:00"
+    },
+    {
+      "id": "tdo_002",
+      "userId": "usr_001",
+      "title": "Balas 6 pengajuan sampel",
+      "done": false,
+      "createdAt": null
+    },
+    {
+      "id": "tdo_003",
+      "userId": "usr_001",
+      "title": "Review draf brief TAP",
+      "done": true,
+      "createdAt": "2024-10-24T13:30:00+07:00"
+    },
+    {
+      "id": "tdo_004",
+      "userId": "usr_001",
+      "title": "Kunci target harian tim",
+      "done": false,
+      "createdAt": null
+    }
+  ],
+  "keuangan:cashflow": [
+    {
+      "id": "cf_001",
+      "date": "2024-09-06",
+      "type": "in",
+      "category": "Pemasukan",
+      "amount": "158.200.000",
+      "description": "Pencairan komisi TikTok Shop periode 21–31 Agu",
+      "division": "affiliator",
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_002",
+      "date": "2024-09-06",
+      "type": "in",
+      "category": "Pemasukan",
+      "amount": "81.500.000",
+      "description": "Pencairan MCN periode 21–31 Agu",
+      "division": "mcn",
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_003",
+      "date": "2024-09-09",
+      "type": "out",
+      "category": "creator_share",
+      "amount": "34.100.000",
+      "description": "Bagi hasil kreator MCN Agustus",
+      "division": "mcn",
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_004",
+      "date": "2024-09-11",
+      "type": "out",
+      "category": "direct_cost",
+      "amount": "21.800.000",
+      "description": "Iklan TikTok akun beauty daily",
+      "division": "affiliator",
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_005",
+      "date": "2024-09-10",
+      "type": "out",
+      "category": "beban",
+      "amount": "74.500.000",
+      "description": "Gaji tim September",
+      "division": null,
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_006",
+      "date": "2024-10-05",
+      "type": "in",
+      "category": "Pemasukan",
+      "amount": "186.400.000",
+      "description": "Pencairan komisi TikTok Shop periode 21–30 Sep",
+      "division": "affiliator",
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_007",
+      "date": "2024-10-05",
+      "type": "in",
+      "category": "Pemasukan",
+      "amount": "92.300.000",
+      "description": "Pencairan MCN periode 21–30 Sep",
+      "division": "mcn",
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_008",
+      "date": "2024-10-07",
+      "type": "out",
+      "category": "creator_share",
+      "amount": "38.700.000",
+      "description": "Bagi hasil kreator MCN September",
+      "division": "mcn",
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_009",
+      "date": "2024-10-08",
+      "type": "out",
+      "category": "direct_cost",
+      "amount": "24.500.000",
+      "description": "Iklan TikTok akun skincare",
+      "division": "affiliator",
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_010",
+      "date": "2024-10-10",
+      "type": "out",
+      "category": "beban",
+      "amount": "78.000.000",
+      "description": "Gaji tim Oktober",
+      "division": null,
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_011",
+      "date": "2024-10-12",
+      "type": "out",
+      "category": "aset",
+      "amount": "18.900.000",
+      "description": "Dua set lighting studio live",
+      "division": "affiliator",
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_012",
+      "date": "2024-10-15",
+      "type": "in",
+      "category": "Pemasukan",
+      "amount": "64.000.000",
+      "description": "Termin pertama kampanye brand ads",
+      "division": "tap",
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_013",
+      "date": "2024-10-18",
+      "type": "out",
+      "category": "beban",
+      "amount": "45.000.000",
+      "description": "Sewa kantor kuartal IV",
+      "division": null,
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_014",
+      "date": "2024-10-21",
+      "type": "out",
+      "category": "beban",
+      "amount": "3.200.000",
+      "description": "Konsumsi MMC Oktober",
+      "division": "mcn",
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_015",
+      "date": "2024-10-22",
+      "type": "out",
+      "category": "aset",
+      "amount": "21.500.000",
+      "description": "Laptop editor TAP",
+      "division": "tap",
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_016",
+      "date": "2024-10-23",
+      "type": "out",
+      "category": "direct_cost",
+      "amount": "9.800.000",
+      "description": "Iklan akun fashion hijab",
+      "division": "affiliator",
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_017",
+      "date": "2024-10-09",
+      "type": "out",
+      "category": "dividen",
+      "amount": "50.000.000",
+      "description": "Dividen pemegang saham kuartal III",
+      "division": null,
+      "inputById": "usr_022"
+    },
+    {
+      "id": "cf_018",
+      "date": "2024-10-20",
+      "type": "out",
+      "category": "beban",
+      "amount": "4.600.000",
+      "description": "Langganan alat desain & penjadwalan",
+      "division": null,
+      "inputById": "usr_022"
+    }
+  ],
+  "gmv:targets": [
+    {
+      "division": "affiliator",
+      "month": "2024-10-01",
+      "target": "620.000.000"
+    },
+    {
+      "division": "affiliator",
+      "month": "2024-11-01",
+      "target": "669.600.000"
+    },
+    {
+      "division": "affiliator",
+      "month": "2024-12-01",
+      "target": "744.000.000"
+    },
+    {
+      "division": "mcn",
+      "month": "2024-10-01",
+      "target": "387.500.000"
+    },
+    {
+      "division": "mcn",
+      "month": "2024-11-01",
+      "target": "418.500.000"
+    },
+    {
+      "division": "mcn",
+      "month": "2024-12-01",
+      "target": "465.000.000"
+    },
+    {
+      "division": "tap",
+      "month": "2024-10-01",
+      "target": "155.000.000"
+    },
+    {
+      "division": "tap",
+      "month": "2024-11-01",
+      "target": "167.400.000"
+    },
+    {
+      "division": "tap",
+      "month": "2024-12-01",
+      "target": "186.000.000"
+    }
+  ],
+  "affiliate:goal": [
+    {
+      "accountId": "acc_001",
+      "month": "2024-10-01",
+      "target": "117.000.000"
+    },
+    {
+      "accountId": "acc_002",
+      "month": "2024-10-01",
+      "target": "78.000.000"
+    },
+    {
+      "accountId": "acc_003",
+      "month": "2024-10-01",
+      "target": "91.000.000"
+    },
+    {
+      "accountId": "acc_004",
+      "month": "2024-10-01",
+      "target": "104.000.000"
+    },
+    {
+      "accountId": "acc_005",
+      "month": "2024-10-01",
+      "target": "65.000.000"
+    },
+    {
+      "accountId": "acc_006",
+      "month": "2024-10-01",
+      "target": "65.000.000"
+    }
+  ],
+  "img:store": [
+    {
+      "id": "sf_001",
+      "ref": "img:store/sf_001",
+      "mime": "image/jpeg",
+      "size": 148213
+    },
+    {
+      "id": "sf_002",
+      "ref": "img:store/sf_002",
+      "mime": "image/jpeg",
+      "size": 148213
+    },
+    {
+      "id": "sf_003",
+      "ref": "img:store/sf_003",
+      "mime": "image/jpeg",
+      "size": 148213
+    }
+  ],
+  "app:settings": {
+    "theme": "light",
+    "locale": "id-ID",
+    "weekStart": "monday"
+  }
+}

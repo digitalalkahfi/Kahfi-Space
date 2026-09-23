@@ -10,6 +10,7 @@ import {
   MessageSquare,
   NotebookPen,
   Package,
+  SlidersHorizontal,
   TrendingUp,
   Users,
   Wallet,
@@ -53,15 +54,18 @@ export type MenuPendamping = {
   icon: LucideIcon;
   izin?: IzinMenu;
   /**
-   * Sudah punya pintasan di app-bar atas (NavigasiAtas).
+   * Sudah punya pintu masuk lain di layar desktop.
    *
-   * Rail ikon desktop melewatkannya supaya pintu masuknya cuma satu —
-   * dua tombol ke halaman yang sama membuat orang mengira keduanya
-   * berbeda. Laci "Lainnya" di mobile tetap menampilkannya, karena
-   * app-bar atas itu desktop saja; kalau ikut disembunyikan, halamannya
-   * jadi tidak bisa dibuka sama sekali dari ponsel.
+   * Dua sumbernya: pintasan di app-bar atas (`pintasanAtas`), dan
+   * sub-menu akun di balik kartu profil. Rail ikon desktop
+   * melewatkan keduanya supaya pintu masuknya cuma satu — dua tombol
+   * ke halaman yang sama membuat orang mengira keduanya berbeda.
+   *
+   * Laci "Lainnya" di mobile tetap menampilkannya: pintu-pintu itu
+   * desktop atau tersembunyi di balik kartu profil, dan kalau di laci
+   * pun disembunyikan, halamannya jadi sulit ditemukan dari ponsel.
    */
-  diAppBar?: boolean;
+  pintuLainDiDesktop?: boolean;
 };
 
 /**
@@ -78,7 +82,7 @@ export const menuPendamping: MenuPendamping[] = [
     keterangan: "Agenda unit dan perusahaan",
     href: "/kalender",
     icon: CalendarDays,
-    diAppBar: true,
+    pintuLainDiDesktop: true,
   },
   {
     label: "Keuangan",
@@ -104,7 +108,7 @@ export const menuPendamping: MenuPendamping[] = [
     keterangan: "Lapor masalah, manajemen menuliskan solusinya",
     href: "/masalah",
     icon: CircleAlert,
-    diAppBar: true,
+    pintuLainDiDesktop: true,
   },
   {
     label: "Pembelajaran",
@@ -125,6 +129,13 @@ export const menuPendamping: MenuPendamping[] = [
     icon: Users,
   },
   {
+    label: "Pengaturan tampilan",
+    keterangan: "Pilih menu dan widget yang tampil untukmu",
+    href: "/tampilan",
+    icon: SlidersHorizontal,
+    pintuLainDiDesktop: true,
+  },
+  {
     label: "Migrasi data lama",
     keterangan: "Pemindahan isi kv_store K-Space lama",
     href: "/migrasi",
@@ -136,15 +147,53 @@ export const menuPendamping: MenuPendamping[] = [
 /**
  * Menu pendamping yang boleh dibuka pengguna ini.
  *
- * `kecualiAppBar` dipakai rail desktop: menu yang sudah punya pintasan di
- * app-bar atas tidak diulang di rail. Laci mobile memanggilnya tanpa
- * opsi itu, karena app-bar atas tidak ada di layar kecil.
+ * `railDesktop` dipakai rail ikon kiri: menu yang sudah punya pintu
+ * masuk lain di desktop tidak diulang di sana. Laci mobile
+ * memanggilnya tanpa opsi itu, karena pintu-pintu itu tidak ada atau
+ * tersembunyi di layar kecil.
  */
 export function menuPendampingTerlihat(
   izin: Record<IzinMenu, boolean>,
-  { kecualiAppBar = false }: { kecualiAppBar?: boolean } = {},
+  { railDesktop = false }: { railDesktop?: boolean } = {},
 ) {
   return menuPendamping.filter(
-    (m) => (!m.izin || izin[m.izin]) && !(kecualiAppBar && m.diAppBar),
+    (m) => (!m.izin || izin[m.izin]) && !(railDesktop && m.pintuLainDiDesktop),
   );
 }
+
+/**
+ * Pintasan di app-bar atas — desktop saja.
+ *
+ * Tinggal di sini, bukan di komponennya, sejak halaman Pengaturan
+ * Tampilan ikut menawarkannya untuk dicentang: dua daftar yang harus
+ * sama persis pasti melenceng, dan yang melenceng di sini berarti
+ * orang mencentang pintasan yang tidak pernah ada.
+ */
+export type PintasanAtas = {
+  label: string;
+  keterangan: string;
+  href: string;
+};
+
+export const pintasanAtas: PintasanAtas[] = [
+  {
+    label: "Scan Sampel",
+    keterangan: "Buka pemindai QR sampel",
+    href: "/sampel/scan",
+  },
+  {
+    label: "Kalender",
+    keterangan: "Agenda unit dan perusahaan",
+    href: "/kalender",
+  },
+  {
+    label: "Goal",
+    keterangan: "Pohon goal dan lead measure",
+    href: "/grd/goal",
+  },
+  {
+    label: "Kaizen",
+    keterangan: "Lapor masalah dan solusinya",
+    href: "/masalah",
+  },
+];

@@ -22,6 +22,12 @@ type MasukanAnggota = {
   unitKode: KodeUnit | null;
   departemenId: string | null;
   programId: string | null;
+  /**
+   * Atasan langsung. Hanya dipakai saat menambah; perubahan atasan
+   * anggota lama lewat DialogAtasan, yang memeriksa siklus dan
+   * memperlihatkan akibatnya lebih dulu.
+   */
+  atasanId?: string | null;
 };
 
 function periksa(input: MasukanAnggota): string | null {
@@ -44,10 +50,28 @@ function periksa(input: MasukanAnggota): string | null {
   return null;
 }
 
+/**
+ * Atasan wajib bagi siapa pun kecuali CEO.
+ *
+ * Bukan formalitas: atasan itulah yang menyetujui izin dan menerima
+ * laporannya. Anggota tanpa atasan tidak bisa mengajukan izin sama
+ * sekali, dan itu baru ketahuan pada hari ia membutuhkannya.
+ */
+function periksaAtasan(input: MasukanAnggota): string | null {
+  if (input.role === "CEO") return null;
+  return input.atasanId
+    ? null
+    : "Pilih atasan langsungnya — dialah yang menyetujui izin dan menerima laporannya.";
+}
+
 async function idUnit(kode: KodeUnit | null) {
   if (!kode) return null;
   const sb = await klienServer();
-  const { data } = await sb.from("units").select("id").eq("kode", kode).maybeSingle();
+  const { data } = await sb
+    .from("units")
+    .select("id")
+    .eq("kode", kode)
+    .maybeSingle();
   return data?.id ?? null;
 }
 
@@ -65,7 +89,7 @@ function segarkan() {
  * `supabase/auth.sql` menyatukan id profilnya dengan id Auth.
  */
 export async function tambahAnggota(input: MasukanAnggota): Promise<Hasil> {
-  const salah = periksa(input);
+  const salah = periksa(input) ?? periksaAtasan(input);
   if (salah) return gagal(salah, "validasi");
   if (modeData() === "demo") return BALASAN_DEMO;
 
@@ -90,6 +114,7 @@ export async function tambahAnggota(input: MasukanAnggota): Promise<Hasil> {
     unit_id: await idUnit(input.unitKode),
     department_id: input.departemenId,
     program_id: input.programId,
+    atasan_id: input.role === "CEO" ? null : (input.atasanId ?? null),
     status: "aktif",
   });
 
@@ -140,8 +165,10 @@ export async function ubahAnggota(
     .eq("id", id);
 
   if (error) {
-    if (error.code === "23505") return gagal("Email itu sudah dipakai anggota lain.", "validasi");
-    if (error.code === "42501") return gagal("Kamu tidak berhak mengubah anggota ini.", "izin");
+    if (error.code === "23505")
+      return gagal("Email itu sudah dipakai anggota lain.", "validasi");
+    if (error.code === "42501")
+      return gagal("Kamu tidak berhak mengubah anggota ini.", "izin");
     // Pesan trigger penjaga pengelola terakhir diteruskan apa adanya.
     return gagal(error.message, "validasi");
   }
@@ -199,7 +226,10 @@ export async function ubahAtasan(
 ): Promise<Hasil> {
   if (!id) return gagal("Anggota tidak dikenali.", "validasi");
   if (atasanId === id) {
-    return gagal("Seseorang tidak bisa menjadi atasan dirinya sendiri.", "validasi");
+    return gagal(
+      "Seseorang tidak bisa menjadi atasan dirinya sendiri.",
+      "validasi",
+    );
   }
   if (modeData() === "demo") return BALASAN_DEMO;
 
@@ -219,11 +249,13 @@ export async function ubahAtasan(
       .select("id, nama, role, status")
       .in("id", [id, atasanId]);
 
-    if (galatPihak) return gagal(`Gagal memeriksa atasan: ${galatPihak.message}`);
+    if (galatPihak)
+      return gagal(`Gagal memeriksa atasan: ${galatPihak.message}`);
 
     const bawahan = pihak?.find((p) => p.id === id);
     const calon = pihak?.find((p) => p.id === atasanId);
-    if (!bawahan || !calon) return gagal("Anggota tidak ditemukan.", "validasi");
+    if (!bawahan || !calon)
+      return gagal("Anggota tidak ditemukan.", "validasi");
 
     if (calon.status !== "aktif") {
       return gagal(
@@ -251,8 +283,5 @@ export async function ubahAtasan(
   }
 
   segarkan();
-  return sukses(
-    undefined,
-    atasanId ? "Atasan diperbarui." : "Atasan dilepas.",
-  );
+  return sukses(undefined, atasanId ? "Atasan diperbarui." : "Atasan dilepas.");
 }

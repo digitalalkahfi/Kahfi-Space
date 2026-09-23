@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import {
   ArrowRight,
   Check,
@@ -20,6 +21,8 @@ import {
 } from "@/lib/pemetaan";
 import { setujuiPemetaan, tarikPersetujuan } from "@/app/actions/migrasi";
 import type { Persetujuan } from "@/lib/data/migrasi";
+import { bilangan } from "@/lib/format";
+import type { BarisRekapKelompok } from "@/lib/rekap-pemetaan";
 
 /**
  * Satu entitas beserta pemetaan medannya dan status persetujuannya.
@@ -34,12 +37,22 @@ export function KartuPemetaan({
   persetujuan,
   bolehSetujui,
   medanAsing,
+  adaDiEkspor = true,
+  rekap,
+  cuplikan,
 }: {
   pemetaan: PemetaanEntitas;
   versi: string;
   persetujuan: Persetujuan | null;
   bolehSetujui: boolean;
   medanAsing: string[];
+  /** Apakah kuncinya benar-benar ada di ekspor yang sudah dibaca. */
+  adaDiEkspor?: boolean;
+  /** Tiga angka kelompok ini; ditaruh di sini supaya yang meninjau tidak
+   * perlu naik ke tabel rekap untuk tahu berapa yang tersangkut. */
+  rekap?: BarisRekapKelompok;
+  /** Dua catatan pertama di kunci ini, apa adanya. */
+  cuplikan?: string;
 }) {
   const [buka, setBuka] = useState(false);
   const [catatan, setCatatan] = useState("");
@@ -75,6 +88,9 @@ export function KartuPemetaan({
               </span>
             ) : null}
           </h2>
+          <p className="font-mono text-[11px] leading-[14px] break-all text-muted-foreground">
+            {pemetaan.kunci}
+          </p>
           <p className="text-[13px] leading-[18px] text-muted-foreground">
             ke <span className="font-mono">{pemetaan.tabelBaru}</span> ·{" "}
             {r.dipindahkan} medan dipindahkan
@@ -87,6 +103,60 @@ export function KartuPemetaan({
         </div>
       </div>
 
+      {rekap ? (
+        <dl className="mx-5 grid grid-cols-3 gap-2">
+          {[
+            { label: "Di ekspor", nilai: rekap.ekspor, gaya: "bg-muted" },
+            {
+              label: "Siap",
+              nilai: rekap.terpetakan,
+              gaya: rekap.ekspor > 0 ? "bg-ok-fill text-ok-text" : "bg-muted",
+            },
+            {
+              label: "Menunggu",
+              nilai: rekap.butuhKeputusan,
+              gaya:
+                rekap.butuhKeputusan > 0
+                  ? "bg-warn-fill text-warn-text"
+                  : "bg-muted",
+            },
+          ].map((a) => (
+            <div
+              key={a.label}
+              className={cn("rounded-2xl px-4 py-2.5", a.gaya)}
+            >
+              <dt className="text-[11px] leading-[14px] font-semibold tracking-[0.06em] uppercase opacity-80">
+                {a.label}
+              </dt>
+              <dd className="tabular text-base leading-6 font-bold">
+                {bilangan(a.nilai)}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
+
+      {rekap && rekap.butuhKeputusan > 0 ? (
+        <p className="mx-5 rounded-2xl bg-warn-fill px-4 py-2.5 text-[13px] leading-[18px] text-pretty text-warn-text">
+          {bilangan(rekap.butuhKeputusan)} catatan di kelompok ini menunjuk
+          orang yang belum punya padanan di V2, jadi barisnya tidak akan
+          diproses. Bukan karena rusak — karena laporan tanpa pelapor dan tugas
+          tanpa penerima adalah data yang tampak utuh tetapi tidak bisa dipakai.{" "}
+          <Link href="/migrasi/orang" className="font-semibold underline">
+            Putuskan orangnya
+          </Link>{" "}
+          dulu, lalu jalankan lagi.
+        </p>
+      ) : null}
+
+      {!adaDiEkspor ? (
+        <p className="mx-5 rounded-2xl bg-muted px-4 py-2.5 text-[11px] leading-[14px] text-pretty text-muted-foreground">
+          Kunci ini belum ada di ekspor yang terbaca. Bisa jadi memang tidak
+          dipakai di sistem lama — tetapi bisa juga ekspornya belum lengkap,
+          jadi periksa dulu sebelum menyetujui.
+        </p>
+      ) : null}
+
       {medanAsing.length > 0 ? (
         <p className="mx-5 rounded-2xl bg-warn-fill px-4 py-2.5 text-[11px] leading-[14px] text-pretty text-warn-text">
           Data lama memuat medan yang belum ada di pemetaan:{" "}
@@ -98,10 +168,31 @@ export function KartuPemetaan({
       {disetujui ? (
         <p className="mx-5 rounded-2xl bg-ok-fill px-4 py-2.5 text-[11px] leading-[14px] text-pretty text-ok-text">
           Disetujui {persetujuan.olehNama ?? "seseorang"} pada{" "}
-          {tanggalPanjang(persetujuan.pada)}.
-          {persetujuan.catatan ? ` “${persetujuan.catatan}”` : ""}
+          {tanggalPanjang(persetujuan.pada)}
+          {persetujuan.rekap
+            ? `, saat itu ${persetujuan.rekap.ekspor} entri di ekspor dan ${persetujuan.rekap.butuhKeputusan} menunggu keputusan`
+            : ""}
+          .{persetujuan.catatan ? ` “${persetujuan.catatan}”` : ""}
         </p>
       ) : null}
+
+      {disetujui && persetujuan.rekap && rekap
+        ? (() => {
+            const beda =
+              persetujuan.rekap.ekspor !== rekap.ekspor ||
+              persetujuan.rekap.butuhKeputusan !== rekap.butuhKeputusan;
+            // Pemetaannya memang tidak berubah — sidik versinya masih
+            // cocok. Yang berubah datanya, dan itu tidak kalah penting:
+            // yang menyetujui melihat angka yang lain.
+            return beda ? (
+              <p className="mx-5 rounded-2xl bg-warn-fill px-4 py-2.5 text-[11px] leading-[14px] text-pretty text-warn-text">
+                Angkanya berubah sejak disetujui: sekarang {rekap.ekspor} entri
+                dan {rekap.butuhKeputusan} menunggu keputusan. Pemetaannya sama,
+                tetapi yang menyetujui melihat data yang lain.
+              </p>
+            ) : null;
+          })()
+        : null}
 
       <div className="px-5">
         <button
@@ -167,6 +258,22 @@ export function KartuPemetaan({
                   </li>
                 ))}
               </ul>
+            ) : null}
+
+            {cuplikan ? (
+              <div>
+                <p className="text-[11px] leading-[14px] font-semibold tracking-[0.06em] text-muted-foreground uppercase">
+                  Cuplikan isinya
+                </p>
+                <p className="mt-0.5 text-[11px] leading-[14px] text-pretty text-muted-foreground">
+                  Dua catatan pertama, apa adanya. Pemetaan hanya menyebut nama
+                  medan; apakah isinya benar-benar seperti yang dikira baru
+                  kelihatan dari sini.
+                </p>
+                <pre className="mt-1.5 max-h-64 overflow-auto rounded-2xl bg-muted p-3 font-mono text-[11px] leading-[16px]">
+                  {cuplikan}
+                </pre>
+              </div>
             ) : null}
           </div>
         ) : null}

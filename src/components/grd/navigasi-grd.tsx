@@ -4,6 +4,7 @@ import {
   ArrowRight,
   CalendarCheck2,
   Gauge,
+  ListChecks,
   Store,
   Target,
   Users,
@@ -45,6 +46,13 @@ const MENU = [
     ringkas: "Akun affiliator dan PIC yang mengisi laporan hariannya.",
     Ikon: Store,
     gaya: "bg-info-fill text-info-text",
+  },
+  {
+    href: "/grd/batas-minimum" as const,
+    judul: "Batas minimum upload",
+    ringkas: "Acuan level 0–8 dan berapa akun yang memakainya.",
+    Ikon: ListChecks,
+    gaya: "bg-warn-fill text-warn-text",
   },
   {
     href: "/grd/mingguan" as const,

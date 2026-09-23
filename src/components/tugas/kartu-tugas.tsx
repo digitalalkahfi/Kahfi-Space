@@ -15,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { jamWib, tanggalRelatif } from "@/lib/format";
 import { periksaTugas, ubahStatusTugas } from "@/app/actions/tugas";
+import { JejakPemeriksaan } from "@/components/tugas/jejak-qc";
+import type { JejakQc } from "@/lib/data/tugas";
 import type { Prioritas, StatusTugas, Tugas } from "@/lib/types";
 
 const GAYA_PRIORITAS: Record<
@@ -55,6 +57,22 @@ function langkahBerikut(status: StatusTugas) {
 }
 
 /**
+ * Langkah mundur: membatalkan yang tadi terlanjur ditekan.
+ *
+ * Ada karena papan Kanban memungkinkannya lewat seretan (migrasi Fase 4),
+ * dan yang bisa dilakukan dengan menyeret harus bisa dilakukan juga
+ * dengan tombol — kalau tidak, orang yang tidak memakai tetikus
+ * kehilangan satu kemampuan.
+ */
+function langkahMundur(status: StatusTugas) {
+  if (status === "berjalan")
+    return { ke: "todo" as const, label: "Kembalikan ke To Do" };
+  if (status === "menunggu_qc")
+    return { ke: "berjalan" as const, label: "Batalkan pengajuan" };
+  return null;
+}
+
+/**
  * Satu tugas dengan aksi yang sesuai perannya: penerima menggeser status,
  * pemberi tugas memutuskan hasil QC. Database menolak bila tertukar.
  */
@@ -63,12 +81,22 @@ export function KartuTugas({
   sayaPenerima,
   bolehQc,
   hariIni,
+  jejakQc = [],
+  hasilTerbukaAwal = false,
 }: {
   tugas: Tugas;
   sayaPenerima: boolean;
   /** Pemberi tugas atau atasan penerima. */
   bolehQc: boolean;
   hariIni: string;
+  /** Riwayat pemeriksaan tugas ini, bila pernah diperiksa. */
+  jejakQc?: JejakQc[];
+  /**
+   * Buka kolom hasil kerja sejak awal. Dipakai papan Kanban saat kartu
+   * diseret ke kolom Review: syaratnya sama dengan tombol "Ajukan
+   * pemeriksaan", jadi kolomnya yang dibuka, bukan aturannya yang diubah.
+   */
+  hasilTerbukaAwal?: boolean;
 }) {
   const [sibuk, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
@@ -77,17 +105,18 @@ export function KartuTugas({
   const [catatanQc, setCatatanQc] = useState("");
   const [isiCatatan, setIsiCatatan] = useState(false);
   const [hasilKerja, setHasilKerja] = useState(tugas.hasilKerja);
-  const [isiHasil, setIsiHasil] = useState(false);
+  const [isiHasil, setIsiHasil] = useState(hasilTerbukaAwal);
 
   const gaya = GAYA_PRIORITAS[tugas.prioritas];
   const berikut = langkahBerikut(status);
+  const mundur = langkahMundur(status);
   const telat =
     tugas.tenggat &&
     status !== "selesai" &&
     new Date(tugas.tenggat) < new Date(`${hariIni}T23:59:59+07:00`) &&
     tugas.tenggat.slice(0, 10) < hariIni;
 
-  const geser = (ke: "berjalan" | "menunggu_qc") => {
+  const geser = (ke: "todo" | "berjalan" | "menunggu_qc") => {
     // Mengajukan pemeriksaan butuh keterangan hasil lebih dulu.
     if (ke === "menunggu_qc" && !isiHasil) {
       setIsiHasil(true);
@@ -270,6 +299,20 @@ export function KartuTugas({
           )
         ) : null}
 
+        {sayaPenerima && mundur && !isiHasil ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            disabled={sibuk}
+            onClick={() => geser(mundur.ke)}
+            className="tekan-halus h-8 w-full rounded-full text-[11px] font-semibold"
+          >
+            <Undo2 className="size-3.5" />
+            {mundur.label}
+          </Button>
+        ) : null}
+
         {status === "menunggu_qc" && hasilKerja ? (
           <p className="rounded-xl bg-muted/70 px-3 py-2 text-[11px] leading-[14px]">
             <span className="font-semibold">Hasil dari {tugas.penerima}: </span>
@@ -341,6 +384,8 @@ export function KartuTugas({
             Catatan pemeriksa: {tugas.qcNote}
           </p>
         ) : null}
+
+        <JejakPemeriksaan jejak={jejakQc} />
 
         {pesan ? (
           <p

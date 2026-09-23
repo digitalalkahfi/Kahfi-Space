@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
+import { AksesDitolak } from "@/components/layout/akses-ditolak";
 import { JadwalBulanan } from "@/components/depresiasi/jadwal-bulanan";
 import { SubMenuFinance } from "@/components/keuangan/sub-menu-finance";
 import { Card } from "@/components/ui/card";
@@ -44,7 +45,15 @@ export default async function JadwalAsetPage({
   const [{ kode }, { persona }] = await Promise.all([params, searchParams]);
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
-  if (!bolehLihatKeuangan(pengguna.role)) notFound();
+  if (!bolehLihatKeuangan(pengguna.role)) {
+    return (
+      <AksesDitolak
+        pengguna={pengguna}
+        halaman="Depresiasi Aset"
+        siapa="Finance, Manager, dan CEO"
+      />
+    );
+  }
 
   const aset = await asetDariKode(pengguna, decodeURIComponent(kode));
   if (!aset) notFound();

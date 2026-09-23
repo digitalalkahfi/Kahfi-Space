@@ -15,13 +15,14 @@ const { uji, jalankan } = buatSuite("Sasaran laporan & visibilitas akun");
 
 const TGL = "2024-10-24";
 const idUser = async (n) =>
-  (await sebagaiAdmin(db, `select id from users where nama=$1`, [n])).rows[0].id;
+  (await sebagaiAdmin(db, `select id from users where nama=$1`, [n])).rows[0]
+    .id;
 
 const U = {
   manager: await idUser("Farhan Pratama"),
   leaderAff: await idUser("Dewi Lestari"),
   leaderMcn: await idUser("Galih Prakoso"),
-  rian: await idUser("Rian Hidayat"),   // PIC 2 akun
+  rian: await idUser("Rian Hidayat"), // PIC 2 akun
   anisa: await idUser("Anisa Larasati"), // Staff Affiliator tanpa akun
   finance: await idUser("Laras Ayuningtyas"),
 };
@@ -93,7 +94,11 @@ uji("Staff tidak bisa melihat akun rekan sejawat", async () => {
     U.anisa,
     `select count(*)::int n from accounts`,
   );
-  harusSama(Number(rows[0].n), 0, "Staff tanpa akun tidak melihat akun apa pun");
+  harusSama(
+    Number(rows[0].n),
+    0,
+    "Staff tanpa akun tidak melihat akun apa pun",
+  );
 });
 
 uji("Leader unit melihat akun unitnya", async () => {
@@ -112,6 +117,49 @@ uji("Finance melihat akun untuk kebutuhan angka", async () => {
     `select count(*)::int n from accounts`,
   );
   harusSama(Number(rows[0].n), 6);
+});
+
+uji("target sasaran memakai rumus yang sama dengan KPI & WRM", async () => {
+  // Dua rumus prorata yang terpisah akan berbeda diam-diam begitu salah
+  // satunya diubah; tes ini yang akan gagal lebih dulu.
+  const dariSasaran = await sasaran(U.manager);
+  const { rows: akun } = await sebagaiAdmin(
+    db,
+    `select account_id, target from target_harian_akun($1::date)`,
+    [TGL],
+  );
+  const { rows: unit } = await sebagaiAdmin(
+    db,
+    `select unit_id, target from target_harian_unit($1::date)`,
+    [TGL],
+  );
+  const perUnit = Object.fromEntries(
+    (await sebagaiAdmin(db, `select id, kode from units`)).rows.map((u) => [
+      u.id,
+      u.kode,
+    ]),
+  );
+  const rumusAkun = Object.fromEntries(
+    akun.map((a) => [a.account_id, Number(a.target)]),
+  );
+  const rumusUnit = Object.fromEntries(
+    unit.map((u) => [perUnit[u.unit_id], Number(u.target)]),
+  );
+
+  let diperiksa = 0;
+  for (const s of dariSasaran) {
+    const harapan =
+      s.jenis === "akun"
+        ? (rumusAkun[s.akun_id] ?? 0)
+        : (rumusUnit[s.unit_kode] ?? 0);
+    harusSama(
+      Number(s.target_harian),
+      harapan,
+      `target ${s.label} berbeda dari rumus GRD`,
+    );
+    diperiksa += 1;
+  }
+  harus(diperiksa > 0, "tidak ada sasaran yang bisa dibandingkan");
 });
 
 const gagal = await jalankan();

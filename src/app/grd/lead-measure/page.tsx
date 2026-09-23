@@ -72,7 +72,14 @@ export default async function LeadMeasurePage({
           </div>
           {kelola && goal.length > 0 ? (
             <DialogTambahLeadMeasure
-              goal={goal.map((g) => ({ id: g.id, judul: g.judul }))}
+              goal={goal.map((g) => ({
+                id: g.id,
+                judul: g.judul,
+                // Dicocokkan lewat judul: keduanya berasal dari kolom
+                // `goals.judul` yang sama, jadi ini kecocokan persis.
+                jumlahAktif: daftar.filter((m) => m.goalJudul === g.judul)
+                  .length,
+              }))}
             />
           ) : null}
         </div>

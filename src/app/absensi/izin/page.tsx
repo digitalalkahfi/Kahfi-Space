@@ -6,8 +6,9 @@ import { ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { FormIzin } from "@/components/absensi/form-izin";
 import { DaftarPengajuan } from "@/components/absensi/daftar-pengajuan";
+import { RiwayatIzin } from "@/components/absensi/riwayat-izin";
 import { Reveal } from "@/components/motion/reveal";
-import { pengajuanMenunggu } from "@/lib/data/absensi";
+import { izinSaya, pengajuanMenunggu } from "@/lib/data/absensi";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
@@ -32,9 +33,17 @@ export default async function IzinPage({
       ? TANGGAL_ACUAN
       : new Date().toISOString().slice(0, 10);
 
-  const pengajuan = PEMUTUS.includes(pengguna.role)
-    ? await pengajuanMenunggu(pengguna)
-    : [];
+  // Riwayat dibatasi 60 hari ke belakang: yang berguna adalah keputusan
+  // yang masih bisa ditindaklanjuti, bukan arsip tahun lalu.
+  const sejak = new Date(`${acuan}T00:00:00Z`);
+  sejak.setUTCDate(sejak.getUTCDate() - 60);
+
+  const [pengajuan, milikku] = await Promise.all([
+    PEMUTUS.includes(pengguna.role)
+      ? pengajuanMenunggu(pengguna)
+      : Promise.resolve([]),
+    izinSaya(pengguna, sejak.toISOString().slice(0, 10)),
+  ]);
 
   return (
     <AppShell pengguna={pengguna} halaman="Absensi">
@@ -63,7 +72,11 @@ export default async function IzinPage({
         ) : null}
 
         <Reveal>
-          <FormIzin tanggalAwal={acuan} batasAwal={acuan} />
+          <FormIzin hariIni={acuan} />
+        </Reveal>
+
+        <Reveal>
+          <RiwayatIzin daftar={milikku} />
         </Reveal>
       </div>
     </AppShell>

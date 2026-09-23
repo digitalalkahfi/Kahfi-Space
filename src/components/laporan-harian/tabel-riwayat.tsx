@@ -2,8 +2,14 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { ChevronRight, PencilLine } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronRight,
+  PencilLine,
+  TriangleAlert,
+} from "lucide-react";
 import { DialogRevisi } from "@/components/laporan-harian/dialog-revisi";
+import { RekapKepatuhan } from "@/components/laporan-harian/rekap-kepatuhan";
 import { TombolUnduhExcel } from "@/components/shared/tombol-unduh-excel";
 import { namaBerkasTanggal, type KolomEkspor } from "@/lib/ekspor-excel";
 import {
@@ -15,8 +21,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
+import { KeadaanKosong } from "@/components/shared/keadaan";
 import { cn } from "@/lib/utils";
+import { GAYA_CAPAIAN, warnaCapaian } from "@/lib/capaian";
+import { GAYA_MINIMUM, statusTerkirim } from "@/lib/batas-minimum";
 import {
+  bilangan,
   jamWib,
   persen,
   rasioCapaian,
@@ -27,6 +37,13 @@ import {
 import type { LaporanHarian, RevisiLaporan } from "@/lib/types";
 
 const SEMUA = "semua";
+
+/** Angka satu laporan setelah koreksi yang belum sempat di-revalidate. */
+type AngkaLaporan = {
+  gmv: number;
+  komisi: number | null;
+  jumlahUpload: number | null;
+};
 
 /**
  * Riwayat laporan yang pernah dikirim, bisa disaring per akun/unit.
@@ -40,10 +57,13 @@ export function TabelRiwayat({
   olehNama: string;
 }) {
   const [saringan, setSaringan] = useState(SEMUA);
+  // Penyaring kedua, berdiri sendiri dari pilihan akun: Leader biasanya
+  // ingin "semua akun, tapi hanya yang di bawah minimum".
+  const [hanyaKurang, setHanyaKurang] = useState(false);
   // Koreksi yang baru saja disimpan agar angkanya langsung terlihat benar
   // sebelum halaman di-revalidate server.
   const [revisi, setRevisi] = useState<RevisiLaporan[]>([]);
-  const [koreksi, setKoreksi] = useState<Record<string, number>>({});
+  const [koreksi, setKoreksi] = useState<Record<string, AngkaLaporan>>({});
 
   const jejakUntuk = (id: string) =>
     revisi
@@ -52,17 +72,49 @@ export function TabelRiwayat({
 
   const simpanRevisi = (baru: RevisiLaporan) => {
     setRevisi((s) => [...s, baru]);
-    setKoreksi((s) => ({ ...s, [baru.reportId]: baru.gmvBaru }));
+    // Kolom yang tidak ikut berubah bernilai null di jejak; yang dipakai
+    // tetap angka sebelumnya, bukan nol.
+    setKoreksi((s) => {
+      const lama = s[baru.reportId];
+      const asal = riwayat.find((r) => r.id === baru.reportId);
+      return {
+        ...s,
+        [baru.reportId]: {
+          gmv: baru.gmvBaru,
+          komisi: baru.komisiBaru ?? lama?.komisi ?? asal?.komisi ?? null,
+          jumlahUpload:
+            baru.uploadBaru ?? lama?.jumlahUpload ?? asal?.jumlahUpload ?? null,
+        },
+      };
+    });
   };
 
-  const gmvKini = (r: LaporanHarian) => koreksi[r.id] ?? r.gmv;
+  const angkaKini = (r: LaporanHarian): AngkaLaporan =>
+    koreksi[r.id] ?? {
+      gmv: r.gmv,
+      komisi: r.komisi,
+      jumlahUpload: r.jumlahUpload,
+    };
+  const gmvKini = (r: LaporanHarian) => angkaKini(r).gmv;
+
+  // Kolom departemen hanya ditampilkan bila memang ada isinya di daftar
+  // yang sedang dilihat — Leader MCN tidak perlu dua kolom kosong.
+  const adaKomisi = riwayat.some((r) => angkaKini(r).komisi !== null);
+  const adaUpload = riwayat.some((r) => angkaKini(r).jumlahUpload !== null);
+  // Kolom "Min." menyusul kolom upload, dan hanya bila ada akun berlevel
+  // di daftar ini — unit MCN & TAP tidak punya batas minimum sama sekali.
+  const adaMinimum = riwayat.some((r) => r.minimumUpload !== null);
 
   const label = useMemo(
     () => Array.from(new Set(riwayat.map((r) => r.label))),
     [riwayat],
   );
 
-  const daftar = useMemo(
+  // Dipisah dari `daftar`: rekap di bawah membaca yang INI, bukan yang
+  // sudah disaring "di bawah minimum". Kalau rekap ikut tersaring,
+  // penyebutnya berubah jadi "0 dari 37" — benar secara aritmetika,
+  // menyesatkan sebagai jawaban.
+  const daftarAkun = useMemo(
     () =>
       (saringan === SEMUA
         ? riwayat
@@ -72,6 +124,29 @@ export function TabelRiwayat({
         .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt)),
     [riwayat, saringan],
   );
+
+  const daftar = useMemo(
+    () =>
+      // Yang disaring hanya yang BISA dinilai: laporan unit dan akun
+      // tanpa level tidak punya batas, jadi tidak pernah "di bawah".
+      daftarAkun.filter(
+        (r) =>
+          !hanyaKurang ||
+          statusTerkirim(angkaKini(r).jumlahUpload, r.minimumUpload) ===
+            "kurang",
+      ),
+    // `koreksi` ikut jadi ketergantungan lewat angkaKini: laporan yang
+    // baru saja diperbaiki harus langsung keluar dari saringan.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [daftarAkun, hanyaKurang, koreksi],
+  );
+
+  // Kalau tidak ada satu pun yang di bawah minimum, tombolnya tetap ada
+  // tapi hasilnya kosong — itu jawaban yang berguna, bukan kesalahan.
+  const jumlahKurang = riwayat.filter(
+    (r) =>
+      statusTerkirim(angkaKini(r).jumlahUpload, r.minimumUpload) === "kurang",
+  ).length;
 
   const kolomEkspor: KolomEkspor<LaporanHarian>[] = [
     { judul: "Tanggal", ambil: (r) => r.tanggal, lebar: 12 },
@@ -85,6 +160,29 @@ export function TabelRiwayat({
       lebar: 12,
     },
     {
+      judul: "Komisi (Rp)",
+      ambil: (r) => angkaKini(r).komisi ?? "",
+      lebar: 16,
+    },
+    {
+      judul: "Jumlah upload",
+      ambil: (r) => angkaKini(r).jumlahUpload ?? "",
+      lebar: 14,
+    },
+    {
+      judul: "Min. upload",
+      ambil: (r) => r.minimumUpload ?? "",
+      lebar: 12,
+    },
+    {
+      judul: "Status minimum",
+      ambil: (r) => {
+        const st = statusTerkirim(angkaKini(r).jumlahUpload, r.minimumUpload);
+        return st === null ? "" : st === "terpenuhi" ? "Terpenuhi" : "Kurang";
+      },
+      lebar: 16,
+    },
+    {
       judul: "Revisi",
       ambil: (r) => Math.max(r.jumlahRevisi, jejakUntuk(r.id).length),
       lebar: 8,
@@ -93,6 +191,10 @@ export function TabelRiwayat({
   ];
 
   const totalGmv = daftar.reduce((a, r) => a + gmvKini(r), 0);
+  const totalKomisi = daftar.reduce(
+    (a, r) => a + (angkaKini(r).komisi ?? 0),
+    0,
+  );
   const totalTarget = daftar.reduce((a, r) => a + r.target, 0);
   const jumlahRevisi = daftar.reduce(
     (a, r) => a + Math.max(r.jumlahRevisi, jejakUntuk(r.id).length),
@@ -110,7 +212,7 @@ export function TabelRiwayat({
               onClick={() => setSaringan(l)}
               aria-pressed={l === saringan}
               className={cn(
-                "tekan-halus sentuh-nyaman rounded-full px-3 py-1.5 text-[11px] leading-[14px] font-semibold",
+                "tekan-halus sentuh-nyaman rounded-full px-3 py-1.5 text-[11px] leading-[14px] font-semibold whitespace-nowrap",
                 l === saringan
                   ? "bg-primary text-primary-foreground"
                   : "bg-card text-muted-foreground ring-1 ring-border-subtle hover:text-foreground",
@@ -119,24 +221,58 @@ export function TabelRiwayat({
               {l === SEMUA ? "Semua akun" : l}
             </button>
           ))}
+
+          {adaMinimum ? (
+            <button
+              type="button"
+              onClick={() => setHanyaKurang((v) => !v)}
+              aria-pressed={hanyaKurang}
+              aria-label="Hanya laporan yang di bawah minimum"
+              className={cn(
+                "tekan-halus sentuh-nyaman flex items-center gap-1 rounded-full px-3 py-1.5 text-[11px] leading-[14px] font-semibold whitespace-nowrap",
+                hanyaKurang
+                  ? "bg-warn-fill text-warn-text ring-1 ring-warn-text/20"
+                  : "bg-card text-muted-foreground ring-1 ring-border-subtle hover:text-foreground",
+              )}
+            >
+              <TriangleAlert className="size-3" aria-hidden />
+              Di bawah minimum
+              <span className="tabular opacity-70">({jumlahKurang})</span>
+            </button>
+          ) : null}
         </div>
 
         <TombolUnduhExcel
           baris={daftar}
           kolom={kolomEkspor}
           namaBerkas={namaBerkasTanggal(
-            saringan === SEMUA
-              ? "k-space-laporan-harian"
-              : `k-space-laporan-${saringan.replace(/[^a-z0-9]+/gi, "-")}`,
+            [
+              saringan === SEMUA
+                ? "k-space-laporan-harian"
+                : `k-space-laporan-${saringan.replace(/[^a-z0-9]+/gi, "-")}`,
+              // Berkas yang sudah disaring harus mengaku dari namanya;
+              // kalau tidak, ia beredar sebagai "seluruh laporan".
+              hanyaKurang ? "di-bawah-minimum" : "",
+            ]
+              .filter(Boolean)
+              .join("-"),
           )}
           namaSheet="Laporan Harian"
         />
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div
+        className={cn(
+          "grid gap-3",
+          adaKomisi ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3",
+        )}
+      >
         {[
           { label: "Laporan", nilai: String(daftar.length) },
           { label: "Total GMV", nilai: rupiahRingkas(totalGmv) },
+          ...(adaKomisi
+            ? [{ label: "Total komisi", nilai: rupiahRingkas(totalKomisi) }]
+            : []),
           {
             label: "Capaian",
             nilai: persen(rasioCapaian(totalGmv, totalTarget)),
@@ -158,6 +294,34 @@ export function TabelRiwayat({
         ))}
       </div>
 
+      {daftar.length === 0 ? (
+        <KeadaanKosong
+          ikon={<CheckCircle2 className="size-4" />}
+          judul={
+            hanyaKurang
+              ? "Tidak ada yang di bawah minimum"
+              : "Belum ada laporan"
+          }
+          pesan={
+            hanyaKurang
+              ? "Semua laporan pada pilihan ini sudah memenuhi batas minimum levelnya. Matikan penyaringnya untuk melihat seluruh laporan."
+              : "Belum ada laporan yang cocok dengan pilihan ini."
+          }
+        />
+      ) : null}
+
+      {/* Rekap ikut saringan & koreksi di atasnya, bukan riwayat mentah:
+          angka yang baru saja diperbaiki harus langsung terhitung. */}
+      <RekapKepatuhan
+        riwayat={daftarAkun.map((r) => ({
+          akunId: r.akunId,
+          label: r.label,
+          pelaporNama: r.pelaporNama,
+          jumlahUpload: angkaKini(r).jumlahUpload,
+          minimumUpload: r.minimumUpload,
+        }))}
+      />
+
       {/* Desktop: tabel padat */}
       <Card className="hidden rounded-3xl shadow-card ring-border-subtle lg:block">
         <div className="overflow-x-auto px-5">
@@ -167,6 +331,15 @@ export function TabelRiwayat({
                 <TableHead>Tanggal</TableHead>
                 <TableHead>Akun / unit</TableHead>
                 <TableHead className="text-right">GMV</TableHead>
+                {adaKomisi ? (
+                  <TableHead className="text-right">Komisi</TableHead>
+                ) : null}
+                {adaUpload ? (
+                  <TableHead className="text-right">Upload</TableHead>
+                ) : null}
+                {adaMinimum ? (
+                  <TableHead className="text-right">Min.</TableHead>
+                ) : null}
                 <TableHead className="text-right">Target</TableHead>
                 <TableHead className="text-right">Capaian</TableHead>
                 <TableHead>Status &amp; perbaikan</TableHead>
@@ -174,9 +347,14 @@ export function TabelRiwayat({
             </TableHeader>
             <TableBody>
               {daftar.map((r) => {
-                const gmv = gmvKini(r);
+                const angka = angkaKini(r);
+                const gmv = angka.gmv;
                 const rasio = rasioCapaian(gmv, r.target);
-                const tercapai = gmv >= r.target;
+                const warna = warnaCapaian(rasio, r.target > 0);
+                const statusUpload = statusTerkirim(
+                  angka.jumlahUpload,
+                  r.minimumUpload,
+                );
                 const jejak = jejakUntuk(r.id);
                 return (
                   <TableRow key={r.id}>
@@ -202,6 +380,40 @@ export function TabelRiwayat({
                     <TableCell className="tabular text-right font-semibold whitespace-nowrap">
                       {rupiahPenuh(gmv)}
                     </TableCell>
+                    {adaKomisi ? (
+                      <TableCell className="tabular text-right whitespace-nowrap">
+                        {angka.komisi === null ? (
+                          <span className="text-muted-foreground">—</span>
+                        ) : (
+                          rupiahRingkas(angka.komisi)
+                        )}
+                      </TableCell>
+                    ) : null}
+                    {adaUpload ? (
+                      <TableCell className="tabular text-right whitespace-nowrap">
+                        {angka.jumlahUpload === null ? (
+                          <span className="text-muted-foreground">—</span>
+                        ) : (
+                          <span
+                            className={cn(
+                              "font-semibold",
+                              statusUpload
+                                ? GAYA_MINIMUM[statusUpload].teks
+                                : undefined,
+                            )}
+                          >
+                            {bilangan(angka.jumlahUpload)}
+                          </span>
+                        )}
+                      </TableCell>
+                    ) : null}
+                    {adaMinimum ? (
+                      <TableCell className="tabular text-right whitespace-nowrap text-muted-foreground">
+                        {r.minimumUpload === null
+                          ? "—"
+                          : bilangan(r.minimumUpload)}
+                      </TableCell>
+                    ) : null}
                     <TableCell className="tabular text-right whitespace-nowrap text-muted-foreground">
                       {rupiahRingkas(r.target)}
                     </TableCell>
@@ -209,12 +421,12 @@ export function TabelRiwayat({
                       <span
                         className={cn(
                           "tabular rounded-full px-2 py-0.5 text-[11px] leading-[14px] font-semibold",
-                          tercapai
-                            ? "bg-ok-fill text-ok-text"
-                            : "bg-warn-fill text-warn-text",
+                          warna
+                            ? GAYA_CAPAIAN[warna].pil
+                            : "bg-muted text-muted-foreground",
                         )}
                       >
-                        {persen(rasio)}
+                        {r.target > 0 ? persen(rasio) : "—"}
                       </span>
                     </TableCell>
                     <TableCell>
@@ -230,7 +442,7 @@ export function TabelRiwayat({
                           </span>
                         )}
                         <DialogRevisi
-                          laporan={{ ...r, gmv }}
+                          laporan={{ ...r, ...angka }}
                           jejak={jejak}
                           olehNama={olehNama}
                           onSimpan={simpanRevisi}
@@ -248,9 +460,14 @@ export function TabelRiwayat({
       {/* HP & tablet: kartu bertumpuk */}
       <div className="space-y-2.5 lg:hidden">
         {daftar.map((r) => {
-          const gmv = gmvKini(r);
+          const angka = angkaKini(r);
+          const gmv = angka.gmv;
           const rasio = rasioCapaian(gmv, r.target);
-          const tercapai = gmv >= r.target;
+          const warna = warnaCapaian(rasio, r.target > 0);
+          const statusUpload = statusTerkirim(
+            angka.jumlahUpload,
+            r.minimumUpload,
+          );
           const jejak = jejakUntuk(r.id);
           return (
             <Card
@@ -274,12 +491,12 @@ export function TabelRiwayat({
                   <span
                     className={cn(
                       "tabular shrink-0 rounded-full px-2 py-0.5 text-[11px] leading-[14px] font-semibold",
-                      tercapai
-                        ? "bg-ok-fill text-ok-text"
-                        : "bg-warn-fill text-warn-text",
+                      warna
+                        ? GAYA_CAPAIAN[warna].pil
+                        : "bg-muted text-muted-foreground",
                     )}
                   >
-                    {persen(rasio)}
+                    {r.target > 0 ? persen(rasio) : "—"}
                   </span>
                 </div>
 
@@ -289,6 +506,32 @@ export function TabelRiwayat({
                     / {rupiahRingkas(r.target)}
                   </span>
                 </p>
+
+                {angka.komisi !== null || angka.jumlahUpload !== null ? (
+                  <div className="flex flex-wrap gap-1.5">
+                    {angka.komisi !== null ? (
+                      <span className="tabular rounded-full bg-muted px-2 py-0.5 text-[11px] leading-[14px] font-semibold">
+                        Komisi {rupiahRingkas(angka.komisi)}
+                      </span>
+                    ) : null}
+                    {angka.jumlahUpload !== null ? (
+                      <span
+                        className={cn(
+                          "tabular rounded-full px-2 py-0.5 text-[11px] leading-[14px] font-semibold",
+                          statusUpload
+                            ? GAYA_MINIMUM[statusUpload].pil
+                            : "bg-muted",
+                        )}
+                      >
+                        {bilangan(angka.jumlahUpload)}
+                        {r.minimumUpload === null
+                          ? ""
+                          : ` / ${bilangan(r.minimumUpload)} min.`}{" "}
+                        upload
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
 
                 {r.catatan ? (
                   <p className="text-[11px] leading-[14px] text-muted-foreground">
@@ -308,7 +551,7 @@ export function TabelRiwayat({
                     </span>
                   )}
                   <DialogRevisi
-                    laporan={{ ...r, gmv }}
+                    laporan={{ ...r, ...angka }}
                     jejak={jejak}
                     olehNama={olehNama}
                     onSimpan={simpanRevisi}
@@ -322,8 +565,8 @@ export function TabelRiwayat({
 
       {jumlahRevisi > 0 ? (
         <p className="text-[11px] leading-[14px] text-muted-foreground">
-          {jumlahRevisi} revisi tercatat pada rentang ini. Setiap perubahan
-          angka GMV meninggalkan jejak siapa, kapan, dan dari berapa ke berapa.
+          {jumlahRevisi} revisi tercatat pada rentang ini. Setiap angka yang
+          berubah meninggalkan jejak siapa, kapan, dan dari berapa ke berapa.
         </p>
       ) : null}
     </div>

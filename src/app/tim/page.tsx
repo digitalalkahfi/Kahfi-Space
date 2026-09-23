@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Network } from "lucide-react";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
 import { DaftarAnggota } from "@/components/tim/daftar-anggota";
+import { SusunanOrganisasi } from "@/components/tim/susunan-organisasi";
 import { SaringAnggota } from "@/components/tim/saring-anggota";
 import { Reveal } from "@/components/motion/reveal";
 import {
@@ -12,6 +15,7 @@ import {
 import { DialogTambahAnggota } from "@/components/tim/dialog-anggota";
 import { pilihanOrganisasi } from "@/lib/data/organisasi";
 import { petaBawahan, petaRantai } from "@/lib/atasan";
+import { susunanDepartemen } from "@/lib/organisasi";
 import {
   bacaSaringan,
   saringAnggota,
@@ -35,6 +39,9 @@ export default async function TimPage({ searchParams }: PageProps<"/tim">) {
     daftarAnggotaTim(pengguna),
     pilihanOrganisasi(),
   ]);
+  // Susunan dihitung dari daftar penuh, bukan hasil saringan: menyaring
+  // satu unit tidak membuat departemen lain berhenti ada.
+  const susunan = susunanDepartemen(semua, pilihan);
   const saringan = bacaSaringan(params);
   const daftar = saringAnggota(semua, saringan);
   const kelompok = kelompokkanPerUnit(daftar);
@@ -48,7 +55,9 @@ export default async function TimPage({ searchParams }: PageProps<"/tim">) {
   // Departemen dan program diambil dari anggota yang ada, bukan dari
   // seluruh tabel: pilihan yang tak menyaring siapa pun hanya menipu.
   // Sumbu yang nilainya sama untuk semua orang ikut disembunyikan.
-  const nilaiSaringan = (ambil: (a: (typeof semua)[number]) => string | null) => {
+  const nilaiSaringan = (
+    ambil: (a: (typeof semua)[number]) => string | null,
+  ) => {
     const ada = semua.map(ambil);
     const nilai = [...new Set(ada.filter((v) => v !== null))].sort();
     const menyaring = nilai.length > 1 || ada.some((v) => v === null);
@@ -82,8 +91,28 @@ export default async function TimPage({ searchParams }: PageProps<"/tim">) {
             </p>
           </div>
 
-          {bolehKelola ? <DialogTambahAnggota pilihan={pilihan} /> : null}
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/tim/struktur"
+              className="tekan-halus sentuh-nyaman inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-[13px] leading-[18px] font-semibold ring-1 ring-border-subtle"
+            >
+              <Network className="size-3.5" />
+              Struktur organisasi
+            </Link>
+            {bolehKelola ? (
+              <DialogTambahAnggota pilihan={pilihan} semua={semua} />
+            ) : null}
+          </div>
         </div>
+
+        <Reveal>
+          <SusunanOrganisasi
+            daftar={susunan}
+            tanpaDepartemen={
+              semua.filter((a) => a.status === "aktif" && !a.departemen).length
+            }
+          />
+        </Reveal>
 
         <SaringAnggota
           saringan={saringan}

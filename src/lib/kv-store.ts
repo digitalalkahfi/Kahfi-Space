@@ -1,10 +1,16 @@
 /**
- * Pembacaan ekspor `kv_store` sistem lama — modul murni.
+ * Pembacaan ekspor K-Space lama — modul murni.
  *
- * Sistem lama menyimpan segalanya sebagai pasangan kunci-nilai dengan
- * bentuk `entitas:sisa-kunci`. Bentuknya tidak dijamin rapi, jadi setiap
- * fungsi di sini harus tahan terhadap kunci menyimpang dan nilai kosong.
+ * Satu baris di sini sama dengan satu kunci tingkat atas ekspor
+ * (`users:list`, `daily-reports:all`), persis seperti isi
+ * `kv_store_lama`. Jadi "entitas" sebuah entri adalah kuncinya sendiri —
+ * bukan potongan sebelum titik dua, seperti pada bentuk ekspor karangan
+ * yang dipakai sebelum bentuk aslinya diketahui.
+ *
+ * Bentuknya tidak dijamin rapi, jadi setiap fungsi di sini harus tahan
+ * terhadap kunci menyimpang dan nilai kosong.
  */
+import { golonganKunci, KUNCI_DIKENAL } from "@/lib/ekspor-v1";
 
 export type EntriKv = {
   key: string;
@@ -23,24 +29,21 @@ export type RingkasKv = {
   dikenali: boolean;
 };
 
-/** Entitas yang punya tempat di skema baru. */
-export const ENTITAS_DIKENALI = [
-  "user",
-  "account",
-  "goal",
-  "report",
-  "attendance",
-  "task",
-] as const;
+/** Kunci ekspor yang punya tempat di skema baru. */
+export const ENTITAS_DIKENALI = KUNCI_DIKENAL.map((k) => k.kunci);
 
+/**
+ * Entitas sebuah entri: kuncinya sendiri.
+ *
+ * Kunci kosong tetap ditandai, karena entri tanpa kunci tidak bisa
+ * dipetakan ke mana pun dan harus kelihatan di layar.
+ */
 export function entitasDari(key: string): string {
-  const pisah = key.indexOf(":");
-  if (pisah <= 0) return "(tanpa entitas)";
-  return key.slice(0, pisah);
+  return key.trim() === "" ? "(tanpa entitas)" : key;
 }
 
 export function dikenali(entitas: string) {
-  return (ENTITAS_DIKENALI as readonly string[]).includes(entitas);
+  return golonganKunci(entitas) === "dikenal";
 }
 
 /** Ringkasan jumlah entri per entitas, terbanyak lebih dulu. */
@@ -83,17 +86,14 @@ export function masalahKv(entri: EntriKv[]): MasalahKv[] {
 
     const jenis = entitasDari(e.key);
     if (jenis === "(tanpa entitas)") {
-      hasil.push({
-        key: e.key,
-        sebab: "Kunci tidak memuat pemisah ':', entitasnya tak bisa ditentukan.",
-      });
+      hasil.push({ key: e.key, sebab: "Entri tanpa kunci." });
       continue;
     }
 
     if (!dikenali(jenis)) {
       hasil.push({
         key: e.key,
-        sebab: `Entitas '${jenis}' tidak ada di skema baru.`,
+        sebab: `Kunci '${jenis}' tidak dipetakan ke skema baru.`,
       });
       continue;
     }

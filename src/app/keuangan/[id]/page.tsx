@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowDownLeft, ArrowLeft, ArrowUpRight } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
+import { AksesDitolak } from "@/components/layout/akses-ditolak";
 import { Card } from "@/components/ui/card";
 import { AksiKeputusan } from "@/components/keuangan/aksi-keputusan";
 import { JejakKeputusan } from "@/components/keuangan/jejak-keputusan";
@@ -52,7 +53,15 @@ export default async function DetailTransaksiPage({
   const [{ id }, { persona }] = await Promise.all([params, searchParams]);
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
-  if (!bolehLihatKeuangan(pengguna.role)) notFound();
+  if (!bolehLihatKeuangan(pengguna.role)) {
+    return (
+      <AksesDitolak
+        pengguna={pengguna}
+        halaman="Transaksi"
+        siapa="Finance, Manager, dan CEO"
+      />
+    );
+  }
 
   const [semua, saldoAwal] = await Promise.all([
     daftarTransaksi(pengguna),

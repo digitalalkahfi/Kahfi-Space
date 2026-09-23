@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
+import { AksesDitolak } from "@/components/layout/akses-ditolak";
 import {
   BelumAdaMigrasi,
   DaftarBermasalah,
@@ -13,17 +14,22 @@ import { Reveal } from "@/components/motion/reveal";
 import { PanelEkspor } from "@/components/migrasi/panel-ekspor";
 import { PanelJalankan } from "@/components/migrasi/panel-jalankan";
 import { PanelKspaceLama } from "@/components/migrasi/panel-kspace-lama";
+import { PanelUnggahEkspor } from "@/components/migrasi/panel-unggah-ekspor";
 import {
   bolehMigrasi,
   catatanBermasalah,
   eksporKvStore,
   persetujuanPemetaan,
-  ringkasMigrasi,
+  ringkasJalanKelompok,
   riwayatMigrasi,
   riwayatKspaceLama,
   statusKspaceLama,
+  kunciLamaTersimpan,
+  orangPending,
 } from "@/lib/data/migrasi";
-import { PEMETAAN, versiPemetaan } from "@/lib/pemetaan";
+import { unggahEksporV1 } from "@/app/actions/migrasi";
+import { versiPemetaan } from "@/lib/pemetaan";
+import { PEMETAAN_V1 } from "@/lib/pemetaan-v1";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
 import { tanggalPanjang } from "@/lib/format";
@@ -42,20 +48,38 @@ export default async function MigrasiPage({
   if (!pengguna) redirect("/masuk");
 
   // Migrasi memuat data pribadi seluruh karyawan; bukan halaman umum.
-  if (!bolehMigrasi(pengguna)) notFound();
+  if (!bolehMigrasi(pengguna)) {
+    return (
+      <AksesDitolak
+        pengguna={pengguna}
+        halaman="Migrasi Data"
+        siapa="CEO dan Manager"
+      />
+    );
+  }
 
-  const [riwayat, ekspor, persetujuan, lama, riwayatLama] = await Promise.all([
+  const [
+    riwayat,
+    ekspor,
+    persetujuan,
+    lama,
+    riwayatLama,
+    kunciLama,
+    menungguOrang,
+  ] = await Promise.all([
     riwayatMigrasi(),
     eksporKvStore(),
     persetujuanPemetaan(),
     statusKspaceLama(),
     riwayatKspaceLama(),
+    kunciLamaTersimpan(),
+    orangPending(),
   ]);
 
   // Migrasi sungguhan menunggu seluruh pemetaan disetujui pada versinya
   // yang sekarang — persetujuan lama tidak terbawa ke pemetaan yang sudah
   // disunting.
-  const belumDisetujui = PEMETAAN.filter(
+  const belumDisetujui = PEMETAAN_V1.filter(
     (p) =>
       !persetujuan.some(
         (s) => s.entitas === p.kunci && s.versi === versiPemetaan(p),
@@ -67,7 +91,7 @@ export default async function MigrasiPage({
       : undefined) ?? riwayat[0];
 
   const [ringkas, bermasalah] = await Promise.all([
-    terpilih ? ringkasMigrasi(terpilih.id) : Promise.resolve([]),
+    terpilih ? ringkasJalanKelompok(terpilih.id) : Promise.resolve([]),
     terpilih ? catatanBermasalah(terpilih.id) : Promise.resolve([]),
   ]);
 
@@ -80,12 +104,37 @@ export default async function MigrasiPage({
           </h1>
           <p className="text-[13px] leading-[18px] text-pretty text-muted-foreground">
             Pemindahan dari <span className="font-mono">kv_store</span> sistem
-            lama. Setiap entri dicatat beserta alasannya, supaya kegagalan
-            tidak baru ketahuan berbulan-bulan kemudian.
+            lama. Setiap entri dicatat beserta alasannya, supaya kegagalan tidak
+            baru ketahuan berbulan-bulan kemudian.
           </p>
         </div>
 
         <PanelKspaceLama status={lama} riwayat={riwayatLama} />
+
+        <PanelUnggahEkspor
+          kirim={unggahEksporV1}
+          tersimpan={kunciLama.baris}
+          sumberTersimpan={kunciLama.berkas}
+        />
+
+        {menungguOrang.filter((o) => !o.userId && !o.diabaikan).length > 0 ? (
+          <Link
+            href="/migrasi/orang"
+            className="baris-interaktif flex items-center gap-3 rounded-3xl bg-warn-fill px-5 py-4"
+          >
+            <span className="min-w-0 flex-1">
+              <span className="block text-[13px] leading-[18px] font-semibold text-warn-text">
+                {menungguOrang.filter((o) => !o.userId && !o.diabaikan).length}{" "}
+                orang di data lama menunggu keputusan
+              </span>
+              <span className="block text-[11px] leading-[14px] text-pretty text-warn-text/90">
+                Selama belum diputuskan, seluruh laporan, tugas, dan kehadiran
+                yang menunjuk mereka tidak ikut dipindahkan.
+              </span>
+            </span>
+            <ArrowRight className="size-4 shrink-0 text-warn-text" />
+          </Link>
+        ) : null}
 
         <PanelJalankan
           siapSungguhan={belumDisetujui.length === 0}
@@ -132,11 +181,7 @@ export default async function MigrasiPage({
         {terpilih ? (
           <>
             <Reveal>
-              <RingkasJalan
-                jalan={terpilih}
-                ringkas={ringkas}
-                bolehTutup
-              />
+              <RingkasJalan jalan={terpilih} ringkas={ringkas} bolehTutup />
             </Reveal>
 
             <Reveal>

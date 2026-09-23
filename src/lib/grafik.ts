@@ -201,3 +201,32 @@ export function labelSumbuX(panjang: number, maks = 6): number[] {
   indeks.push(panjang - 1);
   return indeks;
 }
+
+/**
+ * Gaya dua garis pembanding yang berbeda arti.
+ *
+ * TARGET adalah sasaran yang berubah tiap bulan mengikuti anak tangga
+ * GRD; digambar tipis dan pekat, satu potong di atas tiap batang.
+ * MINIMUM adalah lantai yang melekat pada level akun dan tidak berubah
+ * sepanjang rentang; digambar tebal, putus-putus, berwarna peringatan,
+ * melintang penuh.
+ *
+ * Keduanya dikunci di satu tempat supaya tidak pernah bertemu dalam
+ * bentuk yang sama: dua garis mendatar yang mirip pada grafik-grafik
+ * bertetangga adalah cara tercepat membuat orang salah membaca "sudah
+ * lewat target" sebagai "sudah lewat minimum". `garis` dipakai pada
+ * grafiknya, `swatch` pada legendanya — satu sumber, jadi contoh di
+ * legenda tidak bisa melenceng dari garis yang sebenarnya.
+ */
+export const GAYA_GARIS_PEMBANDING = {
+  target: {
+    label: "Target harian",
+    garis: "bg-foreground/45",
+    swatch: "h-px w-3 bg-foreground/45",
+  },
+  minimum: {
+    label: "Batas minimum",
+    garis: "border-t-2 border-dashed border-warn-text/70",
+    swatch: "h-0 w-4 border-t-2 border-dashed border-warn-text/70",
+  },
+} as const;

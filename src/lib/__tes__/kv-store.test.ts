@@ -7,41 +7,46 @@ import {
   type EntriKv,
 } from "../kv-store.ts";
 
-test("entitas diambil dari bagian sebelum titik dua", () => {
-  assert.equal(entitasDari("user:123"), "user");
-  assert.equal(entitasDari("report:2024-10-24:@akun"), "report");
+test("entitas sebuah entri adalah kunci ekspornya sendiri", () => {
+  // Satu kunci ekspor memuat seluruh catatannya sekaligus, jadi tidak
+  // ada lagi potongan sebelum titik dua yang perlu diambil.
+  assert.equal(entitasDari("users:list"), "users:list");
+  assert.equal(entitasDari("daily-reports:all"), "daily-reports:all");
 });
 
-test("kunci tanpa pemisah ditandai", () => {
-  assert.equal(entitasDari("tanpa_pemisah"), "(tanpa entitas)");
-  // Kunci yang diawali titik dua juga tidak sah.
-  assert.equal(entitasDari(":kosong"), "(tanpa entitas)");
+test("entri tanpa kunci ditandai", () => {
+  assert.equal(entitasDari(""), "(tanpa entitas)");
+  assert.equal(entitasDari("   "), "(tanpa entitas)");
 });
 
 test("ringkasan mengurutkan dari yang terbanyak", () => {
   const entri: EntriKv[] = [
-    { key: "user:1", value: {} },
-    { key: "report:a", value: {} },
-    { key: "report:b", value: {} },
-    { key: "seller:9", value: {} },
+    { key: "users:list", value: [{}] },
+    { key: "daily-reports:all", value: [{}] },
+    { key: "img:store", value: [{}] },
   ];
   const r = ringkasKv(entri);
+  // Jumlahnya sama, jadi urutannya menurut abjad kuncinya.
   assert.deepEqual(
     r.map((x) => x.entitas),
-    ["report", "seller", "user"],
+    ["daily-reports:all", "img:store", "users:list"],
   );
-  assert.equal(r[0].jumlah, 2);
 });
 
-test("entitas asing ditandai tidak dikenali", () => {
-  const r = ringkasKv([{ key: "seller:1", value: {} }]);
-  assert.equal(r[0].dikenali, false);
+test("kunci yang tidak dipetakan ditandai tidak dikenali", () => {
+  const r = ringkasKv([
+    { key: "img:store", value: [{}] },
+    { key: "users:list", value: [{}] },
+  ]);
+  const peta = Object.fromEntries(r.map((x) => [x.entitas, x.dikenali]));
+  assert.equal(peta["img:store"], false);
+  assert.equal(peta["users:list"], true);
 });
 
 test("kunci ganda dilaporkan", () => {
   const m = masalahKv([
-    { key: "user:1", value: {} },
-    { key: "user:1", value: {} },
+    { key: "users:list", value: [{}] },
+    { key: "users:list", value: [{}] },
   ]);
   assert.equal(m.length, 1);
   assert.match(m[0].sebab, /lebih dari sekali/);
@@ -49,16 +54,16 @@ test("kunci ganda dilaporkan", () => {
 
 test("nilai kosong dan bukan objek dilaporkan", () => {
   const m = masalahKv([
-    { key: "account:@a", value: null },
-    { key: "user:2", value: "teks" },
+    { key: "users:list", value: null },
+    { key: "tasks:all", value: "teks" },
   ]);
   assert.equal(m.length, 2);
 });
 
 test("entri yang wajar tidak dilaporkan", () => {
   const m = masalahKv([
-    { key: "user:1", value: { nama: "A" } },
-    { key: "account:@b", value: { username: "@b" } },
+    { key: "users:list", value: [{ id: "u1" }] },
+    { key: "attendance:config", value: { jamMasuk: "08:00" } },
   ]);
   assert.deepEqual(m, []);
 });

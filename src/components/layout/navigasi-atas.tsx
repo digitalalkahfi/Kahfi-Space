@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { pintasanAtas } from "@/lib/navigasi";
+import { useSusunan } from "@/components/tampilan/penyedia-tampilan";
 
 /**
  * Empat pintasan di app-bar atas (PRD §2).
@@ -13,7 +15,7 @@ import { cn } from "@/lib/utils";
  * modul yang benar-benar memakainya (Finance, GRD, absensi), jadi ruang
  * ini dipakai untuk yang memang butuh dijangkau cepat dari mana saja.
  *
- * Keempatnya justru DIKELUARKAN dari rail kiri (lihat `diAppBar` di
+ * Keempatnya justru DIKELUARKAN dari rail kiri (lihat `pintuLainDiDesktop` di
  * lib/navigasi.ts): dua tombol menuju halaman yang sama membuat orang
  * mengira keduanya berbeda. Laporan Harian tidak ada di sini karena ia
  * salah satu dari lima menu utama dan sudah punya tempat tetap di rail.
@@ -21,15 +23,13 @@ import { cn } from "@/lib/utils";
  * App-bar atas ini desktop saja; di mobile pintu masuknya tetap laci
  * "Lainnya" pada bottom-nav.
  */
-const PINTASAN = [
-  { label: "Scan Sampel", href: "/sampel/scan" },
-  { label: "Kalender", href: "/kalender" },
-  { label: "Goal", href: "/grd/goal" },
-  { label: "Kaizen", href: "/masalah" },
-] as const;
-
 export function NavigasiAtas({ className }: { className?: string }) {
   const pathname = usePathname();
+  const terpilih = useSusunan("pintasan")(pintasanAtas);
+
+  // Bar kosong bukan bar tanpa isi: ia kapsul abu-abu selebar beberapa
+  // piksel yang tidak menjelaskan apa pun. Lebih baik tidak ada.
+  if (terpilih.length === 0) return null;
 
   return (
     <nav
@@ -39,7 +39,7 @@ export function NavigasiAtas({ className }: { className?: string }) {
         className,
       )}
     >
-      {PINTASAN.map((item) => {
+      {terpilih.map((item) => {
         // Cocokkan sebagai segmen utuh: "/sampel/scan" tidak boleh ikut
         // menyala saat yang dibuka "/sampel/scan-lama" seandainya ada.
         const aktif =

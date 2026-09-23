@@ -5,6 +5,13 @@ import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { sesiSaatIni } from "@/lib/data/sesi";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
+import {
+  MIN_ALASAN_TOLAK,
+  periksaIzin,
+  tanggalRentang,
+  type BentukIzin,
+  type IsiIzin,
+} from "@/lib/izin";
 
 type Titik = { lat: number; lng: number };
 
@@ -189,37 +196,134 @@ export async function absenPulang(input: {
   return sukses(undefined, `Absen pulang tercatat ${jam} WIB. Terima kasih!`);
 }
 
-/** Ajukan izin atau sakit; menunggu persetujuan atasan. */
+/**
+ * Ajukan izin: sakit hari berjalan, izin terencana sehari atau lebih
+ * (minimal H-1), atau izin beberapa jam pada hari berjalan.
+ *
+ * Izin terencana yang lebih dari sehari disimpan sebagai satu baris
+ * absensi per hari — begitulah seluruh aplikasi membaca kehadiran — yang
+ * disatukan lewat `izin_induk_id`, sehingga atasan cukup memutuskan
+ * sekali (migrasi 0132).
+ */
 export async function ajukanIzin(input: {
-  tanggal: string;
-  jenis: "izin" | "sakit";
+  bentuk: BentukIzin;
+  mulai: string;
+  selesai?: string;
+  jamMulai?: string;
+  jamSelesai?: string;
   alasan: string;
 }): Promise<Hasil> {
-  if (input.alasan.trim().length < 5) {
-    return gagal("Tulis alasan singkat agar atasan bisa menilai.", "validasi");
-  }
+  const isi: IsiIzin = {
+    bentuk: input.bentuk,
+    mulai: input.mulai,
+    selesai: input.selesai ?? input.mulai,
+    jamMulai: input.jamMulai ?? "",
+    jamSelesai: input.jamSelesai ?? "",
+    alasan: input.alasan,
+  };
+  const salah = periksaIzin(isi, tanggalHariIni());
+  if (salah) return gagal(salah, "validasi");
+
   if (modeData() === "demo") return BALASAN_DEMO;
 
   const pengguna = await sesiSaatIni();
   if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
 
   const sb = await klienServer();
-  const { error } = await sb.from("attendance").upsert(
-    {
-      user_id: pengguna.id,
-      tanggal: input.tanggal,
-      status: input.jenis,
-      alasan: input.alasan.trim(),
-      persetujuan: "diajukan",
-    },
-    { onConflict: "user_id,tanggal" },
+  const alasan = isi.alasan.trim();
+
+  if (isi.bentuk === "jam") {
+    // Orangnya tetap masuk; statusnya jangan disentuh supaya absen masuk
+    // yang menyusul tetap menghitung hadir/terlambat seperti biasa.
+    const { error } = await sb.from("attendance").upsert(
+      {
+        user_id: pengguna.id,
+        tanggal: isi.mulai,
+        izin_jenis: "jam",
+        izin_mulai: isi.jamMulai,
+        izin_selesai: isi.jamSelesai,
+        alasan,
+        persetujuan: "diajukan",
+      },
+      { onConflict: "user_id,tanggal" },
+    );
+    if (error) return gagal(...pesanGalatIzin(error));
+    segarkanIzin();
+    return sukses(
+      undefined,
+      `Izin ${isi.jamMulai}–${isi.jamSelesai} terkirim, menunggu persetujuan atasan.`,
+    );
+  }
+
+  if (isi.bentuk === "sakit") {
+    const { error } = await sb.from("attendance").upsert(
+      {
+        user_id: pengguna.id,
+        tanggal: isi.mulai,
+        status: "sakit",
+        alasan,
+        persetujuan: "diajukan",
+      },
+      { onConflict: "user_id,tanggal" },
+    );
+    if (error) return gagal(...pesanGalatIzin(error));
+    segarkanIzin();
+    return sukses(
+      undefined,
+      "Pengajuan terkirim, menunggu persetujuan atasan.",
+    );
+  }
+
+  // Terencana: seluruh harinya dibuat satu RPC, satu transaksi. Dua
+  // perjalanan terpisah bisa berhenti di tengah dan menyisakan izin
+  // sehari yang disangka tiga hari oleh pengajunya (migrasi 0134).
+  const hari = tanggalRentang(isi.mulai, isi.selesai);
+  const { error } = await sb.rpc("ajukan_izin_terencana", {
+    p_mulai: isi.mulai,
+    p_selesai: isi.selesai,
+    p_alasan: alasan,
+  });
+  if (error) return gagal(...pesanGalatIzin(error));
+
+  segarkanIzin();
+  return sukses(
+    undefined,
+    hari.length > 1
+      ? `Izin ${hari.length} hari terkirim, menunggu satu persetujuan atasan.`
+      : "Pengajuan terkirim, menunggu persetujuan atasan.",
   );
+}
 
-  if (error) return gagal(`Gagal menyimpan: ${error.message}`);
-
+function segarkanIzin() {
   revalidatePath("/absensi");
+  revalidatePath("/absensi/izin");
   revalidatePath("/beranda");
-  return sukses(undefined, "Pengajuan terkirim, menunggu persetujuan atasan.");
+}
+
+/** Pagar database diterjemahkan ke kalimat yang bisa ditindaklanjuti. */
+function pesanGalatIzin(error: {
+  code?: string;
+  message: string;
+}): [string, "validasi" | "galat"] {
+  if (/paling lambat H-1/.test(error.message)) {
+    return [
+      "Izin terencana diajukan paling lambat H-1. Untuk hari ini, pilih sakit atau izin beberapa jam.",
+      "validasi",
+    ];
+  }
+  if (/jam_izin_lengkap/.test(error.message)) {
+    return ["Jam mulai dan jam selesai izin belum benar.", "validasi"];
+  }
+  if (/jam_izin_tetap_hadir/.test(error.message)) {
+    return [
+      "Hari ini sudah tercatat izin/sakit sehari penuh, jadi izin berjam tidak berlaku.",
+      "validasi",
+    ];
+  }
+  if (/attendance_izin_beralasan|jam_izin_beralasan/.test(error.message)) {
+    return ["Tulis alasan minimal 5 karakter.", "validasi"];
+  }
+  return [`Gagal menyimpan: ${error.message}`, "galat"];
 }
 
 /**
@@ -229,7 +333,17 @@ export async function ajukanIzin(input: {
 export async function putuskanIzin(
   attendanceId: string,
   keputusan: "disetujui" | "ditolak",
+  alasan = "",
 ): Promise<Hasil> {
+  // Penolakan tanpa keterangan hanya menyisakan pertanyaan bagi pengaju;
+  // database menolaknya juga (migrasi 0133), ini supaya pesannya jelas
+  // sebelum perjalanan bolak-balik.
+  if (keputusan === "ditolak" && alasan.trim().length < MIN_ALASAN_TOLAK) {
+    return gagal(
+      `Tulis alasan penolakan minimal ${MIN_ALASAN_TOLAK} karakter.`,
+      "validasi",
+    );
+  }
   if (modeData() === "demo") return BALASAN_DEMO;
 
   const pengguna = await sesiSaatIni();
@@ -242,6 +356,7 @@ export async function putuskanIzin(
       persetujuan: keputusan,
       disetujui_oleh: pengguna.id,
       disetujui_pada: new Date().toISOString(),
+      alasan_keputusan: keputusan === "ditolak" ? alasan.trim() : "",
     })
     .eq("id", attendanceId)
     // Hanya pengajuan yang masih menunggu; mencegah keputusan ganda
@@ -263,10 +378,11 @@ export async function putuskanIzin(
     );
   }
 
-  revalidatePath("/absensi");
-  revalidatePath("/absensi/izin");
+  segarkanIzin();
   return sukses(
     undefined,
-    keputusan === "disetujui" ? "Pengajuan disetujui." : "Pengajuan ditolak.",
+    keputusan === "disetujui"
+      ? "Pengajuan disetujui; telat hari itu langsung dihitung ulang."
+      : "Pengajuan ditolak beserta alasannya.",
   );
 }

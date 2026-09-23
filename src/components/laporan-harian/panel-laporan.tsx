@@ -20,6 +20,7 @@ export function PanelLaporan({
   jamMasuk,
   lokasi,
   sudahLaporAwal = false,
+  coSampel,
 }: {
   sasaran: SasaranLaporan[];
   sudahDilaporkan: string[];
@@ -30,6 +31,8 @@ export function PanelLaporan({
   jamMasuk: string;
   lokasi: string;
   sudahLaporAwal?: boolean;
+  /** CO sampel hari ini per kunci sasaran; dihitung, bukan diketik. */
+  coSampel?: Record<string, number>;
 }) {
   const [sudahLapor, setSudahLapor] = useState(sudahLaporAwal);
 
@@ -43,6 +46,7 @@ export function PanelLaporan({
             tanggal={tanggal}
             terkirim={sudahLapor}
             onUbahTerkirim={setSudahLapor}
+            coSampel={coSampel}
           />
         </Reveal>
       </div>

@@ -4,7 +4,10 @@ import "server-only";
 
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
-import { dataContoh } from "@/lib/data/contoh";
+import { dataContoh, TANGGAL_ACUAN } from "@/lib/data/contoh";
+import { targetHarianGrd } from "@/lib/goal";
+import { bolehLihatLaporan } from "@/lib/laporan";
+import { batasMinimum } from "@/lib/batas-minimum";
 import type {
   AkunAffiliator,
   KodeUnit,
@@ -14,15 +17,6 @@ import type {
   SasaranLaporan,
 } from "@/lib/types";
 
-/** Berapa hari dalam bulan tanggal tersebut. */
-function hariDalamBulan(tanggal: string) {
-  return new Date(
-    Number(tanggal.slice(0, 4)),
-    Number(tanggal.slice(5, 7)),
-    0,
-  ).getDate();
-}
-
 // ---------------------------------------------------------------------
 // Sasaran laporan: akun yang dipegang PIC, atau unit yang dipimpin Leader.
 // ---------------------------------------------------------------------
@@ -30,11 +24,20 @@ export async function sasaranUntuk(
   pengguna: Pengguna,
   tanggal: string,
 ): Promise<SasaranLaporan[]> {
-  const hari = hariDalamBulan(tanggal);
-
   if (modeData() === "demo") {
     const { accounts, units, goals } = dataContoh;
     const lintas = pengguna.role === "CEO" || pengguna.role === "Manager";
+
+    // Target tidak pernah diketik pelapor: dihitung dari anak tangga GRD
+    // yang aktif, dengan rumus yang sama dengan `target_harian_akun` di
+    // database — supaya mode demo dan mode Supabase tidak berbeda angka.
+    const targetGoal = (cocok: (g: (typeof goals)[number]) => boolean) =>
+      Math.round(
+        targetHarianGrd(
+          goals.filter(cocok).flatMap((g) => g.bulan_list ?? []),
+          tanggal,
+        ),
+      );
 
     const akun: SasaranLaporan[] = accounts
       .filter((a) => lintas || a.pic === pengguna.nama)
@@ -47,7 +50,10 @@ export async function sasaranUntuk(
           picNama: a.pic,
           unitId: a.unit as KodeUnit,
           program: a.program === "Reguler" ? null : a.program,
-          targetHarian: a.target_harian,
+          targetHarian: targetGoal(
+            (g) => g.level === "account" && g.account === a.username,
+          ),
+          level: (a as { level?: number }).level ?? null,
           status: "aktif",
         } satisfies AkunAffiliator,
       }));
@@ -60,17 +66,14 @@ export async function sasaranUntuk(
         (u) =>
           lintas || (pengguna.role === "Leader" && pengguna.unitId === u.kode),
       )
-      .map((u) => {
-        const goal = goals.find(
-          (g) => g.unit === u.kode && g.level === "leader",
-        );
-        return {
-          jenis: "unit" as const,
-          unitId: u.kode as KodeUnit,
-          nama: u.nama,
-          targetHarian: Math.round((goal?.target_bulan ?? 0) / hari),
-        };
-      });
+      .map((u) => ({
+        jenis: "unit" as const,
+        unitId: u.kode as KodeUnit,
+        nama: u.nama,
+        targetHarian: targetGoal(
+          (g) => g.unit === u.kode && g.account === null,
+        ),
+      }));
 
     return [...akun, ...unit];
   }
@@ -95,6 +98,7 @@ export async function sasaranUntuk(
             unitId: b.unit_kode as KodeUnit,
             program: b.program,
             targetHarian: Math.round(Number(b.target_harian)),
+            level: b.level,
             status: "aktif" as const,
           },
         }
@@ -107,20 +111,147 @@ export async function sasaranUntuk(
   );
 }
 
+/**
+ * Departemen sebuah kunci sasaran ("akun:<uuid>" atau "unit:<kode>").
+ * Dipakai Server Action untuk tahu kolom mana yang boleh ikut disimpan,
+ * sebelum barisnya sempat menyentuh database.
+ */
+export async function unitSasaranLaporan(
+  kunci: string,
+): Promise<KodeUnit | null> {
+  const [jenis, nilai] = kunci.split(":");
+  if (!jenis || !nilai) return null;
+
+  if (jenis === "unit") {
+    return (
+      (["affiliator", "mcn", "tap"] as const).find((k) => k === nilai) ?? null
+    );
+  }
+  if (jenis !== "akun") return null;
+
+  if (modeData() === "demo") {
+    const akun = dataContoh.accounts.find((a) => a.id === nilai);
+    return (akun?.unit as KodeUnit) ?? null;
+  }
+
+  const sb = await klienServer();
+  const { data } = await sb
+    .from("accounts")
+    .select("units:unit_id (kode)")
+    .eq("id", nilai)
+    .maybeSingle();
+  const unit = data?.units as unknown as { kode: KodeUnit } | null;
+  return unit?.kode ?? null;
+}
+
+/**
+ * Departemen sebuah laporan yang sudah tersimpan. Dipakai saat
+ * memperbaiki: kolom yang sah ditentukan laporannya, bukan kiriman.
+ */
+export async function unitLaporan(reportId: string): Promise<KodeUnit | null> {
+  if (modeData() === "demo") {
+    // Id laporan contoh berbentuk "<tanggal>-<akun|unit>-<urutan>".
+    const bagian = reportId.split("-");
+    const tengah = bagian.slice(3, -1).join("-");
+    const akun = dataContoh.accounts.find((a) => a.username === tengah);
+    if (akun) return akun.unit as KodeUnit;
+    return (
+      (["affiliator", "mcn", "tap"] as const).find((k) => k === tengah) ?? null
+    );
+  }
+
+  const sb = await klienServer();
+  const { data } = await sb
+    .from("daily_reports")
+    .select("accounts:account_id (units:unit_id (kode)), units:unit_id (kode)")
+    .eq("id", reportId)
+    .maybeSingle();
+  if (!data) return null;
+
+  const lewatAkun = data.accounts as unknown as {
+    units: { kode: KodeUnit } | null;
+  } | null;
+  const lewatUnit = data.units as unknown as { kode: KodeUnit } | null;
+  return lewatAkun?.units?.kode ?? lewatUnit?.kode ?? null;
+}
+
+/**
+ * CO sampel hari ini per kunci sasaran ("akun:<uuid>").
+ *
+ * Angkanya ditarik dari log pemindaian QR sampel, bukan diketik pelapor:
+ * sampel yang sudah discan hari itu adalah bukti pemakaiannya. Sasaran
+ * tingkat unit tidak punya CO sampel, jadi tidak ikut dikembalikan; kunci
+ * yang tidak ada di peta berarti nol.
+ */
+export async function coSampelHariIni(
+  tanggal: string,
+): Promise<Record<string, number>> {
+  if (modeData() === "demo") {
+    const { sample_scans = [], samples, accounts } = dataContoh;
+    const peta: Record<string, number> = {};
+    for (const scan of sample_scans) {
+      if (!scan.dikenali) continue;
+      const hari = tanggalScanContoh(scan.lalu_hari);
+      if (hari !== tanggal) continue;
+      const sampel = samples.find((s) => s.kode === scan.kode);
+      const akun = sampel?.akun
+        ? accounts.find((a) => a.username === sampel.akun)
+        : null;
+      if (!akun) continue;
+      const kunci = `akun:${akun.id}`;
+      peta[kunci] = (peta[kunci] ?? 0) + 1;
+    }
+    return peta;
+  }
+
+  const sb = await klienServer();
+  const { data, error } = await sb.rpc("co_sampel_akun", {
+    p_tanggal: tanggal,
+  });
+  // Angka ini ikut dilaporkan, jadi kegagalan baca tidak boleh menyamar
+  // sebagai "belum ada scan" — nol palsu lebih berbahaya dari halaman gagal.
+  if (error) throw new Error(`Gagal memuat CO sampel: ${error.message}`);
+
+  return Object.fromEntries(
+    (data ?? []).map((b) => [`akun:${b.account_id}`, Number(b.jumlah)]),
+  );
+}
+
+/** Tanggal pemindaian contoh: seed menyimpan jarak hari dari tanggal acuan. */
+function tanggalScanContoh(laluHari: number) {
+  const d = new Date(`${TANGGAL_ACUAN}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() - laluHari);
+  return d.toISOString().slice(0, 10);
+}
+
 // ---------------------------------------------------------------------
 // Riwayat laporan
 // ---------------------------------------------------------------------
+/**
+ * Satu baris dari view `riwayat_laporan_minimum` (migrasi 0141).
+ *
+ * Bentuknya datar, bukan bersarang seperti hasil join supabase-js:
+ * batas minimum ikut dihitung di database supaya level → angka batas
+ * hanya diterjemahkan di satu tempat.
+ */
 type BarisLaporan = {
   id: string;
   tanggal: string;
   account_id: string | null;
   unit_id: string | null;
   gmv: number;
+  komisi: number | null;
+  jumlah_upload: number | null;
   catatan: string;
   status: "terkirim" | "revisi";
   submitted_at: string;
-  accounts: { username: string } | null;
-  units: { nama: string; kode: KodeUnit } | null;
+  akun_username: string | null;
+  akun_level: number | null;
+  minimum_unggahan: number | null;
+  akun_unit_kode: KodeUnit | null;
+  unit_kode: KodeUnit | null;
+  unit_nama: string | null;
+  pelapor_nama: string | null;
 };
 
 function targetUntuk(
@@ -147,18 +278,19 @@ export async function riwayatLaporan(
 
   if (modeData() === "demo") {
     const { daily_reports, accounts, units } = dataContoh;
-    const lintas = pengguna.role === "CEO" || pengguna.role === "Manager";
-    const akunSaya = new Set(
-      accounts.filter((a) => a.pic === pengguna.nama).map((a) => a.username),
-    );
 
     return daily_reports
-      .filter(
-        (l) =>
-          lintas ||
-          l.user === pengguna.nama ||
-          (l.akun && akunSaya.has(l.akun)),
-      )
+      .filter((l) => {
+        const akun = l.akun
+          ? accounts.find((a) => a.username === l.akun)
+          : null;
+        return bolehLihatLaporan(pengguna, {
+          pelapor: l.user,
+          unitLaporan: (l.unit as KodeUnit) ?? null,
+          departemen: ((akun?.unit ?? l.unit) as KodeUnit) ?? null,
+          picAkun: akun?.pic ?? null,
+        });
+      })
       .sort((a, b) => b.tanggal.localeCompare(a.tanggal))
       .slice(0, batas)
       .map((l, i) => {
@@ -172,7 +304,15 @@ export async function riwayatLaporan(
           akunId: akun?.id ?? null,
           unitId: (l.unit as KodeUnit) ?? null,
           label: l.akun ?? unit?.nama ?? "—",
+          departemen: ((akun?.unit ?? l.unit) as KodeUnit) ?? null,
+          pelaporNama: l.user,
           gmv: l.gmv,
+          komisi: l.komisi ?? null,
+          jumlahUpload: l.jumlah_upload ?? null,
+          minimumUpload: batasMinimum(
+            (akun as { level?: number } | null | undefined)?.level ?? null,
+          ),
+          coSampel: null,
           target: targetUntuk(sasaran, akun?.id ?? null, l.unit),
           catatan: l.catatan,
           status: "terkirim",
@@ -184,10 +324,8 @@ export async function riwayatLaporan(
 
   const sb = await klienServer();
   const { data, error } = await sb
-    .from("daily_reports")
-    .select(
-      "id, tanggal, account_id, unit_id, gmv, catatan, status, submitted_at, accounts:account_id (username), units:unit_id (nama, kode)",
-    )
+    .from("riwayat_laporan_minimum")
+    .select("*")
     .order("tanggal", { ascending: false })
     .order("submitted_at", { ascending: false })
     .limit(batas);
@@ -209,19 +347,41 @@ export async function riwayatLaporan(
   }
 
   return baris.map((b) => ({
+    ...bentukLaporan(b, sasaran),
+    jumlahRevisi: jumlahRevisi.get(b.id) ?? 0,
+  }));
+}
+
+/**
+ * Satu baris view jadi satu `LaporanHarian`.
+ *
+ * Dipakai riwayat maupun halaman rincian: dua tempat yang menyusun
+ * bentuk yang sama sendiri-sendiri akan berbeda pada kolom yang jarang
+ * dilihat — dan justru kolom itulah yang salah tanpa ketahuan.
+ */
+function bentukLaporan(
+  b: BarisLaporan,
+  sasaran: SasaranLaporan[],
+): Omit<LaporanHarian, "jumlahRevisi"> {
+  return {
     id: b.id,
     tanggal: b.tanggal,
     akunId: b.account_id,
-    unitId: b.units?.kode ?? null,
-    label: b.accounts?.username ?? b.units?.nama ?? "—",
+    unitId: b.unit_kode,
+    label: b.akun_username ?? b.unit_nama ?? "—",
+    departemen: b.akun_unit_kode ?? b.unit_kode,
+    pelaporNama: b.pelapor_nama ?? "—",
     gmv: Number(b.gmv),
+    komisi: b.komisi === null ? null : Number(b.komisi),
+    jumlahUpload: b.jumlah_upload,
+    minimumUpload: b.minimum_unggahan,
+    coSampel: null,
     // Laporan tingkat unit dicocokkan lewat kode unit, bukan account_id.
-    target: targetUntuk(sasaran, b.account_id, b.units?.kode ?? null),
+    target: targetUntuk(sasaran, b.account_id, b.unit_kode),
     catatan: b.catatan,
     status: b.status,
     submittedAt: b.submitted_at,
-    jumlahRevisi: jumlahRevisi.get(b.id) ?? 0,
-  }));
+  };
 }
 
 /** Sasaran yang laporannya sudah masuk hari ini. */
@@ -262,7 +422,8 @@ export async function jejakRevisi(reportId: string): Promise<RevisiLaporan[]> {
   const { data } = await sb
     .from("daily_report_revisions")
     .select(
-      "id, report_id, gmv_lama, gmv_baru, alasan, created_at, users:diubah_oleh (nama)",
+      `id, report_id, gmv_lama, gmv_baru, komisi_lama, komisi_baru,
+       upload_lama, upload_baru, alasan, created_at, users:diubah_oleh (nama)`,
     )
     .eq("report_id", reportId)
     .order("created_at");
@@ -272,6 +433,10 @@ export async function jejakRevisi(reportId: string): Promise<RevisiLaporan[]> {
     reportId: r.report_id,
     gmvLama: Number(r.gmv_lama),
     gmvBaru: Number(r.gmv_baru),
+    komisiLama: r.komisi_lama === null ? null : Number(r.komisi_lama),
+    komisiBaru: r.komisi_baru === null ? null : Number(r.komisi_baru),
+    uploadLama: r.upload_lama,
+    uploadBaru: r.upload_baru,
     alasan: r.alasan,
     diubahOleh: (r.users as unknown as { nama: string } | null)?.nama ?? "—",
     createdAt: r.created_at,
@@ -279,6 +444,17 @@ export async function jejakRevisi(reportId: string): Promise<RevisiLaporan[]> {
 }
 
 /** Satu laporan beserta jejak revisinya — untuk halaman detail. */
+/**
+ * CO sampel satu laporan: dihitung ulang dari log pemindaian pada tanggal
+ * laporan itu, bukan dibaca dari barisnya — angka itu memang tidak pernah
+ * disimpan di `daily_reports`.
+ */
+async function lengkapiCoSampel(laporan: LaporanHarian) {
+  if (!laporan.akunId) return laporan;
+  const peta = await coSampelHariIni(laporan.tanggal);
+  return { ...laporan, coSampel: peta[`akun:${laporan.akunId}`] ?? 0 };
+}
+
 export async function ambilLaporan(
   id: string,
   pengguna: Pengguna,
@@ -287,15 +463,15 @@ export async function ambilLaporan(
   if (modeData() === "demo") {
     const riwayat = await riwayatLaporan(pengguna, tanggal, 200);
     const laporan = riwayat.find((r) => r.id === id);
-    return laporan ? { laporan, jejak: [] } : null;
+    return laporan
+      ? { laporan: await lengkapiCoSampel(laporan), jejak: [] }
+      : null;
   }
 
   const sb = await klienServer();
   const { data } = await sb
-    .from("daily_reports")
-    .select(
-      "id, tanggal, account_id, unit_id, gmv, catatan, status, submitted_at, accounts:account_id (username), units:unit_id (nama, kode)",
-    )
+    .from("riwayat_laporan_minimum")
+    .select("*")
     .eq("id", id)
     .maybeSingle();
 
@@ -305,20 +481,10 @@ export async function ambilLaporan(
   const sasaran = await sasaranUntuk(pengguna, b.tanggal);
   const jejak = await jejakRevisi(id);
 
-  return {
-    laporan: {
-      id: b.id,
-      tanggal: b.tanggal,
-      akunId: b.account_id,
-      unitId: b.units?.kode ?? null,
-      label: b.accounts?.username ?? b.units?.nama ?? "—",
-      gmv: Number(b.gmv),
-      target: targetUntuk(sasaran, b.account_id, b.units?.kode ?? null),
-      catatan: b.catatan,
-      status: b.status,
-      submittedAt: b.submitted_at,
-      jumlahRevisi: jejak.length,
-    },
-    jejak,
+  const laporan: LaporanHarian = {
+    ...bentukLaporan(b, sasaran),
+    jumlahRevisi: jejak.length,
   };
+
+  return { laporan: await lengkapiCoSampel(laporan), jejak };
 }

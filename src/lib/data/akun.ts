@@ -5,6 +5,13 @@ import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { dataContoh } from "@/lib/data/contoh";
 import { aktifDemo } from "@/lib/demo";
+import { batasMinimum, KEPATUHAN_KOSONG } from "@/lib/batas-minimum";
+import type { Kepatuhan } from "@/lib/batas-minimum";
+import {
+  jejakLevelSemuaAkun,
+  kepatuhanSemuaAkun,
+  type JejakLevel,
+} from "@/lib/data/kepatuhan";
 import type { KodeUnit, Pengguna } from "@/lib/types";
 
 export type StatusAkun = "aktif" | "nonaktif";
@@ -24,6 +31,14 @@ export type AkunKelola = {
   status: StatusAkun;
   /** GMV akun ini sepanjang periode berjalan, dari Laporan Harian. */
   gmvPeriode: number;
+  /** Level 0–8 yang menentukan batas minimum unggahannya; null bila belum. */
+  level: number | null;
+  /** Batas minimum unggahan per hari kerja; null bila levelnya belum ada. */
+  minimum: number | null;
+  /** Kepatuhan terhadap hari kerja pada periode yang sama dengan GMV. */
+  kepatuhan: Kepatuhan;
+  /** Riwayat perubahan level, terbaru lebih dulu. */
+  jejakLevel: JejakLevel[];
 };
 
 export type KandidatPic = {
@@ -55,7 +70,7 @@ export async function daftarAkun(
   const { data, error } = await sb
     .from("accounts")
     .select(
-      `id, platform, username, status,
+      `id, platform, username, status, level,
        pic:users!accounts_pic_user_id_fkey (id, nama),
        co_leader:users!accounts_co_leader_id_fkey (id, nama),
        unit:units (kode, nama),
@@ -79,6 +94,13 @@ export async function daftarAkun(
     perAkun.set(l.account_id, (perAkun.get(l.account_id) ?? 0) + Number(l.gmv));
   }
 
+  // Keduanya sekali jalan untuk seluruh akun, bukan sekali per baris:
+  // halaman ini justru dibuka ketika akunnya banyak.
+  const [kepatuhan, jejak] = await Promise.all([
+    kepatuhanSemuaAkun(bulan, sampai),
+    jejakLevelSemuaAkun(),
+  ]);
+
   return (data ?? []).map((a) => ({
     id: a.id,
     username: a.username,
@@ -93,6 +115,10 @@ export async function daftarAkun(
     coLeaderNama: a.co_leader?.nama ?? null,
     status: a.status as StatusAkun,
     gmvPeriode: perAkun.get(a.id) ?? 0,
+    level: a.level,
+    minimum: batasMinimum(a.level),
+    kepatuhan: kepatuhan.get(a.id) ?? { ...KEPATUHAN_KOSONG },
+    jejakLevel: jejak.get(a.id) ?? [],
   }));
 }
 
@@ -227,12 +253,21 @@ function inisialDari(nama: string) {
 // ---------------------------------------------------------------------
 // Mode demo — cakupan baca menirukan policy `accounts_baca`.
 // ---------------------------------------------------------------------
-function akunDemo(
+async function akunDemo(
   pengguna: Pengguna,
   bulan: string,
   sampai: string,
-): AkunKelola[] {
+): Promise<AkunKelola[]> {
   const { accounts, users, units, daily_reports } = dataContoh;
+
+  const [kepatuhan, jejak] = await Promise.all([
+    kepatuhanSemuaAkun(
+      bulan,
+      sampai,
+      accounts.map((a) => a.id),
+    ),
+    jejakLevelSemuaAkun(),
+  ]);
 
   const gmv = new Map<string, number>();
   for (const l of daily_reports) {
@@ -259,6 +294,10 @@ function akunDemo(
         coLeaderNama: a.co_leader ?? null,
         status: "aktif" as StatusAkun,
         gmvPeriode: gmv.get(a.username) ?? 0,
+        level: (a as { level?: number }).level ?? null,
+        minimum: batasMinimum((a as { level?: number }).level ?? null),
+        kepatuhan: kepatuhan.get(a.id) ?? { ...KEPATUHAN_KOSONG },
+        jejakLevel: jejak.get(a.id) ?? [],
       };
     })
     .filter((a) => {
@@ -285,16 +324,18 @@ function kandidatDemo(unitKode: KodeUnit): KandidatPic[] {
     beban.set(a.pic, (beban.get(a.pic) ?? 0) + 1);
   }
 
-  return users
-    // Staf nonaktif tidak boleh muncul sebagai calon: menunjuknya akan
-    // ditolak database (0038) dan akun itu berhenti tertagih laporan.
-    .filter((u) => u.role === "Staff" && u.unit === unitKode && aktifDemo(u))
-    .map((u) => ({
-      id: u.id,
-      nama: u.nama,
-      jabatan: u.jabatan,
-      inisial: u.inisial,
-      jumlahAkun: beban.get(u.nama) ?? 0,
-    }))
-    .sort((a, b) => a.nama.localeCompare(b.nama));
+  return (
+    users
+      // Staf nonaktif tidak boleh muncul sebagai calon: menunjuknya akan
+      // ditolak database (0038) dan akun itu berhenti tertagih laporan.
+      .filter((u) => u.role === "Staff" && u.unit === unitKode && aktifDemo(u))
+      .map((u) => ({
+        id: u.id,
+        nama: u.nama,
+        jabatan: u.jabatan,
+        inisial: u.inisial,
+        jumlahAkun: beban.get(u.nama) ?? 0,
+      }))
+      .sort((a, b) => a.nama.localeCompare(b.nama))
+  );
 }

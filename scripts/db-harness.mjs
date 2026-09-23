@@ -132,6 +132,72 @@ export async function sebagai(db, userId, sql, params = []) {
   }
 }
 
+// ---------------------------------------------------------------------
+// Penolong khusus migrasi V1
+// ---------------------------------------------------------------------
+
+/**
+ * Memuat ekspor K-Space lama ke `kv_store_lama`.
+ *
+ * Satu kunci ekspor = satu baris, persis seperti yang dikerjakan layar
+ * unggah. Dipakai berulang oleh test migrasi; menuliskannya manual tiap
+ * kali hanya memperbesar peluang salah bentuk — dan test yang bentuk
+ * datanya salah menguji sesuatu yang tidak pernah terjadi.
+ */
+export async function muatEkspor(db, isi) {
+  const kunci = Object.keys(isi);
+  if (kunci.length === 0) return;
+
+  await sebagaiAdmin(
+    db,
+    `insert into kv_store_lama (key, value)
+     select k, v::jsonb from unnest($1::text[], $2::text[]) as t(k, v)
+     on conflict (key) do update set value = excluded.value`,
+    [kunci, kunci.map((k) => JSON.stringify(isi[k]))],
+  );
+}
+
+/**
+ * Id seorang pengguna aktif berperan tertentu.
+ *
+ * Test migrasi hampir selalu butuh "seorang Manager" dan "seorang
+ * Staff"; menyebut namanya satu per satu membuat test ikut rusak setiap
+ * kali data seed disunting.
+ */
+export async function idPeran(db, peran) {
+  const { rows } = await sebagaiAdmin(
+    db,
+    `select id from users where role = $1 and status = 'aktif' order by nama limit 1`,
+    [peran],
+  );
+  if (!rows[0]) throw new Error(`Tidak ada pengguna aktif berperan ${peran}`);
+  return rows[0].id;
+}
+
+/** Id seorang pengguna dari namanya. */
+export async function idNama(db, nama) {
+  const { rows } = await sebagaiAdmin(
+    db,
+    `select id from users where nama = $1 limit 1`,
+    [nama],
+  );
+  if (!rows[0]) throw new Error(`Tidak ada pengguna bernama ${nama}`);
+  return rows[0].id;
+}
+
+/**
+ * Menautkan seorang V1 ke orang V2 lewat peta, seperti hasil pemetaan.
+ */
+export async function petakanOrang(db, idLama, userId) {
+  await sebagaiAdmin(
+    db,
+    `insert into migrasi_peta (kelompok, id_lama, id_baru, tabel)
+     values ('users:list', $1, $2, 'users')
+     on conflict (kelompok, id_lama) do update set id_baru = excluded.id_baru`,
+    [idLama, userId],
+  );
+}
+
 /** Mini test runner — cukup untuk memverifikasi skema tanpa menambah framework. */
 /** Pesan Postgres saja — stack trace PGlite tidak menolong saat debugging SQL. */
 export function pesanDb(e) {

@@ -32,6 +32,9 @@ export type StatusKehadiranDb =
 
 export type StatusPersetujuanDb = "diajukan" | "disetujui" | "ditolak";
 
+/** Migrasi 0132 — bentuk izin di luar sakit hari berjalan. */
+export type JenisIzinDb = "terencana" | "jam";
+
 export type SumberKpiDb =
   "gmv" | "lead_measure" | "absensi" | "tiket" | "manual";
 
@@ -53,6 +56,8 @@ export type TingkatKursusDb = "dasar" | "menengah" | "lanjutan";
 export type StatusMasalahDb = "baru" | "diproses" | "selesai" | "ditutup";
 
 export type DampakMasalahDb = "rendah" | "sedang" | "tinggi";
+
+export type PermukaanTampilanDb = "sidebar" | "dock" | "pintasan" | "beranda";
 
 export type StatusSampelDb =
   "tersedia" | "dipegang" | "dikirim" | "diterima" | "dikembalikan" | "hilang";
@@ -204,7 +209,20 @@ export type BarisAccount = {
   co_leader_id: string | null;
   unit_id: string;
   program_id: string | null;
+  /** Level akun 0–8 (migrasi 0137); null berarti belum ditetapkan. */
+  level: number | null;
   status: StatusAktifDb;
+  created_at: string;
+};
+
+/** @tabel account_level_events */
+export type BarisAccountLevelEvent = {
+  id: string;
+  account_id: string;
+  dari: number | null;
+  ke: number | null;
+  oleh_id: string | null;
+  alasan: string;
   created_at: string;
 };
 
@@ -229,6 +247,13 @@ export type BarisAnnouncement = {
  * (`select("…, units:unit_id (kode)")`). Bentuknya mengikuti keluaran
  * `supabase gen types`; tanpa ini hasil join bertipe `never`.
  */
+/** @tabel batas_minimum_level */
+export type BarisBatasMinimumLevel = {
+  level: number;
+  minimum_unggahan: number;
+  updated_at: string;
+};
+
 /** @tabel daily_reports */
 export type BarisDailyReport = {
   id: string;
@@ -237,6 +262,8 @@ export type BarisDailyReport = {
   account_id: string | null;
   unit_id: string | null;
   gmv: number;
+  komisi: number | null;
+  jumlah_upload: number | null;
   catatan: string;
   status: StatusLaporanDb;
   submitted_at: string;
@@ -249,6 +276,10 @@ export type BarisDailyReportRevision = {
   report_id: string;
   gmv_lama: number;
   gmv_baru: number;
+  komisi_lama: number | null;
+  komisi_baru: number | null;
+  upload_lama: number | null;
+  upload_baru: number | null;
   alasan: string;
   diubah_oleh: string | null;
   created_at: string;
@@ -342,6 +373,16 @@ export type BarisAttendance = {
   persetujuan: StatusPersetujuanDb | null;
   disetujui_oleh: string | null;
   disetujui_pada: string | null;
+  /** Migrasi 0132 — izin berjam & izin terencana. */
+  izin_jenis: JenisIzinDb | null;
+  izin_mulai: string | null;
+  izin_selesai: string | null;
+  izin_induk_id: string | null;
+  menit_telat: number;
+  /** Migrasi 0133 — keterangan atasan saat menolak. */
+  alasan_keputusan: string;
+  /** Migrasi 0157 — asal bukti kehadiran; terisi untuk baris hasil migrasi. */
+  catatan_bukti: string;
   created_at: string;
   updated_at: string;
 };
@@ -367,6 +408,8 @@ export type BarisLeadMeasure = {
   label_pendukung: string | null;
   aktif: boolean;
   urutan: number;
+  /** Kolom daily_reports sumber angkanya; null berarti diisi manual (0130). */
+  sumber_laporan: "gmv" | "komisi" | "jumlah_upload" | null;
   created_at: string;
 };
 
@@ -379,6 +422,8 @@ export type BarisLeadMeasureEntry = {
   nilai: number;
   nilai_pendukung: number | null;
   catatan: string;
+  /** Baris hasil hitung ulang dari laporan harian (0130). */
+  dari_laporan: boolean;
   created_at: string;
 };
 
@@ -526,6 +571,16 @@ export type BarisModuleProgress = {
   selesai_pada: string;
 };
 
+/** @tabel preferensi_tampilan */
+export type BarisPreferensiTampilan = {
+  pengguna_id: string;
+  permukaan: PermukaanTampilanDb;
+  kunci_item: string;
+  tampil: boolean;
+  urutan: number;
+  updated_at: string;
+};
+
 /** @tabel problems */
 export type BarisProblem = {
   id: string;
@@ -593,6 +648,8 @@ export type BarisTransaction = {
   catatan_keputusan: string;
   created_at: string;
   updated_at: string;
+  /** Alamat bukti di bucket bukti-transaksi (migrasi 0151); '' bila belum ada. */
+  bukti_url: string;
 };
 
 /** @tabel assets */
@@ -650,6 +707,92 @@ export type BarisAsetPublik = {
   lokasi: string;
   berakhir: string | null;
   catatan: string;
+};
+
+// Baris riwayat laporan beserta level akun dan batas minimumnya — view
+// turunan, bukan kolom baru di `daily_reports` (migrasi 0141).
+/** @tabel riwayat_laporan_minimum */
+export type BarisRiwayatLaporanMinimum = {
+  id: string;
+  tanggal: string;
+  account_id: string | null;
+  unit_id: string | null;
+  gmv: number;
+  komisi: number | null;
+  jumlah_upload: number | null;
+  catatan: string;
+  status: StatusLaporanDb;
+  submitted_at: string;
+  akun_username: string | null;
+  akun_level: number | null;
+  minimum_unggahan: number | null;
+  akun_unit_kode: string | null;
+  unit_kode: string | null;
+  unit_nama: string | null;
+  pelapor_nama: string | null;
+};
+
+// Tren kepatuhan tiga hari kerja terakhir per akun aktif — view turunan
+// dari absensi + laporan, bukan tabel (migrasi 0140).
+/** @tabel tren_kepatuhan_tiga_hari */
+export type BarisTrenKepatuhan = {
+  account_id: string;
+  username: string;
+  unit_kode: string;
+  pic_user_id: string | null;
+  level: number | null;
+  minimum: number | null;
+  hari_dinilai: number;
+  jumlah_terpenuhi: number;
+  /** Urutannya lama → baru; null bila tidak ada hari yang dinilai. */
+  tanggal: string[] | null;
+  unggahan: (number | null)[] | null;
+  terpenuhi: boolean[] | null;
+  arah: "naik" | "turun" | "datar" | null;
+  beruntun_kurang: number;
+};
+
+/** @tabel metrik_departemen */
+export type BarisMetrikDepartemen = {
+  unit_kode: string;
+  /** Ejaan kode aplikasi (camelCase), sama dengan `KolomLaporan`. */
+  metrik: string;
+  urutan: number;
+  wajib: boolean;
+};
+
+/** @tabel budgets */
+export type BarisBudget = {
+  id: string;
+  /** Bentuk "YYYY-MM"; anggaran selalu bulanan (migrasi 0148). */
+  periode: string;
+  /** null berarti pagu perusahaan, bukan milik satu unit. */
+  unit_id: string | null;
+  jenis: JenisKeluarDb;
+  jumlah: number;
+  catatan: string;
+  disetujui_id: string | null;
+  dibuat_oleh: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type StatusAlokasiDb = "diajukan" | "disetujui" | "ditolak";
+
+/** @tabel budget_allocations */
+export type BarisBudgetAllocation = {
+  id: string;
+  periode: string;
+  unit_id: string | null;
+  jenis: JenisKeluarDb;
+  jumlah: number;
+  alasan: string;
+  status: StatusAlokasiDb;
+  diajukan_id: string | null;
+  diputuskan_id: string | null;
+  catatan_keputusan: string;
+  diputuskan_pada: string | null;
+  created_at: string;
 };
 
 /** @tabel transaction_approvals */
@@ -752,6 +895,53 @@ export type BarisKvStoreLama = {
   value: unknown;
   /** Diturunkan database dari awalan kunci; tidak pernah ditulis aplikasi. */
   entitas: string;
+  dimuat_pada: string;
+  /** Berkas ekspor asal baris ini (0152). */
+  unggahan_id: string | null;
+};
+
+/** @tabel migrasi_ringkas */
+export type BarisMigrasiRingkas = {
+  jalan_id: string;
+  kelompok: string;
+  diperiksa: number;
+  ditulis: number;
+  tertahan: number;
+  dicatat_pada: string;
+};
+
+/** @tabel migrasi_peta */
+export type BarisMigrasiPeta = {
+  kelompok: string;
+  id_lama: string;
+  id_baru: string;
+  tabel: string;
+  dibuat_pada: string;
+};
+
+/** @tabel migrasi_orang_pending */
+export type BarisMigrasiOrangPending = {
+  id: string;
+  id_lama: string;
+  nama: string;
+  kemunculan: string[];
+  alasan: string;
+  user_id: string | null;
+  diabaikan: boolean;
+  diputuskan_oleh: string | null;
+  diputuskan_pada: string | null;
+  dibuat_pada: string;
+};
+
+/** @tabel kv_unggahan */
+export type BarisKvUnggahan = {
+  id: string;
+  berkas: string;
+  /** Isi `_meta` ekspor lama, apa adanya. */
+  meta: unknown;
+  jumlah_kunci: number;
+  jumlah_entri: number;
+  oleh: string | null;
   dimuat_pada: string;
 };
 
@@ -879,6 +1069,39 @@ export type Database = {
           Relasi<"accounts_pic_user_id_fkey", "pic_user_id", "users">,
           Relasi<"accounts_co_leader_id_fkey", "co_leader_id", "users">,
           Relasi<"accounts_program_id_fkey", "program_id", "programs">,
+        ]
+      >;
+      batas_minimum_level: Tabel<BarisBatasMinimumLevel, []>;
+      metrik_departemen: Tabel<BarisMetrikDepartemen, []>;
+      budgets: Tabel<
+        BarisBudget,
+        [
+          Relasi<"budgets_unit_id_fkey", "unit_id", "units">,
+          Relasi<"budgets_disetujui_id_fkey", "disetujui_id", "users">,
+          Relasi<"budgets_dibuat_oleh_fkey", "dibuat_oleh", "users">,
+        ]
+      >;
+      budget_allocations: Tabel<
+        BarisBudgetAllocation,
+        [
+          Relasi<"budget_allocations_unit_id_fkey", "unit_id", "units">,
+          Relasi<"budget_allocations_diajukan_id_fkey", "diajukan_id", "users">,
+          Relasi<
+            "budget_allocations_diputuskan_id_fkey",
+            "diputuskan_id",
+            "users"
+          >,
+        ]
+      >;
+      account_level_events: Tabel<
+        BarisAccountLevelEvent,
+        [
+          Relasi<
+            "account_level_events_account_id_fkey",
+            "account_id",
+            "accounts"
+          >,
+          Relasi<"account_level_events_oleh_id_fkey", "oleh_id", "users">,
         ]
       >;
       daily_reports: Tabel<
@@ -1040,6 +1263,10 @@ export type Database = {
           >,
         ]
       >;
+      preferensi_tampilan: Tabel<
+        BarisPreferensiTampilan,
+        [Relasi<"preferensi_tampilan_pengguna_id_fkey", "pengguna_id", "users">]
+      >;
       problems: Tabel<
         BarisProblem,
         [
@@ -1096,6 +1323,8 @@ export type Database = {
         ]
       >;
       aset_publik: Tabel<BarisAsetPublik, []>;
+      tren_kepatuhan_tiga_hari: Tabel<BarisTrenKepatuhan, []>;
+      riwayat_laporan_minimum: Tabel<BarisRiwayatLaporanMinimum, []>;
       asset_events: Tabel<
         BarisAssetEvent,
         [
@@ -1136,7 +1365,30 @@ export type Database = {
         BarisMigrasiCatatan,
         [Relasi<"migrasi_catatan_jalan_id_fkey", "jalan_id", "migrasi_jalan">]
       >;
-      kv_store_lama: Tabel<BarisKvStoreLama>;
+      kv_store_lama: Tabel<
+        BarisKvStoreLama,
+        [Relasi<"kv_store_lama_unggahan_id_fkey", "unggahan_id", "kv_unggahan">]
+      >;
+      kv_unggahan: Tabel<
+        BarisKvUnggahan,
+        [Relasi<"kv_unggahan_oleh_fkey", "oleh", "users">]
+      >;
+      migrasi_peta: Tabel<BarisMigrasiPeta>;
+      migrasi_ringkas: Tabel<
+        BarisMigrasiRingkas,
+        [Relasi<"migrasi_ringkas_jalan_id_fkey", "jalan_id", "migrasi_jalan">]
+      >;
+      migrasi_orang_pending: Tabel<
+        BarisMigrasiOrangPending,
+        [
+          Relasi<"migrasi_orang_pending_user_id_fkey", "user_id", "users">,
+          Relasi<
+            "migrasi_orang_pending_diputuskan_oleh_fkey",
+            "diputuskan_oleh",
+            "users"
+          >,
+        ]
+      >;
       sample_scans: Tabel<
         BarisSampleScan,
         [
@@ -1368,10 +1620,16 @@ export type Database = {
           status: StatusKehadiranDb;
           jam_masuk: string | null;
           terlambat: boolean;
+          menit_telat: number;
+          izin_jenis: JenisIzinDb | null;
+          izin_selesai: string | null;
           lokasi_valid: boolean;
           persetujuan: StatusPersetujuanDb | null;
           wajib_lapor: boolean;
           sudah_lapor: boolean;
+          /** Migrasi 0145 — unggahan & batas minimum harian orang itu. */
+          unggahan_hari_ini: number | null;
+          minimum_unggahan: number | null;
         }[];
       };
       /** Scorecard KPI seluruh tim yang terlihat pemanggil. */
@@ -1480,13 +1738,252 @@ export type Database = {
         Args: { p_modul: string; p_arah: number };
         Returns: BarisCourseModule;
       };
+      simpan_susunan_tampilan: {
+        Args: { p_permukaan: PermukaanTampilanDb; p_item: unknown };
+        Returns: BarisPreferensiTampilan[];
+      };
       kode_asing: {
         Args: { p_sejak?: string };
         Returns: { kode: string; jumlah: number; terakhir: string }[];
       };
+      /** Migrasi 0149 — kolom laporan yang berlaku bagi sebuah unit. */
+      metrik_unit: {
+        Args: { p_unit: string };
+        Returns: { metrik: string; urutan: number; wajib: boolean }[];
+      };
+      /** Migrasi 0136 — batas minimum unggahan sebuah level. */
+      batas_minimum: {
+        Args: { p_level: number };
+        Returns: number | null;
+      };
+      /** Migrasi 0138 — padanan SQL hitungKepatuhanMinimum. */
+      kepatuhan_minimum_akun: {
+        Args: { p_account_id: string; p_dari: string; p_sampai: string };
+        Returns: {
+          hari_kerja: number;
+          terpenuhi: number;
+          rasio: number | null;
+          minimum: number | null;
+        }[];
+      };
+      /** Migrasi 0147 — ubah level akun beserta alasannya. */
+      ubah_level_akun: {
+        Args: { p_account_id: string; p_level: number; p_alasan: string };
+        Returns: undefined;
+      };
+      /** Migrasi 0146 — kepatuhan seluruh akun dalam satu panggilan. */
+      kepatuhan_minimum_semua: {
+        Args: { p_dari: string; p_sampai: string };
+        Returns: {
+          account_id: string;
+          hari_kerja: number;
+          terpenuhi: number;
+          rasio: number | null;
+          minimum: number | null;
+        }[];
+      };
+      /** Migrasi 0142 — padanan SQL rekapMinimumPerAkun. */
+      rekap_minimum_akun: {
+        Args: { p_dari: string; p_sampai: string; p_hanya_kurang?: boolean };
+        Returns: {
+          account_id: string;
+          username: string;
+          minimum: number;
+          laporan: number;
+          terpenuhi: number;
+          rasio: number;
+          kurang_terdalam: number;
+        }[];
+      };
+      /** Migrasi 0143 — padanan SQL rekapMinimumPerOrang. */
+      rekap_minimum_orang: {
+        Args: { p_dari: string; p_sampai: string; p_hanya_kurang?: boolean };
+        Returns: {
+          pelapor_nama: string;
+          minimum: number | null;
+          akun: number;
+          laporan: number;
+          terpenuhi: number;
+          rasio: number;
+          kurang_terdalam: number;
+        }[];
+      };
+      kepatuhan_minimum_orang: {
+        Args: { p_user_id: string; p_dari: string; p_sampai: string };
+        Returns: {
+          akun_dinilai: number;
+          hari_kerja: number;
+          terpenuhi: number;
+          rasio: number | null;
+        }[];
+      };
+      co_sampel_akun: {
+        Args: { p_tanggal: string };
+        Returns: { account_id: string; jumlah: number }[];
+      };
+      /** Migrasi 0131 — satu panggilan untuk kartu capaian Beranda. */
+      /** Migrasi 0134 — seluruh hari izin terencana dalam satu transaksi. */
+      ajukan_izin_terencana: {
+        Args: { p_mulai: string; p_selesai: string; p_alasan: string };
+        Returns: string;
+      };
+      capaian_pribadi_saya: {
+        Args: { p_dari: string; p_sampai: string };
+        Returns: {
+          tanggal: string;
+          target: number;
+          gmv: number;
+          komisi: number | null;
+          jumlah_upload: number | null;
+          co_sampel: number;
+          lingkup: string | null;
+          departemen: "affiliator" | "mcn" | "tap" | null;
+        }[];
+      };
       ringkas_kv_lama: {
         Args: Record<string, never>;
         Returns: { entitas: string; jumlah: number }[];
+      };
+      ringkas_kunci_lama: {
+        Args: Record<string, never>;
+        Returns: {
+          kunci: string;
+          golongan: string;
+          jumlah: number;
+          dimuat_pada: string;
+        }[];
+      };
+      golongan_kunci: {
+        Args: { p_kunci: string };
+        Returns: string;
+      };
+      medan_kunci_lama: {
+        Args: { p_contoh?: number };
+        Returns: { kunci: string; medan: string[] }[];
+      };
+      peta_id: {
+        Args: { p_kelompok: string; p_id_lama: string };
+        Returns: string | null;
+      };
+      orang_v1: {
+        Args: { p_id_lama: string };
+        Returns: string | null;
+      };
+      orang_pending_terbuka: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
+      migrasi_tulis_kehadiran: {
+        Args: {
+          p_user: string;
+          p_tanggal: string;
+          p_status: StatusKehadiranDb;
+          p_jam_masuk?: string | null;
+          p_jam_pulang?: string | null;
+          p_lat?: number | null;
+          p_lng?: number | null;
+          p_alasan?: string;
+          p_persetujuan?: StatusPersetujuanDb | null;
+          p_disetujui_oleh?: string | null;
+          p_catatan_bukti?: string;
+        };
+        Returns: string;
+      };
+      migrasi_tulis_laporan: {
+        Args: {
+          p_user: string;
+          p_tanggal: string;
+          p_account: string | null;
+          p_unit: string | null;
+          p_gmv: number;
+          p_komisi?: number | null;
+          p_upload?: number | null;
+          p_catatan?: string;
+          p_dikirim?: string | null;
+        };
+        Returns: string | null;
+      };
+      migrasi_tulis_transaksi: {
+        Args: {
+          p_tanggal: string;
+          p_arah: ArahTransaksiDb;
+          p_jenis: JenisKeluarDb | null;
+          p_jumlah: number;
+          p_keterangan: string;
+          p_unit?: string | null;
+          p_diajukan?: string | null;
+          p_id?: string | null;
+        };
+        Returns: string;
+      };
+      kehadiran_per_orang: {
+        Args: Record<string, never>;
+        Returns: {
+          user_id: string;
+          nama: string;
+          hadir: number;
+          izin: number;
+        }[];
+      };
+      kehadiran_per_bulan: {
+        Args: Record<string, never>;
+        Returns: {
+          bulan: string;
+          hadir: number;
+          izin: number;
+          semua: number;
+        }[];
+      };
+      gmv_unit_bulan: {
+        Args: Record<string, never>;
+        Returns: {
+          unit: string;
+          bulan: string;
+          gmv: number;
+          laporan: number;
+        }[];
+      };
+      ringkas_jalan_kelompok: {
+        Args: { p_jalan?: string | null };
+        Returns: {
+          kelompok: string;
+          diperiksa: number;
+          ditulis: number;
+          tertahan: number;
+        }[];
+      };
+      peta_menggantung: {
+        Args: Record<string, never>;
+        Returns: {
+          kelompok: string;
+          tabel: string;
+          id_lama: string;
+          id_baru: string;
+        }[];
+      };
+      bersihkan_peta_menggantung: {
+        Args: Record<string, never>;
+        Returns: number;
+      };
+      ringkas_peta_kelompok: {
+        Args: Record<string, never>;
+        Returns: {
+          kelompok: string;
+          tabel: string;
+          jumlah: number;
+          terakhir: string;
+        }[];
+      };
+      daftar_orang_pending: {
+        Args: Record<string, never>;
+        Returns: {
+          id_lama: string;
+          nama: string;
+          alasan: string;
+          kemunculan: string[];
+          user_id: string | null;
+          diabaikan: boolean;
+        }[];
       };
       mulai_migrasi_jalan: {
         Args: {
@@ -1540,6 +2037,7 @@ export type Database = {
           rasio: number;
           pendukung: number | null;
           label_pendukung: string | null;
+          sumber_laporan: "gmv" | "komisi" | "jumlah_upload" | null;
         }[];
       };
       anak_tangga_target: {
@@ -1592,10 +2090,15 @@ export type Database = {
           jam_masuk: string | null;
           jam_pulang: string | null;
           terlambat: boolean;
+          menit_telat: number;
+          izin_jenis: JenisIzinDb | null;
+          izin_mulai: string | null;
+          izin_selesai: string | null;
           lokasi_valid: boolean;
           jarak_masuk_m: number | null;
           alasan: string;
           persetujuan: StatusPersetujuanDb | null;
+          alasan_keputusan: string;
           sudah_lapor: boolean;
         }[];
       };
@@ -1610,6 +2113,8 @@ export type Database = {
           program: string | null;
           pic_nama: string | null;
           target_harian: number;
+          /** Level akun 0–8 (migrasi 0139); null untuk sasaran unit. */
+          level: number | null;
           sudah_lapor: boolean;
         }[];
       };
@@ -1620,6 +2125,8 @@ export type Database = {
           p_gmv: number;
           p_alasan: string;
           p_catatan?: string | null;
+          p_komisi?: number | null;
+          p_jumlah_upload?: number | null;
         };
         Returns: BarisDailyReport;
       };
@@ -1718,6 +2225,7 @@ export type Database = {
       jenis_keluar: JenisKeluarDb;
       status_transaksi: StatusTransaksiDb;
       status_aset: StatusAsetDb;
+      permukaan_tampilan: PermukaanTampilanDb;
       status_masalah: StatusMasalahDb;
       dampak_masalah: DampakMasalahDb;
       tingkat_kursus: TingkatKursusDb;

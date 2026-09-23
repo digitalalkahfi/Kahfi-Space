@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { AlarmClock, ListChecks } from "lucide-react";
 import { KartuTugas } from "@/components/tugas/kartu-tugas";
 import { cn } from "@/lib/utils";
+import type { JejakQc } from "@/lib/data/tugas";
 import type { Tugas } from "@/lib/types";
 import { KeadaanKosong } from "@/components/shared/keadaan";
 
@@ -59,12 +60,15 @@ export function DaftarTugas({
   namaSaya,
   bolehQcSemua,
   hariIni,
+  jejakQc = {},
 }: {
   tugas: Tugas[];
   namaSaya: string;
   /** CEO/Manager/Leader boleh memeriksa tugas orang lain. */
   bolehQcSemua: boolean;
   hariIni: string;
+  /** Riwayat pemeriksaan per id tugas. */
+  jejakQc?: Record<string, JejakQc[]>;
 }) {
   const [saringan, setSaringan] = useState<Saringan>("semua");
 
@@ -207,6 +211,7 @@ export function DaftarTugas({
                           t.pembuat.startsWith(namaSaya.split(" ")[0]))
                       }
                       hariIni={hariIni}
+                      jejakQc={jejakQc[t.id]}
                     />
                   </li>
                 ))}

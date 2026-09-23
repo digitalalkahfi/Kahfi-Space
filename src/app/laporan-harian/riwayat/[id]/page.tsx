@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 
-import { ArrowLeft, ArrowRight, History } from "lucide-react";
+import { ArrowLeft, History } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
+  bilangan,
   jamWib,
   persen,
   rasioCapaian,
@@ -14,6 +15,9 @@ import {
   rupiahRingkas,
   tanggalPanjang,
 } from "@/lib/format";
+import { LABEL_KOLOM } from "@/lib/laporan";
+import { GAYA_CAPAIAN, warnaCapaian } from "@/lib/capaian";
+import { RincianRevisi } from "@/components/laporan-harian/rincian-revisi";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { ambilLaporan } from "@/lib/data/laporan";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
@@ -43,7 +47,27 @@ export default async function DetailLaporanPage({
 
   const { laporan, jejak } = hasil;
   const rasio = rasioCapaian(laporan.gmv, laporan.target);
-  const tercapai = laporan.gmv >= laporan.target;
+  const warna = warnaCapaian(rasio, laporan.target > 0);
+
+  const tambahan = [
+    laporan.komisi !== null
+      ? { label: LABEL_KOLOM.komisi, nilai: rupiahPenuh(laporan.komisi) }
+      : null,
+    laporan.jumlahUpload !== null
+      ? {
+          label: LABEL_KOLOM.jumlahUpload,
+          // Batas minimumnya ikut di sini, bukan sebagai baris terpisah:
+          // angka unggahan tidak berarti apa-apa tanpa pembandingnya.
+          nilai:
+            laporan.minimumUpload === null
+              ? bilangan(laporan.jumlahUpload)
+              : `${bilangan(laporan.jumlahUpload)} / ${bilangan(laporan.minimumUpload)} min.`,
+        }
+      : null,
+    laporan.coSampel !== null
+      ? { label: LABEL_KOLOM.coSampel, nilai: bilangan(laporan.coSampel) }
+      : null,
+  ].filter((t) => t !== null);
 
   return (
     <AppShell pengguna={pengguna} halaman="Laporan Harian">
@@ -88,14 +112,34 @@ export default async function DetailLaporanPage({
               <span
                 className={cn(
                   "tabular rounded-full px-3 py-1 text-[13px] leading-[18px] font-semibold",
-                  tercapai
-                    ? "bg-ok-fill text-ok-text"
-                    : "bg-warn-fill text-warn-text",
+                  warna
+                    ? GAYA_CAPAIAN[warna].pil
+                    : "bg-muted text-muted-foreground",
                 )}
               >
-                {persen(rasio)} dari target
+                {laporan.target > 0
+                  ? `${persen(rasio)} dari target`
+                  : "Target belum ada di GRD"}
               </span>
             </div>
+
+            {/* Kolom departemen hanya muncul bila memang dilaporkan —
+                menampilkan "Komisi Rp 0" untuk MCN & TAP akan terbaca
+                sebagai komisi nol, bukan sebagai tidak berlaku. */}
+            {tambahan.length > 0 ? (
+              <dl className="flex flex-wrap gap-x-6 gap-y-2 border-t border-border-subtle pt-4">
+                {tambahan.map((t) => (
+                  <div key={t.label}>
+                    <dt className="text-[11px] leading-[14px] text-muted-foreground">
+                      {t.label}
+                    </dt>
+                    <dd className="tabular text-base leading-6 font-semibold">
+                      {t.nilai}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            ) : null}
 
             {laporan.catatan ? (
               <div className="border-t border-border-subtle pt-4">
@@ -117,8 +161,7 @@ export default async function DetailLaporanPage({
               Jejak perbaikan ({jejak.length})
             </h2>
             <p className="text-[13px] leading-[18px] text-muted-foreground">
-              Setiap perubahan angka GMV tercatat lengkap dan tidak bisa
-              dihapus.
+              Setiap angka yang berubah tercatat lengkap dan tidak bisa dihapus.
             </p>
           </div>
 
@@ -130,11 +173,7 @@ export default async function DetailLaporanPage({
             <ol className="space-y-2 px-5">
               {jejak.map((r) => (
                 <li key={r.id} className="rounded-2xl bg-muted/60 p-3.5">
-                  <p className="tabular flex flex-wrap items-center gap-1.5 text-[13px] leading-[18px] font-semibold">
-                    {rupiahPenuh(r.gmvLama)}
-                    <ArrowRight className="size-3.5 text-muted-foreground" />
-                    {rupiahPenuh(r.gmvBaru)}
-                  </p>
+                  <RincianRevisi revisi={r} />
                   <p className="mt-1 text-[13px] leading-[18px] text-muted-foreground">
                     {r.alasan}
                   </p>

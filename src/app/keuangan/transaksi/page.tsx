@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
+import { AksesDitolak } from "@/components/layout/akses-ditolak";
 import { DaftarTransaksi } from "@/components/keuangan/daftar-transaksi";
 import { DialogTransaksi } from "@/components/keuangan/dialog-transaksi";
 import { PanelPembayaran } from "@/components/keuangan/panel-pembayaran";
@@ -50,7 +51,15 @@ export default async function TransaksiPage({
   if (!pengguna) redirect("/masuk");
 
   // Angka perusahaan: hanya Finance, Manager, dan CEO.
-  if (!bolehLihatKeuangan(pengguna.role)) notFound();
+  if (!bolehLihatKeuangan(pengguna.role)) {
+    return (
+      <AksesDitolak
+        pengguna={pengguna}
+        halaman="Transaksi"
+        siapa="Finance, Manager, dan CEO"
+      />
+    );
+  }
 
   const tanggal =
     modeData() === "demo"

@@ -228,6 +228,42 @@ export type JejakQc = {
 };
 
 /**
+ * Riwayat pemeriksaan beberapa tugas sekaligus.
+ *
+ * Satu kueri untuk seluruh papan, bukan satu per kartu: papan tugas bisa
+ * memuat puluhan kartu, dan riwayat QC-nya diminta bersamaan.
+ */
+export async function jejakQcBanyak(
+  taskIds: string[],
+): Promise<Record<string, JejakQc[]>> {
+  if (modeData() === "demo" || taskIds.length === 0) return {};
+
+  const sb = await klienServer();
+  const { data } = await sb
+    .from("task_qc_log")
+    .select(
+      "id, task_id, hasil, catatan, hasil_kerja, created_at, users:diperiksa_oleh (nama)",
+    )
+    .in("task_id", taskIds)
+    .order("created_at");
+
+  const peta: Record<string, JejakQc[]> = {};
+  for (const r of data ?? []) {
+    const baris: JejakQc = {
+      id: r.id,
+      hasil: r.hasil as "lolos" | "revisi",
+      catatan: r.catatan,
+      hasilKerja: r.hasil_kerja,
+      diperiksaOleh:
+        (r.users as unknown as { nama: string } | null)?.nama ?? "Pemeriksa",
+      createdAt: r.created_at,
+    };
+    (peta[r.task_id] ??= []).push(baris);
+  }
+  return peta;
+}
+
+/**
  * Riwayat pemeriksaan sebuah tugas.
  * Menyimpan konteks tiap putaran revisi, bukan hanya catatan terakhir.
  */

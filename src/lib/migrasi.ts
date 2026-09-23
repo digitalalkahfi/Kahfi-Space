@@ -1,6 +1,7 @@
 /**
  * Migrasi data lama — tipe & aturan murni, dipakai server maupun browser.
  */
+import { PEMETAAN_V1 } from "@/lib/pemetaan-v1";
 
 export type StatusMigrasi = "menunggu" | "berhasil" | "dilewati" | "gagal";
 export type TahapMigrasi = "uji_coba" | "sungguhan";
@@ -25,45 +26,22 @@ export type JalanMigrasi = {
 };
 
 /**
- * Entitas yang dipindahkan, berurutan sesuai ketergantungannya.
+ * Kelompok yang dipindahkan, berurutan sesuai ketergantungannya.
  *
- * Urutan ini bukan hiasan: akun menunjuk pengguna, goal menunjuk akun,
- * dan laporan harian menunjuk keduanya. Memindahkan laporan sebelum
- * akunnya ada akan menghasilkan tumpukan kegagalan yang menyesatkan.
+ * Diturunkan dari pemetaan V1 supaya tidak ada dua daftar yang harus
+ * dijaga tetap sama: urutan di layar selalu urutan yang benar-benar
+ * dijalankan. Urutan itu bukan hiasan — akun menunjuk orang, laporan
+ * menunjuk keduanya, dan seluruh data operasional menunjuk orang.
  */
-export const ENTITAS_MIGRASI: { kunci: string; label: string; catatan: string }[] =
-  [
-    {
-      kunci: "users",
-      label: "Anggota tim",
-      catatan: "Dasar semua data lain; dipindahkan paling awal.",
-    },
-    {
-      kunci: "accounts",
-      label: "Akun affiliator",
-      catatan: "Menunjuk PIC, jadi menunggu anggota tim selesai.",
-    },
-    {
-      kunci: "goals",
-      label: "Goal & target bulanan",
-      catatan: "Menunjuk unit dan akun.",
-    },
-    {
-      kunci: "daily_reports",
-      label: "Laporan harian GMV",
-      catatan: "Paling banyak barisnya; menunjuk akun dan pelapor.",
-    },
-    {
-      kunci: "attendance",
-      label: "Absensi",
-      catatan: "Menunjuk anggota tim.",
-    },
-    {
-      kunci: "tasks",
-      label: "Tugas & tiket",
-      catatan: "Menunjuk pembuat, penerima, dan goal.",
-    },
-  ];
+export const ENTITAS_MIGRASI: {
+  kunci: string;
+  label: string;
+  catatan: string;
+}[] = PEMETAAN_V1.map((p) => ({
+  kunci: p.kunci,
+  label: p.label,
+  catatan: `Menjadi ${p.tabelBaru}.`,
+}));
 
 export const LABEL_STATUS: Record<StatusMigrasi, string> = {
   menunggu: "Menunggu",
@@ -81,9 +59,7 @@ export const GAYA_STATUS: Record<StatusMigrasi, string> = {
 
 /** Sebuah jalan dianggap tuntas bila tidak ada lagi yang menunggu. */
 export function tuntas(ringkas: RingkasEntitas[]) {
-  return (
-    ringkas.length > 0 && ringkas.every((r) => r.menunggu === 0)
-  );
+  return ringkas.length > 0 && ringkas.every((r) => r.menunggu === 0);
 }
 
 /** Gagal satu pun berarti migrasi belum boleh dianggap beres. */
@@ -163,4 +139,21 @@ export function nilaiBaris(b: BarisVerifikasi): PenilaianBaris {
   }
 
   return { cocok: true, keterangan: "Seluruh entri berpindah utuh." };
+}
+
+/**
+ * Kolom baru yang tidak punya padanan di `kv_store` lama dan memang
+ * dibiarkan kosong setelah migrasi.
+ *
+ * Dipakai layar verifikasi supaya kolom kosong terbaca sebagai "tidak
+ * pernah ada di data lama", bukan sebagai baris yang gagal pindah.
+ * Pembedanya `wajib`: kolom bawaan yang wajib memang diisi nilai bawaan
+ * (mis. `platform`), sedangkan yang tidak wajib tetap kosong.
+ */
+export function kolomTanpaSumber(entitas: string): string[] {
+  const peta = PEMETAAN_V1.find((p) => p.kunci === entitas);
+  if (!peta) return [];
+  return peta.baris
+    .filter((b) => b.medanLama === null && b.ubahan === "bawaan" && !b.wajib)
+    .map((b) => b.kolomBaru);
 }

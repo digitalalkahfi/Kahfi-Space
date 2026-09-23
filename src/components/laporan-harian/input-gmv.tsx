@@ -29,6 +29,9 @@ export function InputGmv({
   maks = MAKS_GMV,
   suffix,
   className,
+  prefix = "Rp",
+  ringkas = false,
+  label,
 }: {
   id?: string;
   /** Nilai dalam rupiah penuh. */
@@ -37,6 +40,12 @@ export function InputGmv({
   maks?: number;
   suffix?: React.ReactNode;
   className?: string;
+  /** Satuan di kiri angka; "Rp" untuk uang, teks lain untuk cacahan. */
+  prefix?: React.ReactNode;
+  /** Ukuran kompak untuk kolom pendamping, bukan angka utama. */
+  ringkas?: boolean;
+  /** Dipakai saat kolom tidak punya <label> sendiri di sekitarnya. */
+  label?: string;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   const caretRef = useRef<number | null>(null);
@@ -88,12 +97,18 @@ export function InputGmv({
   return (
     <div
       className={cn(
-        "flex items-center gap-2 rounded-xl bg-muted px-4 py-3 focus-within:ring-2 focus-within:ring-ring/40",
+        "flex items-center gap-2 rounded-xl bg-muted focus-within:ring-2 focus-within:ring-ring/40",
+        ringkas ? "px-3 py-2.5" : "px-4 py-3",
         className,
       )}
     >
-      <span className="shrink-0 text-[20px] leading-7 font-semibold text-muted-foreground">
-        Rp
+      <span
+        className={cn(
+          "shrink-0 font-semibold text-muted-foreground",
+          ringkas ? "text-[13px] leading-[18px]" : "text-[20px] leading-7",
+        )}
+      >
+        {prefix}
       </span>
 
       <input
@@ -104,16 +119,20 @@ export function InputGmv({
         enterKeyHint="done"
         placeholder="0"
         aria-describedby={`${id}-bantuan`}
+        aria-label={label}
         value={teks}
         onChange={tangani}
-        className="tabular w-full min-w-0 bg-transparent text-[22px] leading-7 font-bold tracking-tight outline-none placeholder:text-muted-foreground/60"
+        className={cn(
+          "tabular w-full min-w-0 bg-transparent font-bold tracking-tight outline-none placeholder:text-muted-foreground/60",
+          ringkas ? "text-[15px] leading-5" : "text-[22px] leading-7",
+        )}
       />
 
       {teks ? (
         <button
           type="button"
           onClick={kosongkan}
-          aria-label="Kosongkan nilai GMV"
+          aria-label={`Kosongkan ${label ?? "nilai GMV"}`}
           className="tekan-halus sentuh-nyaman flex size-6 shrink-0 items-center justify-center rounded-full bg-card text-muted-foreground hover:text-foreground"
         >
           <X className="size-3.5" />

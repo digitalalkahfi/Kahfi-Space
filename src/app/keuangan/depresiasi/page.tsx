@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
+import { AksesDitolak } from "@/components/layout/akses-ditolak";
 import { DaftarDepresiasi } from "@/components/depresiasi/daftar-depresiasi";
 import { DampakDepresiasi } from "@/components/depresiasi/dampak-depresiasi";
 import { JadwalPeriode } from "@/components/depresiasi/jadwal-periode";
@@ -47,7 +48,15 @@ export default async function DepresiasiPage({
   if (!pengguna) redirect("/masuk");
 
   // Angka perusahaan: hanya Finance, Manager, dan CEO.
-  if (!bolehLihatKeuangan(pengguna.role)) notFound();
+  if (!bolehLihatKeuangan(pengguna.role)) {
+    return (
+      <AksesDitolak
+        pengguna={pengguna}
+        halaman="Depresiasi Aset"
+        siapa="Finance, Manager, dan CEO"
+      />
+    );
+  }
 
   const hariIni =
     modeData() === "demo"

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BarChart3 } from "lucide-react";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
+import { AksesDitolak } from "@/components/layout/akses-ditolak";
 import { RingkasanKeuangan } from "@/components/keuangan/ringkasan-keuangan";
 import { Waterfall } from "@/components/keuangan/waterfall";
 import { PanelDrillDown } from "@/components/keuangan/panel-drill-down";
@@ -58,7 +59,15 @@ export default async function KeuanganPage({
   if (!pengguna) redirect("/masuk");
 
   // Angka perusahaan: hanya Finance, Manager, dan CEO.
-  if (!bolehLihatKeuangan(pengguna.role)) notFound();
+  if (!bolehLihatKeuangan(pengguna.role)) {
+    return (
+      <AksesDitolak
+        pengguna={pengguna}
+        halaman="Keuangan"
+        siapa="Finance, Manager, dan CEO"
+      />
+    );
+  }
 
   const tanggal =
     modeData() === "demo"

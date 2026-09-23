@@ -126,17 +126,36 @@ ${data.users
 
 bagian.push(`
 -- Akun affiliator ------------------------------------------------------
-insert into accounts (id, platform, username, pic_user_id, co_leader_id, unit_id, program_id) values
+insert into accounts (id, platform, username, pic_user_id, co_leader_id, unit_id, program_id, level) values
 ${data.accounts
   .map(
     (a) =>
-      `  (${q(a.id)}, 'TikTok Shop', ${q(a.username)}, ${q(idUser[a.pic])}, ${q(idUser[a.co_leader])}, ${q(idUnit[a.unit])}, ${q(idProgram[a.program])})`,
+      `  (${q(a.id)}, 'TikTok Shop', ${q(a.username)}, ${q(idUser[a.pic])}, ${q(idUser[a.co_leader])}, ${q(idUnit[a.unit])}, ${q(idProgram[a.program])}, ${a.level ?? "null"})`,
   )
   .join(",\n")}
 on conflict (id) do update
   set pic_user_id = excluded.pic_user_id,
       co_leader_id = excluded.co_leader_id,
-      program_id = excluded.program_id;`);
+      program_id = excluded.program_id,
+      level = excluded.level;`);
+
+bagian.push(`
+-- Riwayat level akun ---------------------------------------------------
+-- Baris "ditetapkan" yang dibuat trigger saat akun disisipkan dibuang
+-- dulu: stempel waktunya adalah waktu seed dijalankan, bukan waktu
+-- levelnya benar-benar ditetapkan, dan riwayat dengan dua baris awal
+-- yang saling bertentangan lebih membingungkan daripada tanpa riwayat.
+delete from account_level_events;
+
+insert into account_level_events
+  (account_id, dari, ke, oleh_id, alasan, created_at) values
+${data.level_events
+  .map(
+    (e) =>
+      `  (${q(data.accounts.find((a) => a.username === e.akun).id)}, ` +
+      `${e.dari ?? "null"}, ${e.ke}, ${q(idUser[e.oleh])}, ${q(e.alasan)}, ${q(e.pada)})`,
+  )
+  .join(",\n")};`);
 
 bagian.push(`
 -- Pengumuman -----------------------------------------------------------
@@ -206,16 +225,20 @@ const laporanUnit = data.daily_reports.filter((l) => l.unit);
 bagian.push(`
 -- Laporan harian per akun ----------------------------------------------
 insert into daily_reports
-  (user_id, tanggal, account_id, unit_id, gmv, catatan, submitted_at) values
+  (user_id, tanggal, account_id, unit_id, gmv, komisi, jumlah_upload,
+   catatan, submitted_at) values
 ${laporanAkun
   .map(
     (l) =>
       `  (${q(idUser[l.user])}, ${q(l.tanggal)}, ${q(idAkun[l.akun])}, null, ` +
-      `${l.gmv}, ${q(l.catatan)}, ${q(`${l.tanggal}T${l.jam}:00+07:00`)})`,
+      `${l.gmv}, ${l.komisi ?? "null"}, ${l.jumlah_upload ?? "null"}, ` +
+      `${q(l.catatan)}, ${q(`${l.tanggal}T${l.jam}:00+07:00`)})`,
   )
   .join(",\n")}
 on conflict (account_id, tanggal) where account_id is not null
-do update set gmv = excluded.gmv, catatan = excluded.catatan;
+do update set gmv = excluded.gmv, komisi = excluded.komisi,
+              jumlah_upload = excluded.jumlah_upload,
+              catatan = excluded.catatan;
 
 -- Laporan harian per unit ----------------------------------------------
 insert into daily_reports
@@ -259,14 +282,16 @@ bagian.push(`
 -- Absensi hari acuan ---------------------------------------------------
 insert into attendance
   (user_id, tanggal, jam_masuk, lat_masuk, lng_masuk, status, alasan,
-   persetujuan, disetujui_oleh)
+   persetujuan, disetujui_oleh, izin_jenis, izin_mulai, izin_selesai)
 values
 ${data.attendance
   .map(
     (a) =>
       `  (${q(idUser[a.user])}, ${q(a.tanggal)}, ${q(a.jam_masuk ?? null)}, ` +
       `${a.lat ?? "null"}, ${a.lng ?? "null"}, ${q(a.status)}, ${q(a.alasan)}, ` +
-      `${q(a.persetujuan)}, ${a.persetujuan === "disetujui" ? q(idUser["Farhan Pratama"]) : "null"})`,
+      `${q(a.persetujuan)}, ${a.persetujuan === "disetujui" ? q(idUser["Farhan Pratama"]) : "null"}, ` +
+      `${q(a.izin_jenis ?? null)}${a.izin_jenis ? "::jenis_izin" : ""}, ` +
+      `${q(a.izin_mulai ?? null)}, ${q(a.izin_selesai ?? null)})`,
   )
   .join(",\n")}
 on conflict (user_id, tanggal) do update
@@ -275,7 +300,24 @@ on conflict (user_id, tanggal) do update
       lng_masuk = excluded.lng_masuk,
       status = excluded.status,
       alasan = excluded.alasan,
-      persetujuan = excluded.persetujuan;`);
+      persetujuan = excluded.persetujuan,
+      izin_jenis = excluded.izin_jenis,
+      izin_mulai = excluded.izin_mulai,
+      izin_selesai = excluded.izin_selesai;
+
+-- Hari lanjutan izin terencana menunjuk hari pertamanya, supaya satu
+-- keputusan atasan menutup seluruh pengajuan (migrasi 0132).
+${data.attendance
+  .filter((a) => a.izin_induk)
+  .map(
+    (a) =>
+      `update attendance set izin_induk_id = (
+  select id from attendance
+   where user_id = ${q(idUser[a.user])} and tanggal = ${q(a.izin_induk)}
+)
+ where user_id = ${q(idUser[a.user])} and tanggal = ${q(a.tanggal)};`,
+  )
+  .join("\n")}`);
 
 // --- Lead measure & entri harian ---------------------------------------
 const idGoalUnitLead = Object.fromEntries(
@@ -285,17 +327,20 @@ const idGoalUnitLead = Object.fromEntries(
 bagian.push(`
 -- Lead measure (papan skor langkah kunci) ------------------------------
 insert into lead_measures
-  (id, goal_id, judul, satuan, target_mingguan, label_pendukung, urutan) values
+  (id, goal_id, judul, satuan, target_mingguan, label_pendukung, urutan,
+   sumber_laporan) values
 ${data.lead_measures
   .map(
     (m) =>
       `  (${q(m.id)}, ${q(idGoalUnitLead[m.unit])}, ${q(m.judul)}, ${q(m.satuan)}, ` +
-      `${m.target_mingguan}, ${q(m.label_pendukung)}, ${m.urutan})`,
+      `${m.target_mingguan}, ${q(m.label_pendukung)}, ${m.urutan}, ` +
+      `${q(m.sumber_laporan ?? null)})`,
   )
   .join(",\n")}
 on conflict (id) do update
   set target_mingguan = excluded.target_mingguan,
-      label_pendukung = excluded.label_pendukung;
+      label_pendukung = excluded.label_pendukung,
+      sumber_laporan = excluded.sumber_laporan;
 
 -- Realisasi harian pekan berjalan --------------------------------------
 insert into lead_measure_entries

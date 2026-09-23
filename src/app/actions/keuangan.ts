@@ -266,3 +266,81 @@ async function idPengaju(transaksiId: string, namaPengaju: string | null) {
     .maybeSingle();
   return data?.diajukan_id ?? null;
 }
+
+/** Prefiks bucket bukti; dipakai memeriksa alamat yang dikirim layar. */
+const PREFIKS_BUKTI = "/storage/v1/object/public/bukti-transaksi/";
+
+/**
+ * Apakah alamat ini benar-benar berkas di bucket bukti transaksi?
+ *
+ * Kolom `bukti_url` berakhir sebagai tautan yang dibuka Finance dan
+ * manajemen. Tanpa pemeriksaan ini, ia jadi tempat menyematkan alamat
+ * dari domain mana pun — termasuk yang melacak siapa yang membukanya.
+ */
+function buktiSah(url: string): boolean {
+  try {
+    const alamat = new URL(url);
+    return (
+      alamat.protocol === "https:" && alamat.pathname.includes(PREFIKS_BUKTI)
+    );
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Menyematkan bukti pendukung pada sebuah transaksi.
+ *
+ * Berkasnya diunggah browser langsung ke Supabase Storage; yang sampai
+ * ke sini hanya alamatnya — pola yang sama dengan foto profil.
+ *
+ * Transaksi yang sudah DIBAYAR tidak bisa diganti buktinya: bukti yang
+ * masih bisa ditukar setelah uangnya keluar bukan bukti. Penjagaannya
+ * ada di trigger (migrasi 0151); di sini hanya supaya pesannya bisa
+ * dibaca orang.
+ */
+export async function ubahBuktiTransaksi(input: {
+  transaksiId: string;
+  url: string | null;
+}): Promise<Hasil> {
+  if (!input.transaksiId) return gagal("Transaksi tidak dikenali.", "validasi");
+  if (input.url !== null && !buktiSah(input.url)) {
+    return gagal("Alamat bukti tidak dikenali.", "validasi");
+  }
+
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (!bolehLihatKeuangan(pengguna.role)) {
+    return gagal(
+      "Hanya Finance, Manager, atau CEO yang menyematkan bukti.",
+      "izin",
+    );
+  }
+
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const sb = await klienServer();
+  const { data, error } = await sb
+    .from("transactions")
+    .update({ bukti_url: input.url ?? "" })
+    .eq("id", input.transaksiId)
+    .select("id");
+
+  if (error) {
+    return error.message.includes("sudah dibayar")
+      ? gagal(
+          "Transaksi ini sudah dibayar; buktinya tidak bisa diganti lagi.",
+          "validasi",
+        )
+      : gagal(`Gagal menyimpan: ${error.message}`);
+  }
+  if ((data ?? []).length === 0) {
+    return gagal("Transaksi tidak ditemukan, atau bukan hakmu.", "izin");
+  }
+
+  revalidatePath("/keuangan/transaksi");
+  return sukses(
+    undefined,
+    input.url === null ? "Bukti dilepas." : "Bukti tersemat pada transaksi.",
+  );
+}

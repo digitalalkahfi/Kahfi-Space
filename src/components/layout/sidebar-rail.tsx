@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { menuPendampingTerlihat, menuUtama } from "@/lib/navigasi";
+import { useSusunan } from "@/components/tampilan/penyedia-tampilan";
 import { TombolKeluar } from "@/components/layout/tombol-keluar";
 import type { LucideIcon } from "lucide-react";
 
@@ -48,12 +49,13 @@ export function SidebarRail({
   bolehKeuangan: boolean;
 }) {
   const pathname = usePathname();
-  // Kalender dan Kaizen sudah punya pintasan di app-bar atas; tidak
+  // Kalender dan Kaizen sudah punya pintu masuk lain di desktop; tidak
   // diulang di rail supaya pintu masuknya cuma satu.
   const pendamping = menuPendampingTerlihat(
     { keuangan: bolehKeuangan, migrasi: bolehMigrasi },
-    { kecualiAppBar: true },
+    { railDesktop: true },
   );
+  const urut = useSusunan("sidebar");
 
   return (
     // Rail bisa lebih tinggi dari layar begitu menu pendampingnya banyak;
@@ -68,7 +70,7 @@ export function SidebarRail({
           <span className="text-sm font-bold tracking-tight">K</span>
         </Link>
 
-        {menuUtama.map((menu) => (
+        {urut(menuUtama).map((menu) => (
           <TautanRail
             key={menu.href}
             href={menu.href}
@@ -80,7 +82,7 @@ export function SidebarRail({
       </div>
 
       <div className="mt-auto flex shrink-0 flex-col items-center gap-1 pt-6">
-        {pendamping.map((menu) => (
+        {urut(pendamping).map((menu) => (
           <TautanRail
             key={menu.href}
             href={menu.href}

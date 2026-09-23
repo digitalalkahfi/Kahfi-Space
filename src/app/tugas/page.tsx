@@ -11,7 +11,7 @@ import {
 import { DialogTiket } from "@/components/tugas/dialog-tiket";
 import { DialogToDo } from "@/components/tugas/dialog-todo";
 import { Reveal } from "@/components/motion/reveal";
-import { ambilSemuaTugas, ringkasToDo } from "@/lib/data/tugas";
+import { ambilSemuaTugas, jejakQcBanyak, ringkasToDo } from "@/lib/data/tugas";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { goalAktif } from "@/lib/data/goal";
 import { anggotaBisaDitugasi, peranValid, sesiSaatIni } from "@/lib/data/sesi";
@@ -48,6 +48,12 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
     goalAktif(pengguna),
     ringkasToDo(pengguna),
   ]);
+
+  // Riwayat QC hanya diambil untuk tugas yang memang pernah diperiksa —
+  // satu kueri untuk seluruh papan, bukan satu per kartu.
+  const jejak = await jejakQcBanyak(
+    tugas.filter((t) => t.qcStatus !== "belum").map((t) => t.id),
+  );
 
   // Minggu dianggap berakhir Sabtu; dipakai sebagai tenggat bawaan komitmen.
   const akhir = new Date(`${tanggal}T00:00:00Z`);
@@ -94,6 +100,7 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
               namaSaya={pengguna.nama}
               bolehQcSemua={PEMERIKSA.includes(pengguna.role)}
               hariIni={tanggal}
+              jejakQc={jejak}
             />
           ) : (
             <DaftarTugas
@@ -101,6 +108,7 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
               namaSaya={pengguna.nama}
               bolehQcSemua={PEMERIKSA.includes(pengguna.role)}
               hariIni={tanggal}
+              jejakQc={jejak}
             />
           )}
         </Reveal>

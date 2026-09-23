@@ -21,6 +21,8 @@ import {
   ubahPicAkun,
   ubahStatusAkun,
 } from "@/app/actions/akun";
+import { DialogPindahUnit } from "@/components/grd/dialog-pindah-unit";
+import { PanelLevelAkun } from "@/components/grd/panel-level-akun";
 import type { AkunKelola, KandidatPic } from "@/lib/data/akun";
 
 /**
@@ -298,6 +300,7 @@ function BarisAkun({
 }) {
   const [bukaPic, setBukaPic] = useState(false);
   const [bukaCoLeader, setBukaCoLeader] = useState(false);
+  const [bukaUnit, setBukaUnit] = useState(false);
   const [bukaStatus, setBukaStatus] = useState(false);
   const [mengubah, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
@@ -349,9 +352,23 @@ function BarisAkun({
               </span>
             ) : null}
           </p>
-          <p className="truncate text-[11px] leading-[14px] text-muted-foreground">
-            {akun.unitNama} · {akun.platform}
-          </p>
+          {bolehKelola ? (
+            <button
+              type="button"
+              onClick={() => setBukaUnit(true)}
+              className="tekan-halus truncate text-left text-[11px] leading-[14px] text-muted-foreground underline-offset-2 hover:underline"
+            >
+              {akun.unitNama} · {akun.platform}
+              <span className="sr-only">
+                {" "}
+                — pindahkan akun ini ke unit lain
+              </span>
+            </button>
+          ) : (
+            <p className="truncate text-[11px] leading-[14px] text-muted-foreground">
+              {akun.unitNama} · {akun.platform}
+            </p>
+          )}
           {bolehKelola ? (
             <button
               type="button"
@@ -367,6 +384,8 @@ function BarisAkun({
               Co-Leader {akun.coLeaderNama}
             </p>
           ) : null}
+
+          <PanelLevelAkun akun={akun} bolehKelola={bolehKelola} />
         </div>
 
         <span className="tabular shrink-0 text-right">
@@ -460,6 +479,8 @@ function BarisAkun({
             buka={bukaCoLeader}
             onBuka={setBukaCoLeader}
           />
+
+          <DialogPindahUnit akun={akun} buka={bukaUnit} onBuka={setBukaUnit} />
 
           <Dialog open={bukaStatus} onOpenChange={setBukaStatus}>
             <DialogContent className="rounded-3xl sm:max-w-md">

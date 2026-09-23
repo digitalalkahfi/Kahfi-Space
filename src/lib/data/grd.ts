@@ -36,6 +36,11 @@ export type PapanLead = {
   rasio: number;
   pendukung: number | null;
   labelPendukung: string | null;
+  /**
+   * Kolom laporan harian yang menjadi sumber angka ini (migrasi 0130);
+   * null berarti masih diisi manual di papan.
+   */
+  sumberLaporan: "gmv" | "komisi" | "jumlah_upload" | null;
 };
 
 export type AnakTangga = {
@@ -63,14 +68,66 @@ function awalPekan(tanggal: string) {
   return d.toISOString().slice(0, 10);
 }
 
+/**
+ * Entri harian sebuah lead measure di mode demo.
+ *
+ * Lead measure bersumber laporan (migrasi 0130) tidak punya baris seed:
+ * angkanya memang dihitung ulang dari laporan harian. Perhitungan di sini
+ * sengaja meniru `sinkron_lead_measure_laporan` supaya mode demo
+ * menunjukkan angka yang sama dengan mode Supabase.
+ */
+function entriLead(
+  m: (typeof dataContoh.lead_measures)[number],
+  mulai: string,
+  sampai: string,
+) {
+  const { lead_measure_entries, daily_reports, accounts } = dataContoh;
+  const sumber = (m as { sumber_laporan?: string }).sumber_laporan;
+
+  if (!sumber) {
+    return lead_measure_entries
+      .filter(
+        (e) => e.lead === m.id && e.tanggal >= mulai && e.tanggal <= sampai,
+      )
+      .map((e) => ({
+        tanggal: e.tanggal,
+        nilai: e.nilai,
+        nilai_pendukung: e.nilai_pendukung,
+        catatan: e.catatan,
+        oleh: e.user as string | null,
+      }));
+  }
+
+  const unitAkun = Object.fromEntries(
+    accounts.map((a) => [a.username, a.unit]),
+  );
+  const perTanggal = new Map<string, number>();
+  for (const l of daily_reports) {
+    if (l.tanggal < mulai || l.tanggal > sampai) continue;
+    const unit = l.akun ? unitAkun[l.akun] : l.unit;
+    if (unit !== m.unit) continue;
+    const nilai =
+      sumber === "gmv"
+        ? l.gmv
+        : sumber === "komisi"
+          ? ((l as { komisi?: number }).komisi ?? 0)
+          : ((l as { jumlah_upload?: number }).jumlah_upload ?? 0);
+    perTanggal.set(l.tanggal, (perTanggal.get(l.tanggal) ?? 0) + nilai);
+  }
+
+  return [...perTanggal.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([tgl, nilai]) => ({
+      tanggal: tgl,
+      nilai,
+      nilai_pendukung: null,
+      catatan: "",
+      oleh: null,
+    }));
+}
+
 function hitungDemo(tanggal: string) {
-  const {
-    goals,
-    daily_reports,
-    lead_measures,
-    lead_measure_entries,
-    accounts,
-  } = dataContoh;
+  const { goals, daily_reports, lead_measures, accounts } = dataContoh;
 
   const awalBulan = `${tanggal.slice(0, 7)}-01`;
   const hariBulan = new Date(
@@ -99,9 +156,7 @@ function hitungDemo(tanggal: string) {
 
   const mulai = awalPekan(tanggal);
   const papan: PapanLead[] = lead_measures.map((m) => {
-    const entri = lead_measure_entries.filter(
-      (e) => e.lead === m.id && e.tanggal >= mulai && e.tanggal <= tanggal,
-    );
+    const entri = entriLead(m, mulai, tanggal);
     const realisasi = entri.reduce((a, e) => a + e.nilai, 0);
     const pendukung = entri.reduce((a, e) => a + (e.nilai_pendukung ?? 0), 0);
     return {
@@ -114,6 +169,9 @@ function hitungDemo(tanggal: string) {
       rasio: Math.round((realisasi / m.target_mingguan) * 1000) / 10,
       pendukung: m.label_pendukung ? pendukung : null,
       labelPendukung: m.label_pendukung,
+      sumberLaporan:
+        (m as { sumber_laporan?: PapanLead["sumberLaporan"] }).sumber_laporan ??
+        null,
     };
   });
 
@@ -235,6 +293,7 @@ export async function ringkasanGrd(pengguna: Pengguna, tanggal: string) {
       rasio: Number(m.rasio),
       pendukung: m.pendukung === null ? null : Number(m.pendukung),
       labelPendukung: m.label_pendukung,
+      sumberLaporan: m.sumber_laporan,
     })) satisfies PapanLead[],
     tangga: (t.data ?? []).map((x) => ({
       id: x.goal_id,
@@ -280,7 +339,7 @@ export async function detailLeadMeasure(
 
   if (modeData() === "demo") {
     const { papan } = hitungDemo(tanggal);
-    const { lead_measure_entries, goals, lead_measures } = dataContoh;
+    const { goals, lead_measures } = dataContoh;
 
     return papan.map((m) => {
       const sumber = lead_measures.find((x) => x.id === m.id);
@@ -290,17 +349,15 @@ export async function detailLeadMeasure(
       return {
         ...m,
         goalJudul: goal?.judul ?? "",
-        entri: lead_measure_entries
-          .filter(
-            (e) => e.lead === m.id && e.tanggal >= mulai && e.tanggal <= akhir,
-          )
+        entri: (sumber ? entriLead(sumber, mulai, akhir) : [])
           .sort((a, b) => a.tanggal.localeCompare(b.tanggal))
           .map((e) => ({
             tanggal: e.tanggal,
             nilai: e.nilai,
             nilaiPendukung: e.nilai_pendukung ?? null,
             catatan: e.catatan,
-            oleh: e.user,
+            // Baris hasil hitung ulang bukan milik satu orang.
+            oleh: e.oleh ?? "Laporan harian",
           })),
       };
     });
@@ -341,6 +398,7 @@ export async function detailLeadMeasure(
     rasio: Number(m.rasio),
     pendukung: m.pendukung === null ? null : Number(m.pendukung),
     labelPendukung: m.label_pendukung,
+    sumberLaporan: m.sumber_laporan,
     goalJudul: judulGoal.get(m.lead_id) ?? "",
     entri: (entriData ?? [])
       .filter((e) => e.lead_measure_id === m.lead_id)

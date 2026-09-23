@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { peringkatPeran } from "@/lib/peran";
 import { URUTAN_PERAN } from "@/lib/peran";
 import { tambahAnggota, ubahAnggota } from "@/app/actions/anggota";
 import type {
@@ -34,6 +35,7 @@ export type MasukanAnggota = {
   unitKode: KodeUnit | null;
   departemenId: string | null;
   programId: string | null;
+  atasanId?: string | null;
 };
 
 function Isian({
@@ -42,12 +44,18 @@ function Isian({
   onSimpan,
   menyimpan,
   pesan,
+  calon,
 }: {
   awal?: AnggotaTim;
   pilihan: PilihanOrganisasi;
   onSimpan: (data: MasukanAnggota) => void;
   menyimpan: boolean;
   pesan: string | null;
+  /**
+   * Calon atasan; hanya diberikan saat menambah anggota. Perubahan
+   * atasan anggota lama punya dialognya sendiri yang memeriksa siklus.
+   */
+  calon?: AnggotaTim[];
 }) {
   const [nama, setNama] = useState(awal?.nama ?? "");
   const [email, setEmail] = useState(awal?.email ?? "");
@@ -62,8 +70,13 @@ function Isian({
   const [programId, setProgramId] = useState<string | null>(
     awal?.programId ?? null,
   );
+  const [atasanId, setAtasanId] = useState<string | null>(
+    awal?.atasanId ?? null,
+  );
 
   const butuhUnit = PERAN_BERUNIT.includes(role);
+  // CEO memang tidak punya atasan; sisanya wajib.
+  const butuhAtasan = Boolean(calon) && role !== "CEO";
 
   // Program menempel pada satu unit, jadi pilihannya menyempit mengikuti
   // unit yang sedang dipilih.
@@ -74,7 +87,8 @@ function Isian({
     nama.trim().length >= 3 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) &&
     jabatan.trim().length >= 3 &&
-    (butuhUnit ? unitKode !== null : true);
+    (butuhUnit ? unitKode !== null : true) &&
+    (butuhAtasan ? atasanId !== null : true);
 
   // Peran lintas unit tidak boleh membawa unit; dibersihkan saat berganti.
   const gantiPeran = (p: Peran) => {
@@ -276,6 +290,31 @@ function Isian({
           </p>
         </fieldset>
 
+        {calon && role !== "CEO" ? (
+          <fieldset className="space-y-1.5">
+            <legend className="text-[13px] leading-[18px] font-semibold">
+              Atasan langsung
+            </legend>
+            <select
+              value={atasanId ?? ""}
+              onChange={(e) => setAtasanId(e.target.value || null)}
+              aria-label="Atasan langsung"
+              className="h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+            >
+              <option value="">Pilih atasan…</option>
+              {calon.map((a) => (
+                <option key={a.id} value={a.id}>
+                  {a.nama} · {a.role}
+                </option>
+              ))}
+            </select>
+            <p className="text-[11px] leading-[14px] text-muted-foreground">
+              Atasan inilah yang menyetujui izinnya. Tanpa atasan, pengajuan
+              izinnya tidak punya tujuan.
+            </p>
+          </fieldset>
+        ) : null}
+
         {pesan ? (
           <p
             role="status"
@@ -308,6 +347,7 @@ function Isian({
               unitKode,
               departemenId,
               programId,
+              ...(calon ? { atasanId: role === "CEO" ? null : atasanId } : {}),
             })
           }
           className="tekan-halus rounded-full"
@@ -323,8 +363,11 @@ function Isian({
 /** Tambah anggota baru. */
 export function DialogTambahAnggota({
   pilihan,
+  semua,
 }: {
   pilihan: PilihanOrganisasi;
+  /** Anggota yang ada, sebagai calon atasan orang baru ini. */
+  semua: AnggotaTim[];
 }) {
   const [buka, setBuka] = useState(false);
   const [menyimpan, mulai] = useTransition();
@@ -354,6 +397,13 @@ export function DialogTambahAnggota({
           pilihan={pilihan}
           menyimpan={menyimpan}
           pesan={pesan}
+          calon={semua
+            .filter((a) => a.status === "aktif")
+            .sort(
+              (a, b) =>
+                peringkatPeran(a.role) - peringkatPeran(b.role) ||
+                a.nama.localeCompare(b.nama),
+            )}
           onSimpan={(data) =>
             mulai(async () => {
               setPesan(null);

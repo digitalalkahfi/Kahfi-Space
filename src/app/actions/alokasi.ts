@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { modeData } from "@/lib/supabase/config";
+import { klienServer } from "@/lib/supabase/server";
 import { sesiSaatIni } from "@/lib/data/sesi";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
 import {
@@ -10,7 +11,7 @@ import {
   perpindahanAlokasiSah,
   type MasukanAlokasi,
 } from "@/lib/budget";
-import { daftarAlokasi } from "@/lib/data/budget";
+import { daftarAlokasi, idUnitDariKode } from "@/lib/data/budget";
 import { rupiahPenuh } from "@/lib/format";
 
 /**
@@ -21,8 +22,9 @@ import { rupiahPenuh } from "@/lib/format";
  * dinaikkan sendiri oleh yang membelanjakannya bukan anggaran,
  * melainkan saran.
  *
- * BELUM MENYIMPAN: tabel alokasi menyusul di lapisan backend Fase 3;
- * yang dikerjakan di sini pemeriksaan isian dan wewenangnya.
+ * Statusnya tidak dikirim dari sini melainkan dibiarkan pada nilai
+ * bawaan tabelnya, dan RLS pun menolak insert dengan status selain
+ * 'diajukan' (migrasi 0148) — dua pagar untuk satu aturan.
  */
 export async function ajukanAlokasi(input: MasukanAlokasi): Promise<Hasil> {
   const salah = periksaAlokasi(input);
@@ -50,12 +52,38 @@ export async function ajukanAlokasi(input: MasukanAlokasi): Promise<Hasil> {
 
   if (modeData() === "demo") return BALASAN_DEMO;
 
-  revalidatePath("/keuangan/budget");
+  const sb = await klienServer();
+  const unitId = await idUnitDariKode(input.unitKode);
+  if (input.unitKode !== null && unitId === null) {
+    return gagal("Unit tidak dikenali.", "validasi");
+  }
+
+  const { error } = await sb.from("budget_allocations").insert({
+    periode: input.periode,
+    unit_id: unitId,
+    jenis: input.jenis,
+    jumlah: input.jumlah,
+    alasan: input.alasan.trim(),
+    diajukan_id: pengguna.id,
+  });
+
+  if (error) {
+    return error.code === "42501"
+      ? gagal("Kamu tidak berhak mengajukan alokasi.", "izin")
+      : gagal(`Gagal menyimpan: ${error.message}`);
+  }
+
+  segarkan();
 
   return sukses(
     undefined,
-    `Pengajuan ${rupiahPenuh(input.jumlah)} sudah sah dan berstatus diajukan, tetapi belum tersimpan: tabel alokasi menyusul di lapisan backend.`,
+    `Pengajuan ${rupiahPenuh(input.jumlah)} terkirim dan menunggu keputusan.`,
   );
+}
+
+function segarkan() {
+  revalidatePath("/keuangan/budget");
+  revalidatePath("/keuangan/budget/riwayat");
 }
 
 /**
@@ -66,7 +94,9 @@ export async function ajukanAlokasi(input: MasukanAlokasi): Promise<Hasil> {
  * ada di `izinPutusAlokasi` supaya layar dan server memakai ukuran yang
  * sama.
  *
- * BELUM MENYIMPAN: tabel alokasi menyusul di lapisan backend Fase 3.
+ * Pemeriksaan di sini ada supaya pesannya bisa dibaca manusia; yang
+ * benar-benar menutup pintunya tetap database — trigger menolak
+ * keputusan ulang dan keputusan atas pengajuan sendiri (migrasi 0148).
  */
 export async function putuskanAlokasi(input: {
   alokasiId: string;
@@ -103,10 +133,32 @@ export async function putuskanAlokasi(input: {
 
   if (modeData() === "demo") return BALASAN_DEMO;
 
-  revalidatePath("/keuangan/budget");
+  const sb = await klienServer();
+  const { error } = await sb
+    .from("budget_allocations")
+    .update({
+      status: input.keputusan,
+      diputuskan_id: pengguna.id,
+      diputuskan_pada: new Date().toISOString(),
+      catatan_keputusan: catatan,
+    })
+    .eq("id", input.alokasiId)
+    // Hanya yang masih menunggu; kalau ada yang memutuskan lebih dulu,
+    // yang kedua tidak menimpa keputusan pertama.
+    .eq("status", "diajukan");
+
+  if (error) {
+    return error.code === "42501"
+      ? gagal("Kamu tidak berhak memutuskan pengajuan ini.", "izin")
+      : gagal(error.message, "validasi");
+  }
+
+  segarkan();
 
   return sukses(
     undefined,
-    `Keputusan "${input.keputusan}" sah dan berwenang, tetapi belum tersimpan: tabel alokasi menyusul di lapisan backend.`,
+    input.keputusan === "disetujui"
+      ? "Pengajuan disetujui; pagunya bertambah pada periode itu."
+      : "Pengajuan ditolak beserta alasannya.",
   );
 }

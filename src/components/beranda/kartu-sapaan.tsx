@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SlidersHorizontal } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
@@ -44,13 +45,13 @@ export function KartuSapaan({
             </p>
           </div>
 
-          <button
-            type="button"
+          <Link
+            href="/tampilan"
             aria-label="Atur tampilan dasbor"
             className="tekan-halus sentuh-nyaman flex size-9 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground hover:text-foreground"
           >
             <SlidersHorizontal className="size-4" />
-          </button>
+          </Link>
         </div>
       </Card>
     </section>

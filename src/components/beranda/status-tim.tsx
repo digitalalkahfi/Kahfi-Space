@@ -1,7 +1,7 @@
-import { ClipboardX, ShieldCheck } from "lucide-react";
+import { ClipboardX, Clock, ShieldCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { persen } from "@/lib/format";
+import { bilangan, persen } from "@/lib/format";
 
 /**
  * Ringkasan angka kehadiran & laporan hari ini.
@@ -12,12 +12,17 @@ export function StatusTim({
   sudahAbsen,
   wajibLapor,
   sudahLapor,
+  telat,
+  totalMenitTelat,
 }: {
   totalStaf: number;
   sudahAbsen: number;
   /** Penyebut laporan: hanya PIC akun & Leader unit yang wajib lapor. */
   wajibLapor: number;
   sudahLapor: number;
+  /** Berapa orang telat terhadap jam efektif masuknya (migrasi 0132). */
+  telat: number;
+  totalMenitTelat: number;
 }) {
   const rasio = (a: number, b: number) => (b > 0 ? (a / b) * 100 : 0);
   const laporanLengkap = wajibLapor > 0 && sudahLapor >= wajibLapor;
@@ -44,6 +49,20 @@ export function StatusTim({
       kelas: laporanLengkap ? "bg-ok-fill" : "bg-warn-fill",
       teks: laporanLengkap ? "text-ok-text" : "text-warn-text",
     },
+    {
+      label: "Telat",
+      nilai: telat,
+      dari: sudahAbsen,
+      icon: Clock,
+      // Menitnya memakai jam efektif masuk: yang izinnya sudah disetujui
+      // tidak ikut terhitung telat (migrasi 0132).
+      catatan:
+        telat === 0
+          ? "Semua tepat waktu"
+          : `${bilangan(totalMenitTelat)} menit, terhadap jam efektif`,
+      kelas: telat === 0 ? "bg-ok-fill" : "bg-warn-fill",
+      teks: telat === 0 ? "text-ok-text" : "text-warn-text",
+    },
   ];
 
   return (
@@ -57,7 +76,7 @@ export function StatusTim({
         </p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 px-5">
+      <div className="grid grid-cols-2 gap-3 px-5 sm:grid-cols-3">
         {metrik.map((m) => {
           const Icon = m.icon;
           return (

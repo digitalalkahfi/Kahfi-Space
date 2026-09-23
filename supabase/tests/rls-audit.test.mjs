@@ -81,8 +81,11 @@ uji("pengunjung tanpa sesi tidak bisa membaca data apa pun", async () => {
   const bocor = [];
   for (const t of TABEL) {
     try {
-      const { rows } = await db.query(`select count(*)::int n from ${t.relname}`);
-      if (Number(rows[0].n) > 0) bocor.push(`${t.relname} (${rows[0].n} baris)`);
+      const { rows } = await db.query(
+        `select count(*)::int n from ${t.relname}`,
+      );
+      if (Number(rows[0].n) > 0)
+        bocor.push(`${t.relname} (${rows[0].n} baris)`);
     } catch {
       // ditolak = aman
     }
@@ -109,7 +112,8 @@ uji("anon tidak punya hak tulis", async () => {
 
 // --- cakupan data Beranda per peran -------------------------------------
 const idUser = async (n) =>
-  (await sebagaiAdmin(db, `select id from users where nama=$1`, [n])).rows[0].id;
+  (await sebagaiAdmin(db, `select id from users where nama=$1`, [n])).rows[0]
+    .id;
 
 const U = {
   ceo: await idUser("Hafidz Alkahfi"),
@@ -120,8 +124,8 @@ const U = {
   finance: await idUser("Laras Ayuningtyas"),
 };
 
-const hitung = async (id, sql) =>
-  Number((await sebagai(db, id, sql)).rows[0].n);
+const hitung = async (id, sql, params = []) =>
+  Number((await sebagai(db, id, sql, params)).rows[0].n);
 
 uji("Staff tidak melihat laporan GMV rekan lintas unit", async () => {
   const n = await hitung(
@@ -150,8 +154,19 @@ uji("Finance melihat angka lintas unit", async () => {
 });
 
 uji("Finance tidak melihat absensi operasional orang lain", async () => {
-  const n = await hitung(U.finance, `select count(*)::int n from attendance`);
-  harusSama(n, 1, "Finance hanya boleh melihat absensinya sendiri");
+  // Yang diuji kepemilikannya, bukan cacahnya: seed boleh menambah hari
+  // tanpa membuat tes ini merah, tapi satu baris milik orang lain harus
+  // tetap menggagalkannya.
+  const n = await hitung(
+    U.finance,
+    `select count(*)::int n from attendance where user_id <> $1`,
+    [U.finance],
+  );
+  harusSama(n, 0, "Finance hanya boleh melihat absensinya sendiri");
+  harus(
+    (await hitung(U.finance, `select count(*)::int n from attendance`)) > 0,
+    "absensinya sendiri tetap terbaca",
+  );
 });
 
 uji("CEO melihat seluruh absensi", async () => {

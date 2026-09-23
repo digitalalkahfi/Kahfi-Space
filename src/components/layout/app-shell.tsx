@@ -5,6 +5,11 @@ import { bolehLihatKeuangan } from "@/lib/keuangan";
 import { SpandukLama } from "@/components/layout/spanduk-lama";
 import { TopBar } from "@/components/layout/top-bar";
 import { statusKspaceLama } from "@/lib/data/migrasi";
+import { PenyediaTampilan } from "@/components/tampilan/penyedia-tampilan";
+import {
+  katalogUntuk,
+  preferensiTampilanSaya,
+} from "@/lib/data/preferensi-tampilan";
 import { modeData } from "@/lib/supabase/config";
 import type { Pengguna } from "@/lib/types";
 
@@ -25,19 +30,32 @@ export async function AppShell({
   const bolehMigrasi = pengguna.role === "CEO" || pengguna.role === "Manager";
   const bolehKeuangan = bolehLihatKeuangan(pengguna.role);
 
+  // Katalog dan susunan dirakit di server: keduanya bergantung pada
+  // peran, dan peran tidak boleh dikirim ke browser sebagai bahan
+  // keputusan. Yang menyeberang hanya hasil yang sudah disaring.
+  const katalog = katalogUntuk(pengguna);
+  const susunan = await preferensiTampilanSaya(pengguna);
+
   return (
-    <div className="min-h-dvh lg:pl-16">
-      <SidebarRail
-        demo={modeData() === "demo"}
-        bolehMigrasi={bolehMigrasi}
-        bolehKeuangan={bolehKeuangan}
-      />
-      <TopBar pengguna={pengguna} halaman={halaman} />
-      <SpandukLama status={lama} />
-      <main className="mx-auto w-full max-w-[1400px] px-4 pt-4 pb-28 lg:px-8 lg:pt-6 lg:pb-10">
-        {children}
-      </main>
-      <BottomNav bolehKeuangan={bolehKeuangan} bolehMigrasi={bolehMigrasi} />
-    </div>
+    <PenyediaTampilan
+      katalog={katalog}
+      bawaan={susunan.preferensi}
+      sudahTersimpan={susunan.tersimpan}
+      keServer={modeData() !== "demo"}
+    >
+      <div className="min-h-dvh lg:pl-16">
+        <SidebarRail
+          demo={modeData() === "demo"}
+          bolehMigrasi={bolehMigrasi}
+          bolehKeuangan={bolehKeuangan}
+        />
+        <TopBar pengguna={pengguna} halaman={halaman} />
+        <SpandukLama status={lama} />
+        <main className="mx-auto w-full max-w-[1400px] px-4 pt-4 pb-28 lg:px-8 lg:pt-6 lg:pb-10">
+          {children}
+        </main>
+        <BottomNav bolehKeuangan={bolehKeuangan} bolehMigrasi={bolehMigrasi} />
+      </div>
+    </PenyediaTampilan>
   );
 }

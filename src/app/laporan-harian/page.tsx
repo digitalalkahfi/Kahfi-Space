@@ -7,6 +7,7 @@ import { tanggalPanjang } from "@/lib/format";
 import { absensiHariIni } from "@/lib/data/absensi";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import {
+  coSampelHariIni,
   riwayatLaporan,
   sasaranUntuk,
   sudahDilaporkan,
@@ -33,11 +34,12 @@ export default async function LaporanHarianPage({
       ? TANGGAL_ACUAN
       : new Date().toISOString().slice(0, 10);
 
-  const [sasaran, riwayat, terlapor, absen] = await Promise.all([
+  const [sasaran, riwayat, terlapor, absen, coSampel] = await Promise.all([
     sasaranUntuk(pengguna, tanggal),
     riwayatLaporan(pengguna, tanggal),
     sudahDilaporkan(pengguna, tanggal),
     absensiHariIni(pengguna, tanggal),
+    coSampelHariIni(tanggal),
   ]);
 
   const jamMasuk = absen.jamMasuk
@@ -83,6 +85,7 @@ export default async function LaporanHarianPage({
           jamMasuk={jamMasuk}
           lokasi={lokasi}
           sudahLaporAwal={absen.sudahLapor}
+          coSampel={coSampel}
         />
       </div>
     </AppShell>

@@ -109,10 +109,27 @@ export type AnggotaKehadiran = {
   unit: string;
   statusAbsen: StatusAbsen;
   jamMasuk: string | null;
+  /**
+   * Menit terlambat terhadap jam efektif masuk — sudah memperhitungkan
+   * izin berjam yang disetujui (migrasi 0132). 0 berarti tidak telat.
+   */
+  menitTelat: number;
+  /** Izin berjam yang disetujui hari itu, bila ada. */
+  izinSampai: string | null;
   /** Orang ini memang punya sasaran laporan (PIC akun / Leader unit). */
   wajibLapor: boolean;
   /** Laporan harian hari ini sudah terkirim atau belum. */
   sudahLapor: boolean;
+  /**
+   * Unggahan hari ini, dijumlahkan seluruh akun yang ia pegang; null
+   * bila tidak ada laporan yang memakai kolom itu.
+   */
+  unggahanHariIni: number | null;
+  /**
+   * Batas minimum harian orang ini — jumlah batas seluruh akunnya.
+   * null berarti ia tidak memegang akun berlevel, jadi tidak dinilai.
+   */
+  minimumUnggahan: number | null;
 };
 
 /** Butir to-do pribadi yang tampil di Beranda. */
@@ -157,6 +174,11 @@ export type AkunAffiliator = {
   program: string | null;
   /** Target GMV harian akun ini, turunan dari GRD. */
   targetHarian: number;
+  /**
+   * Level akun 0–8 yang menentukan batas minimum unggahannya.
+   * null berarti belum ditetapkan — kolomnya menyusul di Fase 3.
+   */
+  level: number | null;
   status: "aktif" | "nonaktif";
 };
 
@@ -172,7 +194,33 @@ export type LaporanHarian = {
   akunId: string | null;
   unitId: KodeUnit | null;
   label: string;
+  /**
+   * Departemen pelapor — unit akunnya, atau unit yang dilaporkan. Beda
+   * dengan `unitId`, yang hanya terisi bila sasarannya memang unit.
+   */
+  departemen: KodeUnit | null;
+  /**
+   * Nama pengirim laporan ini.
+   *
+   * Ikut di baris supaya rekap bisa dikelompokkan per ORANG, bukan hanya
+   * per akun: satu orang boleh memegang beberapa akun, dan yang ditegur
+   * Leader adalah orangnya.
+   */
+  pelaporNama: string;
   gmv: number;
+  /** Kolom departemen Affiliator; null bagi departemen yang tak memakainya. */
+  komisi: number | null;
+  jumlahUpload: number | null;
+  /**
+   * Batas minimum unggahan akun ini pada saat dibaca, dari levelnya.
+   *
+   * Ikut di baris laporan supaya riwayat dan rekap bisa menandai yang di
+   * bawah minimum tanpa memanggil ulang tabel acuan per baris. null
+   * berarti akunnya belum berlevel — tidak ada standar yang berlaku.
+   */
+  minimumUpload: number | null;
+  /** Dihitung dari log pemindaian sampel, tidak disimpan di barisnya. */
+  coSampel: number | null;
   target: number;
   catatan: string;
   status: "terkirim" | "revisi";
@@ -187,6 +235,11 @@ export type RevisiLaporan = {
   reportId: string;
   gmvLama: number;
   gmvBaru: number;
+  /** Null berarti kolom itu tidak ikut berubah pada perbaikan ini. */
+  komisiLama: number | null;
+  komisiBaru: number | null;
+  uploadLama: number | null;
+  uploadBaru: number | null;
   alasan: string;
   diubahOleh: string;
   createdAt: string;

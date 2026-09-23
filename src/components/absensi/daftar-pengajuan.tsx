@@ -8,23 +8,51 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { tanggalPendek } from "@/lib/format";
 import { putuskanIzin } from "@/app/actions/absensi";
+import { MIN_ALASAN_TOLAK } from "@/lib/izin";
 import type { PengajuanIzin } from "@/lib/data/absensi";
 
-/** Antrean persetujuan izin/sakit untuk atasan. */
+const LABEL_JENIS: Record<PengajuanIzin["jenis"], string> = {
+  sakit: "Sakit",
+  izin: "Izin",
+  jam: "Izin berjam",
+};
+
+/** Satu baris tanggal yang menyebut bentuk pengajuannya apa adanya. */
+function rentangPengajuan(p: PengajuanIzin) {
+  if (p.jenis === "jam") {
+    return `${tanggalPendek(p.tanggal)} · ${p.jamMulai?.slice(0, 5)}–${p.jamSelesai?.slice(0, 5)}`;
+  }
+  if (p.sampai !== p.tanggal) {
+    return `${tanggalPendek(p.tanggal)} – ${tanggalPendek(p.sampai)}`;
+  }
+  return tanggalPendek(p.tanggal);
+}
+
+/** Antrean persetujuan izin untuk atasan. */
 export function DaftarPengajuan({ pengajuan }: { pengajuan: PengajuanIzin[] }) {
   const [, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
+  // Penolakan wajib beralasan, jadi kotaknya dibuka dulu — bukan menolak
+  // lebih dahulu lalu memunculkan galat dari database.
+  const [menolak, setMenolak] = useState<string | null>(null);
+  const [alasanTolak, setAlasanTolak] = useState("");
 
   const [daftar, putusOptimis] = useOptimistic(
     pengajuan,
     (kini: PengajuanIzin[], id: string) => kini.filter((p) => p.id !== id),
   );
 
-  const putuskan = (id: string, keputusan: "disetujui" | "ditolak") => {
+  const putuskan = (
+    id: string,
+    keputusan: "disetujui" | "ditolak",
+    alasan = "",
+  ) => {
     mulai(async () => {
       putusOptimis(id);
-      const hasil = await putuskanIzin(id, keputusan);
+      const hasil = await putuskanIzin(id, keputusan, alasan);
       setPesan(hasil.pesan ?? null);
+      setMenolak(null);
+      setAlasanTolak("");
     });
   };
 
@@ -68,15 +96,17 @@ export function DaftarPengajuan({ pengajuan }: { pengajuan: PengajuanIzin[] }) {
                         "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] leading-[13px] font-semibold",
                         p.jenis === "sakit"
                           ? "bg-info-fill text-info-text"
-                          : "bg-accentmuted-fill text-accentmuted-text",
+                          : p.jenis === "jam"
+                            ? "bg-warn-fill text-warn-text"
+                            : "bg-accentmuted-fill text-accentmuted-text",
                       )}
                     >
                       <Stethoscope className="size-2.5" />
-                      {p.jenis === "sakit" ? "Sakit" : "Izin"}
+                      {LABEL_JENIS[p.jenis]}
                     </span>
                   </div>
                   <p className="tabular text-[11px] leading-[14px] text-muted-foreground">
-                    {tanggalPendek(p.tanggal)} · {p.unit}
+                    {rentangPengajuan(p)} · {p.unit}
                   </p>
                   <p className="mt-1 text-[13px] leading-[18px] text-pretty">
                     {p.alasan}
@@ -96,13 +126,53 @@ export function DaftarPengajuan({ pengajuan }: { pengajuan: PengajuanIzin[] }) {
                       type="button"
                       size="sm"
                       variant="outline"
-                      onClick={() => putuskan(p.id, "ditolak")}
+                      onClick={() => setMenolak(menolak === p.id ? null : p.id)}
+                      aria-expanded={menolak === p.id}
                       className="tekan-halus sentuh-nyaman h-8 rounded-full px-3 text-[11px] font-semibold"
                     >
                       <X className="size-3" />
                       Tolak
                     </Button>
                   </div>
+
+                  {menolak === p.id ? (
+                    <div className="mt-2.5 space-y-1.5">
+                      <label
+                        htmlFor={`alasan-tolak-${p.id}`}
+                        className="text-[11px] leading-[14px] font-semibold"
+                      >
+                        Alasan penolakan
+                      </label>
+                      <textarea
+                        id={`alasan-tolak-${p.id}`}
+                        rows={2}
+                        maxLength={300}
+                        value={alasanTolak}
+                        onChange={(e) => setAlasanTolak(e.target.value)}
+                        placeholder="Mis. pekan itu jadwal penutupan bulan, ajukan pekan depan."
+                        className="w-full resize-none rounded-xl bg-card px-3 py-2 text-[13px] leading-[18px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
+                      />
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] leading-[14px] text-muted-foreground">
+                          {alasanTolak.trim().length < MIN_ALASAN_TOLAK
+                            ? `Minimal ${MIN_ALASAN_TOLAK} karakter — pengaju perlu tahu sebabnya.`
+                            : "Siap dikirim."}
+                        </span>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          disabled={
+                            alasanTolak.trim().length < MIN_ALASAN_TOLAK
+                          }
+                          onClick={() => putuskan(p.id, "ditolak", alasanTolak)}
+                          className="tekan-halus sentuh-nyaman h-8 shrink-0 rounded-full px-3 text-[11px] font-semibold"
+                        >
+                          Kirim penolakan
+                        </Button>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </li>

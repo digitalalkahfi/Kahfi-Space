@@ -4,17 +4,41 @@ import { revalidatePath } from "next/cache";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { sesiSaatIni } from "@/lib/data/sesi";
-import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
+import {
+  BALASAN_DEMO,
+  gagal,
+  sukses,
+  type Hasil,
+  type KodeGagal,
+} from "@/lib/data/hasil";
+import { periksaIsiLaporan, type IsiLaporan } from "@/lib/laporan";
+import { unitLaporan, unitSasaranLaporan } from "@/lib/data/laporan";
 import type { KodeUnit } from "@/lib/types";
 
-/** Batas atas yang sama dengan constraint di database. */
-const MAKS_GMV = 100_000_000_000;
-
-function periksaGmv(gmv: number): string | null {
-  if (!Number.isFinite(gmv) || gmv < 0) return "Nilai GMV tidak sah.";
-  if (gmv === 0) return "GMV belum diisi.";
-  if (gmv > MAKS_GMV) return "Nilai GMV di luar batas wajar, periksa lagi.";
-  return null;
+/**
+ * Pesan yang bisa dibaca pelapor untuk pagar yang ditegakkan database.
+ *
+ * Nama constraint dan teks `raise` tidak boleh sampai ke layar: pelapor
+ * tidak bisa berbuat apa-apa dengan "daily_reports_komisi_wajar". Yang
+ * tidak dikenali tetap ditampilkan apa adanya supaya tidak ada kegagalan
+ * yang hilang diam-diam.
+ */
+function pesanGalatLaporan(error: {
+  code?: string;
+  message: string;
+}): [string, KodeGagal] {
+  const cocok: [RegExp, string][] = [
+    [/komisi_tak_lebih_dari_gmv/, "Komisi tidak mungkin melebihi GMV-nya."],
+    [/komisi_wajar/, "Nilai komisi di luar batas wajar, periksa lagi."],
+    [/upload_wajar/, "Jumlah upload di luar batas wajar, periksa lagi."],
+    [/gmv_wajar/, "Nilai GMV di luar batas wajar, periksa lagi."],
+    [/hanya melaporkan GMV/, error.message],
+    [/bertanggal masa depan/, "Laporan tidak bisa bertanggal masa depan."],
+  ];
+  for (const [pola, pesan] of cocok) {
+    if (pola.test(error.message)) return [pesan, "validasi"];
+  }
+  return [`Gagal menyimpan: ${error.message}`, "galat"];
 }
 
 /** Sasaran berbentuk "akun:<uuid>" atau "unit:<kode>". */
@@ -31,14 +55,26 @@ function uraikanSasaran(kunci: string) {
 export async function kirimLaporanHarian(input: {
   sasaran: string;
   gmv: number;
+  komisi?: number | null;
+  jumlahUpload?: number | null;
   catatan?: string;
   tanggal: string;
 }): Promise<Hasil<{ id: string }>> {
-  const salah = periksaGmv(input.gmv);
-  if (salah) return gagal(salah, "validasi");
-
   const sasaran = uraikanSasaran(input.sasaran);
   if (!sasaran) return gagal("Pilih akun atau unit dulu.", "validasi");
+
+  // Departemen sasaran menentukan kolom mana yang sah, dan pemeriksaannya
+  // memakai fungsi yang sama dengan form — kiriman yang tidak lewat form
+  // tidak boleh lolos dari aturan yang dilihat pelapor di layar.
+  const isi: IsiLaporan = {
+    gmv: input.gmv,
+    komisi: input.komisi ?? null,
+    jumlahUpload: input.jumlahUpload ?? null,
+    catatan: input.catatan?.trim() ?? "",
+  };
+  const unit = await unitSasaranLaporan(input.sasaran);
+  const salah = periksaIsiLaporan(unit, isi);
+  if (salah) return gagal(salah, "validasi");
 
   if (modeData() === "demo") return BALASAN_DEMO;
 
@@ -65,8 +101,10 @@ export async function kirimLaporanHarian(input: {
       tanggal: input.tanggal,
       account_id: sasaran.jenis === "akun" ? sasaran.nilai : null,
       unit_id: unitId,
-      gmv: input.gmv,
-      catatan: input.catatan?.trim() ?? "",
+      gmv: isi.gmv,
+      komisi: isi.komisi,
+      jumlah_upload: isi.jumlahUpload,
+      catatan: isi.catatan,
     })
     .select("id")
     .single();
@@ -81,7 +119,7 @@ export async function kirimLaporanHarian(input: {
     if (error.code === "42501") {
       return gagal("Kamu bukan penanggung jawab sasaran ini.", "izin");
     }
-    return gagal(`Gagal menyimpan: ${error.message}`);
+    return gagal(...pesanGalatLaporan(error));
   }
 
   revalidatePath("/laporan-harian");
@@ -96,14 +134,31 @@ export async function kirimLaporanHarian(input: {
 export async function perbaikiLaporan(input: {
   reportId: string;
   gmv: number;
+  komisi?: number | null;
+  jumlahUpload?: number | null;
   alasan: string;
   catatan?: string;
 }): Promise<Hasil> {
-  const salah = periksaGmv(input.gmv);
-  if (salah) return gagal(salah, "validasi");
   if (input.alasan.trim().length < 10) {
     return gagal("Alasan perbaikan minimal 10 karakter.", "validasi");
   }
+
+  // Departemennya diambil dari laporan yang diperbaiki, bukan dari kiriman:
+  // pemanggil tidak boleh menentukan sendiri kolom mana yang sah baginya.
+  const unit = await unitLaporan(input.reportId);
+  const salah = periksaIsiLaporan(unit, {
+    gmv: input.gmv,
+    komisi: input.komisi ?? null,
+    jumlahUpload: input.jumlahUpload ?? null,
+    catatan: input.catatan?.trim() ?? "",
+  });
+  if (salah) return gagal(salah, "validasi");
+
+  // Pemeriksaan sesi yang sama dengan `kirimLaporanHarian`: tanpa ini,
+  // sesi yang sudah kedaluwarsa akan memanggil RPC sebagai anon dan
+  // mendapat pesan galat database, bukan pesan yang bisa dibaca orang.
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
 
   if (modeData() === "demo") return BALASAN_DEMO;
 
@@ -111,14 +166,17 @@ export async function perbaikiLaporan(input: {
   const { error } = await sb.rpc("perbaiki_laporan_harian", {
     p_report_id: input.reportId,
     p_gmv: input.gmv,
+    p_komisi: input.komisi ?? null,
+    p_jumlah_upload: input.jumlahUpload ?? null,
     p_alasan: input.alasan.trim(),
     p_catatan: input.catatan?.trim() ?? null,
   });
 
   if (error) {
-    return error.message.includes("bukan milikmu")
-      ? gagal("Laporan ini bukan milikmu.", "izin")
-      : gagal(`Gagal menyimpan: ${error.message}`);
+    if (error.message.includes("bukan milikmu")) {
+      return gagal("Laporan ini bukan milikmu.", "izin");
+    }
+    return gagal(...pesanGalatLaporan(error));
   }
 
   revalidatePath("/laporan-harian");

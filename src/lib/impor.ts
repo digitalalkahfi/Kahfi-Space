@@ -1,6 +1,10 @@
 /**
- * Mesin impor kv_store → skema baru. Modul murni: tidak menyentuh
+ * Mesin impor ekspor K-Space V1 → skema V2. Modul murni: tidak menyentuh
  * database, sehingga setiap aturannya bisa diuji tanpa Supabase.
+ *
+ * Satu kunci ekspor memuat seluruh catatannya sekaligus (`users:list`
+ * berisi semua orang), jadi yang diproses di sini adalah kunci, dan tiap
+ * catatan di dalamnya menjadi satu baris hasil tersendiri.
  *
  * Yang dikerjakan di sini adalah bagian yang paling gampang salah diam-
  * diam: mengubah nilai bergaya lama menjadi nilai yang benar. Angka
@@ -9,10 +13,18 @@
  * tidak diperiksa.
  */
 import { entitasDari, type EntriKv } from "@/lib/kv-store";
-import { PEMETAAN, type PemetaanEntitas, type Ubahan } from "@/lib/pemetaan";
+import type { PemetaanEntitas, Ubahan } from "@/lib/pemetaan";
+import { PEMETAAN_V1 } from "@/lib/pemetaan-v1";
 import type { StatusMigrasi } from "@/lib/migrasi";
 
-/** Padanan nama/kode lama → id baru, dibangun dari database. */
+/**
+ * Padanan nilai lama → id baru, dibangun dari database.
+ *
+ * Kuncinya sengaja bisa lebih dari satu bentuk untuk hal yang sama:
+ * ekspor lama menyebut akun kadang lewat id-nya (`acc_001` di
+ * `affiliate-gmv:daily`), kadang lewat username-nya (`"Akun"` di laporan
+ * harian). Keduanya didaftarkan supaya pencarian tidak perlu menebak.
+ */
 export type Kamus = {
   unit: Record<string, string>;
   program: Record<string, string>;
@@ -106,10 +118,14 @@ function lacakKamus(kolom: string): keyof Kamus | null {
   if (
     kolom === "user_id" ||
     kolom === "pic_user_id" ||
+    kolom === "co_leader_id" ||
     kolom === "atasan_id" ||
     kolom === "pemilik_id" ||
     kolom === "pembuat_id" ||
-    kolom === "penerima_id"
+    kolom === "penerima_id" ||
+    kolom === "diputuskan_oleh" ||
+    kolom === "disetujui_oleh" ||
+    kolom === "diajukan_oleh"
   ) {
     return "pengguna";
   }
@@ -141,7 +157,10 @@ function ubah(
     case "tanggal": {
       const tanggal = keTanggal(nilai);
       return tanggal === null
-        ? { nilai: null, galat: `'${String(nilai)}' bukan tanggal yang dikenali` }
+        ? {
+            nilai: null,
+            galat: `'${String(nilai)}' bukan tanggal yang dikenali`,
+          }
         : { nilai: tanggal };
     }
 
@@ -150,12 +169,16 @@ function ubah(
         return { nilai: null };
       }
       const jenis = lacakKamus(kolom);
-      if (!jenis) return { nilai: null, galat: `tidak tahu mencari id untuk ${kolom}` };
+      if (!jenis)
+        return { nilai: null, galat: `tidak tahu mencari id untuk ${kolom}` };
 
       const id = kamus[jenis][String(nilai)];
       return id
         ? { nilai: id }
-        : { nilai: null, galat: `'${String(nilai)}' tidak ditemukan di ${jenis}` };
+        : {
+            nilai: null,
+            galat: `'${String(nilai)}' tidak ditemukan di ${jenis}`,
+          };
     }
 
     case "bawaan":
@@ -163,41 +186,37 @@ function ubah(
   }
 }
 
+/** Penanda satu catatan di sistem lama; dipakai sebagai kunci idempoten. */
+function idLama(sumber: Record<string, unknown>, urutan: number): string {
+  const id = sumber.id;
+  return typeof id === "string" && id !== "" ? id : `#${urutan}`;
+}
+
 /**
- * Menyiapkan satu entri untuk ditulis, atau menjelaskan mengapa tidak bisa.
+ * Menyiapkan satu catatan untuk ditulis, atau menjelaskan mengapa tidak
+ * bisa.
  *
  * Tidak pernah melempar: setiap kegagalan menjadi baris log dengan
- * alasannya, karena migrasi yang berhenti di entri ke-3.000 tanpa
+ * alasannya, karena migrasi yang berhenti di catatan ke-3.000 tanpa
  * penjelasan jauh lebih mahal daripada yang melaporkan semuanya.
  */
-export function siapkanEntri(entri: EntriKv, kamus: Kamus): HasilEntri {
-  const entitas = entitasDari(entri.key);
-  const pemetaan = PEMETAAN.find((p) => p.kunci === entitas);
-
-  if (!pemetaan) {
+export function siapkanCatatan(
+  pemetaan: PemetaanEntitas,
+  catatan: unknown,
+  kunciLama: string,
+  kamus: Kamus,
+): HasilEntri {
+  if (!catatan || typeof catatan !== "object" || Array.isArray(catatan)) {
     return {
-      entitas,
-      kunciLama: entri.key,
-      status: "dilewati",
-      pesan:
-        entitas === "(tanpa entitas)"
-          ? "Kunci tidak memuat pemisah ':'."
-          : `Entitas '${entitas}' tidak ada di skema baru.`,
-      data: null,
-    };
-  }
-
-  if (!entri.value || typeof entri.value !== "object") {
-    return {
-      entitas,
-      kunciLama: entri.key,
+      entitas: pemetaan.kunci,
+      kunciLama,
       status: "gagal",
-      pesan: "Nilainya kosong atau bukan objek.",
+      pesan: "Catatannya kosong atau bukan objek.",
       data: null,
     };
   }
 
-  const sumber = entri.value as Record<string, unknown>;
+  const sumber = catatan as Record<string, unknown>;
   const data: Record<string, unknown> = {};
   const galat: string[] = [];
 
@@ -217,13 +236,22 @@ export function siapkanEntri(entri: EntriKv, kamus: Kamus): HasilEntri {
       galat.push(`${baris.medanLama}: ${hasil.galat}`);
       continue;
     }
-    if (hasil.nilai !== undefined) data[baris.kolomBaru] = hasil.nilai;
+    if (hasil.nilai === undefined) continue;
+
+    // Beberapa medan bebas sengaja digabung ke satu kolom; yang kedua
+    // menempel, bukan menimpa yang pertama.
+    if (baris.gabung && typeof data[baris.kolomBaru] === "string") {
+      const sudah = data[baris.kolomBaru] as string;
+      data[baris.kolomBaru] = `${sudah}\n${String(hasil.nilai)}`.trim();
+      continue;
+    }
+    data[baris.kolomBaru] = hasil.nilai;
   }
 
   if (galat.length > 0) {
     return {
-      entitas,
-      kunciLama: entri.key,
+      entitas: pemetaan.kunci,
+      kunciLama,
       status: "gagal",
       pesan: galat.join("; "),
       data: null,
@@ -231,17 +259,62 @@ export function siapkanEntri(entri: EntriKv, kamus: Kamus): HasilEntri {
   }
 
   return {
-    entitas,
-    kunciLama: entri.key,
+    entitas: pemetaan.kunci,
+    kunciLama,
     status: "berhasil",
     pesan: "",
     data,
   };
 }
 
-/** Menyiapkan seluruh entri, berurutan sesuai ketergantungan entitasnya. */
+/**
+ * Menyiapkan seluruh catatan di balik satu kunci ekspor.
+ *
+ * Kunci yang tidak dipetakan dilaporkan sekali sebagai dilewati — bukan
+ * diam-diam dibuang, dan bukan pula dihitung sebagai ribuan kegagalan
+ * yang menenggelamkan kegagalan sungguhan.
+ */
+export function siapkanKunci(entri: EntriKv, kamus: Kamus): HasilEntri[] {
+  const kunci = entitasDari(entri.key);
+  const pemetaan = PEMETAAN_V1.find((p) => p.kunci === kunci);
+
+  if (!pemetaan) {
+    return [
+      {
+        entitas: kunci,
+        kunciLama: entri.key,
+        status: "dilewati",
+        pesan:
+          kunci === "(tanpa entitas)"
+            ? "Entri tanpa kunci."
+            : `Kunci '${kunci}' tidak dipetakan ke skema baru.`,
+        data: null,
+      },
+    ];
+  }
+
+  // Kunci berisi satu objek pengaturan (attendance:config) tetap
+  // diperlakukan sebagai satu catatan.
+  const daftar = Array.isArray(entri.value) ? entri.value : [entri.value];
+
+  return daftar.map((catatan, i) =>
+    siapkanCatatan(
+      pemetaan,
+      catatan,
+      `${pemetaan.kunci}:${idLama(
+        catatan && typeof catatan === "object"
+          ? (catatan as Record<string, unknown>)
+          : {},
+        i,
+      )}`,
+      kamus,
+    ),
+  );
+}
+
+/** Menyiapkan seluruh kunci, berurutan sesuai ketergantungannya. */
 export function siapkanSemua(entri: EntriKv[], kamus: Kamus): HasilEntri[] {
-  const urutan = new Map(PEMETAAN.map((p, i) => [p.kunci, i]));
+  const urutan = new Map(PEMETAAN_V1.map((p, i) => [p.kunci, i]));
 
   return [...entri]
     .sort(
@@ -249,20 +322,32 @@ export function siapkanSemua(entri: EntriKv[], kamus: Kamus): HasilEntri[] {
         (urutan.get(entitasDari(a.key)) ?? 99) -
         (urutan.get(entitasDari(b.key)) ?? 99),
     )
-    .map((e) => siapkanEntri(e, kamus));
+    .flatMap((e) => siapkanKunci(e, kamus));
 }
 
 /** Ringkasan hasil per entitas, untuk ditampilkan dan disimpan. */
 export function ringkasHasil(hasil: HasilEntri[]) {
   const peta = new Map<
     string,
-    { entitas: string; total: number; berhasil: number; dilewati: number; gagal: number; menunggu: number }
+    {
+      entitas: string;
+      total: number;
+      berhasil: number;
+      dilewati: number;
+      gagal: number;
+      menunggu: number;
+    }
   >();
 
   for (const h of hasil) {
-    const r =
-      peta.get(h.entitas) ??
-      { entitas: h.entitas, total: 0, berhasil: 0, dilewati: 0, gagal: 0, menunggu: 0 };
+    const r = peta.get(h.entitas) ?? {
+      entitas: h.entitas,
+      total: 0,
+      berhasil: 0,
+      dilewati: 0,
+      gagal: 0,
+      menunggu: 0,
+    };
     r.total += 1;
     r[h.status] += 1;
     peta.set(h.entitas, r);

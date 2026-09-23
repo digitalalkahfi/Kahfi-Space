@@ -4,17 +4,25 @@ import {
   keAngka,
   keTanggal,
   ringkasHasil,
-  siapkanEntri,
+  siapkanKunci,
   siapkanSemua,
   type Kamus,
 } from "../impor.ts";
 
+/**
+ * Kamus memetakan nilai apa adanya dari ekspor lama ke id V2 — id orang
+ * lama (`usr_003`) maupun username akun, karena ekspor lama menyebut akun
+ * dengan dua bentuk yang berbeda di tempat yang berbeda.
+ */
 const kamus: Kamus = {
   unit: { affiliator: "unit-aff", mcn: "unit-mcn" },
   program: { "Mabit Scholar": "prog-mabit", Reguler: "prog-reguler" },
-  pengguna: { "Rian Hidayat": "user-rian", "Dewi Lestari": "user-dewi" },
-  akun: { "@skincare_official": "akun-skincare" },
+  pengguna: { usr_003: "user-rian", usr_005: "user-dewi" },
+  akun: { "@skincare_official": "akun-skincare", acc_001: "akun-skincare" },
 };
+
+const satu = (kunci: string, catatan: unknown) =>
+  siapkanKunci({ key: kunci, value: [catatan] }, kamus)[0];
 
 // --- Angka -----------------------------------------------------------
 
@@ -60,124 +68,143 @@ test("tanggal yang tidak ada ditolak", () => {
 
 // --- Entri -----------------------------------------------------------
 
-test("entri wajar berhasil disiapkan", () => {
-  const h = siapkanEntri(
-    {
-      key: "report:2024-10-24:@skincare_official",
-      value: {
-        tanggal: "24-10-2024",
-        akun: "@skincare_official",
-        pelapor: "Rian Hidayat",
-        gmv: "2.500.000",
-      },
-    },
-    kamus,
-  );
+test("catatan wajar berhasil disiapkan", () => {
+  const h = satu("daily-reports:all", {
+    id: "rep_001",
+    "Tanggal Laporan": "24-10-2024",
+    userId: "usr_003",
+    Akun: "@skincare_official",
+    GMV: "2.500.000",
+  });
+
   assert.equal(h.status, "berhasil");
+  assert.equal(h.kunciLama, "daily-reports:all:rep_001");
   assert.deepEqual(h.data, {
+    id_lama: "rep_001",
     tanggal: "2024-10-24",
-    account_id: "akun-skincare",
     user_id: "user-rian",
+    account_id: "akun-skincare",
     gmv: 2500000,
   });
 });
 
 test("rujukan yang sudah hilang jadi gagal, bukan diam-diam kosong", () => {
-  const h = siapkanEntri(
-    {
-      key: "report:2024-10-21:@akun_hilang",
-      value: {
-        tanggal: "2024-10-21",
-        akun: "@akun_hilang",
-        pelapor: "Rian Hidayat",
-        gmv: 750000,
-      },
-    },
-    kamus,
-  );
+  const h = satu("daily-reports:all", {
+    id: "rep_002",
+    "Tanggal Laporan": "2024-10-21",
+    userId: "usr_003",
+    Akun: "@akun_hilang",
+    GMV: 750000,
+  });
+
   assert.equal(h.status, "gagal");
   assert.match(h.pesan, /tidak ditemukan di akun/);
 });
 
 test("medan wajib yang kosong jadi gagal", () => {
-  const h = siapkanEntri(
-    {
-      key: "report:2024-10-21:@skincare_official",
-      value: { tanggal: "2024-10-21" },
-    },
-    kamus,
-  );
+  const h = satu("daily-reports:all", {
+    id: "rep_003",
+    "Tanggal Laporan": "2024-10-21",
+  });
   assert.equal(h.status, "gagal");
   assert.match(h.pesan, /wajib tapi kosong/);
 });
 
-test("entitas asing dilewati, bukan gagal", () => {
-  const h = siapkanEntri({ key: "seller:1", value: { nama: "Toko" } }, kamus);
-  assert.equal(h.status, "dilewati");
+test("medan bertanda gabung ditempel, bukan saling menimpa", () => {
+  // Jawaban bebas tersebar di beberapa label; memilih salah satu berarti
+  // membuang yang lain tanpa jejak.
+  const h = satu("daily-reports:all", {
+    id: "rep_004",
+    "Tanggal Laporan": "2024-10-21",
+    userId: "usr_003",
+    Unit: "mcn",
+    GMV: 100,
+    Kendala: "Sinyal mati",
+    Catatan: "Lembur",
+  });
+
+  assert.equal(h.status, "berhasil");
+  assert.equal(h.data?.catatan, "Sinyal mati\nLembur");
 });
 
-test("kunci tanpa pemisah dilewati dengan alasan jelas", () => {
-  const h = siapkanEntri({ key: "tanpa_pemisah", value: {} }, kamus);
-  assert.equal(h.status, "dilewati");
-  assert.match(h.pesan, /pemisah/);
+test("kunci asing dilewati sekali, bukan gagal beruntun", () => {
+  const hasil = siapkanKunci(
+    { key: "sellers:all", value: [{ id: "s1" }, { id: "s2" }] },
+    kamus,
+  );
+  assert.equal(hasil.length, 1);
+  assert.equal(hasil[0].status, "dilewati");
 });
 
-test("nilai kosong jadi gagal", () => {
-  const h = siapkanEntri({ key: "account:@a", value: null }, kamus);
+test("catatan kosong jadi gagal", () => {
+  const h = satu("affiliate-accounts:all", null);
   assert.equal(h.status, "gagal");
 });
 
 test("email disimpan huruf kecil", () => {
-  const h = siapkanEntri(
-    {
-      key: "user:1",
-      value: {
-        id: "1",
-        nama_lengkap: "Rian Hidayat",
-        email: "RIAN@alkahfi.co.id",
-        role: "Staff",
-        aktif: true,
-      },
-    },
-    kamus,
-  );
+  const h = satu("users:list", {
+    id: "usr_003",
+    name: "Rian Hidayat",
+    email: "RIAN@contoh.id",
+    role: "Staff",
+    active: true,
+  });
   assert.equal(h.status, "berhasil");
-  assert.equal(h.data?.email, "rian@alkahfi.co.id");
+  assert.equal(h.data?.email, "rian@contoh.id");
 });
 
 test("kolom berisi nilai bawaan tidak diambil dari data lama", () => {
-  const h = siapkanEntri(
+  const h = satu("users:list", {
+    id: "usr_003",
+    name: "A",
+    email: "a@b.co",
+    role: "Staff",
+    active: true,
+    department_id: "jangan-dipakai",
+  });
+  assert.equal("department_id" in (h.data ?? {}), false);
+});
+
+test("catatan tanpa id tetap punya kunci lama yang khas", () => {
+  // Tanpa penanda, dua catatan yang sama-sama tanpa id tidak bisa
+  // dibedakan saat unggahan diulang.
+  const hasil = siapkanKunci(
     {
-      key: "user:1",
-      value: {
-        id: "1",
-        nama_lengkap: "A",
-        email: "a@b.co",
-        role: "Staff",
-        aktif: true,
-        department_id: "jangan-dipakai",
-      },
+      key: "attendance:config",
+      value: { jamMasuk: "08:00", jamPulang: "17:00" },
     },
     kamus,
   );
-  assert.equal("department_id" in (h.data ?? {}), false);
+  assert.equal(hasil.length, 1);
+  assert.equal(hasil[0].kunciLama, "attendance:config:#0");
 });
 
 // --- Urutan & ringkasan ----------------------------------------------
 
-test("entri diurutkan sesuai ketergantungan entitas", () => {
-  // Laporan menunjuk akun; memindahkannya lebih dulu akan gagal beruntun.
+test("kunci diurutkan sesuai ketergantungannya", () => {
+  // Laporan menunjuk akun; memetakannya lebih dulu akan gagal beruntun.
   const hasil = siapkanSemua(
     [
-      { key: "report:2024-10-24:@skincare_official", value: {} },
-      { key: "user:1", value: {} },
-      { key: "account:@x", value: {} },
+      { key: "daily-reports:all", value: [] },
+      { key: "users:list", value: [] },
+      { key: "affiliate-accounts:all", value: [] },
     ],
     kamus,
   );
+  // Kunci kosong tidak menghasilkan baris, jadi yang diperiksa urutan
+  // kuncinya lewat kunci berisi satu catatan.
+  const berisi = siapkanSemua(
+    [
+      { key: "daily-reports:all", value: [{ id: "r" }] },
+      { key: "users:list", value: [{ id: "u" }] },
+      { key: "affiliate-accounts:all", value: [{ id: "a" }] },
+    ],
+    kamus,
+  );
+  assert.deepEqual(hasil, []);
   assert.deepEqual(
-    hasil.map((h) => h.entitas),
-    ["user", "account", "report"],
+    berisi.map((h) => h.entitas),
+    ["users:list", "affiliate-accounts:all", "daily-reports:all"],
   );
 });
 
@@ -209,4 +236,76 @@ test("ringkasan menghitung tiap status per entitas", () => {
   const user = r.find((x) => x.entitas === "user");
   assert.equal(user?.berhasil, 1);
   assert.equal(user?.gagal, 1);
+});
+
+// --- Ejaan medan lama -------------------------------------------------
+
+test("medan camelCase dibaca apa adanya, tidak diubah bentuknya", () => {
+  // Ekspor lama memakai camelCase; mengubahnya menjadi snake_case dulu
+  // akan membuat seluruh pencarian medan meleset.
+  const h = satu("affiliate-accounts:all", {
+    id: "acc_001",
+    username: "@skincare_official",
+    division: "affiliator",
+    picId: "usr_003",
+    coLeaderId: "usr_005",
+    active: true,
+  });
+
+  assert.equal(h.status, "berhasil");
+  assert.equal(h.data?.pic_user_id, "user-rian");
+  assert.equal(h.data?.co_leader_id, "user-dewi");
+  assert.equal(h.data?.id_lama, "acc_001");
+});
+
+test("medan berlabel berspasi dibaca utuh, bukan dipotong", () => {
+  // Formulir lama memakai judul pertanyaan sebagai nama medan.
+  const h = satu("daily-reports:all", {
+    id: "rep_9",
+    "Tanggal Laporan": "2024-10-24",
+    userId: "usr_003",
+    Unit: "mcn",
+    GMV: "13.160.000",
+    "Jumlah Upload": "7",
+  });
+
+  assert.equal(h.status, "berhasil");
+  assert.equal(h.data?.gmv, 13160000);
+  assert.equal(h.data?.jumlah_upload, 7);
+  assert.equal(h.data?.unit_id, "unit-mcn");
+});
+
+test("medan yang tidak ada di pemetaan tidak ikut tertulis", () => {
+  // Kolom tujuan hanya yang disebut pemetaan; medan lain yang kebetulan
+  // bernama sama dengan kolom V2 tidak boleh menyelinap masuk.
+  const h = satu("users:list", {
+    id: "usr_003",
+    name: "Rian",
+    email: "rian@contoh.id",
+    role: "Staff",
+    active: true,
+    status: "diretas",
+    department_id: "jangan-dipakai",
+  });
+
+  assert.equal(h.status, "berhasil");
+  assert.equal("department_id" in (h.data ?? {}), false);
+  // `status` memang kolom tujuan, tetapi sumbernya `active` — bukan
+  // medan bernama status di data lama.
+  assert.equal(h.data?.status, true);
+});
+
+test("ejaan medan yang berbeda tipis tidak dianggap sama", () => {
+  // `userid` bukan `userId`: yang pertama akan membuat laporannya tidak
+  // punya pelapor sama sekali.
+  const h = satu("daily-reports:all", {
+    id: "rep_10",
+    "Tanggal Laporan": "2024-10-24",
+    userid: "usr_003",
+    Unit: "mcn",
+    GMV: 1000,
+  });
+
+  assert.equal(h.status, "gagal");
+  assert.match(h.pesan, /userId wajib tapi kosong/);
 });

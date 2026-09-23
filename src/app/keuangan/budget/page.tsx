@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { redirect } from "next/navigation";
+import { ArrowLeft, History } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
+import { AksesDitolak } from "@/components/layout/akses-ditolak";
 import { BandingRealisasi } from "@/components/budget/banding-realisasi";
 import { DaftarAnggaran } from "@/components/budget/daftar-anggaran";
 import { DaftarAlokasi } from "@/components/budget/daftar-alokasi";
@@ -46,7 +47,15 @@ export default async function BudgetPage({
   if (!pengguna) redirect("/masuk");
 
   // Angka perusahaan: hanya Finance, Manager, dan CEO.
-  if (!bolehLihatKeuangan(pengguna.role)) notFound();
+  if (!bolehLihatKeuangan(pengguna.role)) {
+    return (
+      <AksesDitolak
+        pengguna={pengguna}
+        halaman="Budget"
+        siapa="Finance, Manager, dan CEO"
+      />
+    );
+  }
 
   const [anggaran, alokasi, transaksi, pilihan] = await Promise.all([
     daftarAnggaran(pengguna),
@@ -119,6 +128,13 @@ export default async function BudgetPage({
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/keuangan/budget/riwayat"
+              className="tekan-halus sentuh-nyaman inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-[13px] leading-[18px] font-semibold ring-1 ring-border-subtle"
+            >
+              <History className="size-3.5" />
+              Riwayat pagu
+            </Link>
             <DialogAlokasi
               pilihan={pilihan}
               periodeBawaan={periode}
@@ -128,7 +144,7 @@ export default async function BudgetPage({
           </div>
         </div>
 
-        <CatatanDataContoh pesan="Pagu anggaran masih data contoh; realisasinya sudah dihitung dari transaksi yang tersimpan." />
+        <CatatanDataContoh pesan="Mode demo: pagu dan pengajuan alokasi diperiksa, tetapi tidak tersimpan. Realisasinya dihitung dari transaksi contoh." />
 
         <SaringAnggaran
           saringan={saringan}

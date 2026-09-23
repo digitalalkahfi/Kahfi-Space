@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { ArrowLeft, FileDown } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
+import { AksesDitolak } from "@/components/layout/akses-ditolak";
 import { CatatanDataContoh } from "@/components/shared/catatan-data-contoh";
 import { TabelLaporan } from "@/components/keuangan/tabel-laporan";
 import { Waterfall } from "@/components/keuangan/waterfall";
@@ -37,7 +38,15 @@ export default async function LaporanKeuanganPage({
     peranValid(params.persona) ? params.persona : undefined,
   );
   if (!pengguna) redirect("/masuk");
-  if (!bolehLihatKeuangan(pengguna.role)) notFound();
+  if (!bolehLihatKeuangan(pengguna.role)) {
+    return (
+      <AksesDitolak
+        pengguna={pengguna}
+        halaman="Laporan Keuangan"
+        siapa="Finance, Manager, dan CEO"
+      />
+    );
+  }
 
   const hariIni =
     modeData() === "demo"

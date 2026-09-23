@@ -13,28 +13,29 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { menuPendampingTerlihat } from "@/lib/navigasi";
+import type { LucideIcon } from "lucide-react";
+
+export type IsiLaci = {
+  href: string;
+  label: string;
+  keterangan: string;
+  icon: LucideIcon;
+};
 
 /**
- * Laci menu pendamping untuk mobile.
+ * Laci menu untuk mobile.
  *
- * Dock bawah hanya memuat lima menu utama PRD §2, jadi tanpa laci ini
- * Keuangan, Aset, Sampel, dan sisanya hanya bisa dibuka dari desktop —
- * yang keliru untuk aplikasi yang dipakai dari HP.
+ * Dock bawah hanya memuat lima ikon, jadi tanpa laci ini Keuangan,
+ * Aset, Sampel, dan sisanya hanya bisa dibuka dari desktop — yang
+ * keliru untuk aplikasi yang dipakai dari HP.
+ *
+ * Isinya dititipkan `BottomNav`, bukan dihitung di sini: dock dan laci
+ * dua bagian dari satu daftar yang sama, dan menghitungnya dua kali
+ * membuat sebuah menu bisa muncul di keduanya — atau di tidak satu pun.
  */
-export function MenuLainnya({
-  bolehKeuangan,
-  bolehMigrasi,
-}: {
-  bolehKeuangan: boolean;
-  bolehMigrasi: boolean;
-}) {
+export function MenuLainnya({ menu }: { menu: IsiLaci[] }) {
   const [buka, setBuka] = useState(false);
   const pathname = usePathname();
-  const menu = menuPendampingTerlihat({
-    keuangan: bolehKeuangan,
-    migrasi: bolehMigrasi,
-  });
   const adaYangAktif = menu.some((m) => pathname.startsWith(m.href));
 
   return (

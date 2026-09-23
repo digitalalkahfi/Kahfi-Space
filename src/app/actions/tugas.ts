@@ -83,18 +83,33 @@ export async function ubahStatusTugas(
     );
   }
 
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+
   if (modeData() === "demo") return BALASAN_DEMO;
 
   const sb = await klienServer();
-  const { error } = await sb
+  // `select()` bukan hiasan: RLS menolak dengan cara TIDAK mencocokkan
+  // barisnya, bukan dengan galat. Tanpa memeriksa baris yang benar-benar
+  // tersentuh, perpindahan yang ditolak akan dilaporkan sebagai berhasil
+  // dan kartunya tetap pindah di layar.
+  const { data, error } = await sb
     .from("tasks")
     .update(
       status === "menunggu_qc"
         ? { status, hasil_kerja: hasilKerja?.trim() ?? "" }
         : { status },
     )
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
+
   if (error) return gagal(`Gagal menyimpan: ${error.message}`);
+  if ((data ?? []).length === 0) {
+    return gagal(
+      "Tugas itu tidak ada, atau bukan tugas yang boleh kamu pindahkan.",
+      "izin",
+    );
+  }
 
   revalidatePath("/tugas");
   revalidatePath("/beranda");
@@ -118,16 +133,28 @@ export async function periksaTugas(
   }
   if (modeData() === "demo") return BALASAN_DEMO;
 
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+
   const sb = await klienServer();
-  const { error } = await sb
+  const { data, error } = await sb
     .from("tasks")
     .update({ qc_status: hasil, qc_note: catatan.trim() })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id");
 
   if (error) {
     return error.message.includes("Pemeriksaan (QC)")
       ? gagal("Pemeriksaan harus dilakukan pemberi tugas atau atasan.", "izin")
       : gagal(`Gagal menyimpan: ${error.message}`);
+  }
+  // Sama seperti `ubahStatusTugas`: RLS menolak tanpa galat, jadi yang
+  // menentukan adalah ada tidaknya baris yang tersentuh.
+  if ((data ?? []).length === 0) {
+    return gagal(
+      "Tugas itu tidak ada, atau bukan tugas yang boleh kamu periksa.",
+      "izin",
+    );
   }
 
   revalidatePath("/tugas");

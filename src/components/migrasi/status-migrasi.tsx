@@ -3,16 +3,8 @@ import { Card } from "@/components/ui/card";
 import { TombolTutupJalan } from "@/components/migrasi/tombol-tutup-jalan";
 import { cn } from "@/lib/utils";
 import { tanggalPanjang } from "@/lib/format";
-import {
-  ENTITAS_MIGRASI,
-  GAYA_STATUS,
-  jumlahGagal,
-  LABEL_STATUS,
-  tuntas,
-  type JalanMigrasi,
-  type RingkasEntitas,
-} from "@/lib/migrasi";
-import type { CatatanMigrasi } from "@/lib/data/migrasi";
+import { ENTITAS_MIGRASI, type JalanMigrasi } from "@/lib/migrasi";
+import type { CatatanMigrasi, RingkasKelompokJalan } from "@/lib/data/migrasi";
 
 /** Keadaan awal: sistem lama belum pernah disentuh. */
 export function BelumAdaMigrasi({ demo }: { demo: boolean }) {
@@ -38,8 +30,8 @@ export function BelumAdaMigrasi({ demo }: { demo: boolean }) {
 }
 
 /** Urutan entitas beserta hasilnya. */
-export function TabelEntitas({ ringkas }: { ringkas: RingkasEntitas[] }) {
-  const perEntitas = new Map(ringkas.map((r) => [r.entitas, r]));
+export function TabelEntitas({ ringkas }: { ringkas: RingkasKelompokJalan[] }) {
+  const perEntitas = new Map(ringkas.map((r) => [r.kelompok, r]));
 
   return (
     <Card className="kartu-interaktif rounded-3xl shadow-card ring-border-subtle">
@@ -54,7 +46,7 @@ export function TabelEntitas({ ringkas }: { ringkas: RingkasEntitas[] }) {
       <ol className="space-y-2 px-5">
         {ENTITAS_MIGRASI.map((e, i) => {
           const r = perEntitas.get(e.kunci);
-          const selesai = r && r.menunggu === 0 && r.gagal === 0;
+          const selesai = r && r.tertahan === 0 && r.diperiksa > 0;
 
           return (
             <li
@@ -66,7 +58,7 @@ export function TabelEntitas({ ringkas }: { ringkas: RingkasEntitas[] }) {
                   "flex size-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold",
                   selesai
                     ? "bg-ok-fill text-ok-text"
-                    : r && r.gagal > 0
+                    : r && r.tertahan > 0
                       ? "bg-danger-fill text-danger-text"
                       : "bg-card text-muted-foreground",
                 )}
@@ -83,19 +75,19 @@ export function TabelEntitas({ ringkas }: { ringkas: RingkasEntitas[] }) {
                 </span>
                 {r ? (
                   <span className="tabular mt-1 flex flex-wrap gap-1">
-                    {(["berhasil", "dilewati", "gagal", "menunggu"] as const)
-                      .filter((k) => r[k] > 0)
-                      .map((k) => (
-                        <span
-                          key={k}
-                          className={cn(
-                            "rounded-full px-2 py-0.5 text-[10px] leading-[14px] font-semibold",
-                            GAYA_STATUS[k],
-                          )}
-                        >
-                          {r[k]} {LABEL_STATUS[k].toLowerCase()}
-                        </span>
-                      ))}
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] leading-[14px] font-semibold text-muted-foreground">
+                      {r.diperiksa} diperiksa
+                    </span>
+                    {r.ditulis > 0 ? (
+                      <span className="rounded-full bg-ok-fill px-2 py-0.5 text-[10px] leading-[14px] font-semibold text-ok-text">
+                        {r.ditulis} ditulis
+                      </span>
+                    ) : null}
+                    {r.tertahan > 0 ? (
+                      <span className="rounded-full bg-warn-fill px-2 py-0.5 text-[10px] leading-[14px] font-semibold text-warn-text">
+                        {r.tertahan} tertahan
+                      </span>
+                    ) : null}
                   </span>
                 ) : (
                   <span className="mt-1 block text-[11px] leading-[14px] text-muted-foreground">
@@ -118,13 +110,16 @@ export function RingkasJalan({
   bolehTutup = false,
 }: {
   jalan: JalanMigrasi;
-  ringkas: RingkasEntitas[];
+  ringkas: RingkasKelompokJalan[];
   /** CEO/Manager boleh menutup jalan yang tersangkut terbuka. */
   bolehTutup?: boolean;
 }) {
-  const gagal = jumlahGagal(ringkas);
-  const beres = tuntas(ringkas);
-  const total = ringkas.reduce((a, r) => a + r.total, 0);
+  // "Tertahan" bukan "gagal": sebagian besar memang sengaja tidak
+  // dipindahkan — menunggu keputusan orang, atau sudah ada di V2.
+  const tertahan = ringkas.reduce((a, r) => a + r.tertahan, 0);
+  const ditulis = ringkas.reduce((a, r) => a + r.ditulis, 0);
+  const beres = ringkas.length > 0 && tertahan === 0;
+  const total = ringkas.reduce((a, r) => a + r.diperiksa, 0);
 
   return (
     <Card className="kartu-interaktif rounded-3xl shadow-card ring-border-subtle">
@@ -160,19 +155,20 @@ export function RingkasJalan({
         </span>
       </div>
 
-      {gagal > 0 ? (
-        <p className="mx-5 flex items-start gap-2 rounded-2xl bg-danger-fill px-4 py-2.5 text-[13px] leading-[18px] text-danger-text">
+      {tertahan > 0 ? (
+        <p className="mx-5 flex items-start gap-2 rounded-2xl bg-warn-fill px-4 py-2.5 text-[13px] leading-[18px] text-warn-text">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" />
           <span className="text-pretty">
-            {gagal} entri gagal dipindahkan. Migrasi belum boleh dianggap
-            selesai sebelum semuanya tertangani.
+            {tertahan} catatan tertahan dan {ditulis} ditulis. Tertahan belum
+            tentu rusak — sebagian memang menunggu keputusan orang, sebagian
+            sudah ada di V2. Rinciannya ada di daftar di bawah.
           </span>
         </p>
       ) : beres ? (
         <p className="mx-5 flex items-start gap-2 rounded-2xl bg-ok-fill px-4 py-2.5 text-[13px] leading-[18px] text-ok-text">
           <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
           <span className="text-pretty">
-            Seluruh entri sudah diperiksa dan tidak ada yang gagal.
+            Seluruh catatan sudah diperiksa dan tidak ada yang tertahan.
           </span>
         </p>
       ) : (
@@ -215,13 +211,8 @@ export function DaftarBermasalah({ daftar }: { daftar: CatatanMigrasi[] }) {
         {daftar.map((c) => (
           <li key={c.id} className="rounded-2xl bg-muted/50 px-3 py-2.5">
             <p className="flex flex-wrap items-center gap-1.5">
-              <span
-                className={cn(
-                  "rounded-full px-2 py-0.5 text-[10px] leading-[14px] font-semibold",
-                  GAYA_STATUS[c.status],
-                )}
-              >
-                {LABEL_STATUS[c.status]}
+              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] leading-[14px] font-semibold text-muted-foreground">
+                tertahan
               </span>
               <span className="text-[11px] leading-[14px] text-muted-foreground">
                 {c.entitas}

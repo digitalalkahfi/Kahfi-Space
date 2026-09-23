@@ -16,6 +16,14 @@ import { Button } from "@/components/ui/button";
 import { InputGmv } from "@/components/laporan-harian/input-gmv";
 import { cn } from "@/lib/utils";
 import { jamWib, rupiahPenuh, tanggalPendek } from "@/lib/format";
+import { RincianRevisi } from "@/components/laporan-harian/rincian-revisi";
+import {
+  bersihkanIsi,
+  MAKS_KOMISI,
+  MAKS_UPLOAD,
+  periksaIsiLaporan,
+  punyaKolom,
+} from "@/lib/laporan";
 import { perbaikiLaporan } from "@/app/actions/laporan";
 import type { LaporanHarian, RevisiLaporan } from "@/lib/types";
 
@@ -37,15 +45,30 @@ export function DialogRevisi({
   olehNama: string;
   onSimpan: (revisi: RevisiLaporan) => void;
 }) {
+  const unit = laporan.departemen;
   const [buka, setBuka] = useState(false);
   const [gmvBaru, setGmvBaru] = useState(laporan.gmv);
+  const [komisiBaru, setKomisiBaru] = useState(laporan.komisi ?? 0);
+  const [uploadBaru, setUploadBaru] = useState(laporan.jumlahUpload ?? 0);
   const [alasan, setAlasan] = useState("");
   const [menyimpan, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
 
-  const berubah = gmvBaru !== laporan.gmv && gmvBaru > 0;
+  const isiBaru = bersihkanIsi(unit, {
+    gmv: gmvBaru,
+    komisi: komisiBaru,
+    jumlahUpload: uploadBaru,
+    catatan: laporan.catatan,
+  });
+  // Perbaikan boleh menyentuh angka mana pun; yang wajib hanya ada yang
+  // benar-benar berubah, dan alasannya.
+  const berubah =
+    isiBaru.gmv !== laporan.gmv ||
+    isiBaru.komisi !== (laporan.komisi ?? null) ||
+    isiBaru.jumlahUpload !== (laporan.jumlahUpload ?? null);
+  const salah = periksaIsiLaporan(unit, isiBaru);
   const alasanCukup = alasan.trim().length >= MIN_ALASAN;
-  const bisaSimpan = berubah && alasanCukup;
+  const bisaSimpan = berubah && !salah && alasanCukup;
   const selisih = gmvBaru - laporan.gmv;
 
   const simpan = () => {
@@ -55,7 +78,9 @@ export function DialogRevisi({
     mulai(async () => {
       const hasil = await perbaikiLaporan({
         reportId: laporan.id,
-        gmv: gmvBaru,
+        gmv: isiBaru.gmv,
+        komisi: isiBaru.komisi,
+        jumlahUpload: isiBaru.jumlahUpload,
         alasan: alasan.trim(),
       });
 
@@ -65,11 +90,18 @@ export function DialogRevisi({
         return;
       }
 
+      const ubahKomisi = isiBaru.komisi !== (laporan.komisi ?? null);
+      const ubahUpload =
+        isiBaru.jumlahUpload !== (laporan.jumlahUpload ?? null);
       onSimpan({
         id: `rev-${Date.now()}`,
         reportId: laporan.id,
         gmvLama: laporan.gmv,
-        gmvBaru,
+        gmvBaru: isiBaru.gmv,
+        komisiLama: ubahKomisi ? (laporan.komisi ?? 0) : null,
+        komisiBaru: ubahKomisi ? isiBaru.komisi : null,
+        uploadLama: ubahUpload ? (laporan.jumlahUpload ?? 0) : null,
+        uploadBaru: ubahUpload ? isiBaru.jumlahUpload : null,
         alasan: alasan.trim(),
         diubahOleh: olehNama,
         createdAt: new Date().toISOString(),
@@ -86,6 +118,8 @@ export function DialogRevisi({
         setBuka(v);
         if (v) {
           setGmvBaru(laporan.gmv);
+          setKomisiBaru(laporan.komisi ?? 0);
+          setUploadBaru(laporan.jumlahUpload ?? 0);
           setAlasan("");
         }
       }}
@@ -106,8 +140,8 @@ export function DialogRevisi({
         <DialogHeader>
           <DialogTitle>Perbaiki laporan</DialogTitle>
           <DialogDescription>
-            {laporan.label} · {tanggalPendek(laporan.tanggal)}. Perubahan angka
-            GMV selalu meninggalkan jejak.
+            {laporan.label} · {tanggalPendek(laporan.tanggal)}. Setiap angka
+            yang berubah selalu meninggalkan jejak.
           </DialogDescription>
         </DialogHeader>
 
@@ -157,6 +191,55 @@ export function DialogRevisi({
             <InputGmv id="gmv-revisi" nilai={gmvBaru} onUbah={setGmvBaru} />
           </div>
 
+          {punyaKolom(unit, "komisi") || punyaKolom(unit, "jumlahUpload") ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {punyaKolom(unit, "komisi") ? (
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="komisi-revisi"
+                    className="text-[13px] leading-[18px] font-semibold"
+                  >
+                    Komisi diterima
+                  </label>
+                  <InputGmv
+                    id="komisi-revisi"
+                    ringkas
+                    label="komisi"
+                    maks={MAKS_KOMISI}
+                    nilai={komisiBaru}
+                    onUbah={setKomisiBaru}
+                  />
+                </div>
+              ) : null}
+
+              {punyaKolom(unit, "jumlahUpload") ? (
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="upload-revisi"
+                    className="text-[13px] leading-[18px] font-semibold"
+                  >
+                    Jumlah upload
+                  </label>
+                  <InputGmv
+                    id="upload-revisi"
+                    ringkas
+                    label="jumlah upload"
+                    prefix="×"
+                    maks={MAKS_UPLOAD}
+                    nilai={uploadBaru}
+                    onUbah={setUploadBaru}
+                  />
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+
+          {salah ? (
+            <p className="text-[11px] leading-[14px] font-semibold text-warn-text">
+              {salah}
+            </p>
+          ) : null}
+
           <div className="space-y-1.5">
             <label
               htmlFor="alasan"
@@ -196,9 +279,7 @@ export function DialogRevisi({
               <ul className="space-y-2">
                 {jejak.map((r) => (
                   <li key={r.id} className="rounded-xl bg-muted/60 px-3 py-2.5">
-                    <p className="tabular text-[11px] leading-[14px] font-semibold">
-                      {rupiahPenuh(r.gmvLama)} → {rupiahPenuh(r.gmvBaru)}
-                    </p>
+                    <RincianRevisi revisi={r} className="text-[11px]" />
                     <p className="mt-0.5 text-[11px] leading-[14px] text-muted-foreground">
                       {r.alasan}
                     </p>

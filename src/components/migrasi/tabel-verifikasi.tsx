@@ -1,7 +1,11 @@
 import { CheckCircle2, TriangleAlert } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { nilaiBaris, type BarisVerifikasi } from "@/lib/migrasi";
+import {
+  kolomTanpaSumber,
+  nilaiBaris,
+  type BarisVerifikasi,
+} from "@/lib/migrasi";
 
 /**
  * Perbandingan jumlah baris: sumber, yang tercatat pindah, dan yang
@@ -109,6 +113,19 @@ export function TabelVerifikasi({ daftar }: { daftar: BarisVerifikasi[] }) {
               >
                 {nilai.keterangan}
               </p>
+
+              {/* Kolom yang memang tidak ada di K-Space lama. Tanpa
+                  keterangan ini, kolom kosong pada laporan lama terbaca
+                  sebagai data yang hilang saat migrasi. */}
+              {kolomTanpaSumber(baris.entitas).length > 0 ? (
+                <p className="mt-1 text-[11px] leading-[14px] text-pretty text-muted-foreground">
+                  Tetap kosong setelah pindah karena tidak ada di data lama:{" "}
+                  <span className="font-mono">
+                    {kolomTanpaSumber(baris.entitas).join(", ")}
+                  </span>
+                  .
+                </p>
+              ) : null}
             </li>
           ))}
         </ul>

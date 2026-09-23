@@ -6,6 +6,8 @@ import { klienServer } from "@/lib/supabase/server";
 import { sesiSaatIni } from "@/lib/data/sesi";
 import { bolehKelolaAkun } from "@/lib/data/akun";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
+import { levelSah, LEVEL_MAKS, LEVEL_MIN } from "@/lib/batas-minimum";
+import { kodeUnitSah } from "@/lib/unit-pelaporan";
 import type { KodeUnit } from "@/lib/types";
 
 /** Username akun: diawali @, huruf/angka/titik/garis bawah. */
@@ -56,7 +58,8 @@ export async function ubahPicAkun(input: {
       .eq("id", input.picId)
       .maybeSingle();
 
-    if (galatCalon) return gagal(`Gagal memeriksa calon PIC: ${galatCalon.message}`);
+    if (galatCalon)
+      return gagal(`Gagal memeriksa calon PIC: ${galatCalon.message}`);
     if (!calon || calon.status !== "aktif") {
       return gagal("Calon PIC tidak aktif.", "validasi");
     }
@@ -194,7 +197,10 @@ export async function ubahCoLeaderAkun(input: {
   const pengguna = await sesiSaatIni();
   if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
   if (!bolehKelolaAkun(pengguna)) {
-    return gagal("Hanya CEO atau Manager yang boleh mengubah co-leader.", "izin");
+    return gagal(
+      "Hanya CEO atau Manager yang boleh mengubah co-leader.",
+      "izin",
+    );
   }
 
   const sb = await klienServer();
@@ -225,7 +231,10 @@ export async function ubahCoLeaderAkun(input: {
       return gagal("Co-leader akun harus Leader atau Co-Leader.", "validasi");
     }
     if (calon.unit_id !== akun.unit_id) {
-      return gagal("Co-leader harus berasal dari unit akun tersebut.", "validasi");
+      return gagal(
+        "Co-leader harus berasal dari unit akun tersebut.",
+        "validasi",
+      );
     }
   }
 
@@ -283,4 +292,135 @@ export async function ubahProgramAkun(input: {
 
   segarkan();
   return sukses(undefined, "Program akun diperbarui.");
+}
+
+/**
+ * Ubah level sebuah akun beserta alasannya.
+ *
+ * Levelnya menentukan batas minimum unggahan harian PIC-nya, jadi
+ * menaikkannya berarti menaikkan beban orang — karena itu alasannya
+ * wajib, dan jejaknya ditulis database, bukan oleh layar ini.
+ */
+export async function ubahLevelAkun(input: {
+  akunId: string;
+  level: number;
+  alasan: string;
+}): Promise<Hasil> {
+  if (!input.akunId) return gagal("Akun tidak dikenali.", "validasi");
+  if (!levelSah(input.level)) {
+    return gagal(
+      `Level harus antara ${LEVEL_MIN} dan ${LEVEL_MAKS}.`,
+      "validasi",
+    );
+  }
+  if (input.alasan.trim().length < 10) {
+    return gagal(
+      "Tulis alasan perubahan level, minimal 10 karakter.",
+      "validasi",
+    );
+  }
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (!bolehKelolaAkun(pengguna)) {
+    return gagal("Hanya CEO atau Manager yang boleh mengubah level.", "izin");
+  }
+
+  const sb = await klienServer();
+  const { error } = await sb.rpc("ubah_level_akun", {
+    p_account_id: input.akunId,
+    p_level: input.level,
+    p_alasan: input.alasan.trim(),
+  });
+
+  if (error) {
+    return error.code === "42501"
+      ? gagal("Kamu tidak berhak mengubah akun ini.", "izin")
+      : gagal(error.message, "validasi");
+  }
+
+  segarkan();
+  return sukses(undefined, `Level akun disetel ke ${input.level}.`);
+}
+
+/**
+ * Memindahkan akun ke unit lain.
+ *
+ * Bukan sekadar mengganti satu kolom: PIC dan co-leader wajib berasal
+ * dari unit akun itu (migrasi 0038 & 0061), dan programnya menempel
+ * pada unit pula. Memindahkan unit tanpa melepas ketiganya akan
+ * ditolak database — jadi dilepas di sini, secara sadar, dan
+ * pemanggilnya diberi tahu apa yang ikut terlepas.
+ */
+export async function pindahUnitAkun(input: {
+  akunId: string;
+  unitKode: KodeUnit;
+}): Promise<Hasil> {
+  if (!input.akunId) return gagal("Akun tidak dikenali.", "validasi");
+  if (!kodeUnitSah(input.unitKode)) {
+    return gagal("Unit tujuan tidak dikenali.", "validasi");
+  }
+
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (!bolehKelolaAkun(pengguna)) {
+    return gagal("Hanya CEO atau Manager yang memindahkan akun.", "izin");
+  }
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const sb = await klienServer();
+  const { data: akun, error: galatAkun } = await sb
+    .from("accounts")
+    .select("unit_id, pic_user_id, co_leader_id, program_id, unit:units (kode)")
+    .eq("id", input.akunId)
+    .maybeSingle();
+
+  if (galatAkun) return gagal(`Gagal memeriksa akun: ${galatAkun.message}`);
+  if (!akun) return gagal("Akun tidak ditemukan.", "validasi");
+  if (akun.unit?.kode === input.unitKode) {
+    return gagal("Akun itu sudah berada di unit tersebut.", "validasi");
+  }
+
+  const { data: unit, error: galatUnit } = await sb
+    .from("units")
+    .select("id, nama")
+    .eq("kode", input.unitKode)
+    .maybeSingle();
+
+  if (galatUnit) return gagal(`Gagal memeriksa unit: ${galatUnit.message}`);
+  if (!unit) return gagal("Unit tujuan tidak ditemukan.", "validasi");
+
+  const { error } = await sb
+    .from("accounts")
+    .update({
+      unit_id: unit.id,
+      // Ketiganya menempel pada unit lama; tidak ada yang bisa
+      // "ikut pindah" tanpa ditunjuk ulang oleh orang.
+      pic_user_id: null,
+      co_leader_id: null,
+      program_id: null,
+    })
+    .eq("id", input.akunId);
+
+  if (error) {
+    return error.code === "42501"
+      ? gagal("Kamu tidak berhak memindahkan akun ini.", "izin")
+      : gagal(`Gagal memindahkan: ${error.message}`);
+  }
+
+  segarkan();
+
+  const dilepas = [
+    akun.pic_user_id ? "PIC" : null,
+    akun.co_leader_id ? "co-leader" : null,
+    akun.program_id ? "program" : null,
+  ].filter((x) => x !== null);
+
+  return sukses(
+    undefined,
+    dilepas.length === 0
+      ? `Akun dipindahkan ke ${unit.nama}.`
+      : `Akun dipindahkan ke ${unit.nama}; ${dilepas.join(", ")} dilepas dan perlu ditunjuk ulang.`,
+  );
 }

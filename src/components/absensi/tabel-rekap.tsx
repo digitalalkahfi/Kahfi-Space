@@ -92,6 +92,18 @@ export function TabelRekapAbsensi({
       lebar: 10,
     },
     {
+      // Terhadap jam efektif masuk: yang izin berjamnya disetujui sudah
+      // ikut diperhitungkan (migrasi 0132).
+      judul: "Menit telat",
+      ambil: (b) => b.menitTelat,
+      lebar: 12,
+    },
+    {
+      judul: "Izin s.d.",
+      ambil: (b) => b.izinSelesai?.slice(0, 5) ?? "",
+      lebar: 10,
+    },
+    {
       judul: "Lokasi valid",
       ambil: (b) => (b.jamMasuk ? (b.lokasiValid ? "Ya" : "Tidak") : "—"),
       lebar: 12,

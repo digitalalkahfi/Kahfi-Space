@@ -6,6 +6,7 @@ import {
   puncakRapi,
   skalaGrafik,
   teksSatuan,
+  GAYA_GARIS_PEMBANDING,
 } from "@/lib/grafik";
 
 const deret = (...nilai: number[]) =>
@@ -119,4 +120,34 @@ test("teksSatuan memakai format sesuai satuannya", () => {
   assert.equal(teksSatuan(34_200_000, "rupiah", { prefix: false }), "34,2 Jt");
   assert.equal(teksSatuan(342_163, "angka"), "342.163");
   assert.equal(teksSatuan(91.2, "persen"), "91,2%");
+});
+
+test("garis minimum dan garis target tidak bisa tertukar", () => {
+  const { target, minimum } = GAYA_GARIS_PEMBANDING;
+
+  // Bukan sekadar "berbeda string": keduanya harus berbeda pada dua
+  // sumbu sekaligus — pola dan warna — supaya tetap terbedakan di layar
+  // monokrom maupun oleh mata yang sulit membedakan warna.
+  assert.ok(
+    !target.garis.includes("dashed") && minimum.garis.includes("dashed"),
+    "hanya garis minimum yang putus-putus",
+  );
+  // Dilebarkan ke string dulu: `as const` membuat tsc menganggap
+  // perbandingan dua literal yang berbeda sebagai kekeliruan penulisan,
+  // padahal justru perbedaan itu yang sedang diuji.
+  const beda = (a: string, b: string) => a !== b;
+  assert.ok(
+    beda(target.garis, minimum.garis) && beda(target.label, minimum.label),
+    "gaya dan namanya berbeda",
+  );
+
+  // Legenda memakai gaya yang sama dengan garisnya; contoh yang tidak
+  // cocok dengan garisnya lebih buruk daripada tidak ada legenda.
+  for (const g of [target, minimum]) {
+    const inti = g.garis.split(" ");
+    assert.ok(
+      inti.every((k) => g.swatch.includes(k)),
+      `swatch ${g.label} harus memuat gaya garisnya`,
+    );
+  }
 });

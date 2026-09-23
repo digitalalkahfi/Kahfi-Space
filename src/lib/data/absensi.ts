@@ -5,6 +5,7 @@ import "server-only";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { dataContoh } from "@/lib/data/contoh";
+import { jamEfektifMasuk, menitTelat } from "@/lib/izin";
 import { KANTOR, jarakDariKantor } from "@/lib/geo";
 import type { Pengguna, StatusAbsen } from "@/lib/types";
 
@@ -97,7 +98,11 @@ export async function absensiHariIni(
 ): Promise<AbsensiHariIni> {
   if (modeData() === "demo") {
     const { attendance, daily_reports, accounts } = dataContoh;
-    const a = attendance.find((x) => x.user === pengguna.nama);
+    // Harus dicocokkan tanggalnya: seed menyimpan beberapa hari
+    // sekaligus, dan baris pertama milik orang itu belum tentu hari ini.
+    const a = attendance.find(
+      (x) => x.user === pengguna.nama && x.tanggal === tanggal,
+    );
     const akunSaya = accounts.filter((x) => x.pic === pengguna.nama);
     const unitBerakun = new Set(accounts.map((a) => a.unit));
     const wajibLapor =
@@ -189,11 +194,30 @@ export type BarisRekapAbsensi = {
   jamMasuk: string | null;
   jamPulang: string | null;
   terlambat: boolean;
+  /** Menit telat terhadap jam efektif masuk (migrasi 0132/0135). */
+  menitTelat: number;
+  /** Jam selesai izin berjam yang disetujui hari itu, bila ada. */
+  izinSelesai: string | null;
   lokasiValid: boolean;
   jarakMeter: number | null;
   alasan: string;
   sudahLapor: boolean;
 };
+
+/** Batas masuk mode demo: 08:00 + toleransi 15 menit (migrasi 0010). */
+const BATAS_MASUK_DEMO = "08:15";
+
+/** Jam WIB dari cap waktu ISO. */
+function jamLokalWib(iso: string) {
+  return new Date(iso)
+    .toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Jakarta",
+    })
+    .slice(0, 5);
+}
 
 /**
  * Rekap kehadiran satu rentang tanggal.
@@ -225,16 +249,37 @@ export async function rekapAbsensi(
           ? (units.find((x) => x.kode === u.unit)?.nama.split(" (")[0] ?? "")
           : "Manajemen";
         const jarak = jarakDariKantor(a);
+        const efektif = jamEfektifMasuk(BATAS_MASUK_DEMO, {
+          jamSelesai:
+            (a as { izin_jenis?: string }).izin_jenis === "jam"
+              ? ((a as { izin_selesai?: string }).izin_selesai ?? null)
+              : null,
+          disetujui: a.persetujuan === "disetujui",
+        });
+        const telat = a.jam_masuk
+          ? menitTelat(jamLokalWib(a.jam_masuk), efektif)
+          : 0;
         return {
           nama: a.user,
           unit,
           tanggal: a.tanggal,
-          status: (a.status === "alpa"
-            ? "belum_absen"
-            : a.status) as StatusAbsen,
+          // Sama seperti `hitung_absensi`: hadir/terlambat ditentukan
+          // ulang dari jam efektif masuk.
+          status:
+            a.status === "hadir" || a.status === "terlambat"
+              ? ((telat > 0 ? "terlambat" : "hadir") as StatusAbsen)
+              : ((a.status === "alpa"
+                  ? "belum_absen"
+                  : a.status) as StatusAbsen),
           jamMasuk: a.jam_masuk ?? null,
           jamPulang: null,
-          terlambat: a.status === "terlambat",
+          terlambat: telat > 0,
+          menitTelat: telat,
+          izinSelesai:
+            (a as { izin_jenis?: string }).izin_jenis === "jam" &&
+            a.persetujuan === "disetujui"
+              ? ((a as { izin_selesai?: string }).izin_selesai ?? null)
+              : null,
           lokasiValid: jarak !== null && jarak <= KANTOR.radius,
           jarakMeter: jarak,
           alasan: a.alasan ?? "",
@@ -264,6 +309,8 @@ export async function rekapAbsensi(
     jamMasuk: b.jam_masuk,
     jamPulang: b.jam_pulang,
     terlambat: b.terlambat,
+    menitTelat: Number(b.menit_telat ?? 0),
+    izinSelesai: b.izin_jenis === "jam" ? b.izin_selesai : null,
     lokasiValid: b.lokasi_valid,
     jarakMeter: b.jarak_masuk_m,
     alasan: b.alasan,
@@ -277,9 +324,16 @@ export type PengajuanIzin = {
   inisial: string;
   unit: string;
   tanggal: string;
-  jenis: "izin" | "sakit";
+  /** Hari terakhir izin terencana; sama dengan `tanggal` bila sehari. */
+  sampai: string;
+  jenis: "izin" | "sakit" | "jam";
+  /** Jam izin, hanya untuk izin berjam. */
+  jamMulai: string | null;
+  jamSelesai: string | null;
   alasan: string;
   persetujuan: "diajukan" | "disetujui" | "ditolak";
+  /** Keterangan atasan saat menolak. */
+  alasanKeputusan: string;
 };
 
 /**
@@ -310,24 +364,51 @@ export async function pengajuanMenunggu(
             ? (units.find((x) => x.kode === u.unit)?.nama.split(" (")[0] ?? "")
             : "Manajemen",
           tanggal: a.tanggal,
+          sampai: a.tanggal,
           jenis: a.status as "izin" | "sakit",
+          jamMulai: null,
+          jamSelesai: null,
           alasan: a.alasan ?? "",
           persetujuan: "diajukan" as const,
+          alasanKeputusan: "",
         };
       });
   }
 
   const sb = await klienServer();
+  // Izin berjam tetap berstatus hadir/terlambat — orangnya memang masuk —
+  // jadi antrean tidak boleh disaring lewat `status` saja (migrasi 0132).
   const { data, error } = await sb
     .from("attendance")
     .select(
-      "id, tanggal, status, alasan, persetujuan, users:user_id (nama, units:unit_id (nama))",
+      `id, tanggal, status, alasan, persetujuan, alasan_keputusan,
+       izin_jenis, izin_mulai, izin_selesai,
+       users:user_id (nama, units:unit_id (nama))`,
     )
     .eq("persetujuan", "diajukan")
-    .in("status", ["izin", "sakit"])
+    // Hari lanjutan izin terencana ikut hari pertamanya; satu pengajuan,
+    // satu keputusan.
+    .is("izin_induk_id", null)
+    .or("status.in.(izin,sakit),izin_jenis.eq.jam")
     .order("tanggal", { ascending: false });
 
   if (error) throw new Error(`Gagal memuat pengajuan: ${error.message}`);
+
+  // Hari terakhir tiap izin terencana, supaya antrean bisa menyebut
+  // "3 hari" alih-alih hanya tanggal pertamanya.
+  const { data: lanjutan } = await sb
+    .from("attendance")
+    .select("izin_induk_id, tanggal")
+    .in(
+      "izin_induk_id",
+      (data ?? []).map((a) => a.id),
+    );
+  const hariTerakhir = new Map<string, string>();
+  for (const l of lanjutan ?? []) {
+    if (!l.izin_induk_id) continue;
+    const kini = hariTerakhir.get(l.izin_induk_id);
+    if (!kini || l.tanggal > kini) hariTerakhir.set(l.izin_induk_id, l.tanggal);
+  }
 
   return (data ?? []).map((a) => {
     const u = a.users as unknown as {
@@ -345,11 +426,105 @@ export async function pengajuanMenunggu(
       ).toUpperCase(),
       unit: u?.units?.nama.split(" (")[0] ?? "Manajemen",
       tanggal: a.tanggal,
-      jenis: a.status as "izin" | "sakit",
+      sampai: hariTerakhir.get(a.id) ?? a.tanggal,
+      jenis: a.izin_jenis === "jam" ? "jam" : (a.status as "izin" | "sakit"),
+      jamMulai: a.izin_mulai,
+      jamSelesai: a.izin_selesai,
       alasan: a.alasan,
       persetujuan: "diajukan" as const,
+      alasanKeputusan: a.alasan_keputusan,
     };
   });
+}
+
+/** Satu pengajuan izin milik sendiri, beserta keputusannya. */
+export type IzinSaya = {
+  id: string;
+  tanggal: string;
+  sampai: string;
+  jenis: "izin" | "sakit" | "jam";
+  jamMulai: string | null;
+  jamSelesai: string | null;
+  alasan: string;
+  persetujuan: "diajukan" | "disetujui" | "ditolak";
+  alasanKeputusan: string;
+  diputusOleh: string | null;
+};
+
+/**
+ * Pengajuan izin milik pengguna sendiri.
+ *
+ * Tanpa daftar ini, pengaju tidak punya tempat melihat keputusannya —
+ * termasuk alasan penolakan, yang justru bagian terpentingnya.
+ */
+export async function izinSaya(
+  pengguna: Pengguna,
+  sejak: string,
+  batas = 20,
+): Promise<IzinSaya[]> {
+  if (modeData() === "demo") {
+    const { attendance } = dataContoh;
+    return attendance
+      .filter((a) => a.user === pengguna.nama && a.persetujuan)
+      .sort((a, b) => b.tanggal.localeCompare(a.tanggal))
+      .slice(0, batas)
+      .map((a, i) => ({
+        id: `contoh-izin-${i}`,
+        tanggal: a.tanggal,
+        sampai: a.tanggal,
+        jenis: a.status as "izin" | "sakit",
+        jamMulai: null,
+        jamSelesai: null,
+        alasan: a.alasan ?? "",
+        persetujuan: a.persetujuan as IzinSaya["persetujuan"],
+        alasanKeputusan: "",
+        diputusOleh: null,
+      }));
+  }
+
+  const sb = await klienServer();
+  const { data, error } = await sb
+    .from("attendance")
+    .select(
+      `id, tanggal, status, alasan, persetujuan, alasan_keputusan,
+       izin_jenis, izin_mulai, izin_selesai,
+       pemutus:disetujui_oleh (nama)`,
+    )
+    .eq("user_id", pengguna.id)
+    .not("persetujuan", "is", null)
+    .is("izin_induk_id", null)
+    .gte("tanggal", sejak)
+    .order("tanggal", { ascending: false })
+    .limit(batas);
+
+  if (error) throw new Error(`Gagal memuat izin: ${error.message}`);
+
+  const induk = (data ?? []).map((a) => a.id);
+  const { data: lanjutan } = await sb
+    .from("attendance")
+    .select("izin_induk_id, tanggal")
+    .in("izin_induk_id", induk);
+
+  const hariTerakhir = new Map<string, string>();
+  for (const l of lanjutan ?? []) {
+    if (!l.izin_induk_id) continue;
+    const kini = hariTerakhir.get(l.izin_induk_id);
+    if (!kini || l.tanggal > kini) hariTerakhir.set(l.izin_induk_id, l.tanggal);
+  }
+
+  return (data ?? []).map((a) => ({
+    id: a.id,
+    tanggal: a.tanggal,
+    sampai: hariTerakhir.get(a.id) ?? a.tanggal,
+    jenis: a.izin_jenis === "jam" ? "jam" : (a.status as "izin" | "sakit"),
+    jamMulai: a.izin_mulai,
+    jamSelesai: a.izin_selesai,
+    alasan: a.alasan,
+    persetujuan: a.persetujuan as IzinSaya["persetujuan"],
+    alasanKeputusan: a.alasan_keputusan,
+    diputusOleh:
+      (a.pemutus as unknown as { nama: string } | null)?.nama ?? null,
+  }));
 }
 
 /**

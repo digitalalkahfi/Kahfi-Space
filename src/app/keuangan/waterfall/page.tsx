@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
+import { AksesDitolak } from "@/components/layout/akses-ditolak";
 import { CatatanDataContoh } from "@/components/shared/catatan-data-contoh";
 import { BandingWaterfall } from "@/components/keuangan/banding-waterfall";
 import { KontribusiUnitKartu } from "@/components/keuangan/kontribusi-unit";
@@ -37,7 +38,15 @@ export default async function WaterfallPage({
     peranValid(params.persona) ? params.persona : undefined,
   );
   if (!pengguna) redirect("/masuk");
-  if (!bolehLihatKeuangan(pengguna.role)) notFound();
+  if (!bolehLihatKeuangan(pengguna.role)) {
+    return (
+      <AksesDitolak
+        pengguna={pengguna}
+        halaman="Waterfall Keuangan"
+        siapa="Finance, Manager, dan CEO"
+      />
+    );
+  }
 
   const hariIni =
     modeData() === "demo"

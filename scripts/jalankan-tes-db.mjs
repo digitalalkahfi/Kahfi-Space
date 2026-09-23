@@ -31,6 +31,10 @@ const jalankanBerkas = (f) =>
     const anak = spawn(
       process.execPath,
       [
+        // Tes yang mengimpor modul TS aplikasi memicu peringatan
+        // MODULE_TYPELESS_PACKAGE_JSON tiga baris per berkas. Dengan 77
+        // berkas, derau itu menenggelamkan hasil tesnya sendiri.
+        "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
         "--import",
         path.join(process.cwd(), "scripts", "alias-ts.mjs"),
         path.join(DIR, f),
