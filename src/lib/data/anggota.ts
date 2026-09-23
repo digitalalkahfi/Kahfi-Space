@@ -89,7 +89,7 @@ export const KOLOM_ANGGOTA = `id, nama, email, role, jabatan, status,
    unit:units (kode, nama),
    departemen:departments (id, nama),
    program:programs (id, nama),
-   atasan:users!users_atasan_id_fkey (id, nama)` as const;
+   atasan:users!atasan_id (id, nama)` as const;
 
 type BarisAnggota = {
   id: string;
