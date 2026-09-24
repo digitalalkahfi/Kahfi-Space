@@ -84,12 +84,19 @@ export async function daftarAnggotaTim(
  * Ditulis sekali dan dipakai dua tempat — daftar tim dan profil diri —
  * karena dua salinan pilihan kolom adalah cara paling mudah membuat
  * kedua halaman menampilkan atasan yang berbeda untuk orang yang sama.
+ *
+ * Atasan disematkan lewat KOLOM kunci asingnya (`atasan_id (…)`), bukan
+ * lewat nama tabel. `users` merujuk ke `users` sendiri, dan petunjuk
+ * bernama tabel (`users!atasan_id`) dibaca PostgREST sebagai arah
+ * sebaliknya: daftar bawahan — sehingga bawahan pertama tampil sebagai
+ * "atasan". Petunjuk bernama kendala bergantung pada nama kendala di
+ * basis data yang ternyata berbeda di produksi.
  */
 export const KOLOM_ANGGOTA = `id, nama, email, role, jabatan, status,
    unit:units (kode, nama),
    departemen:departments (id, nama),
    program:programs (id, nama),
-   atasan:users!atasan_id (id, nama)` as const;
+   atasan:atasan_id (id, nama)` as const;
 
 type BarisAnggota = {
   id: string;
