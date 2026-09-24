@@ -98,6 +98,22 @@ test("Finance melapor ke CEO atau Manager, bukan ke Staff", () => {
   assert.equal(peringatanAtasan(staf, finance)[0]?.nada, "salah");
 });
 
+test("Staff tim manajemen (tanpa unit) melapor ke Manager atau CEO", () => {
+  const admin = orang("a1", "Alma", "Staff", "Manajemen");
+  assert.deepEqual(peringatanAtasan(admin, manager), []);
+  assert.deepEqual(peringatanAtasan(admin, ceo), []);
+  assert.equal(peringatanAtasan(admin, leader)[0]?.nada, "salah");
+  assert.equal(peringatanAtasan(admin, coLeader)[0]?.nada, "salah");
+
+  const semua = [ceo, manager, leader, coLeader, admin];
+  assert.deepEqual(
+    calonAtasan(semua, admin, new Set()).map((c) => c.id),
+    ["c1", "m1"],
+  );
+  assert.equal(atasanDisarankan(semua, admin)?.id, "m1", "Manager dulu");
+  assert.equal(atasanDisarankan([ceo, leader, admin], admin)?.id, "c1");
+});
+
 test("tanpa atasan tetap diberi catatan, kecuali untuk CEO", () => {
   const p = peringatanAtasan(staf, null);
   assert.equal(p.length, 1);

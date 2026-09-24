@@ -44,8 +44,13 @@ function periksa(input: MasukanAnggota): string | null {
   if (input.jabatan.trim().length < 3) return "Jabatan minimal 3 huruf.";
 
   // Unit menentukan cakupan RLS; Leader tanpa unit tidak akan melihat
-  // siapa pun, dan Staff tanpa unit tidak bisa ditagih laporan.
-  if (PERAN_BERUNIT.includes(input.role) && !input.unitKode) {
+  // siapa pun. Staff boleh tanpa unit hanya sebagai tim manajemen —
+  // langsung di bawah CEO atau Manager (dijaga aturan atasan dan 0164).
+  if (
+    PERAN_BERUNIT.includes(input.role) &&
+    !input.unitKode &&
+    input.role !== "Staff"
+  ) {
     return `${input.role} wajib ditempatkan di salah satu unit.`;
   }
   if (!PERAN_BERUNIT.includes(input.role) && input.unitKode) {

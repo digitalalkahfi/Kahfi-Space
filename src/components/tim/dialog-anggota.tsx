@@ -16,7 +16,12 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { peringkatPeran } from "@/lib/peran";
 import { URUTAN_PERAN } from "@/lib/peran";
-import { ATASAN_UNTUK, atasanDisarankan, calonAtasan } from "@/lib/atasan";
+import {
+  atasanDisarankan,
+  calonAtasan,
+  jenjangAtasan,
+  sebutPeran,
+} from "@/lib/atasan";
 import { tambahAnggota, ubahAnggota } from "@/app/actions/anggota";
 import type {
   AnggotaTim,
@@ -74,8 +79,16 @@ function Isian({
   const [atasanId, setAtasanId] = useState<string | null>(
     awal?.atasanId ?? null,
   );
+  // Staff tim manajemen: tanpa unit, langsung di bawah Manager/CEO
+  // (administrasi, tata kelola, sekretariat). Dipilih secara sadar,
+  // bukan sekadar "belum memilih unit".
+  const [timManajemen, setTimManajemen] = useState(
+    awal !== undefined && awal.role === "Staff" && awal.unitKode === null,
+  );
 
   const butuhUnit = PERAN_BERUNIT.includes(role);
+  const bolehTimManajemen = role === "Staff";
+  const unitTerpilih = unitKode !== null || (bolehTimManajemen && timManajemen);
   // CEO memang tidak punya atasan; sisanya wajib.
   const butuhAtasan = Boolean(calon) && role !== "CEO";
 
@@ -95,6 +108,7 @@ function Isian({
   };
   const calonSah = calon ? calonAtasan(calon, sintetis, new Set()) : [];
   const usulan = calon ? atasanDisarankan(calon, sintetis) : null;
+  const jenjang = jenjangAtasan(sintetis);
   // Pilihan yang tidak lagi sah setelah peran/unit berganti diganti
   // usulan, bukan dibiarkan diam-diam menunjuk orang yang salah.
   const atasanEfektif = calon
@@ -112,7 +126,7 @@ function Isian({
     nama.trim().length >= 3 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) &&
     jabatan.trim().length >= 3 &&
-    (butuhUnit ? unitKode !== null : true) &&
+    (butuhUnit ? unitTerpilih : true) &&
     (butuhAtasan ? atasanEfektif !== null : true);
 
   // Peran lintas unit tidak boleh membawa unit; dibersihkan saat berganti.
@@ -122,12 +136,20 @@ function Isian({
       setUnitKode(null);
       setProgramId(null);
     }
+    if (p !== "Staff") setTimManajemen(false);
   };
 
   // Berpindah unit membuat program lama tak lagi berlaku.
   const gantiUnit = (kode: KodeUnit) => {
     setUnitKode(kode);
     setProgramId(null);
+    setTimManajemen(false);
+  };
+
+  const pilihTimManajemen = () => {
+    setUnitKode(null);
+    setProgramId(null);
+    setTimManajemen(true);
   };
 
   return (
@@ -228,24 +250,48 @@ function Isian({
             )}
           </legend>
           {butuhUnit ? (
-            <div className="flex flex-wrap gap-1">
-              {pilihan.unit.map((u) => (
-                <button
-                  key={u.kode}
-                  type="button"
-                  onClick={() => gantiUnit(u.kode)}
-                  aria-pressed={u.kode === unitKode}
-                  className={cn(
-                    "tekan-halus h-10 rounded-xl px-3 text-[11px] font-semibold",
-                    u.kode === unitKode
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {u.nama}
-                </button>
-              ))}
-            </div>
+            <>
+              <div className="flex flex-wrap gap-1">
+                {pilihan.unit.map((u) => (
+                  <button
+                    key={u.kode}
+                    type="button"
+                    onClick={() => gantiUnit(u.kode)}
+                    aria-pressed={u.kode === unitKode}
+                    className={cn(
+                      "tekan-halus h-10 rounded-xl px-3 text-[11px] font-semibold",
+                      u.kode === unitKode
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {u.nama}
+                  </button>
+                ))}
+                {bolehTimManajemen ? (
+                  <button
+                    type="button"
+                    onClick={pilihTimManajemen}
+                    aria-pressed={timManajemen && unitKode === null}
+                    className={cn(
+                      "tekan-halus h-10 rounded-xl px-3 text-[11px] font-semibold",
+                      timManajemen && unitKode === null
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    Tim manajemen
+                  </button>
+                ) : null}
+              </div>
+              {bolehTimManajemen && timManajemen && unitKode === null ? (
+                <p className="rounded-xl bg-info-fill px-3 py-2 text-[11px] leading-[14px] text-pretty text-info-text">
+                  Tim manajemen: bekerja langsung di bawah Manager atau CEO
+                  (administrasi, tata kelola, sekretariat). Tidak masuk unit
+                  pelaporan mana pun, jadi tidak tertagih laporan unit.
+                </p>
+              ) : null}
+            </>
           ) : (
             <p className="rounded-xl bg-muted px-3 py-2 text-[11px] leading-[14px] text-muted-foreground">
               {role} bekerja lintas unit, jadi tidak ditempatkan di salah satu.
@@ -336,15 +382,18 @@ function Isian({
             </select>
             {calonSah.length === 0 ? (
               <p className="rounded-xl bg-warn-fill px-3 py-2 text-[11px] leading-[14px] text-pretty text-warn-text">
-                Belum ada {ATASAN_UNTUK[role].join(" atau ")} aktif
-                {butuhUnit && unitKode ? ` di ${unitNamaDipilih}` : ""}.
+                Belum ada {sebutPeran(jenjang.boleh)} aktif
+                {jenjang.seunit && unitKode ? ` di ${unitNamaDipilih}` : ""}.
                 Tetapkan dulu orangnya, baru anggota ini bisa ditambahkan.
               </p>
             ) : (
               <p className="text-[11px] leading-[14px] text-muted-foreground">
-                {role} melapor kepada {ATASAN_UNTUK[role].join(" atau ")}
-                {butuhUnit ? " di unitnya sendiri" : ""}. Atasan inilah yang
-                menyetujui izinnya.
+                {timManajemen && unitKode === null
+                  ? "Staff tim manajemen"
+                  : role}{" "}
+                melapor kepada {sebutPeran(jenjang.boleh)}
+                {jenjang.seunit ? " di unitnya sendiri" : ""}. Atasan inilah
+                yang menyetujui izinnya.
               </p>
             )}
           </fieldset>

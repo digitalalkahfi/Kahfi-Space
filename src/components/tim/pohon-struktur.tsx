@@ -145,7 +145,7 @@ export function PohonStruktur({
           </li>
         ))}
         <li className="text-muted-foreground">
-          · Finance melapor ke CEO atau Manager
+          · Finance dan Staff tim manajemen melapor ke CEO atau Manager
         </li>
       </ol>
 

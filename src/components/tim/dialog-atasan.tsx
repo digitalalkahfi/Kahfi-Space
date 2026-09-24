@@ -15,12 +15,14 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import {
-  ATASAN_UNTUK,
   adaManagerAktif,
   atasanDisarankan,
   calonAtasan,
+  jenjangAtasan,
   peringatanAtasan,
   sebabAtasanTakSah,
+  sebutPeran,
+  stafManajemen,
 } from "@/lib/atasan";
 import { ubahAtasan } from "@/app/actions/anggota";
 import type { AnggotaTim, MataRantai } from "@/lib/types";
@@ -75,7 +77,8 @@ export function DialogAtasan({
         ? `${atasanKini.nama} sudah nonaktif.`
         : sebabAtasanTakSah(anggota, atasanKini, opsi)
       : null;
-  const peranBoleh = ATASAN_UNTUK[anggota.role];
+  const jenjang = jenjangAtasan(anggota, opsi);
+  const sebutan = stafManajemen(anggota) ? "Staff tim manajemen" : anggota.role;
 
   const simpan = () => {
     if (menyimpan || adaYangSalah) return;
@@ -98,10 +101,8 @@ export function DialogAtasan({
           <DialogDescription>
             {anggota.role === "CEO"
               ? "CEO berada di puncak dan tidak melapor kepada siapa pun."
-              : `${anggota.role} melapor kepada ${peranBoleh.join(" atau ")}${
-                  anggota.role === "Co-Leader" || anggota.role === "Staff"
-                    ? " di unitnya sendiri"
-                    : ""
+              : `${sebutan} melapor kepada ${sebutPeran(jenjang.boleh)}${
+                  jenjang.seunit ? " di unitnya sendiri" : ""
                 }. Atasan berwenang menugasi dan menyetujui izin orang ini.`}
           </DialogDescription>
         </DialogHeader>
@@ -145,11 +146,9 @@ export function DialogAtasan({
 
         {anggota.role !== "CEO" && calon.length === 0 ? (
           <p className="rounded-2xl bg-warn-fill px-3 py-2 text-[11px] leading-[14px] text-pretty text-warn-text">
-            Belum ada {peranBoleh.join(" atau ")} aktif
-            {anggota.role === "Co-Leader" || anggota.role === "Staff"
-              ? ` di ${anggota.unitNama}`
-              : ""}
-            . Tetapkan dulu orangnya, baru atasan ini bisa dipilih.
+            Belum ada {sebutPeran(jenjang.boleh)} aktif
+            {jenjang.seunit ? ` di ${anggota.unitNama}` : ""}. Tetapkan dulu
+            orangnya, baru atasan ini bisa dipilih.
           </p>
         ) : null}
 

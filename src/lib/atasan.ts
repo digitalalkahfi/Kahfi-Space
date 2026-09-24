@@ -54,7 +54,30 @@ export const ATASAN_UNTUK: Record<Peran, readonly Peran[]> = {
 /** Peran yang atasannya harus dari unit yang sama. */
 const SEUNIT: ReadonlySet<Peran> = new Set<Peran>(["Co-Leader", "Staff"]);
 
-function sebutPeran(daftar: readonly Peran[]) {
+/** Nama unit semu bagi yang tidak ditempatkan di unit mana pun. */
+export const UNIT_MANAJEMEN = "Manajemen";
+
+/**
+ * Staff tim manajemen: tanpa unit, bekerja langsung di bawah CEO atau
+ * Manager — administrasi, tata kelola, sekretariat. Bukan bagian dari
+ * unit pelaporan mana pun, jadi tidak tertagih laporan unit.
+ */
+export function stafManajemen(a: Pick<OrangPelaporan, "role" | "unitNama">) {
+  return a.role === "Staff" && a.unitNama === UNIT_MANAJEMEN;
+}
+
+/** Ke siapa seseorang melapor menurut aturan, dan apakah harus seunit. */
+export function jenjangAtasan(
+  a: Pick<OrangPelaporan, "role" | "unitNama">,
+  opsi: OpsiAturan = {},
+): { boleh: Peran[]; seunit: boolean } {
+  if (stafManajemen(a)) return { boleh: ["Manager", "CEO"], seunit: false };
+  const boleh: Peran[] = [...ATASAN_UNTUK[a.role]];
+  if (a.role === "Leader" && opsi.adaManager === false) boleh.push("CEO");
+  return { boleh, seunit: SEUNIT.has(a.role) };
+}
+
+export function sebutPeran(daftar: readonly Peran[]) {
   if (daftar.length <= 1) return daftar.join("");
   return `${daftar.slice(0, -1).join(", ")} atau ${daftar.at(-1)}`;
 }
@@ -82,15 +105,15 @@ export function sebabAtasanTakSah(
     return "CEO berada di puncak dan tidak melapor kepada siapa pun.";
   }
 
-  const boleh: Peran[] = [...ATASAN_UNTUK[anggota.role]];
-  if (anggota.role === "Leader" && opsi.adaManager === false) {
-    boleh.push("CEO");
-  }
+  const { boleh, seunit } = jenjangAtasan(anggota, opsi);
   if (!boleh.includes(calon.role)) {
-    return `${anggota.role} melapor kepada ${sebutPeran(boleh)}, bukan kepada ${calon.role} (${calon.nama}).`;
+    const sebutan = stafManajemen(anggota)
+      ? "Staff tim manajemen"
+      : anggota.role;
+    return `${sebutan} melapor kepada ${sebutPeran(boleh)}, bukan kepada ${calon.role} (${calon.nama}).`;
   }
 
-  if (SEUNIT.has(anggota.role) && calon.unitNama !== anggota.unitNama) {
+  if (seunit && calon.unitNama !== anggota.unitNama) {
     return `${calon.nama} memimpin ${calon.unitNama}, sedangkan ${anggota.nama} di ${anggota.unitNama}. ${anggota.role} melapor ke pimpinan unitnya sendiri.`;
   }
 
@@ -172,14 +195,15 @@ export function atasanDisarankan(
   let calon = calonAtasan(semua, anggota, new Set());
   if (calon.length === 0) return null;
 
-  if (SEUNIT.has(anggota.role)) {
+  const { boleh: urutan, seunit } = jenjangAtasan(anggota, {
+    adaManager: adaManagerAktif(semua),
+  });
+  if (seunit) {
     const seprogram = calon.filter(
       (c) => (c.programId ?? null) === (anggota.programId ?? null),
     );
     if (seprogram.length > 0) calon = seprogram;
   } else {
-    const urutan: Peran[] = [...ATASAN_UNTUK[anggota.role]];
-    if (anggota.role === "Leader") urutan.push("CEO");
     for (const peran of urutan) {
       const seperan = calon.filter((c) => c.role === peran);
       if (seperan.length > 0) {
