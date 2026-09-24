@@ -113,6 +113,33 @@ test("data yang berputar tidak membuat pohonnya tak berujung", () => {
   assert.equal(ratakanStruktur(pohon).length <= 2, true);
 });
 
+test("bawahan diurutkan menurut peringkat peran, baru abjad", () => {
+  // Di bawah Manager, para Leader tampil sebelum Finance; di bawah
+  // Leader, Co-Leader sebelum Staff — persis urutan hierarkinya.
+  const pohon = pohonStruktur([
+    orang("a", "Adi", null, "CEO"),
+    orang("z", "Zaki", "a", "Manager"),
+    orang("b", "Budi", "a", "Finance"),
+    orang("s", "Sari", "z", "Staff"),
+    orang("k", "Kirana", "z", "Co-Leader"),
+  ]);
+  assert.deepEqual(
+    pohon[0].bawahan.map((b) => b.nama),
+    ["Zaki", "Budi"],
+  );
+  assert.deepEqual(
+    pohon[0].bawahan[0].bawahan.map((b) => b.nama),
+    ["Kirana", "Sari"],
+  );
+});
+
+test("tiap simpul menyebut atasannya, kecuali akar", () => {
+  const anak = { ...orang("b", "Budi", "a", "Manager"), atasanNama: "Adi" };
+  const pohon = pohonStruktur([orang("a", "Adi", null, "CEO"), anak]);
+  assert.equal(pohon[0].atasanNama, null);
+  assert.equal(pohon[0].bawahan[0].atasanNama, "Adi");
+});
+
 test("akar diurutkan abjad, bukan urutan masuknya", () => {
   const pohon = pohonStruktur([
     orang("z", "Zaki", null),

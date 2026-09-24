@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { peringkatPeran } from "@/lib/peran";
 import { URUTAN_PERAN } from "@/lib/peran";
+import { ATASAN_UNTUK, atasanDisarankan, calonAtasan } from "@/lib/atasan";
 import { tambahAnggota, ubahAnggota } from "@/app/actions/anggota";
 import type {
   AnggotaTim,
@@ -78,6 +79,30 @@ function Isian({
   // CEO memang tidak punya atasan; sisanya wajib.
   const butuhAtasan = Boolean(calon) && role !== "CEO";
 
+  // Calon atasan mengikuti peran dan unit yang sedang dipilih — bukan
+  // seluruh anggota — supaya hierarki (CEO → Manager → Leader →
+  // Co-Leader → Staff) tidak bisa dilanggar dari formulir ini. Nama unit
+  // dibaca persis seperti kartu anggota membacanya.
+  const unitNamaDipilih = unitKode
+    ? (pilihan.unit.find((u) => u.kode === unitKode)?.nama.split(" (")[0] ??
+      "Manajemen")
+    : "Manajemen";
+  const sintetis = {
+    id: awal?.id ?? "baru",
+    nama: nama.trim() || "Anggota baru",
+    role,
+    unitNama: unitNamaDipilih,
+  };
+  const calonSah = calon ? calonAtasan(calon, sintetis, new Set()) : [];
+  const usulan = calon ? atasanDisarankan(calon, sintetis) : null;
+  // Pilihan yang tidak lagi sah setelah peran/unit berganti diganti
+  // usulan, bukan dibiarkan diam-diam menunjuk orang yang salah.
+  const atasanEfektif = calon
+    ? atasanId && calonSah.some((c) => c.id === atasanId)
+      ? atasanId
+      : (usulan?.id ?? null)
+    : atasanId;
+
   // Program menempel pada satu unit, jadi pilihannya menyempit mengikuti
   // unit yang sedang dipilih.
   const programUnit = unitKode
@@ -88,7 +113,7 @@ function Isian({
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) &&
     jabatan.trim().length >= 3 &&
     (butuhUnit ? unitKode !== null : true) &&
-    (butuhAtasan ? atasanId !== null : true);
+    (butuhAtasan ? atasanEfektif !== null : true);
 
   // Peran lintas unit tidak boleh membawa unit; dibersihkan saat berganti.
   const gantiPeran = (p: Peran) => {
@@ -296,22 +321,32 @@ function Isian({
               Atasan langsung
             </legend>
             <select
-              value={atasanId ?? ""}
+              value={atasanEfektif ?? ""}
               onChange={(e) => setAtasanId(e.target.value || null)}
               aria-label="Atasan langsung"
               className="h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
             >
               <option value="">Pilih atasan…</option>
-              {calon.map((a) => (
+              {calonSah.map((a) => (
                 <option key={a.id} value={a.id}>
                   {a.nama} · {a.role}
+                  {usulan?.id === a.id ? " · disarankan" : ""}
                 </option>
               ))}
             </select>
-            <p className="text-[11px] leading-[14px] text-muted-foreground">
-              Atasan inilah yang menyetujui izinnya. Tanpa atasan, pengajuan
-              izinnya tidak punya tujuan.
-            </p>
+            {calonSah.length === 0 ? (
+              <p className="rounded-xl bg-warn-fill px-3 py-2 text-[11px] leading-[14px] text-pretty text-warn-text">
+                Belum ada {ATASAN_UNTUK[role].join(" atau ")} aktif
+                {butuhUnit && unitKode ? ` di ${unitNamaDipilih}` : ""}.
+                Tetapkan dulu orangnya, baru anggota ini bisa ditambahkan.
+              </p>
+            ) : (
+              <p className="text-[11px] leading-[14px] text-muted-foreground">
+                {role} melapor kepada {ATASAN_UNTUK[role].join(" atau ")}
+                {butuhUnit ? " di unitnya sendiri" : ""}. Atasan inilah yang
+                menyetujui izinnya.
+              </p>
+            )}
           </fieldset>
         ) : null}
 
@@ -347,7 +382,9 @@ function Isian({
               unitKode,
               departemenId,
               programId,
-              ...(calon ? { atasanId: role === "CEO" ? null : atasanId } : {}),
+              ...(calon
+                ? { atasanId: role === "CEO" ? null : atasanEfektif }
+                : {}),
             })
           }
           className="tekan-halus rounded-full"

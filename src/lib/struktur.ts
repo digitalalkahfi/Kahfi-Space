@@ -6,6 +6,7 @@
  * yang bisa digambar bertingkat. Keduanya diturunkan dari kolom yang
  * sama (`atasanId`), jadi tidak ada susunan kedua yang bisa melenceng.
  */
+import { peringkatPeran } from "@/lib/peran";
 import type { AnggotaTim, Peran } from "@/lib/types";
 
 /** Satu orang beserta bawahan langsungnya, siap digambar bertingkat. */
@@ -15,7 +16,10 @@ export type SimpulStruktur = {
   jabatan: string;
   role: Peran;
   unitKode: string | null;
+  unitNama: string;
   departemen: string | null;
+  /** Nama atasan langsungnya; null untuk akar. */
+  atasanNama: string | null;
   /** Kedalaman dari puncak; 0 untuk yang tidak punya atasan. */
   tingkat: number;
   /** Seluruh orang di bawahnya, langsung maupun tidak. */
@@ -55,8 +59,15 @@ export function pohonStruktur(
     ]);
   }
 
+  // Peringkat lebih dulu, baru abjad: di bawah Manager para Leader
+  // tampil sebelum Finance, dan di bawah Leader para Co-Leader sebelum
+  // Staff — persis urutan hierarkinya.
   const urut = (daftar: AnggotaTim[]) =>
-    [...daftar].sort((x, y) => x.nama.localeCompare(y.nama));
+    [...daftar].sort(
+      (x, y) =>
+        peringkatPeran(x.role) - peringkatPeran(y.role) ||
+        x.nama.localeCompare(y.nama),
+    );
 
   const bangun = (
     a: AnggotaTim,
@@ -78,7 +89,9 @@ export function pohonStruktur(
       jabatan: a.jabatan,
       role: a.role,
       unitKode: a.unitKode,
+      unitNama: a.unitNama,
       departemen: a.departemen,
+      atasanNama: tingkat === 0 ? null : a.atasanNama,
       tingkat,
       jumlahBawahan: anaknya.reduce((n, b) => n + 1 + b.jumlahBawahan, 0),
       bawahan: anaknya,

@@ -7,7 +7,8 @@ import { Reveal } from "@/components/motion/reveal";
 import { DaftarDepartemen } from "@/components/tim/daftar-departemen";
 import { PohonStruktur } from "@/components/tim/pohon-struktur";
 import { SusunanOrganisasi } from "@/components/tim/susunan-organisasi";
-import { daftarAnggotaTim } from "@/lib/data/anggota";
+import { periksaStruktur } from "@/lib/atasan";
+import { bolehKelolaAnggota, daftarAnggotaTim } from "@/lib/data/anggota";
 import { pilihanOrganisasi } from "@/lib/data/organisasi";
 import { susunanDepartemen } from "@/lib/organisasi";
 import { pohonStruktur, tercecer } from "@/lib/struktur";
@@ -46,6 +47,9 @@ export default async function StrukturPage({
   const lepas = tercecer(semua, pohon);
   const susunan = susunanDepartemen(semua, pilihan);
   const aktif = semua.filter((a) => a.status === "aktif").length;
+  // Pemeriksaan aturan hanya berarti bagi yang bisa membetulkannya.
+  const bolehKelola = bolehKelolaAnggota(pengguna);
+  const periksa = bolehKelola ? periksaStruktur(semua) : undefined;
 
   return (
     <AppShell pengguna={pengguna} halaman="Anggota Tim">
@@ -65,9 +69,25 @@ export default async function StrukturPage({
           <p className="text-[13px] leading-[18px] text-pretty text-muted-foreground">
             {aktif} orang aktif, tersusun dalam {susunan.length} departemen.
             Garis pelaporannya diturunkan dari atasan yang tercatat pada tiap
-            anggota — bukan disusun terpisah.
+            anggota, mengikuti jenjang CEO → Manager → Leader → Co-Leader →
+            Staff.
           </p>
         </div>
+
+        {/* Bagan pelaporan didahulukan: itulah jawaban atas "siapa melapor
+            kepada siapa" — pertanyaan yang membawa orang ke halaman ini. */}
+        <Reveal>
+          <PohonStruktur
+            pohon={pohon}
+            tercecer={lepas.map((a) => ({
+              id: a.id,
+              nama: a.nama,
+              jabatan: a.jabatan,
+            }))}
+            periksa={periksa}
+            bolehKelola={bolehKelola}
+          />
+        </Reveal>
 
         <Reveal>
           <SusunanOrganisasi
@@ -147,17 +167,6 @@ export default async function StrukturPage({
           </span>
           <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
         </Link>
-
-        <Reveal>
-          <PohonStruktur
-            pohon={pohon}
-            tercecer={lepas.map((a) => ({
-              id: a.id,
-              nama: a.nama,
-              jabatan: a.jabatan,
-            }))}
-          />
-        </Reveal>
       </div>
     </AppShell>
   );

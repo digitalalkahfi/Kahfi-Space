@@ -4,9 +4,16 @@ import { revalidatePath } from "next/cache";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { sesiSaatIni } from "@/lib/data/sesi";
-import { bolehKelolaAnggota } from "@/lib/data/anggota";
+import { bolehKelolaAnggota, daftarAnggotaTim } from "@/lib/data/anggota";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
-import { peranSah, peringkatPeran } from "@/lib/peran";
+import {
+  adaManagerAktif,
+  atasanDisarankan,
+  periksaStruktur,
+  petaBawahan,
+  sebabAtasanTakSah,
+} from "@/lib/atasan";
+import { peranSah } from "@/lib/peran";
 import type { KodeUnit, Peran } from "@/lib/types";
 
 const POLA_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -75,8 +82,21 @@ async function idUnit(kode: KodeUnit | null) {
   return data?.id ?? null;
 }
 
+/** Nama unit seperti yang dibaca kartu anggota (`keAnggota`), dari kodenya. */
+async function namaUnit(kode: KodeUnit | null) {
+  if (!kode) return "Manajemen";
+  const sb = await klienServer();
+  const { data } = await sb
+    .from("units")
+    .select("nama")
+    .eq("kode", kode)
+    .maybeSingle();
+  return data?.nama ? data.nama.split(" (")[0] : "Manajemen";
+}
+
 function segarkan() {
   revalidatePath("/tim");
+  revalidatePath("/tim/struktur");
   revalidatePath("/beranda");
 }
 
@@ -97,6 +117,30 @@ export async function tambahAnggota(input: MasukanAnggota): Promise<Hasil> {
   if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
   if (!bolehKelolaAnggota(pengguna)) {
     return gagal("Hanya CEO atau Manager yang boleh menambah anggota.", "izin");
+  }
+
+  // Atasannya diperiksa terhadap hierarki di sini juga, bukan hanya di
+  // formulir: formulir bisa saja lama, aturannya tidak boleh.
+  if (input.atasanId) {
+    const semua = await daftarAnggotaTim(pengguna);
+    const calon = semua.find((a) => a.id === input.atasanId);
+    if (!calon || calon.status !== "aktif") {
+      return gagal(
+        "Atasan yang dipilih tidak ditemukan atau nonaktif.",
+        "validasi",
+      );
+    }
+    const sebab = sebabAtasanTakSah(
+      {
+        id: "baru",
+        nama: input.nama.trim(),
+        role: input.role,
+        unitNama: await namaUnit(input.unitKode),
+      },
+      calon,
+      { adaManager: adaManagerAktif(semua) },
+    );
+    if (sebab) return gagal(sebab, "validasi");
   }
 
   const sb = await klienServer();
@@ -150,6 +194,37 @@ export async function ubahAnggota(
     return gagal("Hanya CEO atau Manager yang boleh mengubah anggota.", "izin");
   }
 
+  // Peran atau unit yang berganti bisa membuat atasan lamanya melanggar
+  // hierarki (Staff yang naik jadi Leader tidak lagi melapor ke
+  // Co-Leader). Alih-alih ditolak basis data dengan pesan mentah — atau
+  // atasannya hilang diam-diam — atasannya dipindahkan ke yang sesuai
+  // aturan dan perpindahannya disebut.
+  const semua = await daftarAnggotaTim(pengguna);
+  const diri = semua.find((a) => a.id === id);
+  if (!diri) return gagal("Anggota tidak ditemukan.", "validasi");
+
+  const sesudah = {
+    id,
+    nama: input.nama.trim(),
+    role: input.role,
+    unitNama: await namaUnit(input.unitKode),
+  };
+  const opsi = { adaManager: adaManagerAktif(semua) };
+  const kini = diri.atasanId
+    ? semua.find((a) => a.id === diri.atasanId)
+    : undefined;
+
+  let atasanBaru: string | null | undefined;
+  let catatanAtasan = "";
+  if (kini && sebabAtasanTakSah(sesudah, kini, opsi) !== null) {
+    const bawahan = new Set(petaBawahan(semua)[id] ?? []);
+    const usul = atasanDisarankan(semua, sesudah, bawahan);
+    atasanBaru = usul?.id ?? null;
+    catatanAtasan = usul
+      ? ` Atasannya dipindahkan dari ${kini.nama} ke ${usul.nama} agar sesuai aturan ${input.role}.`
+      : ` Atasan lamanya (${kini.nama}) tidak lagi sesuai aturan ${input.role}; pilih atasan barunya lewat kartu anggota.`;
+  }
+
   const sb = await klienServer();
   const { error } = await sb
     .from("users")
@@ -161,6 +236,7 @@ export async function ubahAnggota(
       unit_id: await idUnit(input.unitKode),
       department_id: input.departemenId,
       program_id: input.programId,
+      ...(atasanBaru !== undefined ? { atasan_id: atasanBaru } : {}),
     })
     .eq("id", id);
 
@@ -174,7 +250,7 @@ export async function ubahAnggota(
   }
 
   segarkan();
-  return sukses(undefined, "Data anggota diperbarui.");
+  return sukses(undefined, `Data anggota diperbarui.${catatanAtasan}`);
 }
 
 /**
@@ -196,6 +272,42 @@ export async function ubahStatusAnggota(
   }
 
   const sb = await klienServer();
+
+  // Basis data melepas seluruh bawahan orang yang dinonaktifkan (0070)
+  // — dan tidak mengembalikannya saat ia aktif lagi. Supaya tidak ada
+  // yang tiba-tiba "belum punya atasan", bawahannya dipindahkan lebih
+  // dulu ke atasan yang sesuai aturan, dan perpindahannya disebut.
+  let catatan = "";
+  if (status === "nonaktif") {
+    const semua = await daftarAnggotaTim(pengguna);
+    const sisa = semua.map((a) =>
+      a.id === id ? { ...a, status: "nonaktif" as const } : a,
+    );
+    const cabang = petaBawahan(sisa);
+    const dipindah: string[] = [];
+    const lepas: string[] = [];
+
+    for (const b of sisa) {
+      if (b.atasanId !== id || b.status !== "aktif") continue;
+      const usul = atasanDisarankan(sisa, b, new Set(cabang[b.id] ?? []));
+      if (!usul) {
+        lepas.push(b.nama);
+        continue;
+      }
+      const { error: galatPindah } = await sb
+        .from("users")
+        .update({ atasan_id: usul.id })
+        .eq("id", b.id);
+      if (galatPindah) lepas.push(b.nama);
+      else dipindah.push(`${b.nama} → ${usul.nama}`);
+    }
+
+    if (dipindah.length > 0)
+      catatan += ` Bawahannya dipindahkan: ${dipindah.join(", ")}.`;
+    if (lepas.length > 0)
+      catatan += ` Belum ada atasan pengganti yang sesuai aturan untuk ${lepas.join(", ")}; pilihkan lewat kartu anggota.`;
+  }
+
   const { error } = await sb.from("users").update({ status }).eq("id", id);
 
   if (error) {
@@ -208,8 +320,8 @@ export async function ubahStatusAnggota(
   return sukses(
     undefined,
     status === "aktif"
-      ? "Anggota diaktifkan kembali."
-      : "Anggota dinonaktifkan; seluruh riwayatnya tetap tersimpan.",
+      ? "Anggota diaktifkan kembali. Periksa atasannya di kartu anggota bila sebelumnya dilepas."
+      : `Anggota dinonaktifkan; seluruh riwayatnya tetap tersimpan.${catatan}`,
   );
 }
 
@@ -242,18 +354,12 @@ export async function ubahAtasan(
   const sb = await klienServer();
 
   if (atasanId) {
-    // Diperiksa lebih dulu supaya alasannya jelas; database menolak hal
-    // yang sama lewat jalur mana pun (migrasi 0044 & 0070).
-    const { data: pihak, error: galatPihak } = await sb
-      .from("users")
-      .select("id, nama, role, status")
-      .in("id", [id, atasanId]);
-
-    if (galatPihak)
-      return gagal(`Gagal memeriksa atasan: ${galatPihak.message}`);
-
-    const bawahan = pihak?.find((p) => p.id === id);
-    const calon = pihak?.find((p) => p.id === atasanId);
+    // Diperiksa terhadap aturan yang sama dengan dialognya supaya
+    // alasannya jelas; database menolak siklus dan pembalikan peringkat
+    // lewat jalur mana pun (migrasi 0044 & 0070).
+    const semua = await daftarAnggotaTim(pengguna);
+    const bawahan = semua.find((a) => a.id === id);
+    const calon = semua.find((a) => a.id === atasanId);
     if (!bawahan || !calon)
       return gagal("Anggota tidak ditemukan.", "validasi");
 
@@ -263,12 +369,16 @@ export async function ubahAtasan(
         "validasi",
       );
     }
-    if (peringkatPeran(calon.role) > peringkatPeran(bawahan.role)) {
+    if ((petaBawahan(semua)[id] ?? []).includes(atasanId)) {
       return gagal(
-        `${calon.nama} berperan ${calon.role}, lebih sempit daripada ${bawahan.role}. Garis pelaporannya terbalik.`,
+        `${calon.nama} adalah bawahan ${bawahan.nama}; garis pelaporannya akan berputar.`,
         "validasi",
       );
     }
+    const sebab = sebabAtasanTakSah(bawahan, calon, {
+      adaManager: adaManagerAktif(semua),
+    });
+    if (sebab) return gagal(sebab, "validasi");
   }
 
   const { error } = await sb
@@ -284,4 +394,75 @@ export async function ubahAtasan(
 
   segarkan();
   return sukses(undefined, atasanId ? "Atasan diperbarui." : "Atasan dilepas.");
+}
+
+/**
+ * Menyambungkan garis pelaporan yang kosong atau melanggar aturan ke
+ * atasan yang sesuai — hanya yang usulannya tunggal.
+ *
+ * Atasan yang sudah sah tidak disentuh, dan tidak ada yang dihapus:
+ * merapikan bukan alasan mengganti keputusan yang sudah benar. Yang
+ * calonnya tidak tunggal dikembalikan untuk diputuskan orang.
+ */
+export async function rapikanStruktur(): Promise<
+  Hasil<{ diubah: number; gagal: string[] }>
+> {
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (!bolehKelolaAnggota(pengguna)) {
+    return gagal(
+      "Hanya CEO atau Manager yang boleh merapikan struktur.",
+      "izin",
+    );
+  }
+
+  const sb = await klienServer();
+  const galat: string[] = [];
+  let diubah = 0;
+
+  // Bertahap: satu perbaikan membuka perbaikan berikutnya. Rantai yang
+  // terbalik (CEO tercatat melapor ke Manager) baru bisa disusun ulang
+  // setelah puncaknya dilepas, jadi daftarnya diperiksa lagi sesudah
+  // tiap putaran sampai tidak ada lagi yang bisa disambungkan.
+  for (let putaran = 0; putaran < 6; putaran += 1) {
+    const semua = await daftarAnggotaTim(pengguna);
+    const { ubah } = periksaStruktur(semua);
+    // Yang sudah gagal tidak dicoba lagi di putaran berikutnya.
+    const sisa = ubah.filter(
+      (u) => !galat.some((g) => g.startsWith(`${u.nama}:`)),
+    );
+    if (sisa.length === 0) break;
+
+    let berubah = 0;
+    for (const u of sisa) {
+      const { error } = await sb
+        .from("users")
+        .update({ atasan_id: u.ke?.id ?? null })
+        .eq("id", u.id);
+      if (error) galat.push(`${u.nama}: ${error.message}`);
+      else {
+        diubah += 1;
+        berubah += 1;
+      }
+    }
+    if (berubah === 0) break;
+  }
+
+  if (diubah === 0 && galat.length === 0) {
+    return sukses({ diubah: 0, gagal: [] }, "Tidak ada yang perlu dirapikan.");
+  }
+
+  segarkan();
+  if (galat.length > 0) {
+    return gagal(
+      `${diubah} orang tersambung, ${galat.length} gagal: ${galat.join("; ")}`,
+      "validasi",
+    );
+  }
+  return sukses(
+    { diubah, gagal: [] },
+    `${diubah} orang tersambung ke atasan yang sesuai aturan.`,
+  );
 }

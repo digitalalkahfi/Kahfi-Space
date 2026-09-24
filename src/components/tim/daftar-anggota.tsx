@@ -8,20 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { gayaUnit } from "@/lib/unit";
+import { GAYA_PERAN } from "@/lib/gaya-peran";
 import { DialogAtasan } from "@/components/tim/dialog-atasan";
 import { LencanaStatus } from "@/components/tim/lencana-status";
 import { TombolStatusAnggota } from "@/components/tim/tombol-status-anggota";
 import { DialogUbahAnggota } from "@/components/tim/dialog-anggota";
 import type { AnggotaTim, MataRantai, PilihanOrganisasi } from "@/lib/types";
-
-const GAYA_PERAN: Record<AnggotaTim["role"], string> = {
-  CEO: "bg-primary text-primary-foreground",
-  Manager: "bg-info-fill text-info-text",
-  Leader: "bg-accentmuted-fill text-accentmuted-text",
-  "Co-Leader": "bg-accentmuted-fill text-accentmuted-text",
-  Staff: "bg-muted text-muted-foreground",
-  Finance: "bg-ok-fill text-ok-text",
-};
 
 function BarisAnggota({
   anggota,

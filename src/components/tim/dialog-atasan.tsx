@@ -14,16 +14,26 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { calonAtasan, peringatanAtasan } from "@/lib/atasan";
+import {
+  ATASAN_UNTUK,
+  adaManagerAktif,
+  atasanDisarankan,
+  calonAtasan,
+  peringatanAtasan,
+  sebabAtasanTakSah,
+} from "@/lib/atasan";
 import { ubahAtasan } from "@/app/actions/anggota";
 import type { AnggotaTim, MataRantai } from "@/lib/types";
 
 /**
  * Penetapan atasan.
  *
- * Atasan menentukan siapa yang boleh menugasi orang ini dan menyetujui
- * izinnya, jadi akibat setiap pilihan ditulis sebelum disimpan — bukan
- * ditemukan belakangan saat seseorang tak bisa mengajukan izin.
+ * Calon yang ditawarkan hanya yang memenuhi hierarki
+ * (CEO → Manager → Leader → Co-Leader → Staff), dan yang paling masuk
+ * akal sudah terpilih lebih dulu — yang menekan tombol tinggal
+ * membenarkan, bukan menebak. Atasan menentukan siapa yang boleh
+ * menugasi orang ini dan menyetujui izinnya, jadi akibat setiap pilihan
+ * ditulis sebelum disimpan.
  */
 export function DialogAtasan({
   anggota,
@@ -40,15 +50,32 @@ export function DialogAtasan({
   buka: boolean;
   onBuka: (b: boolean) => void;
 }) {
-  const [pilih, setPilih] = useState<string | null>(anggota.atasanId);
+  const bawahan = new Set(idBawahan);
+  const opsi = { adaManager: adaManagerAktif(semua) };
+  const calon = calonAtasan(semua, anggota, bawahan);
+  const usulan = atasanDisarankan(semua, anggota, bawahan);
+
+  // Atasan sekarang dipertahankan bila masih sah; kalau tidak, usulan
+  // yang dipilih lebih dulu supaya tombol simpan langsung berarti.
+  const atasanKini = semua.find((a) => a.id === anggota.atasanId) ?? null;
+  const kiniSah =
+    atasanKini !== null && calon.some((c) => c.id === atasanKini.id);
+  const [pilih, setPilih] = useState<string | null>(
+    kiniSah ? anggota.atasanId : (usulan?.id ?? null),
+  );
   const [menyimpan, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
 
-  const bawahan = new Set(idBawahan);
-  const calon = calonAtasan(semua, anggota, bawahan);
   const terpilih = calon.find((c) => c.id === pilih) ?? null;
-  const peringatan = peringatanAtasan(anggota, terpilih);
+  const peringatan = peringatanAtasan(anggota, terpilih, opsi);
   const adaYangSalah = peringatan.some((p) => p.nada === "salah");
+  const sebabKini =
+    atasanKini && !kiniSah
+      ? atasanKini.status !== "aktif"
+        ? `${atasanKini.nama} sudah nonaktif.`
+        : sebabAtasanTakSah(anggota, atasanKini, opsi)
+      : null;
+  const peranBoleh = ATASAN_UNTUK[anggota.role];
 
   const simpan = () => {
     if (menyimpan || adaYangSalah) return;
@@ -69,7 +96,13 @@ export function DialogAtasan({
         <DialogHeader>
           <DialogTitle>Atasan {anggota.nama}</DialogTitle>
           <DialogDescription>
-            Atasan berwenang menugasi dan menyetujui izin orang ini.
+            {anggota.role === "CEO"
+              ? "CEO berada di puncak dan tidak melapor kepada siapa pun."
+              : `${anggota.role} melapor kepada ${peranBoleh.join(" atau ")}${
+                  anggota.role === "Co-Leader" || anggota.role === "Staff"
+                    ? " di unitnya sendiri"
+                    : ""
+                }. Atasan berwenang menugasi dan menyetujui izin orang ini.`}
           </DialogDescription>
         </DialogHeader>
 
@@ -96,10 +129,27 @@ export function DialogAtasan({
           </div>
         ) : null}
 
+        {sebabKini ? (
+          <p className="rounded-2xl bg-warn-fill px-3 py-2 text-[11px] leading-[14px] text-pretty text-warn-text">
+            Atasan sekarang ({atasanKini?.nama}) tidak lagi sesuai aturan:{" "}
+            {sebabKini} Pilih penggantinya di bawah.
+          </p>
+        ) : null}
+
         {idBawahan.length > 0 ? (
           <p className="rounded-2xl bg-info-fill px-3 py-2 text-[11px] leading-[14px] text-pretty text-info-text">
             {idBawahan.length} orang melapor kepada {anggota.nama}. Mengubah
             atasannya menggeser seluruh cabang ini, bukan satu orang saja.
+          </p>
+        ) : null}
+
+        {anggota.role !== "CEO" && calon.length === 0 ? (
+          <p className="rounded-2xl bg-warn-fill px-3 py-2 text-[11px] leading-[14px] text-pretty text-warn-text">
+            Belum ada {peranBoleh.join(" atau ")} aktif
+            {anggota.role === "Co-Leader" || anggota.role === "Staff"
+              ? ` di ${anggota.unitNama}`
+              : ""}
+            . Tetapkan dulu orangnya, baru atasan ini bisa dipilih.
           </p>
         ) : null}
 
@@ -123,11 +173,18 @@ export function DialogAtasan({
                 </AvatarFallback>
               </Avatar>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] leading-[18px] font-semibold">
-                  {c.nama}
+                <span className="flex items-center gap-1.5">
+                  <span className="truncate text-[13px] leading-[18px] font-semibold">
+                    {c.nama}
+                  </span>
+                  {usulan?.id === c.id ? (
+                    <span className="shrink-0 rounded-full bg-ok-fill px-1.5 py-0.5 text-[10px] leading-[12px] font-semibold text-ok-text">
+                      disarankan
+                    </span>
+                  ) : null}
                 </span>
                 <span className="block truncate text-[11px] leading-[14px] text-muted-foreground">
-                  {c.jabatan}
+                  {c.role} · {c.jabatan}
                 </span>
               </span>
               <span className="shrink-0 text-[11px] leading-[14px] text-muted-foreground">
