@@ -57,8 +57,6 @@ export type StatusMasalahDb = "baru" | "diproses" | "selesai" | "ditutup";
 
 export type DampakMasalahDb = "rendah" | "sedang" | "tinggi";
 
-export type StatusPenjualDb = "prospek" | "aktif" | "nonaktif";
-
 export type KategoriCatatanDb = "dokumentasi" | "sop" | "rapat" | "lainnya";
 
 export type VisibilitasCatatanDb = "pribadi" | "unit" | "perusahaan";
@@ -584,24 +582,6 @@ export type BarisPreferensiTampilan = {
   kunci_item: string;
   tampil: boolean;
   urutan: number;
-  updated_at: string;
-};
-
-/** @tabel sellers */
-export type BarisSeller = {
-  id: string;
-  nama_toko: string;
-  nama_kontak: string;
-  telepon: string;
-  kategori: string;
-  status: StatusPenjualDb;
-  /** Persen 0–100; null bila belum disepakati. */
-  komisi_persen: number | null;
-  catatan: string;
-  unit_id: string;
-  pic_user_id: string | null;
-  dibuat_oleh: string | null;
-  created_at: string;
   updated_at: string;
 };
 
@@ -1305,14 +1285,6 @@ export type Database = {
       preferensi_tampilan: Tabel<
         BarisPreferensiTampilan,
         [Relasi<"preferensi_tampilan_pengguna_id_fkey", "pengguna_id", "users">]
-      >;
-      sellers: Tabel<
-        BarisSeller,
-        [
-          Relasi<"sellers_unit_id_fkey", "unit_id", "units">,
-          Relasi<"sellers_pic_user_id_fkey", "pic_user_id", "users">,
-          Relasi<"sellers_dibuat_oleh_fkey", "dibuat_oleh", "users">,
-        ]
       >;
       notes: Tabel<
         BarisNote,
@@ -2282,7 +2254,6 @@ export type Database = {
       permukaan_tampilan: PermukaanTampilanDb;
       status_masalah: StatusMasalahDb;
       dampak_masalah: DampakMasalahDb;
-      status_penjual: StatusPenjualDb;
       kategori_catatan: KategoriCatatanDb;
       visibilitas_catatan: VisibilitasCatatanDb;
       tingkat_kursus: TingkatKursusDb;

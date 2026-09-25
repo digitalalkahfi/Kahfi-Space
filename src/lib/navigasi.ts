@@ -11,7 +11,6 @@ import {
   NotebookPen,
   Package,
   SlidersHorizontal,
-  Store,
   TrendingUp,
   Users,
   Wallet,
@@ -103,12 +102,6 @@ export const menuPendamping: MenuPendamping[] = [
     keterangan: "Pelacakan sampel lewat kode QR",
     href: "/sampel",
     icon: Package,
-  },
-  {
-    label: "Penjual",
-    keterangan: "Mitra seller dan brand yang digarap tiap unit",
-    href: "/penjual",
-    icon: Store,
   },
   {
     label: "Kaizen",

@@ -144,7 +144,7 @@ export function jumlahTerhitung(kelompok: KelompokBanding[]) {
  */
 export const ENTITAS_TAHAP_2: { kunci: string; label: string }[] = [
   // Kosong sejak 25 Sep 2026: seluruh kunci data lama sudah punya tempat
-  // di V2 (penjual di 0166, catatan di 0167). Daftarnya dipertahankan
+  // di V2 atau diputuskan tidak dibawa (catatan di 0167; seller diabaikan). Daftarnya dipertahankan
   // supaya layar banding tetap punya tempat bila ekspor lain muncul.
 ];
 

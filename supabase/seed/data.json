@@ -6810,56 +6810,6 @@
       "pada": "2024-09-16T11:30:00+07:00"
     }
   ],
-  "sellers": [
-    {
-      "nama_toko": "Torch.id",
-      "nama_kontak": "Sandi",
-      "telepon": "0856-2223-2570",
-      "kategori": "Bag",
-      "status": "aktif",
-      "komisi_persen": 10,
-      "catatan": "Proses pencarian kreator untuk live mingguan.",
-      "unit": "tap",
-      "pic": "Yoga Saputra",
-      "dibuat_oleh": "Dimas Maulana"
-    },
-    {
-      "nama_toko": "Nitron",
-      "nama_kontak": "Pak Firgon",
-      "telepon": "0822-1953-7566",
-      "kategori": "Otomotif",
-      "status": "aktif",
-      "komisi_persen": 17,
-      "catatan": "Tujuan: memperbanyak kreator sebanyak-banyaknya.",
-      "unit": "tap",
-      "pic": "Hendra Kusuma",
-      "dibuat_oleh": "Dimas Maulana"
-    },
-    {
-      "nama_toko": "Orbelle",
-      "nama_kontak": "Mega",
-      "telepon": "0881-0236-1246",
-      "kategori": "Kerudung",
-      "status": "prospek",
-      "komisi_persen": null,
-      "catatan": "Menunggu respons beliau.",
-      "unit": "tap",
-      "pic": null,
-      "dibuat_oleh": "Dimas Maulana"
-    },
-    {
-      "nama_toko": "Manzone",
-      "nama_kontak": "Gina",
-      "telepon": "0812-9019-9640",
-      "kategori": "Fashion",
-      "status": "nonaktif",
-      "komisi_persen": 8,
-      "catatan": "Kerja sama berhenti; mencari affiliator live eksklusif.",
-      "unit": "affiliator",
-      "pic": null,
-      "dibuat_oleh": "Dewi Lestari"
-    }
-  ],
   "notes": [
     {
       "judul": "Templat chat admin kreator",

@@ -16,9 +16,9 @@ import {
 } from "@/lib/ekspor-v1";
 
 test("seluruh kunci ekspor yang dipetakan dikenali dan tidak ada yang kembar", () => {
-  assert.equal(KUNCI_DIKENAL.length, 25);
+  assert.equal(KUNCI_DIKENAL.length, 24);
   const kunci = KUNCI_DIKENAL.map((k) => k.kunci);
-  assert.equal(new Set(kunci).size, 25);
+  assert.equal(new Set(kunci).size, 24);
   for (const k of kunci) assert.equal(golonganKunci(k), "dikenal");
 });
 

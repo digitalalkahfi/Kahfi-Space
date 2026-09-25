@@ -168,12 +168,6 @@ export const KUNCI_DIKENAL: KunciEkspor[] = [
     catatan: "Tiap berkas menjadi kursus satu modul.",
   },
   {
-    kunci: "sellers:all",
-    label: "Penjual",
-    catatan:
-      "Menjadi mitra unit pengelolanya; toko yang tercatat dua kali digabung.",
-  },
-  {
     kunci: "notes:all",
     label: "Catatan",
     catatan: "Menjadi catatan pribadi penulisnya; tidak dibagikan.",
@@ -211,6 +205,9 @@ export const KUNCI_DIABAIKAN = [
   "app:settings",
   // Turunan yang V2 hitung sendiri, atau yang isinya kosong di ekspor.
   "sampel-stat:all",
+  // Daftar seller lama: diputuskan pemilik (25 Sep 2026) tidak dibawa,
+  // fitur penjualnya pun dihapus dari V2 (0169).
+  "sellers:all",
   "lms:lesson-bodies:all",
   "attendance:selfie-index",
 ] as const;

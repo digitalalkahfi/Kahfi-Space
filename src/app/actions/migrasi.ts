@@ -29,7 +29,6 @@ import {
   terapkanMasukan,
   terapkanSampel,
   terapkanLms,
-  terapkanPenjual,
   terapkanCatatan,
   terapkanPengaturanAbsensi,
   terapkanTodo,
@@ -256,7 +255,6 @@ export async function jalankanMigrasi(
     { label: "Masukan", jalankan: () => terapkanMasukan(tahap) },
     { label: "Sampel", jalankan: () => terapkanSampel(tahap) },
     { label: "Portal belajar", jalankan: () => terapkanLms(tahap) },
-    { label: "Penjual", jalankan: () => terapkanPenjual(tahap) },
     { label: "Catatan", jalankan: () => terapkanCatatan(tahap) },
     {
       label: "Pengaturan absensi",

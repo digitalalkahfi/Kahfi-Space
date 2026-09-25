@@ -7555,21 +7555,6 @@
       "createdByName": "A"
     }
   ],
-  "sellers:all": [
-    {
-      "id": "sel_001",
-      "name": "Sandi",
-      "note": "Proses pencarian kreator.",
-      "phone": "0856-2223-2570",
-      "status": "aktif",
-      "category": "Bag",
-      "shopName": "Torch.id",
-      "createdAt": "2024-10-01T00:00:00.000Z",
-      "managerId": "usr_001",
-      "commission": "10%",
-      "managerName": "A"
-    }
-  ],
   "notes:all": [
     {
       "id": "note_001",

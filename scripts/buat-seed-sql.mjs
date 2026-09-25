@@ -64,7 +64,9 @@ bagian.push(`
 -- Program (atribut akun, bukan unit) -----------------------------------
 insert into programs (id, nama, unit_id, aktif) values
 ${data.programs
-  .map((p) => `  (${q(p.id)}, ${q(p.nama)}, ${q(idUnit[p.unit])}, ${q(p.aktif)})`)
+  .map(
+    (p) => `  (${q(p.id)}, ${q(p.nama)}, ${q(idUnit[p.unit])}, ${q(p.aktif)})`,
+  )
   .join(",\n")}
 on conflict (id) do update set nama = excluded.nama, aktif = excluded.aktif;`);
 
@@ -75,7 +77,9 @@ on conflict (id) do update set nama = excluded.nama, aktif = excluded.aktif;`);
  */
 function kontakBaku(mentah) {
   if (!mentah) return null;
-  const bersih = String(mentah).trim().replace(/[\s\-().]/g, "");
+  const bersih = String(mentah)
+    .trim()
+    .replace(/[\s\-().]/g, "");
   if (!/^\+?\d+$/.test(bersih)) return null;
   let angka = bersih.replace(/^\+/, "");
   if (angka.startsWith("0")) angka = `62${angka.slice(1)}`;
@@ -203,7 +207,8 @@ on conflict (id) do update
 ${data.goals
   .filter((g) => g.parent)
   .map(
-    (g) => `update goals set parent_goal_id = ${q(g.parent)} where id = ${q(g.id)};`,
+    (g) =>
+      `update goals set parent_goal_id = ${q(g.parent)} where id = ${q(g.id)};`,
   )
   .join("\n")}
 
@@ -321,7 +326,9 @@ ${data.attendance
 
 // --- Lead measure & entri harian ---------------------------------------
 const idGoalUnitLead = Object.fromEntries(
-  data.goals.filter((g) => g.unit && g.level === "leader").map((g) => [g.unit, g.id]),
+  data.goals
+    .filter((g) => g.unit && g.level === "leader")
+    .map((g) => [g.unit, g.id]),
 );
 
 bagian.push(`
@@ -415,7 +422,8 @@ on conflict (lower(kode)) do update
 const stafUnit = Object.fromEntries(
   data.units.map((u) => [
     u.kode,
-    data.users.find((x) => x.role === "Staff" && x.unit === u.kode)?.nama ?? null,
+    data.users.find((x) => x.role === "Staff" && x.unit === u.kode)?.nama ??
+      null,
   ]),
 );
 
@@ -426,7 +434,8 @@ for (const s of data.samples) {
     const namaPemegang = s.pemegang ?? stafUnit[s.unit];
     // Hanya langkah 'dipegang' yang menyebut pemegang; sesudah dikirim,
     // barangnya tidak lagi di tangan siapa pun di kantor.
-    const pemegang = ke === "dipegang" && namaPemegang ? idUser[namaPemegang] : null;
+    const pemegang =
+      ke === "dipegang" && namaPemegang ? idUser[namaPemegang] : null;
     kejadian.push(
       `  ((select id from samples where lower(kode) = lower(${q(s.kode)})), ${q(ke)}, ` +
         `${q(idUser["Farhan Pratama"])}, ${q(pemegang)}, ` +
@@ -483,20 +492,8 @@ ${data.problems
 ) as v(judul, konteks, unit_id, dilaporkan_oleh, dampak, status, solusi)
 where not exists (select 1 from problems);`);
 
-// Penjual & catatan (tahap 2 migrasi V1) ---------------------------------
+// Catatan (tahap 2 migrasi V1) ------------------------------------------
 bagian.push(`
--- Penjual ---------------------------------------------------------------
-insert into sellers (nama_toko, nama_kontak, telepon, kategori, status, komisi_persen, catatan, unit_id, pic_user_id, dibuat_oleh)
-select * from (values
-${data.sellers
-  .map(
-    (s) =>
-      `  (${q(s.nama_toko)}, ${q(s.nama_kontak)}, ${q(s.telepon)}, ${q(s.kategori)}, ${q(s.status)}::status_penjual, ${s.komisi_persen === null ? "null::numeric" : `${s.komisi_persen}::numeric`}, ${q(s.catatan)}, ${q(idUnit[s.unit])}::uuid, ${s.pic ? `${q(idUser[s.pic])}::uuid` : "null::uuid"}, ${q(idUser[s.dibuat_oleh])}::uuid)`,
-  )
-  .join(",\n")}
-) as v(nama_toko, nama_kontak, telepon, kategori, status, komisi_persen, catatan, unit_id, pic_user_id, dibuat_oleh)
-where not exists (select 1 from sellers);
-
 -- Catatan ---------------------------------------------------------------
 insert into notes (judul, isi, kategori, visibilitas, unit_id, disematkan, lampiran, dibuat_oleh)
 select * from (values
@@ -759,7 +756,9 @@ where not exists (select 1 from transactions);
 // pernah berada di titik yang tak mungkin dicapai pengguna.
 // ---------------------------------------------------------------------
 const idAset = Object.fromEntries(data.aset.map((a) => [a.kode, a.id]));
-const perpindahanAset = (data.aset_riwayat ?? []).filter((k) => k.dari !== null);
+const perpindahanAset = (data.aset_riwayat ?? []).filter(
+  (k) => k.dari !== null,
+);
 
 bagian.push(`
 -- Aset & inventaris ----------------------------------------------------
