@@ -11,6 +11,7 @@ import {
   NotebookPen,
   Package,
   SlidersHorizontal,
+  Store,
   TrendingUp,
   Users,
   Wallet,
@@ -104,6 +105,12 @@ export const menuPendamping: MenuPendamping[] = [
     icon: Package,
   },
   {
+    label: "Penjual",
+    keterangan: "Mitra seller dan brand yang digarap tiap unit",
+    href: "/penjual",
+    icon: Store,
+  },
+  {
     label: "Kaizen",
     keterangan: "Lapor masalah, manajemen menuliskan solusinya",
     href: "/masalah",
@@ -121,6 +128,12 @@ export const menuPendamping: MenuPendamping[] = [
     keterangan: "Laporkan kendala aplikasi",
     href: "/masukan",
     icon: MessageSquare,
+  },
+  {
+    label: "Catatan",
+    keterangan: "Catatan kerja pribadi, bisa dibagikan ke unit",
+    href: "/catatan",
+    icon: NotebookPen,
   },
   {
     label: "Anggota tim",

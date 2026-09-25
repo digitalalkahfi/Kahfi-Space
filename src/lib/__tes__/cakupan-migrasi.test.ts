@@ -28,6 +28,8 @@ const MODUL = [
   "masukan-v1",
   "sampel-v1",
   "lms-v1",
+  "penjual-v1",
+  "catatan-v1",
   "banding",
   "banding-v1",
   "rekap-pemetaan",

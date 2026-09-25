@@ -255,6 +255,18 @@ const KELOMPOK = [
     tabel: "courses",
     jalankan: (t) => terap.terapkanLms(t),
   },
+  {
+    kunci: "sellers:all",
+    label: "Penjual",
+    tabel: "sellers",
+    jalankan: (t) => terap.terapkanPenjual(t),
+  },
+  {
+    kunci: "notes:all",
+    label: "Catatan",
+    tabel: "notes",
+    jalankan: (t) => terap.terapkanCatatan(t),
+  },
 ];
 const TABEL = [
   "users",
@@ -334,6 +346,8 @@ function jumlahSumber(isi) {
     "feedback:all": n("feedback:all"),
     "sampel:all": n("sampel:all"),
     "lms:courses:all": n("lms:courses:all") + n("lms:library:all"),
+    "sellers:all": n("sellers:all"),
+    "notes:all": n("notes:all"),
   };
 }
 

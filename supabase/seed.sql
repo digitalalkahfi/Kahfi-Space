@@ -744,6 +744,29 @@ select * from (values
 ) as v(judul, konteks, unit_id, dilaporkan_oleh, dampak, status, solusi)
 where not exists (select 1 from problems);
 
+-- Penjual ---------------------------------------------------------------
+insert into sellers (nama_toko, nama_kontak, telepon, kategori, status, komisi_persen, catatan, unit_id, pic_user_id, dibuat_oleh)
+select * from (values
+  ('Torch.id', 'Sandi', '0856-2223-2570', 'Bag', 'aktif'::status_penjual, 10::numeric, 'Proses pencarian kreator untuk live mingguan.', 'f1b49e07-9937-5915-bedc-37348bdf1ac1'::uuid, '73eab5ac-5007-5391-913e-01e9ad855f45'::uuid, 'c5631790-4df7-5d06-b9db-ee468783017f'::uuid),
+  ('Nitron', 'Pak Firgon', '0822-1953-7566', 'Otomotif', 'aktif'::status_penjual, 17::numeric, 'Tujuan: memperbanyak kreator sebanyak-banyaknya.', 'f1b49e07-9937-5915-bedc-37348bdf1ac1'::uuid, 'fd438ea5-9664-51d4-9fed-4744fe5c6d8d'::uuid, 'c5631790-4df7-5d06-b9db-ee468783017f'::uuid),
+  ('Orbelle', 'Mega', '0881-0236-1246', 'Kerudung', 'prospek'::status_penjual, null::numeric, 'Menunggu respons beliau.', 'f1b49e07-9937-5915-bedc-37348bdf1ac1'::uuid, null::uuid, 'c5631790-4df7-5d06-b9db-ee468783017f'::uuid),
+  ('Manzone', 'Gina', '0812-9019-9640', 'Fashion', 'nonaktif'::status_penjual, 8::numeric, 'Kerja sama berhenti; mencari affiliator live eksklusif.', '19570324-4683-5829-9eb5-4c69aa62222a'::uuid, null::uuid, 'e2391748-8e38-5009-b5d6-758e232c6381'::uuid)
+) as v(nama_toko, nama_kontak, telepon, kategori, status, komisi_persen, catatan, unit_id, pic_user_id, dibuat_oleh)
+where not exists (select 1 from sellers);
+
+-- Catatan ---------------------------------------------------------------
+insert into notes (judul, isi, kategori, visibilitas, unit_id, disematkan, lampiran, dibuat_oleh)
+select * from (values
+  ('Templat chat admin kreator', 'Halo Kak, terima kasih sudah bergabung.
+
+1. Kirim link produk yang dipilih.
+2. Konfirmasi jadwal live.
+3. Laporkan kendala lewat grup.', 'sop'::kategori_catatan, 'unit'::visibilitas_catatan, 'db5378cf-cefb-5acc-9e22-8d62911fe882'::uuid, true, array[]::text[], '32de9d7a-0ac4-5c56-a57f-aeb9f7099b97'::uuid),
+  ('Review harian 24 Oktober', 'Dua akun beauty masih di bawah target. Minta host cadangan siap pekan depan.', 'rapat'::kategori_catatan, 'pribadi'::visibilitas_catatan, null::uuid, false, array[]::text[], '7019770e-faea-5467-98ad-3c4a088d602e'::uuid),
+  ('Lima jenis dokumen di bawah SOP', 'Kebijakan, prosedur, instruksi kerja, formulir, dan rekaman. Setiap SOP baru harus menyebut kelimanya.', 'dokumentasi'::kategori_catatan, 'perusahaan'::visibilitas_catatan, null::uuid, false, array['https://contoh.invalid/dokumen-sop.png']::text[], '9fbfa1b2-ab86-5fa3-8a0c-1a88537cdc33'::uuid)
+) as v(judul, isi, kategori, visibilitas, unit_id, disematkan, lampiran, dibuat_oleh)
+where not exists (select 1 from notes);
+
 -- Kursus ----------------------------------------------------------------
 insert into courses (judul, ringkasan, kategori, tingkat, unit_id, wajib_untuk, dibuat_oleh)
 select * from (values

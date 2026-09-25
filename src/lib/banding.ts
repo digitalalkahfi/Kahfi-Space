@@ -143,10 +143,9 @@ export function jumlahTerhitung(kelompok: KelompokBanding[]) {
  * alih-alih menyimpulkan bahwa migrasinya rusak.
  */
 export const ENTITAS_TAHAP_2: { kunci: string; label: string }[] = [
-  // Sisa yang belum punya tabel di V2 (25 Sep 2026): pengumuman, kalender,
-  // masalah, masukan, sampel, dan LMS sudah dipetakan.
-  { kunci: "notes", label: "Catatan" },
-  { kunci: "sellers", label: "Seller" },
+  // Kosong sejak 25 Sep 2026: seluruh kunci data lama sudah punya tempat
+  // di V2 (penjual di 0166, catatan di 0167). Daftarnya dipertahankan
+  // supaya layar banding tetap punya tempat bila ekspor lain muncul.
 ];
 
 /**

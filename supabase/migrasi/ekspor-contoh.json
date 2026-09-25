@@ -7554,5 +7554,44 @@
       "description": "Untuk affiliator",
       "createdByName": "A"
     }
+  ],
+  "sellers:all": [
+    {
+      "id": "sel_001",
+      "name": "Sandi",
+      "note": "Proses pencarian kreator.",
+      "phone": "0856-2223-2570",
+      "status": "aktif",
+      "category": "Bag",
+      "shopName": "Torch.id",
+      "createdAt": "2024-10-01T00:00:00.000Z",
+      "managerId": "usr_001",
+      "commission": "10%",
+      "managerName": "A"
+    }
+  ],
+  "notes:all": [
+    {
+      "id": "note_001",
+      "title": "Templat chat admin",
+      "content": "Halo Kak, terima kasih sudah bergabung.",
+      "authorId": "usr_001",
+      "category": "sop",
+      "division": "mcn",
+      "isPinned": true,
+      "createdAt": "2024-10-01T00:00:00.000Z",
+      "relatedId": null,
+      "updatedAt": "2024-10-02T00:00:00.000Z",
+      "authorName": "A",
+      "visibility": "private",
+      "attachments": [
+        {
+          "src": "https://contoh.invalid/a.png",
+          "name": "a.png",
+          "type": "image"
+        }
+      ],
+      "relatedType": null
+    }
   ]
 }

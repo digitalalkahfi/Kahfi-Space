@@ -167,6 +167,17 @@ export const KUNCI_DIKENAL: KunciEkspor[] = [
     label: "Perpustakaan belajar",
     catatan: "Tiap berkas menjadi kursus satu modul.",
   },
+  {
+    kunci: "sellers:all",
+    label: "Penjual",
+    catatan:
+      "Menjadi mitra unit pengelolanya; toko yang tercatat dua kali digabung.",
+  },
+  {
+    kunci: "notes:all",
+    label: "Catatan",
+    catatan: "Menjadi catatan pribadi penulisnya; tidak dibagikan.",
+  },
 ];
 
 /**

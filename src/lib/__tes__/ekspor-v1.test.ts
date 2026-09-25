@@ -16,9 +16,9 @@ import {
 } from "@/lib/ekspor-v1";
 
 test("seluruh kunci ekspor yang dipetakan dikenali dan tidak ada yang kembar", () => {
-  assert.equal(KUNCI_DIKENAL.length, 23);
+  assert.equal(KUNCI_DIKENAL.length, 25);
   const kunci = KUNCI_DIKENAL.map((k) => k.kunci);
-  assert.equal(new Set(kunci).size, 23);
+  assert.equal(new Set(kunci).size, 25);
   for (const k of kunci) assert.equal(golonganKunci(k), "dikenal");
 });
 
@@ -29,7 +29,7 @@ test("kunci rujukan, kunci diabaikan, dan kunci asing dibedakan", () => {
   assert.equal(golonganKunci("app:settings"), "diabaikan");
   // Kunci yang belum pernah terlihat tidak boleh ikut terhitung diabaikan:
   // orang harus memutuskannya, bukan sistem yang diam-diam membuangnya.
-  assert.equal(golonganKunci("sellers:all"), "asing");
+  assert.equal(golonganKunci("misteri:all"), "asing");
 });
 
 test("berkas ditolak bila bukan .json, kosong, atau melewati batas", () => {
@@ -85,8 +85,8 @@ test("ringkasan memisahkan yang tersimpan dari yang dilewatkan", () => {
 test("kunci asing dihitung tersendiri meski isinya tersimpan", () => {
   const r = ringkasanUnggahan([
     baris("users:list", 5, true),
-    baris("sellers:all", 9, true),
-    baris("notes:all", 3, true),
+    baris("misteri:all", 9, true),
+    baris("rahasia:all", 3, true),
   ]);
 
   // Tersimpan supaya tidak hilang, tetapi tetap terhitung menunggu
@@ -134,7 +134,7 @@ test("membaca ekspor memisahkan _meta dari kunci datanya", () => {
     "users:list": [{ id: "u1", password: "rahasia" }, { id: "u2" }],
     "attendance:config": { jamMasuk: "08:00" },
     "img:store": [{ url: "a" }, { url: "b" }],
-    "sellers:all": [{ id: "s1" }],
+    "misteri:all": [{ id: "s1" }],
   });
 
   assert.equal(hasil.ok, true);
@@ -151,8 +151,8 @@ test("membaca ekspor memisahkan _meta dari kunci datanya", () => {
   assert.equal(peta["attendance:config"].jumlah, 1);
   assert.equal(peta["img:store"].disimpan, false);
   // Kunci asing tetap disimpan supaya keputusannya bisa diambil nanti.
-  assert.equal(peta["sellers:all"].disimpan, true);
-  assert.equal(peta["sellers:all"].golongan, "asing");
+  assert.equal(peta["misteri:all"].disimpan, true);
+  assert.equal(peta["misteri:all"].golongan, "asing");
 
   // Yang dipetakan disebut lebih dulu, yang diabaikan paling akhir.
   assert.equal(hasil.isi[0].golongan, "dikenal");
@@ -283,7 +283,7 @@ test("ringkasan unggahan cocok dengan apa yang dibaca dari ekspor", () => {
     _meta: { version: "1.0" },
     "users:list": [{ id: "u1" }, { id: "u2" }],
     "img:store": [{ id: "i1" }],
-    "sellers:all": [{ id: "s1" }],
+    "misteri:all": [{ id: "s1" }],
   });
   assert.equal(dibaca.ok, true);
   if (!dibaca.ok) return;

@@ -40,6 +40,8 @@ import { bacaMasalah } from "@/lib/masalah-v1";
 import { bacaMasukan } from "@/lib/masukan-v1";
 import { bacaSampel } from "@/lib/sampel-v1";
 import { bacaLms } from "@/lib/lms-v1";
+import { bacaPenjual } from "@/lib/penjual-v1";
+import { bacaCatatan } from "@/lib/catatan-v1";
 import type { Peran } from "@/lib/types";
 
 /**
@@ -73,7 +75,9 @@ type TabelTujuan =
   | "courses"
   | "course_modules"
   | "course_enrollments"
-  | "module_progress";
+  | "module_progress"
+  | "sellers"
+  | "notes";
 
 type KlienDb = Awaited<ReturnType<typeof klienServer>>;
 
@@ -3175,5 +3179,175 @@ export async function terapkanLms(
     idLama: "lms",
     pesan: `Kursus ${idKursus.size}, modul ${idModul.size}, pendaftaran ${daftarDitulis}, kemajuan ${majuDitulis} tertulis.`,
   });
+  return hasil;
+}
+
+/** Menerapkan `sellers:all` ke `sellers` (mitra unit pengelolanya). */
+export async function terapkanPenjual(
+  tahap: "uji_coba" | "sungguhan",
+): Promise<HasilTerap> {
+  const [isi, resolusi] = await Promise.all([
+    isiEksporLama(),
+    resolusiOrangV1(),
+  ]);
+  const orang = new Map(resolusi.padanan.map((p) => [p.idLama, p.idBaru]));
+  const daftar = larikLama(isi, "sellers:all");
+  const { siap, tertahan } = bacaPenjual(daftar);
+  const hasil = hasilKosong("sellers:all", daftar.length);
+  hasil.tertahan = tertahan.length;
+  hasil.catatan.push(...tertahan);
+  for (const p of siap) {
+    if (p.digabung.length > 0) {
+      hasil.catatan.push({
+        idLama: p.idLama,
+        pesan: `Toko yang sama tercatat ${p.digabung.length + 1} kali di sistem lama (${p.digabung.join(", ")}); digabung menjadi satu.`,
+      });
+    }
+  }
+  if (tahap === "uji_coba" || modeData() === "demo") return hasil;
+
+  const sb = await klienServer();
+  const [unit, peta] = await Promise.all([
+    petaUnit(sb),
+    bacaPeta(sb, "sellers:all"),
+  ]);
+  const unitTap = unit.get("tap");
+  if (!unitTap) throw new Error("Unit TAP tidak ada di V2.");
+  const idPengelola = [
+    ...new Set(
+      siap
+        .map((p) => (p.pengelolaLama ? orang.get(p.pengelolaLama) : undefined))
+        .filter((id): id is string => Boolean(id)),
+    ),
+  ];
+  const { data: profil } = idPengelola.length
+    ? await sb.from("users").select("id, unit_id, status").in("id", idPengelola)
+    : { data: [] as { id: string; unit_id: string | null; status: string }[] };
+  const profilId = new Map((profil ?? []).map((u) => [u.id, u]));
+
+  for (const p of siap) {
+    const pengelola = p.pengelolaLama
+      ? (orang.get(p.pengelolaLama) ?? null)
+      : null;
+    const prof = pengelola ? profilId.get(pengelola) : undefined;
+    if (p.pengelolaLama && !pengelola) {
+      hasil.catatan.push({
+        idLama: p.idLama,
+        pesan: `Pengelolanya (${p.pengelolaLama}) belum tertaut; masuk ke unit TAP tanpa PIC.`,
+      });
+    }
+    // Unit mengikuti pengelola lamanya; TAP bila ia tidak punya unit
+    // (seluruh seller lama memang milik TAP).
+    const unitId = prof?.unit_id ?? unitTap;
+    const tulis = await tulisIdempoten(sb, {
+      kelompok: "sellers:all",
+      idLama: p.idLama,
+      tabel: "sellers",
+      peta,
+      isi: {
+        nama_toko: p.namaToko,
+        nama_kontak: p.namaKontak,
+        telepon: p.telepon,
+        kategori: p.kategori,
+        status: p.status,
+        komisi_persen: p.komisiPersen,
+        catatan: p.catatan,
+        unit_id: unitId,
+        pic_user_id: prof && prof.status === "aktif" ? prof.id : null,
+        dibuat_oleh: pengelola,
+        created_at: p.dibuatPada ?? new Date().toISOString(),
+      },
+      cariLama: async () => {
+        const { data } = await sb
+          .from("sellers")
+          .select("id")
+          .eq("unit_id", unitId)
+          .ilike("nama_toko", p.namaToko)
+          .maybeSingle();
+        return data?.id ?? null;
+      },
+    });
+    if ("galat" in tulis) {
+      hasil.tertahan += 1;
+      hasil.catatan.push({ idLama: p.idLama, pesan: tulis.galat });
+      continue;
+    }
+    hasil.ditulis += 1;
+    // Entri yang digabung ikut dipetakan ke baris yang sama supaya
+    // pengulangan mengenalinya.
+    for (const idGabung of p.digabung) {
+      await sb
+        .from("migrasi_peta")
+        .upsert(
+          {
+            kelompok: "sellers:all",
+            id_lama: idGabung,
+            id_baru: tulis.id,
+            tabel: "sellers",
+          },
+          { onConflict: "kelompok,id_lama" },
+        );
+    }
+  }
+  return hasil;
+}
+
+/** Menerapkan `notes:all` ke `notes` sebagai catatan pribadi penulisnya. */
+export async function terapkanCatatan(
+  tahap: "uji_coba" | "sungguhan",
+): Promise<HasilTerap> {
+  const [isi, resolusi] = await Promise.all([
+    isiEksporLama(),
+    resolusiOrangV1(),
+  ]);
+  const orang = new Map(resolusi.padanan.map((p) => [p.idLama, p.idBaru]));
+  const daftar = larikLama(isi, "notes:all");
+  const { siap, tertahan } = bacaCatatan(daftar);
+  const hasil = hasilKosong("notes:all", daftar.length);
+  hasil.tertahan = tertahan.length;
+  hasil.catatan.push(...tertahan);
+  const bisa = siap.filter((c) => {
+    const pemilik = c.pemilikLama ? orang.get(c.pemilikLama) : undefined;
+    if (pemilik) return true;
+    hasil.tertahan += 1;
+    hasil.catatan.push({
+      idLama: c.idLama,
+      pesan: c.pemilikLama
+        ? `Penulisnya (${c.pemilikLama}) belum tertaut.`
+        : "Catatan tanpa penulis.",
+    });
+    return false;
+  });
+  if (tahap === "uji_coba" || modeData() === "demo") return hasil;
+
+  const sb = await klienServer();
+  const peta = await bacaPeta(sb, "notes:all");
+  for (const c of bisa) {
+    const tulis = await tulisIdempoten(sb, {
+      kelompok: "notes:all",
+      idLama: c.idLama,
+      tabel: "notes",
+      peta,
+      isi: {
+        judul: c.judul,
+        isi: c.isi,
+        kategori: c.kategori,
+        visibilitas: "pribadi",
+        unit_id: null,
+        disematkan: c.disematkan,
+        lampiran: c.lampiran,
+        dibuat_oleh: orang.get(c.pemilikLama as string) as string,
+        created_at: c.dibuatPada ?? new Date().toISOString(),
+        updated_at:
+          c.diperbaruiPada ?? c.dibuatPada ?? new Date().toISOString(),
+      },
+    });
+    if ("galat" in tulis) {
+      hasil.tertahan += 1;
+      hasil.catatan.push({ idLama: c.idLama, pesan: tulis.galat });
+      continue;
+    }
+    hasil.ditulis += 1;
+  }
   return hasil;
 }

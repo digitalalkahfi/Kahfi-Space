@@ -155,9 +155,9 @@ export function BelumDimigrasi({
       <div className="px-5">
         <h2 className="text-base leading-6 font-semibold">Belum dimigrasi</h2>
         <p className="text-[13px] leading-[18px] text-pretty text-muted-foreground">
-          Kesembilan hal ini sengaja belum dipindahkan pada tahap ini. Datanya
-          masih ada di K-Space lama dan bisa diambil belakangan; yang tidak
-          boleh terjadi adalah orang mengira ia hilang.
+          {ENTITAS_TAHAP_2.length === 0
+            ? "Tidak ada lagi: seluruh kunci data K-Space lama sudah punya tempat di V2. Yang tersisa hanya catatan per baris di laporan migrasi."
+            : "Hal-hal ini sengaja belum dipindahkan pada tahap ini. Datanya masih ada di K-Space lama dan bisa diambil belakangan; yang tidak boleh terjadi adalah orang mengira ia hilang."}
         </p>
       </div>
 

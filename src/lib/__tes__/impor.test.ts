@@ -129,7 +129,7 @@ test("medan bertanda gabung ditempel, bukan saling menimpa", () => {
 
 test("kunci asing dilewati sekali, bukan gagal beruntun", () => {
   const hasil = siapkanKunci(
-    { key: "sellers:all", value: [{ id: "s1" }, { id: "s2" }] },
+    { key: "misteri:all", value: [{ id: "s1" }, { id: "s2" }] },
     kamus,
   );
   assert.equal(hasil.length, 1);

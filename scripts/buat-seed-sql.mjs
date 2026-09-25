@@ -483,6 +483,32 @@ ${data.problems
 ) as v(judul, konteks, unit_id, dilaporkan_oleh, dampak, status, solusi)
 where not exists (select 1 from problems);`);
 
+// Penjual & catatan (tahap 2 migrasi V1) ---------------------------------
+bagian.push(`
+-- Penjual ---------------------------------------------------------------
+insert into sellers (nama_toko, nama_kontak, telepon, kategori, status, komisi_persen, catatan, unit_id, pic_user_id, dibuat_oleh)
+select * from (values
+${data.sellers
+  .map(
+    (s) =>
+      `  (${q(s.nama_toko)}, ${q(s.nama_kontak)}, ${q(s.telepon)}, ${q(s.kategori)}, ${q(s.status)}::status_penjual, ${s.komisi_persen === null ? "null::numeric" : `${s.komisi_persen}::numeric`}, ${q(s.catatan)}, ${q(idUnit[s.unit])}::uuid, ${s.pic ? `${q(idUser[s.pic])}::uuid` : "null::uuid"}, ${q(idUser[s.dibuat_oleh])}::uuid)`,
+  )
+  .join(",\n")}
+) as v(nama_toko, nama_kontak, telepon, kategori, status, komisi_persen, catatan, unit_id, pic_user_id, dibuat_oleh)
+where not exists (select 1 from sellers);
+
+-- Catatan ---------------------------------------------------------------
+insert into notes (judul, isi, kategori, visibilitas, unit_id, disematkan, lampiran, dibuat_oleh)
+select * from (values
+${data.notes
+  .map(
+    (n) =>
+      `  (${q(n.judul)}, ${q(n.isi)}, ${q(n.kategori)}::kategori_catatan, ${q(n.visibilitas)}::visibilitas_catatan, ${n.unit ? `${q(idUnit[n.unit])}::uuid` : "null::uuid"}, ${n.disematkan ? "true" : "false"}, array[${n.lampiran.map((l) => q(l)).join(", ")}]::text[], ${q(idUser[n.dibuat_oleh])}::uuid)`,
+  )
+  .join(",\n")}
+) as v(judul, isi, kategori, visibilitas, unit_id, disematkan, lampiran, dibuat_oleh)
+where not exists (select 1 from notes);`);
+
 // LMS: kursus, modul, dan kemajuan --------------------------------------
 // Kemajuan disisipkan sebagai baris module_progress, bukan dengan menyetel
 // tanggal selesai: kelulusan selalu dihitung dari modul yang tuntas.
