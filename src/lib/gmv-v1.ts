@@ -29,7 +29,7 @@
  * dijelaskan tanpa menebak.
  */
 import { keAngka, keTanggal } from "@/lib/impor";
-import { bakuAkun, medanLaporan, ratakanLaporan } from "@/lib/laporan-v1";
+import { akunV1, medanLaporan, ratakanLaporan } from "@/lib/laporan-v1";
 import { unitV1 } from "@/lib/peran-v1";
 
 export type SumberGmv = "affiliate" | "harian" | "laporan";
@@ -49,7 +49,7 @@ export const LABEL_SUMBER: Record<SumberGmv, string> = {
 export type BarisGmv = {
   idLama: string;
   tanggal: string;
-  /** Nama akun dalam bentuk baku (`bakuAkun`), atau null untuk angka unit. */
+  /** Nama akun dalam bentuk baku (`akunV1`), atau null untuk angka unit. */
   akun: string | null;
   /** Kode unit V2, untuk angka yang bukan per akun. */
   unit: string | null;
@@ -102,7 +102,7 @@ function namaAkunLama(isi: Record<string, unknown>) {
   const peta = new Map<string, string>();
   for (const a of bacaLarik(isi, "affiliate-accounts:all")) {
     const id = teks(a.id);
-    const nama = bakuAkun(a.username ?? a.name ?? a.nama);
+    const nama = akunV1(a.username ?? a.name ?? a.nama);
     if (id && nama) peta.set(id, nama);
   }
   return peta;
@@ -146,8 +146,8 @@ export function gabungGmv(isi: Record<string, unknown>): HasilGabung {
     const idAkun = teks(g.accountId);
     const akun =
       (idAkun ? namaAkun.get(idAkun) : null) ??
-      bakuAkun(g.accountName) ??
-      bakuAkun(idAkun);
+      akunV1(g.accountName) ??
+      akunV1(idAkun);
     if (!akun) {
       dilewati.push({
         idLama,
@@ -201,7 +201,7 @@ export function gabungGmv(isi: Record<string, unknown>): HasilGabung {
     }
 
     const idAkun = teks(g.accountId);
-    const akun = idAkun ? (namaAkun.get(idAkun) ?? bakuAkun(idAkun)) : null;
+    const akun = idAkun ? (namaAkun.get(idAkun) ?? akunV1(idAkun)) : null;
     const divisi = teks(g.division);
     const unit = akun ? null : divisi ? unitV1(divisi) : null;
     if (!akun && !divisi) {
@@ -256,7 +256,7 @@ export function gabungGmv(isi: Record<string, unknown>): HasilGabung {
     const tanggal = keTanggal(medan.tanggal);
     if (!tanggal) continue;
 
-    const akun = bakuAkun(medan.akun);
+    const akun = akunV1(medan.akun);
     const pelapor = teks(medan.user);
     const divisi = medan.unit ?? (pelapor ? divisiOrang.get(pelapor) : null);
     const unit = akun ? null : unitV1(divisi);

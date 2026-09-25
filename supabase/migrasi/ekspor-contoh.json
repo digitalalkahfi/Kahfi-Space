@@ -5431,14 +5431,7 @@
       "lng": 106.8102,
       "nama": "Kantor Pusat"
     },
-    "hariKerja": [
-      "senin",
-      "selasa",
-      "rabu",
-      "kamis",
-      "jumat",
-      "sabtu"
-    ]
+    "hariKerja": ["senin", "selasa", "rabu", "kamis", "jumat", "sabtu"]
   },
   "leave-requests:all": [
     {
@@ -7340,5 +7333,226 @@
     "theme": "light",
     "locale": "id-ID",
     "weekStart": "monday"
-  }
+  },
+  "announcements:all": [
+    {
+      "id": "ann_001",
+      "title": "📢 PENGUMUMAN TIM",
+      "content": "Rapat bulanan dimajukan ke Senin.\n\nMohon hadir tepat waktu.",
+      "authorId": "usr_001",
+      "authorName": "Farhan Pratama",
+      "createdAt": "2024-10-01T02:00:00.000Z"
+    }
+  ],
+  "calendar:all": [
+    {
+      "id": "cal_001",
+      "date": "2024-10-15",
+      "time": "19:30",
+      "endTime": "21:00",
+      "type": "meeting",
+      "title": "Meeting dengan Dosen",
+      "location": "https://zoom.us/j/1",
+      "description": "Bahas kerja sama kampus.",
+      "attendeeIds": ["usr_001", "usr_002"],
+      "attendeeNames": ["A", "B"],
+      "createdById": "usr_001",
+      "createdByName": "A",
+      "createdAt": "2024-10-01T02:00:00.000Z"
+    }
+  ],
+  "schedule:all": [
+    {
+      "id": "sch_001",
+      "date": "2024-10-03",
+      "time": "09:00",
+      "type": "piket_grup",
+      "notes": "Meeting bersama leader affiliator",
+      "status": "scheduled",
+      "adminId": "usr_002",
+      "adminName": "B",
+      "createdAt": "2024-10-01T02:00:00.000Z",
+      "creatorId": "",
+      "creatorName": "-"
+    }
+  ],
+  "problems:all": [
+    {
+      "id": "prb_001",
+      "title": "Akun contoh terkena pembatasan",
+      "status": "resolved",
+      "urgency": "tinggi",
+      "division": "internal",
+      "createdAt": "2024-10-02T01:00:00.000Z",
+      "rootCause": {
+        "root": "pelanggaran konten",
+        "why1": "pelanggaran konten",
+        "corrective": "diganti akun baru",
+        "preventive": "periksa aturan sebelum unggah"
+      },
+      "resolvedAt": "2024-10-03T01:00:00.000Z",
+      "description": "Akun dibatasi selama tiga hari.",
+      "relatedType": "creator",
+      "reportedById": "usr_002",
+      "resolvedById": "usr_001",
+      "reportedByName": "B",
+      "resolvedByName": "A"
+    }
+  ],
+  "feedback:all": [
+    {
+      "id": "fbk_001",
+      "page": "Absensi",
+      "type": "bug",
+      "images": [],
+      "status": "selesai",
+      "userId": "usr_002",
+      "message": "Rekap absen 7 hari terakhir tidak sesuai dengan kalender.",
+      "replies": [
+        {
+          "id": "fbk_001_r1",
+          "text": "Sudah diperbaiki di versi berikutnya.",
+          "userId": "usr_001",
+          "userName": "A",
+          "createdAt": "2024-10-02T03:00:00.000Z"
+        }
+      ],
+      "userName": "B",
+      "userRole": "leader",
+      "createdAt": "2024-10-02T02:00:00.000Z"
+    }
+  ],
+  "sampel:all": [
+    {
+      "id": "SMP-241001-0001",
+      "foto": null,
+      "kode": "SMP-241001-0001",
+      "nama": "Gamis contoh",
+      "token": "ABCD1234",
+      "catatan": "",
+      "kategori": "Fashion",
+      "sellerId": "",
+      "createdAt": "2024-10-01T04:00:00.000Z",
+      "lifecycle": "aktif",
+      "linkProduk": [],
+      "penerimaId": "usr_002",
+      "sellerNama": "",
+      "createdById": "usr_001",
+      "penerimaNama": "B",
+      "createdByName": "A",
+      "tanggalDatang": "2024-10-01",
+      "riwayatKeputusan": []
+    }
+  ],
+  "sampel-usage:all": [
+    {
+      "id": "2024-10-01-usg001",
+      "usedAt": "2024-10-01T05:00:00.000Z",
+      "userId": "usr_001",
+      "sampelId": "SMP-241001-0001",
+      "userName": "A",
+      "createdAt": "2024-10-01T05:00:00.000Z",
+      "sampelKode": "SMP-241001-0001"
+    }
+  ],
+  "lms:paths:all": [
+    {
+      "id": "path_001",
+      "title": "On Boarding Affiliator",
+      "status": "published",
+      "courses": [
+        {
+          "order": 0,
+          "courseId": "crs_001",
+          "required": true
+        }
+      ],
+      "createdAt": "2024-09-01T00:00:00.000Z",
+      "updatedAt": "2024-09-01T00:00:00.000Z",
+      "description": "",
+      "estimatedDays": 7,
+      "targetDivisions": ["internal"],
+      "targetJobTitles": ["Affiliator"]
+    }
+  ],
+  "lms:courses:all": [
+    {
+      "id": "crs_001",
+      "title": "PlayBook Affiliator",
+      "status": "published",
+      "priority": "wajib",
+      "createdAt": "2024-09-01T00:00:00.000Z",
+      "updatedAt": "2024-09-01T00:00:00.000Z",
+      "description": "",
+      "passingScore": 85,
+      "estimatedMinutes": 75,
+      "modules": [
+        {
+          "id": "mod_001",
+          "order": 0,
+          "title": "Playbook Affiliator",
+          "description": "",
+          "lessons": [
+            {
+              "id": "les_001",
+              "type": "pdf",
+              "order": 0,
+              "title": "Affiliator Playbook",
+              "pdfUrl": "https://contoh.invalid/playbook.pdf",
+              "pdfName": "playbook.pdf",
+              "required": true,
+              "estimatedMinutes": 75
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "lms:enrollments:all": [
+    {
+      "id": "usr_002:path_001",
+      "pathId": "path_001",
+      "source": "AUTO",
+      "status": "NOT_STARTED",
+      "userId": "usr_002",
+      "userName": "B",
+      "pathTitle": "On Boarding Affiliator",
+      "startedAt": null,
+      "assignedAt": "2024-09-02T00:00:00.000Z",
+      "completedAt": null,
+      "assignedById": "usr_001",
+      "assignedByName": "A"
+    }
+  ],
+  "lms:progress:all": [
+    {
+      "id": "usr_002:les_001",
+      "done": true,
+      "detail": null,
+      "userId": "usr_002",
+      "percent": 100,
+      "courseId": "crs_001",
+      "lessonId": "les_001",
+      "updatedAt": "2024-09-03T00:00:00.000Z",
+      "completedAt": "2024-09-03T00:00:00.000Z"
+    }
+  ],
+  "lms:library:all": [
+    {
+      "id": "lib_001",
+      "type": "pdf",
+      "order": 0,
+      "title": "Mega Hook Creator",
+      "pdfUrl": "https://contoh.invalid/hook.pdf",
+      "status": "published",
+      "pdfName": "hook.pdf",
+      "pdfSize": 1000,
+      "category": "",
+      "createdAt": "2024-09-01T00:00:00.000Z",
+      "updatedAt": "2024-09-01T00:00:00.000Z",
+      "createdById": "usr_001",
+      "description": "Untuk affiliator",
+      "createdByName": "A"
+    }
+  ]
 }

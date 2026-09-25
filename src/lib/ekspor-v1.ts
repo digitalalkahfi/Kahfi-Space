@@ -35,7 +35,7 @@ export type KunciEkspor = {
 };
 
 /**
- * Kesebelas kunci yang benar-benar dipetakan ke skema V2.
+ * Kunci yang benar-benar dipetakan ke skema V2.
  *
  * Urutannya mengikuti ketergantungan data: orang lebih dulu, lalu akun,
  * baru yang menunjuk keduanya.
@@ -96,6 +96,77 @@ export const KUNCI_DIKENAL: KunciEkspor[] = [
     label: "Arus kas",
     catatan: "Masuk berstatus dibayar, tanpa melewati alur persetujuan.",
   },
+  // Tahap 2 (25 Sep 2026): kunci yang punya tempat di V2 tetapi bentuknya
+  // berbeda; disesuaikan dengan cara V2, bukan disalin apa adanya.
+  {
+    kunci: "announcements:all",
+    label: "Pengumuman",
+    catatan:
+      "Masuk sebagai pengumuman terbit untuk semua orang, tanpa notifikasi ulang.",
+  },
+  {
+    kunci: "calendar:all",
+    label: "Kalender",
+    catatan:
+      "Menjadi agenda seluruh perusahaan; nama peserta masuk ke keterangan.",
+  },
+  {
+    kunci: "schedule:all",
+    label: "Jadwal lama",
+    catatan:
+      "Yang sudah disalin ke kalender lama tidak dibawa dua kali; catatannya digabung.",
+  },
+  {
+    kunci: "problems:all",
+    label: "Masalah (Kaizen)",
+    catatan:
+      "5-Why lama diringkas ke konteks dan solusi; penyelesaian tercatat sebagai jejak.",
+  },
+  {
+    kunci: "feedback:all",
+    label: "Masukan",
+    catatan:
+      "Judul dari kalimat pertama; balasan menjadi komentar; lampiran tetap di penyimpanan lama.",
+  },
+  {
+    kunci: "sampel:all",
+    label: "Sampel",
+    catatan:
+      "Masuk sebagai tersedia, penerimanya dicatat sebagai kejadian dipegang.",
+  },
+  {
+    kunci: "sampel-usage:all",
+    label: "Riwayat pindai sampel",
+    catatan:
+      "Menjadi riwayat pindai; kode yang sudah tidak ada tercatat sebagai tak dikenali.",
+  },
+  {
+    kunci: "lms:paths:all",
+    label: "Jalur belajar",
+    catatan:
+      "Jalur menjadi kategori dan ringkasan kursusnya; pendaftaran jalur menjadi pendaftaran kursus.",
+  },
+  {
+    kunci: "lms:courses:all",
+    label: "Kursus",
+    catatan: "Tiap pelajaran (video/PDF) menjadi satu modul V2.",
+  },
+  {
+    kunci: "lms:enrollments:all",
+    label: "Pendaftaran kursus",
+    catatan: "Satu pendaftaran per kursus di jalurnya.",
+  },
+  {
+    kunci: "lms:progress:all",
+    label: "Kemajuan belajar",
+    catatan:
+      "Hanya pelajaran yang tuntas; yang setengah jalan dicatat, tidak dibulatkan.",
+  },
+  {
+    kunci: "lms:library:all",
+    label: "Perpustakaan belajar",
+    catatan: "Tiap berkas menjadi kursus satu modul.",
+  },
 ];
 
 /**
@@ -114,12 +185,23 @@ export const KUNCI_REFERENSI = ["gmv:targets", "affiliate:goal"] as const;
 export const KUNCI_DIABAIKAN = [
   "img:store",
   "activities",
+  "activities:all",
   "backup",
+  "backup:last",
+  "backup:drive-last",
   "drive",
+  "drive:auto-backup",
   "template",
+  "daily-report-templates:all",
   "reports",
+  "reports:all",
   "targets",
+  "targets:all",
   "app:settings",
+  // Turunan yang V2 hitung sendiri, atau yang isinya kosong di ekspor.
+  "sampel-stat:all",
+  "lms:lesson-bodies:all",
+  "attendance:selfie-index",
 ] as const;
 
 /** Kunci yang memuat keterangan ekspor, bukan data. */

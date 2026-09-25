@@ -143,15 +143,10 @@ export function jumlahTerhitung(kelompok: KelompokBanding[]) {
  * alih-alih menyimpulkan bahwa migrasinya rusak.
  */
 export const ENTITAS_TAHAP_2: { kunci: string; label: string }[] = [
-  { kunci: "problems", label: "Kaizen & masalah" },
-  { kunci: "announcements", label: "Pengumuman" },
+  // Sisa yang belum punya tabel di V2 (25 Sep 2026): pengumuman, kalender,
+  // masalah, masukan, sampel, dan LMS sudah dipetakan.
   { kunci: "notes", label: "Catatan" },
-  { kunci: "feedback", label: "Masukan" },
   { kunci: "sellers", label: "Seller" },
-  { kunci: "sampel", label: "Sampel" },
-  { kunci: "lms", label: "Portal belajar" },
-  { kunci: "calendar", label: "Kalender" },
-  { kunci: "schedule", label: "Jadwal" },
 ];
 
 /**

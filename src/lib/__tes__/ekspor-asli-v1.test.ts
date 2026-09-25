@@ -2,6 +2,8 @@ import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { hariDariKejadian, tanggalWib } from "@/lib/izin-v1";
 import {
+  akunDiLaporan,
+  akunV1,
   bakuAkun,
   catatanLaporan,
   medanLaporan,
@@ -226,4 +228,44 @@ test("kategori arus kas K-Space lama dipetakan", () => {
   assert.equal(jenisKeluarV1("Komisi Affiliate"), "creator_share");
   // Yang maknanya belum pasti tetap tidak ditebak.
   assert.equal(jenisKeluarV1("Pengembalian Dana"), null);
+});
+
+test("salah ketik nama akun yang dikenal dibetulkan; sisanya apa adanya", () => {
+  assert.equal(akunV1("dapaspilin"), "dafaspilin");
+  assert.equal(akunV1("@Dapaspilin_"), "dafaspilin");
+  assert.equal(akunV1("hersandaaffiliator"), "hawnahijab");
+  assert.equal(akunV1("naimanurr_"), "naimanurr");
+  assert.equal(akunV1(""), null);
+});
+
+test("akun yang disebut laporan dihitung beserta pelapornya dan ejaan terseringnya", () => {
+  const laporan = (id: string, akun: string, user: string) => ({
+    id,
+    date: "2026-07-20",
+    authorId: user,
+    fieldsSnapshot: [{ label: "Nama Akun", value: akun }],
+  });
+  const peta = akunDiLaporan([
+    laporan("r1", "hawnahijab_", "u_hersanda"),
+    laporan("r2", "hawnahijab_", "u_hersanda"),
+    laporan("r3", "hawnahijab", "u_agnes"),
+    // Alias: ikut ke akun yang dimaksud, tetapi ejaannya tidak dipakai.
+    laporan("r4", "hersandaaffiliator", "u_hersanda"),
+    laporan("r5", "dapaspilin", "u_daffa"),
+    { id: "r6", date: "2026-07-20", authorId: "u_x", fieldsSnapshot: [] },
+  ]);
+
+  const hawna = peta.get("hawnahijab");
+  assert.ok(hawna);
+  assert.equal(hawna.jumlah, 4);
+  assert.equal(hawna.username, "hawnahijab_");
+  assert.equal(hawna.pelapor.get("u_hersanda"), 3);
+  assert.equal(hawna.pelapor.get("u_agnes"), 1);
+
+  const daffa = peta.get("dafaspilin");
+  assert.ok(daffa);
+  // Satu-satunya ejaan adalah salah ketiknya: dipakai apa adanya daripada
+  // dikarang, dan akun ini biasanya sudah ada di daftar akun lama.
+  assert.equal(daffa.username, "dapaspilin");
+  assert.equal(peta.size, 2);
 });

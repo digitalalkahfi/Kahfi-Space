@@ -15,10 +15,10 @@ import {
   type BarisUnggah,
 } from "@/lib/ekspor-v1";
 
-test("kesebelas kunci ekspor dikenali dan tidak ada yang kembar", () => {
-  assert.equal(KUNCI_DIKENAL.length, 11);
+test("seluruh kunci ekspor yang dipetakan dikenali dan tidak ada yang kembar", () => {
+  assert.equal(KUNCI_DIKENAL.length, 23);
   const kunci = KUNCI_DIKENAL.map((k) => k.kunci);
-  assert.equal(new Set(kunci).size, 11);
+  assert.equal(new Set(kunci).size, 23);
   for (const k of kunci) assert.equal(golonganKunci(k), "dikenal");
 });
 

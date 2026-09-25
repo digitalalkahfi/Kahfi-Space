@@ -217,6 +217,44 @@ const KELOMPOK = [
     tabel: "transactions",
     jalankan: (t) => terap.terapkanKas(t),
   },
+  // Tahap 2: tabel-tabel tanpa jalur migrasi khusus; lihat catatan di
+  // terapkan-migrasi.ts bagian "Kelompok tahap 2".
+  {
+    kunci: "announcements:all",
+    label: "Pengumuman",
+    tabel: "announcements",
+    jalankan: (t) => terap.terapkanPengumuman(t),
+  },
+  {
+    kunci: "calendar:all",
+    label: "Kalender",
+    tabel: "agenda",
+    jalankan: (t) => terap.terapkanAgenda(t),
+  },
+  {
+    kunci: "problems:all",
+    label: "Masalah (Kaizen)",
+    tabel: "problems",
+    jalankan: (t) => terap.terapkanMasalah(t),
+  },
+  {
+    kunci: "feedback:all",
+    label: "Masukan",
+    tabel: "feedback",
+    jalankan: (t) => terap.terapkanMasukan(t),
+  },
+  {
+    kunci: "sampel:all",
+    label: "Sampel",
+    tabel: "samples",
+    jalankan: (t) => terap.terapkanSampel(t),
+  },
+  {
+    kunci: "lms:courses:all",
+    label: "Portal belajar",
+    tabel: "courses",
+    jalankan: (t) => terap.terapkanLms(t),
+  },
 ];
 const TABEL = [
   "users",
@@ -290,6 +328,12 @@ function jumlahSumber(isi) {
     "tasks:all": n("tasks:all"),
     "todos:all": n("todos:all"),
     "keuangan:cashflow": n("keuangan:cashflow"),
+    "announcements:all": n("announcements:all"),
+    "calendar:all": n("calendar:all"),
+    "problems:all": n("problems:all"),
+    "feedback:all": n("feedback:all"),
+    "sampel:all": n("sampel:all"),
+    "lms:courses:all": n("lms:courses:all") + n("lms:library:all"),
   };
 }
 

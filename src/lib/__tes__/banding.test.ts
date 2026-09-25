@@ -220,23 +220,25 @@ test("entitas tahap 2 dihitung dari kunci ekspor yang mirip namanya", () => {
   // Kuncinya belum dipetakan, jadi ejaannya tidak baku: problems:all,
   // problem:list, sellers:all. Semuanya harus ketemu.
   const jumlah = jumlahTahap2([
-    { kunci: "problems:all", jumlah: 12 },
-    { kunci: "announcements:all", jumlah: 5 },
+    { kunci: "notes:all", jumlah: 6 },
+    { kunci: "notes:pinned", jumlah: 1 },
     { kunci: "sellers:all", jumlah: 3 },
     { kunci: "users:list", jumlah: 26 },
   ]);
 
-  assert.equal(jumlah.problems, 12);
-  assert.equal(jumlah.announcements, 5);
+  assert.equal(jumlah.notes, 7);
   assert.equal(jumlah.sellers, 3);
+  // Yang sudah dipetakan (pengumuman, masalah, …) tidak lagi dihitung
+  // sebagai tahap 2.
+  assert.equal(jumlah.announcements, undefined);
 });
 
 test("entitas yang tidak ada di ekspor terhitung nol, bukan hilang", () => {
   // "Tidak ada di ekspor" dan "ada tetapi belum dipindahkan" adalah dua
   // jawaban berbeda untuk orang yang mencari datanya.
   const jumlah = jumlahTahap2([{ kunci: "users:list", jumlah: 26 }]);
-  assert.equal(jumlah.lms, 0);
-  assert.equal(Object.keys(jumlah).length >= 9, true);
+  assert.equal(jumlah.sellers, 0);
+  assert.equal(Object.keys(jumlah).length, 2);
 });
 
 test("arus kas dipisah per bulan dan per arah", () => {

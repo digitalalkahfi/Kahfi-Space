@@ -9,6 +9,8 @@ import { resolusiOrangV1 } from "@/lib/data/resolusi";
 import { kontakV1, peranV1, programV1, statusV1, unitV1 } from "@/lib/peran-v1";
 import { keAngka, keTanggal } from "@/lib/impor";
 import {
+  akunDiLaporan,
+  akunV1,
   bakuAkun,
   catatanLaporan,
   medanLaporan,
@@ -32,6 +34,12 @@ import {
 } from "@/lib/tugas-v1";
 import { arahV1, jenisKeluarV1, keteranganKas } from "@/lib/keuangan-v1";
 import { PEMETAAN_V1 } from "@/lib/pemetaan-v1";
+import { bacaPengumuman } from "@/lib/pengumuman-v1";
+import { bacaAgenda } from "@/lib/agenda-v1";
+import { bacaMasalah } from "@/lib/masalah-v1";
+import { bacaMasukan } from "@/lib/masukan-v1";
+import { bacaSampel } from "@/lib/sampel-v1";
+import { bacaLms } from "@/lib/lms-v1";
 import type { Peran } from "@/lib/types";
 
 /**
@@ -52,7 +60,20 @@ type TabelTujuan =
   | "daily_reports"
   | "attendance"
   | "tasks"
-  | "transactions";
+  | "transactions"
+  | "announcements"
+  | "agenda"
+  | "problems"
+  | "problem_events"
+  | "feedback"
+  | "feedback_comments"
+  | "samples"
+  | "sample_events"
+  | "sample_scans"
+  | "courses"
+  | "course_modules"
+  | "course_enrollments"
+  | "module_progress";
 
 type KlienDb = Awaited<ReturnType<typeof klienServer>>;
 
@@ -532,6 +553,12 @@ export async function terapkanAkun(
     status: "aktif" | "nonaktif";
   };
 
+  // Siapa melaporkan akun mana, dari laporan lama: sumber akun yang sudah
+  // ditutup sebelum ekspor, dan sumber PIC (lihat di bawah).
+  const dariLaporan = akunDiLaporan(
+    Array.isArray(isi["daily-reports:all"]) ? isi["daily-reports:all"] : [],
+  );
+
   const siap: Siap[] = [];
   for (const a of daftar) {
     if (a === null || typeof a !== "object") continue;
@@ -597,6 +624,29 @@ export async function terapkanAkun(
     });
   }
 
+  // Akun yang disebut laporan lama tetapi tidak ada di daftar akun: sudah
+  // ditutup sebelum ekspor (mis. hawnahijab_, Jul 2026). Dibuat nonaktif
+  // supaya laporannya punya tempat, bukan dibuang bersama laporannya.
+  const terdaftar = new Set(siap.map((a) => akunV1(a.username)));
+  for (const [baku, info] of dariLaporan) {
+    if (terdaftar.has(baku)) continue;
+    const idLama = `laporan-akun:${baku}`;
+    hasil.diperiksa += 1;
+    hasil.catatan.push({
+      idLama,
+      pesan: `Akun '${info.username}' tidak ada di daftar akun lama; dibuat nonaktif dari ${info.jumlah} laporan yang menyebutnya.`,
+    });
+    siap.push({
+      idLama,
+      username: info.username,
+      unitKode: UNIT_AKUN_BAWAAN,
+      program: null,
+      pic: null,
+      coLeader: null,
+      status: "nonaktif",
+    });
+  }
+
   if (tahap === "uji_coba" || modeData() === "demo") return hasil;
 
   const sb = await klienServer();
@@ -652,15 +702,35 @@ export async function terapkanAkun(
       continue;
     }
 
-    const pic = layak(a.pic, unit, ["Staff"]);
-    if (pic.sebab) {
+    // PIC di sistem lama adalah leadernya; PIC di V2 harus Staff aktif di
+    // unit akun (0038, 0061). Bila PIC lama tidak memenuhi syarat, PIC
+    // diturunkan dari Staff yang paling sering melaporkan akun ini, dan
+    // PIC lama yang berperan Leader/Co-Leader menjadi co-leader akunnya.
+    let pic = layak(a.pic, unit, ["Staff"]);
+    if (!pic.id) {
+      const pelapor = [
+        ...(dariLaporan.get(akunV1(a.username) ?? "")?.pelapor ?? []),
+      ].sort((x, y) => y[1] - x[1]);
+      for (const [userLama, jumlah] of pelapor) {
+        const calon = layak(orang.get(userLama) ?? null, unit, ["Staff"]);
+        if (calon.id) {
+          pic = calon;
+          hasil.catatan.push({
+            idLama: a.idLama,
+            pesan: `PIC diturunkan dari pelapor terbanyak: ${orangDbId.get(calon.id)?.nama ?? calon.id} (${jumlah} laporan).`,
+          });
+          break;
+        }
+      }
+    }
+    if (!pic.id) {
       hasil.catatan.push({
         idLama: a.idLama,
-        pesan: `PIC belum dipasang: ${pic.sebab}; pasang lewat layar Akun setelah orangnya aktif.`,
+        pesan: `PIC belum dipasang: ${pic.sebab ?? "tidak ada Staff yang pernah melaporkannya"}; pasang lewat layar Akun.`,
       });
     }
-    const coLeader = layak(a.coLeader, unit, ["Leader", "Co-Leader"]);
-    if (coLeader.sebab) {
+    const coLeader = layak(a.coLeader ?? a.pic, unit, ["Leader", "Co-Leader"]);
+    if (coLeader.sebab && a.coLeader) {
       hasil.catatan.push({
         idLama: a.idLama,
         pesan: `Co-leader belum dipasang: ${coLeader.sebab}.`,
@@ -805,7 +875,7 @@ export async function terapkanLaporan(
       continue;
     }
 
-    const akun = bakuAkun(medan.akun);
+    const akun = akunV1(medan.akun);
     const divisi = medan.unit ?? divisiOrang.get(userLama);
     const unitKode = akun ? null : unitV1(divisi);
     if (!akun && !unitKode) {
@@ -875,21 +945,23 @@ export async function terapkanLaporan(
   if (tahap === "uji_coba" || modeData() === "demo") return hasil;
 
   const sb = await klienServer();
-  const [unitDb, akunDb, peta] = await Promise.all([
+  const [unitDb, akunDb, namaDb, peta] = await Promise.all([
     sb.from("units").select("id, kode"),
     sb.from("accounts").select("id, username"),
+    sb.from("users").select("id, nama"),
     bacaPeta(sb, "daily-reports:all"),
   ]);
 
   const unitId = new Map<string, string>(
     (unitDb.data ?? []).map((u) => [u.kode as string, u.id]),
   );
+  const namaOrang = new Map((namaDb.data ?? []).map((u) => [u.id, u.nama]));
   // Dicari lewat bentuk bakunya: formulir lama menulis "naimanurr" untuk
   // akun "naimanurr_". Yang terdaftar lebih dulu menang bila dua akun
   // bakunya sama.
   const akunId = new Map<string, string>();
   for (const a of akunDb.data ?? []) {
-    const baku = bakuAkun(a.username);
+    const baku = akunV1(a.username);
     if (baku && !akunId.has(baku)) akunId.set(baku, a.id);
   }
 
@@ -952,8 +1024,22 @@ export async function terapkanLaporan(
 
     if ("galat" in tulis) {
       // Laporan untuk sasaran dan tanggal yang sama ditolak indeks
-      // uniknya — itu bukan kegagalan, itu bukti pengulangan yang
-      // memang ditahan.
+      // uniknya: V2 hanya punya satu laporan per sasaran per hari. Yang
+      // kedua tidak dibuang — catatannya digabung ke laporan hari itu.
+      if (tulis.galat.startsWith("Baris dengan penanda yang sama")) {
+        hasil.catatan.push({
+          idLama: l.idLama,
+          pesan: await gabungLaporanGanda(sb, {
+            idLama: l.idLama,
+            tanggal: l.tanggal,
+            accountId,
+            unitId: accountId ? null : unit,
+            pelapor: namaOrang.get(orang.get(l.userLama) ?? "") ?? l.userLama,
+            catatan: l.catatan,
+          }),
+        });
+        continue;
+      }
       hasil.catatan.push({ idLama: l.idLama, pesan: tulis.galat });
       continue;
     }
@@ -962,6 +1048,70 @@ export async function terapkanLaporan(
   }
 
   return hasil;
+}
+
+/** Awalan bagian catatan yang berasal dari laporan lain pada hari yang sama. */
+const PENANDA_GABUNG = "\n— Laporan lain hari itu dari ";
+
+/**
+ * Menggabungkan laporan kedua (dan seterusnya) untuk sasaran dan tanggal
+ * yang sama ke catatan laporan yang sudah ada.
+ *
+ * Sistem lama membiarkan dua orang melapor untuk akun yang sama pada hari
+ * yang sama; V2 tidak. Angkanya sudah diwakili rekap, jadi yang bernilai
+ * dari laporan kedua adalah catatan kerjanya — dan itu yang dibawa, dengan
+ * penanda id lamanya supaya pengulangan tidak menggandakannya. Petanya
+ * dicatat di kelompok sendiri (`daily-reports:gabung`) supaya laporan yang
+ * digabung tidak dianggap pemilik baris itu pada jalan berikutnya.
+ */
+async function gabungLaporanGanda(
+  sb: KlienDb,
+  l: {
+    idLama: string;
+    tanggal: string;
+    accountId: string | null;
+    unitId: string | null;
+    pelapor: string;
+    catatan: string;
+  },
+): Promise<string> {
+  const dasar = sb
+    .from("daily_reports")
+    .select("id, catatan")
+    .eq("tanggal", l.tanggal);
+  const { data: ada, error } = await (
+    l.accountId
+      ? dasar.eq("account_id", l.accountId)
+      : dasar.eq("unit_id", l.unitId as string)
+  ).maybeSingle();
+  if (error)
+    return `Laporan ganda; gagal mencari laporan hari itu: ${error.message}`;
+  if (!ada)
+    return "Laporan ganda; laporan hari itu tidak ditemukan untuk digabung.";
+
+  const penanda = `[laporan lama ${l.idLama}]`;
+  if (!ada.catatan.includes(penanda)) {
+    const tambahan = `${PENANDA_GABUNG}${l.pelapor} ${penanda}:\n${l.catatan}`;
+    const gabungan = `${ada.catatan}${tambahan}`.slice(0, 2000);
+    const { error: galatUbah } = await sb
+      .from("daily_reports")
+      .update({ catatan: gabungan })
+      .eq("id", ada.id);
+    if (galatUbah) return `Laporan ganda; gagal digabung: ${galatUbah.message}`;
+  }
+
+  const { error: galatPeta } = await sb.from("migrasi_peta").upsert(
+    {
+      kelompok: "daily-reports:gabung",
+      id_lama: l.idLama,
+      id_baru: ada.id,
+      tabel: "daily_reports",
+    },
+    { onConflict: "kelompok,id_lama" },
+  );
+  if (galatPeta)
+    return `Laporan ganda digabung, tetapi petanya gagal dicatat: ${galatPeta.message}`;
+  return "Laporan ganda untuk sasaran dan tanggal yang sama; catatannya digabung ke laporan hari itu.";
 }
 
 const ALASAN_GMV_LAPORAN =
@@ -1020,6 +1170,12 @@ async function samakanLaporan(
     }
   }
   let catatan = "catatan" in target ? (target.catatan ?? "") : ada.catatan;
+  // Catatan laporan lain yang sudah digabung ke baris ini (lihat
+  // gabungLaporanGanda) bukan milik laporan ini; dipertahankan apa adanya.
+  const ekorGabung = ada.catatan.indexOf(PENANDA_GABUNG);
+  if ("catatan" in target && ekorGabung >= 0) {
+    catatan = `${catatan}${ada.catatan.slice(ekorGabung)}`.slice(0, 2000);
+  }
 
   const gmv = "gmv" in target ? (target.gmv ?? 0) : (angkaDb(ada.gmv) ?? 0);
   let komisi =
@@ -2176,5 +2332,848 @@ export async function catatKunciTakDipetakan(): Promise<HasilTerap> {
     });
   }
 
+  return hasil;
+}
+
+// =====================================================================
+// Kelompok tahap 2: pengumuman, kalender, masalah, masukan, sampel, LMS.
+//
+// Tabel-tabel ini tidak punya jalur migrasi khusus (0158); yang dipakai
+// jalur biasa dengan klien tanpa sesi. Triggernya tetap berjalan, jadi
+// tiap fungsi di bawah menghindari jalan yang mereka tutup: pengumuman
+// disisipkan sebagai draf supaya tidak menyalakan notifikasi massal,
+// agenda tidak pernah mengubah unitnya, status masukan tidak pernah
+// diubah sesudah masuk, dan status sampel digerakkan lewat kejadian.
+// =====================================================================
+
+const larikLama = (isi: Record<string, unknown>, kunci: string): unknown[] =>
+  Array.isArray(isi[kunci]) ? (isi[kunci] as unknown[]) : [];
+
+async function petaUnit(sb: KlienDb) {
+  const { data, error } = await sb.from("units").select("id, kode");
+  if (error) throw new Error(`Gagal membaca unit: ${error.message}`);
+  return new Map<string, string>(
+    (data ?? []).map((u) => [u.kode as string, u.id]),
+  );
+}
+
+function hasilKosong(kelompok: string, diperiksa: number): HasilTerap {
+  return { kelompok, diperiksa, ditulis: 0, tertahan: 0, catatan: [] };
+}
+
+/** Menerapkan `announcements:all` ke `announcements`. */
+export async function terapkanPengumuman(
+  tahap: "uji_coba" | "sungguhan",
+): Promise<HasilTerap> {
+  const [isi, resolusi] = await Promise.all([
+    isiEksporLama(),
+    resolusiOrangV1(),
+  ]);
+  const orang = new Map(resolusi.padanan.map((p) => [p.idLama, p.idBaru]));
+  const daftar = larikLama(isi, "announcements:all");
+  const { siap, tertahan } = bacaPengumuman(daftar);
+  const hasil = hasilKosong("announcements:all", daftar.length);
+  hasil.tertahan = tertahan.length;
+  hasil.catatan.push(...tertahan);
+  if (tahap === "uji_coba" || modeData() === "demo") return hasil;
+
+  const sb = await klienServer();
+  const peta = await bacaPeta(sb, "announcements:all");
+  for (const p of siap) {
+    const dibuatOleh = p.dibuatOleh ? (orang.get(p.dibuatOleh) ?? null) : null;
+    if (p.dibuatOleh && !dibuatOleh) {
+      hasil.catatan.push({
+        idLama: p.idLama,
+        pesan: `Penulisnya (${p.dibuatOleh}) belum tertaut; pengumuman masuk tanpa penulis.`,
+      });
+    }
+    const kolom = {
+      slug: p.slug,
+      judul: p.judul,
+      ringkasan: p.ringkasan,
+      isi: p.isi,
+      dibuat_oleh: dibuatOleh,
+      target_role: null,
+      target_unit_id: null,
+      disematkan: false,
+    };
+    const tulis = await tulisIdempoten(sb, {
+      kelompok: "announcements:all",
+      idLama: p.idLama,
+      tabel: "announcements",
+      peta,
+      isi: {},
+      cariLama: async () => {
+        const { data } = await sb
+          .from("announcements")
+          .select("id")
+          .eq("slug", p.slug)
+          .maybeSingle();
+        return data?.id ?? null;
+      },
+      lewatJalur: async (idSekarang) => {
+        if (idSekarang) {
+          const { data: ada, error } = await sb
+            .from("announcements")
+            .update(kolom)
+            .eq("id", idSekarang)
+            .select("id")
+            .maybeSingle();
+          if (error) return { galat: error.message };
+          if (ada) return { id: ada.id };
+        }
+        // Disisipkan sebagai draf: pemicu notifikasi (0112/0116) hanya
+        // menyala pada INSERT yang sudah terbit, dan pengumuman berbulan
+        // lalu tidak boleh muncul sebagai notifikasi baru bagi semua orang.
+        // Tanggal terbitnya dipasang lewat UPDATE, yang tidak memicu apa pun.
+        const { data: baru, error: galatSisip } = await sb
+          .from("announcements")
+          .insert({
+            ...kolom,
+            published_at: null,
+            created_at: p.dibuatPada ?? new Date().toISOString(),
+          })
+          .select("id")
+          .single();
+        if (galatSisip || !baru) {
+          return {
+            galat: galatSisip?.message ?? "Gagal menyisipkan pengumuman.",
+          };
+        }
+        const { error: galatTerbit } = await sb
+          .from("announcements")
+          .update({ published_at: p.dibuatPada ?? new Date().toISOString() })
+          .eq("id", baru.id);
+        if (galatTerbit) return { galat: galatTerbit.message };
+        return { id: baru.id };
+      },
+    });
+    if ("galat" in tulis) {
+      hasil.tertahan += 1;
+      hasil.catatan.push({ idLama: p.idLama, pesan: tulis.galat });
+      continue;
+    }
+    hasil.ditulis += 1;
+  }
+  return hasil;
+}
+
+/** Menerapkan `calendar:all` (dan `schedule:all` yang belum tersalin) ke `agenda`. */
+export async function terapkanAgenda(
+  tahap: "uji_coba" | "sungguhan",
+): Promise<HasilTerap> {
+  const [isi, resolusi] = await Promise.all([
+    isiEksporLama(),
+    resolusiOrangV1(),
+  ]);
+  const orang = new Map(resolusi.padanan.map((p) => [p.idLama, p.idBaru]));
+  const { siap, tertahan } = bacaAgenda(isi);
+  const hasil = hasilKosong(
+    "calendar:all",
+    larikLama(isi, "calendar:all").length +
+      larikLama(isi, "schedule:all").length,
+  );
+  hasil.tertahan = tertahan.length;
+  hasil.catatan.push(...tertahan);
+  const tersalin =
+    larikLama(isi, "schedule:all").length -
+    siap.filter((a) => a.sumber === "schedule:all").length;
+  if (tersalin > 0) {
+    hasil.catatan.push({
+      idLama: "schedule:all",
+      pesan: `${tersalin} jadwal lama sudah disalin sistem lama ke kalendernya; catatannya digabungkan ke salinan itu, tidak dibawa dua kali.`,
+    });
+  }
+  if (tahap === "uji_coba" || modeData() === "demo") return hasil;
+
+  const sb = await klienServer();
+  const peta = {
+    "calendar:all": await bacaPeta(sb, "calendar:all"),
+    "schedule:all": await bacaPeta(sb, "schedule:all"),
+  };
+  for (const a of siap) {
+    const kolom = {
+      judul: a.judul,
+      keterangan: a.keterangan,
+      jenis: a.jenis,
+      tanggal: a.tanggal,
+      jam_mulai: a.jamMulai,
+      jam_selesai: a.jamSelesai,
+      lokasi: a.lokasi,
+    };
+    const tulis = await tulisIdempoten(sb, {
+      kelompok: a.sumber,
+      idLama: a.idLama,
+      tabel: "agenda",
+      peta: peta[a.sumber],
+      isi: {},
+      lewatJalur: async (idSekarang) => {
+        if (idSekarang) {
+          // Unit tidak ikut diubah: trigger 0095 menolak perubahan unit
+          // tanpa sesi, dan agenda lama memang untuk seluruh perusahaan.
+          const { data: ada, error } = await sb
+            .from("agenda")
+            .update(kolom)
+            .eq("id", idSekarang)
+            .select("id")
+            .maybeSingle();
+          if (error) return { galat: error.message };
+          if (ada) return { id: ada.id };
+        }
+        const { data, error } = await sb
+          .from("agenda")
+          .insert({
+            ...kolom,
+            unit_id: null,
+            dibuat_oleh: a.dibuatOleh
+              ? (orang.get(a.dibuatOleh) ?? null)
+              : null,
+            created_at: a.dibuatPada ?? new Date().toISOString(),
+          })
+          .select("id")
+          .single();
+        return error || !data
+          ? { galat: error?.message ?? "Gagal menyisipkan agenda." }
+          : { id: data.id };
+      },
+    });
+    if ("galat" in tulis) {
+      hasil.tertahan += 1;
+      hasil.catatan.push({ idLama: a.idLama, pesan: tulis.galat });
+      continue;
+    }
+    hasil.ditulis += 1;
+  }
+  return hasil;
+}
+
+/** Menerapkan `problems:all` ke `problems` beserta jejak penyelesaiannya. */
+export async function terapkanMasalah(
+  tahap: "uji_coba" | "sungguhan",
+): Promise<HasilTerap> {
+  const [isi, resolusi] = await Promise.all([
+    isiEksporLama(),
+    resolusiOrangV1(),
+  ]);
+  const orang = new Map(resolusi.padanan.map((p) => [p.idLama, p.idBaru]));
+  const daftar = larikLama(isi, "problems:all");
+  const { siap, tertahan } = bacaMasalah(daftar);
+  const hasil = hasilKosong("problems:all", daftar.length);
+  hasil.tertahan = tertahan.length;
+  hasil.catatan.push(...tertahan);
+  if (tahap === "uji_coba" || modeData() === "demo") return hasil;
+
+  const sb = await klienServer();
+  const [unit, peta, petaJejak] = await Promise.all([
+    petaUnit(sb),
+    bacaPeta(sb, "problems:all"),
+    bacaPeta(sb, "problems:kejadian"),
+  ]);
+  for (const m of siap) {
+    const unitId = m.unitKode ? (unit.get(m.unitKode) ?? null) : null;
+    const kolom = {
+      judul: m.judul,
+      konteks: m.konteks,
+      dampak: m.dampak,
+      solusi: m.solusi,
+    };
+    const tulis = await tulisIdempoten(sb, {
+      kelompok: "problems:all",
+      idLama: m.idLama,
+      tabel: "problems",
+      peta,
+      isi: {},
+      lewatJalur: async (idSekarang) => {
+        if (idSekarang) {
+          // Status tidak ikut: mengubahnya lewat UPDATE menulis jejak baru
+          // (0086) atas nama tidak seorang pun.
+          const { data: ada, error } = await sb
+            .from("problems")
+            .update(kolom)
+            .eq("id", idSekarang)
+            .select("id")
+            .maybeSingle();
+          if (error) return { galat: error.message };
+          if (ada) return { id: ada.id };
+        }
+        const { data, error } = await sb
+          .from("problems")
+          .insert({
+            ...kolom,
+            unit_id: unitId,
+            dilaporkan_oleh: m.dilaporkanOleh
+              ? (orang.get(m.dilaporkanOleh) ?? null)
+              : null,
+            status: m.status,
+            created_at: m.dibuatPada ?? new Date().toISOString(),
+            updated_at:
+              m.diselesaikanPada ?? m.dibuatPada ?? new Date().toISOString(),
+          })
+          .select("id")
+          .single();
+        return error || !data
+          ? { galat: error?.message ?? "Gagal menyisipkan masalah." }
+          : { id: data.id };
+      },
+    });
+    if ("galat" in tulis) {
+      hasil.tertahan += 1;
+      hasil.catatan.push({ idLama: m.idLama, pesan: tulis.galat });
+      continue;
+    }
+    hasil.ditulis += 1;
+
+    // Jejak penyelesaian, supaya riwayatnya terbaca seperti masalah V2.
+    if (
+      (m.status === "selesai" || m.status === "ditutup") &&
+      m.diselesaikanPada
+    ) {
+      const jejak = await tulisIdempoten(sb, {
+        kelompok: "problems:kejadian",
+        idLama: `${m.idLama}#${m.status}`,
+        tabel: "problem_events",
+        peta: petaJejak,
+        isi: {},
+        lewatJalur: async (idSekarang) => {
+          if (idSekarang) return { id: idSekarang };
+          const { data, error } = await sb
+            .from("problem_events")
+            .insert({
+              problem_id: tulis.id,
+              dari: "baru",
+              ke: m.status,
+              oleh_id: m.diselesaikanOleh
+                ? (orang.get(m.diselesaikanOleh) ?? null)
+                : null,
+              catatan: "Diselesaikan di sistem lama.",
+              pada: m.diselesaikanPada ?? undefined,
+            })
+            .select("id")
+            .single();
+          return error || !data
+            ? { galat: error?.message ?? "Gagal menulis jejak." }
+            : { id: data.id };
+        },
+      });
+      if ("galat" in jejak) {
+        hasil.catatan.push({
+          idLama: m.idLama,
+          pesan: `Jejak penyelesaian tidak tertulis: ${jejak.galat}`,
+        });
+      }
+    }
+  }
+  return hasil;
+}
+
+/** Menerapkan `feedback:all` ke `feedback` beserta balasannya. */
+export async function terapkanMasukan(
+  tahap: "uji_coba" | "sungguhan",
+): Promise<HasilTerap> {
+  const [isi, resolusi] = await Promise.all([
+    isiEksporLama(),
+    resolusiOrangV1(),
+  ]);
+  const orang = new Map(resolusi.padanan.map((p) => [p.idLama, p.idBaru]));
+  const daftar = larikLama(isi, "feedback:all");
+  const { siap, tertahan } = bacaMasukan(daftar);
+  const hasil = hasilKosong("feedback:all", daftar.length);
+  hasil.tertahan = tertahan.length;
+  hasil.catatan.push(...tertahan);
+  if (tahap === "uji_coba" || modeData() === "demo") return hasil;
+
+  const sb = await klienServer();
+  const [peta, petaKomentar] = await Promise.all([
+    bacaPeta(sb, "feedback:all"),
+    bacaPeta(sb, "feedback:komentar"),
+  ]);
+  let komentarDitulis = 0;
+  for (const f of siap) {
+    const tulis = await tulisIdempoten(sb, {
+      kelompok: "feedback:all",
+      idLama: f.idLama,
+      tabel: "feedback",
+      peta,
+      isi: {},
+      lewatJalur: async (idSekarang) => {
+        // Masukan yang sudah masuk tidak diubah lagi: trigger 0093 menilai
+        // siapa yang mengubah, dan tanpa sesi jawabannya "bukan siapa pun".
+        if (idSekarang) return { id: idSekarang };
+        const { data, error } = await sb
+          .from("feedback")
+          .insert({
+            jenis: f.jenis,
+            judul: f.judul,
+            isi: f.isi,
+            halaman: f.halaman,
+            status: f.status,
+            dilaporkan_oleh: f.dilaporkanOleh
+              ? (orang.get(f.dilaporkanOleh) ?? null)
+              : null,
+            created_at: f.dibuatPada ?? new Date().toISOString(),
+            updated_at: f.dibuatPada ?? new Date().toISOString(),
+          })
+          .select("id")
+          .single();
+        return error || !data
+          ? { galat: error?.message ?? "Gagal menyisipkan masukan." }
+          : { id: data.id };
+      },
+    });
+    if ("galat" in tulis) {
+      hasil.tertahan += 1;
+      hasil.catatan.push({ idLama: f.idLama, pesan: tulis.galat });
+      continue;
+    }
+    hasil.ditulis += 1;
+
+    for (const k of f.komentar) {
+      const komentar = await tulisIdempoten(sb, {
+        kelompok: "feedback:komentar",
+        idLama: k.idLama,
+        tabel: "feedback_comments",
+        peta: petaKomentar,
+        isi: {},
+        lewatJalur: async (idSekarang) => {
+          if (idSekarang) return { id: idSekarang };
+          const { data, error } = await sb
+            .from("feedback_comments")
+            .insert({
+              feedback_id: tulis.id,
+              oleh_id: k.oleh ? (orang.get(k.oleh) ?? null) : null,
+              isi: k.isi,
+              created_at: k.pada ?? new Date().toISOString(),
+            })
+            .select("id")
+            .single();
+          return error || !data
+            ? { galat: error?.message ?? "Gagal menyisipkan balasan." }
+            : { id: data.id };
+        },
+      });
+      if ("galat" in komentar) {
+        hasil.catatan.push({
+          idLama: k.idLama,
+          pesan: `Balasan tidak tertulis: ${komentar.galat}`,
+        });
+      } else {
+        komentarDitulis += 1;
+      }
+    }
+  }
+  if (komentarDitulis > 0) {
+    hasil.catatan.push({
+      idLama: "feedback:komentar",
+      pesan: `${komentarDitulis} balasan ikut ditulis sebagai komentar.`,
+    });
+  }
+  return hasil;
+}
+
+/** Menerapkan `sampel:all` dan `sampel-usage:all` ke sampel V2. */
+export async function terapkanSampel(
+  tahap: "uji_coba" | "sungguhan",
+): Promise<HasilTerap> {
+  const [isi, resolusi] = await Promise.all([
+    isiEksporLama(),
+    resolusiOrangV1(),
+  ]);
+  const orang = new Map(resolusi.padanan.map((p) => [p.idLama, p.idBaru]));
+  const { sampel, pindai, tertahan } = bacaSampel(isi);
+  const hasil = hasilKosong(
+    "sampel:all",
+    larikLama(isi, "sampel:all").length +
+      larikLama(isi, "sampel-usage:all").length,
+  );
+  hasil.tertahan = tertahan.length;
+  hasil.catatan.push(...tertahan);
+  if (tahap === "uji_coba" || modeData() === "demo") return hasil;
+
+  const sb = await klienServer();
+  const [unit, peta, petaKejadian, petaPindai] = await Promise.all([
+    petaUnit(sb),
+    bacaPeta(sb, "sampel:all"),
+    bacaPeta(sb, "sampel:kejadian"),
+    bacaPeta(sb, "sampel-usage:all"),
+  ]);
+  const unitAffiliator = unit.get(UNIT_AKUN_BAWAAN);
+  if (!unitAffiliator) throw new Error("Unit affiliator tidak ada di V2.");
+
+  for (const s of sampel) {
+    const kolom = {
+      nama: s.nama,
+      kategori: s.kategori,
+      catatan: s.catatan,
+      link_produk: s.linkProduk,
+    };
+    const tulis = await tulisIdempoten(sb, {
+      kelompok: "sampel:all",
+      idLama: s.idLama,
+      tabel: "samples",
+      peta,
+      isi: {},
+      cariLama: async () => {
+        const { data } = await sb
+          .from("samples")
+          .select("id")
+          .ilike("kode", s.kode)
+          .maybeSingle();
+        return data?.id ?? null;
+      },
+      lewatJalur: async (idSekarang) => {
+        if (idSekarang) {
+          const { data: ada, error } = await sb
+            .from("samples")
+            .update(kolom)
+            .eq("id", idSekarang)
+            .select("id")
+            .maybeSingle();
+          if (error) return { galat: error.message };
+          if (ada) return { id: ada.id };
+        }
+        // Masuk sebagai tersedia; pemegangnya dicatat sebagai kejadian di
+        // bawah, karena V2 hanya mengubah status lewat kejadian (0049).
+        const { data, error } = await sb
+          .from("samples")
+          .insert({
+            ...kolom,
+            kode: s.kode,
+            unit_id: unitAffiliator,
+            nilai: 0,
+            status: "tersedia",
+            created_at: s.dibuatPada ?? new Date().toISOString(),
+          })
+          .select("id")
+          .single();
+        return error || !data
+          ? { galat: error?.message ?? "Gagal menyisipkan sampel." }
+          : { id: data.id };
+      },
+    });
+    if ("galat" in tulis) {
+      hasil.tertahan += 1;
+      hasil.catatan.push({ idLama: s.idLama, pesan: tulis.galat });
+      continue;
+    }
+    hasil.ditulis += 1;
+
+    if (s.pemegang) {
+      const pemegang = orang.get(s.pemegang);
+      if (!pemegang) {
+        hasil.catatan.push({
+          idLama: s.idLama,
+          pesan: `Penerimanya (${s.pemegang}) belum tertaut; sampel tetap tersedia.`,
+        });
+        continue;
+      }
+      const kejadian = await tulisIdempoten(sb, {
+        kelompok: "sampel:kejadian",
+        idLama: `${s.idLama}#dipegang`,
+        tabel: "sample_events",
+        peta: petaKejadian,
+        isi: {},
+        lewatJalur: async (idSekarang) => {
+          if (idSekarang) return { id: idSekarang };
+          const { data, error } = await sb
+            .from("sample_events")
+            .insert({
+              sample_id: tulis.id,
+              ke: "dipegang",
+              oleh_id: s.dibuatOleh ? (orang.get(s.dibuatOleh) ?? null) : null,
+              pemegang_id: pemegang,
+              catatan: "Penerima tercatat di sistem lama.",
+              pada: s.dibuatPada ?? new Date().toISOString(),
+            })
+            .select("id")
+            .single();
+          return error || !data
+            ? { galat: error?.message ?? "Gagal menulis kejadian." }
+            : { id: data.id };
+        },
+      });
+      if ("galat" in kejadian) {
+        hasil.catatan.push({
+          idLama: s.idLama,
+          pesan: `Pemegang tidak tercatat: ${kejadian.galat}`,
+        });
+      }
+    }
+  }
+
+  // Pindaian: kode yang tidak dikenal (sampel yang sudah dihapus di sistem
+  // lama) tetap dicatat sebagai pindaian tak dikenali, seperti di V2.
+  const { data: daftarSampel } = await sb.from("samples").select("id, kode");
+  const idKode = new Map(
+    (daftarSampel ?? []).map((x) => [x.kode.toUpperCase(), x.id]),
+  );
+  let pindaiDitulis = 0;
+  for (const p of pindai) {
+    const oleh = p.oleh ? orang.get(p.oleh) : undefined;
+    if (!oleh) {
+      hasil.tertahan += 1;
+      hasil.catatan.push({
+        idLama: p.idLama,
+        pesan: `Pemindainya (${p.oleh ?? "tidak disebut"}) belum tertaut.`,
+      });
+      continue;
+    }
+    const sampleId = idKode.get(p.kode) ?? null;
+    const tulis = await tulisIdempoten(sb, {
+      kelompok: "sampel-usage:all",
+      idLama: p.idLama,
+      tabel: "sample_scans",
+      peta: petaPindai,
+      isi: {},
+      lewatJalur: async (idSekarang) => {
+        if (idSekarang) return { id: idSekarang };
+        const { data, error } = await sb
+          .from("sample_scans")
+          .insert({
+            kode: p.kode,
+            sample_id: sampleId,
+            oleh_id: oleh,
+            dikenali: sampleId !== null,
+            pada: p.pada ?? new Date().toISOString(),
+          })
+          .select("id")
+          .single();
+        return error || !data
+          ? { galat: error?.message ?? "Gagal menulis pindaian." }
+          : { id: data.id };
+      },
+    });
+    if ("galat" in tulis) {
+      hasil.tertahan += 1;
+      hasil.catatan.push({ idLama: p.idLama, pesan: tulis.galat });
+      continue;
+    }
+    pindaiDitulis += 1;
+    hasil.ditulis += 1;
+  }
+  if (pindaiDitulis > 0) {
+    hasil.catatan.push({
+      idLama: "sampel-usage:all",
+      pesan: `${pindaiDitulis} pindaian lama tercatat sebagai riwayat pindai.`,
+    });
+  }
+  return hasil;
+}
+
+/** Menerapkan seluruh kunci `lms:*` ke kursus, modul, pendaftaran, dan kemajuan V2. */
+export async function terapkanLms(
+  tahap: "uji_coba" | "sungguhan",
+): Promise<HasilTerap> {
+  const [isi, resolusi] = await Promise.all([
+    isiEksporLama(),
+    resolusiOrangV1(),
+  ]);
+  const orang = new Map(resolusi.padanan.map((p) => [p.idLama, p.idBaru]));
+  const lms = bacaLms(isi);
+  const hasil = hasilKosong(
+    "lms:courses:all",
+    lms.kursus.length + lms.pendaftaran.length + lms.kemajuan.length,
+  );
+  hasil.catatan.push(...lms.catatan);
+  if (tahap === "uji_coba" || modeData() === "demo") {
+    hasil.tertahan = lms.pendaftaran.filter(
+      (p) => !orang.has(p.userLama),
+    ).length;
+    return hasil;
+  }
+
+  const sb = await klienServer();
+  const [unit, petaKursus, petaModul, petaDaftar, petaMaju] = await Promise.all(
+    [
+      petaUnit(sb),
+      bacaPeta(sb, "lms:courses:all"),
+      bacaPeta(sb, "lms:modul"),
+      bacaPeta(sb, "lms:enrollments:all"),
+      bacaPeta(sb, "lms:progress:all"),
+    ],
+  );
+  const pembuat =
+    lms.pendaftaran
+      .map((p) => p.ditugaskanOleh)
+      .find((id) => id && orang.has(id)) ?? null;
+
+  // 1. Kursus dan modulnya.
+  const idKursus = new Map<string, string>();
+  const idModul = new Map<string, string>();
+  for (const k of lms.kursus) {
+    const tulis = await tulisIdempoten(sb, {
+      kelompok: "lms:courses:all",
+      idLama: k.idLama,
+      tabel: "courses",
+      peta: petaKursus,
+      isi: {
+        judul: k.judul,
+        ringkasan: k.ringkasan,
+        kategori: k.kategori,
+        tingkat: "dasar",
+        unit_id: k.unitKode ? (unit.get(k.unitKode) ?? null) : null,
+        wajib_untuk: [],
+        aktif: k.aktif,
+        dibuat_oleh: pembuat ? (orang.get(pembuat) ?? null) : null,
+        created_at: k.dibuatPada ?? new Date().toISOString(),
+      },
+    });
+    if ("galat" in tulis) {
+      hasil.tertahan += 1;
+      hasil.catatan.push({ idLama: k.idLama, pesan: tulis.galat });
+      continue;
+    }
+    hasil.ditulis += 1;
+    idKursus.set(k.idLama, tulis.id);
+
+    for (const m of k.modul) {
+      const modul = await tulisIdempoten(sb, {
+        kelompok: "lms:modul",
+        idLama: m.idLama,
+        tabel: "course_modules",
+        peta: petaModul,
+        isi: {
+          course_id: tulis.id,
+          urutan: m.urutan,
+          judul: m.judul,
+          isi: m.isi,
+          durasi_menit: m.durasiMenit,
+        },
+        cariLama: async () => {
+          const { data } = await sb
+            .from("course_modules")
+            .select("id")
+            .eq("course_id", tulis.id)
+            .eq("urutan", m.urutan)
+            .maybeSingle();
+          return data?.id ?? null;
+        },
+      });
+      if ("galat" in modul) {
+        hasil.catatan.push({
+          idLama: m.idLama,
+          pesan: `Modul tidak tertulis: ${modul.galat}`,
+        });
+        continue;
+      }
+      idModul.set(m.idLama, modul.id);
+    }
+  }
+
+  // 2. Pendaftaran per kursus.
+  const idDaftar = new Map<string, string>();
+  let daftarDitulis = 0;
+  for (const p of lms.pendaftaran) {
+    const userId = orang.get(p.userLama);
+    const courseId = idKursus.get(p.kursusLama);
+    if (!userId || !courseId) {
+      hasil.tertahan += 1;
+      hasil.catatan.push({
+        idLama: p.idLama,
+        pesan: !userId
+          ? `Pesertanya (${p.userLama}) belum tertaut.`
+          : `Kursusnya (${p.kursusLama}) tidak tertulis.`,
+      });
+      continue;
+    }
+    const tulis = await tulisIdempoten(sb, {
+      kelompok: "lms:enrollments:all",
+      idLama: p.idLama,
+      tabel: "course_enrollments",
+      peta: petaDaftar,
+      isi: {},
+      cariLama: async () => {
+        const { data } = await sb
+          .from("course_enrollments")
+          .select("id")
+          .eq("course_id", courseId)
+          .eq("user_id", userId)
+          .maybeSingle();
+        return data?.id ?? null;
+      },
+      lewatJalur: async (idSekarang) => {
+        if (idSekarang) return { id: idSekarang };
+        const { data, error } = await sb
+          .from("course_enrollments")
+          .insert({
+            course_id: courseId,
+            user_id: userId,
+            dimulai_pada: p.dimulai ?? new Date().toISOString(),
+          })
+          .select("id")
+          .single();
+        return error || !data
+          ? { galat: error?.message ?? "Gagal mendaftarkan." }
+          : { id: data.id };
+      },
+    });
+    if ("galat" in tulis) {
+      hasil.tertahan += 1;
+      hasil.catatan.push({ idLama: p.idLama, pesan: tulis.galat });
+      continue;
+    }
+    daftarDitulis += 1;
+    hasil.ditulis += 1;
+    idDaftar.set(`${p.userLama}|${p.kursusLama}`, tulis.id);
+  }
+
+  // 3. Kemajuan modul yang sudah tuntas.
+  let majuDitulis = 0;
+  for (const m of lms.kemajuan) {
+    const enrollmentId = idDaftar.get(`${m.userLama}|${m.kursusLama}`);
+    const moduleId = idModul.get(m.modulLama);
+    if (!enrollmentId || !moduleId) {
+      hasil.tertahan += 1;
+      hasil.catatan.push({
+        idLama: m.idLama,
+        pesan: !enrollmentId
+          ? "Pendaftarannya tidak tertulis."
+          : `Modulnya (${m.modulLama}) tidak tertulis.`,
+      });
+      continue;
+    }
+    const tulis = await tulisIdempoten(sb, {
+      kelompok: "lms:progress:all",
+      idLama: m.idLama,
+      tabel: "module_progress",
+      peta: petaMaju,
+      isi: {},
+      cariLama: async () => {
+        const { data } = await sb
+          .from("module_progress")
+          .select("id")
+          .eq("enrollment_id", enrollmentId)
+          .eq("module_id", moduleId)
+          .maybeSingle();
+        return data?.id ?? null;
+      },
+      lewatJalur: async (idSekarang) => {
+        if (idSekarang) return { id: idSekarang };
+        const { data, error } = await sb
+          .from("module_progress")
+          .insert({
+            enrollment_id: enrollmentId,
+            module_id: moduleId,
+            selesai_pada: m.selesaiPada ?? new Date().toISOString(),
+          })
+          .select("id")
+          .single();
+        return error || !data
+          ? { galat: error?.message ?? "Gagal menulis kemajuan." }
+          : { id: data.id };
+      },
+    });
+    if ("galat" in tulis) {
+      hasil.tertahan += 1;
+      hasil.catatan.push({ idLama: m.idLama, pesan: tulis.galat });
+      continue;
+    }
+    majuDitulis += 1;
+    hasil.ditulis += 1;
+  }
+
+  hasil.catatan.push({
+    idLama: "lms",
+    pesan: `Kursus ${idKursus.size}, modul ${idModul.size}, pendaftaran ${daftarDitulis}, kemajuan ${majuDitulis} tertulis.`,
+  });
   return hasil;
 }

@@ -184,3 +184,80 @@ export function bakuAkun(nilai: unknown): string | null {
     .replace(/[._]+$/, "");
   return teks === "" ? null : teks;
 }
+
+/**
+ * Nama akun yang salah ketik atau berganti di formulir lama, dipetakan ke
+ * akun yang dimaksud (bentuk baku). Dari data sungguhan (ekspor 25 Sep
+ * 2026):
+ * - "dapaspilin" adalah salah ketik "dafaspilin_" (akun Daffa): sembilan
+ *   laporan memakai ejaan itu, tidak satu pun memakai ejaan yang benar.
+ * - "hersandaaffiliator" hanya muncul sekali (1 Agu 2026), tepat sesudah
+ *   deretan laporan Hersanda untuk hawnahijab_ (20–31 Jul).
+ */
+export const ALIAS_AKUN_V1: Readonly<Record<string, string>> = {
+  dapaspilin: "dafaspilin",
+  hersandaaffiliator: "hawnahijab",
+};
+
+/** Nama akun baku dengan salah ketik yang dikenal sudah dibetulkan. */
+export function akunV1(nilai: unknown): string | null {
+  const baku = bakuAkun(nilai);
+  return baku ? (ALIAS_AKUN_V1[baku] ?? baku) : null;
+}
+
+export type AkunDiLaporan = {
+  /** Ejaan yang paling sering dipakai orang, untuk dijadikan username. */
+  username: string;
+  jumlah: number;
+  /** Berapa laporan tiap orang lama (id) untuk akun ini. */
+  pelapor: Map<string, number>;
+};
+
+/**
+ * Akun yang disebut laporan lama, beserta siapa yang melaporkannya.
+ *
+ * Dua kegunaan: akun yang tidak ada di daftar akun lama (sudah ditutup
+ * sebelum ekspor, mis. hawnahijab_) tetap bisa dibuat supaya laporannya
+ * punya tempat; dan PIC akun di V2 — yang harus seorang Staff — bisa
+ * diturunkan dari siapa yang paling sering melaporkannya, karena PIC di
+ * sistem lama adalah leadernya.
+ */
+export function akunDiLaporan(daftar: unknown[]): Map<string, AkunDiLaporan> {
+  const peta = new Map<
+    string,
+    AkunDiLaporan & { ejaan: Map<string, number> }
+  >();
+  for (const l of daftar) {
+    if (l === null || typeof l !== "object") continue;
+    const medan = medanLaporan(ratakanLaporan(l as Record<string, unknown>));
+    const baku = akunV1(medan.akun);
+    if (!baku) continue;
+    const ejaan =
+      typeof medan.akun === "string"
+        ? medan.akun.trim().replace(/^@+/, "")
+        : baku;
+    const pelapor = typeof medan.user === "string" ? medan.user : "";
+
+    const ada = peta.get(baku) ?? {
+      username: ejaan,
+      jumlah: 0,
+      pelapor: new Map<string, number>(),
+      ejaan: new Map<string, number>(),
+    };
+    ada.jumlah += 1;
+    ada.ejaan.set(ejaan, (ada.ejaan.get(ejaan) ?? 0) + 1);
+    if (pelapor) ada.pelapor.set(pelapor, (ada.pelapor.get(pelapor) ?? 0) + 1);
+    peta.set(baku, ada);
+  }
+
+  const hasil = new Map<string, AkunDiLaporan>();
+  for (const [baku, a] of peta) {
+    // Ejaan yang paling sering dipakai; alias tidak ikut dihitung sebagai
+    // ejaan supaya akun yang salah ketik tidak lahir dengan nama salahnya.
+    const [username] = [...a.ejaan.entries()]
+      .filter(([e]) => !(bakuAkun(e)! in ALIAS_AKUN_V1))
+      .sort((x, y) => y[1] - x[1])[0] ?? [a.username];
+    hasil.set(baku, { username, jumlah: a.jumlah, pelapor: a.pelapor });
+  }
+  return hasil;
+}
