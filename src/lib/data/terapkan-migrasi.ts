@@ -15,12 +15,14 @@ import {
   ratakanLaporan,
 } from "@/lib/laporan-v1";
 import { orangDitunggu } from "@/lib/rekap-pemetaan";
+import { gabungGmv, gmvLaporanAkun, petaRekapAkun } from "@/lib/gmv-v1";
 import {
   hariDariKejadian,
   hariIzin,
   koordinat,
   persetujuanIzin,
   statusHadir,
+  tanggalWib,
 } from "@/lib/izin-v1";
 import {
   jejakQcDatar,
@@ -710,9 +712,13 @@ export async function terapkanAkun(
  * empat koma satu), dan sasarannya harus tepat satu — akun ATAU unit,
  * tidak pernah dua-duanya (kendala `daily_reports_satu_sasaran`).
  *
- * Laporan non-Affiliator masuk dengan GMV nol dan bersasaran unit:
- * angka unit di V2 dihitung dari sumber lain, dan menyalinnya di sini
- * membuat GMV unit terhitung dua kali.
+ * Angka GMV-nya BUKAN dari yang diketik di laporan. Angka itu ternyata
+ * menunjuk hari sebelumnya (lihat gmv-v1), jadi laporan akun mengambil
+ * GMV dari rekap affiliator tanggal yang sama — nol bila rekapnya tidak
+ * ada — dan angka yang diketik disimpan di catatan. Laporan unit masuk
+ * dengan GMV nol: angka unit MCN/TAP datang dari rekap `gmv:daily`
+ * (`terapkanRekapGmv`), dan menyalinnya di sini membuat GMV unit
+ * terhitung dua kali.
  */
 export async function terapkanLaporan(
   tahap: "uji_coba" | "sungguhan",
@@ -765,6 +771,9 @@ export async function terapkanLaporan(
     if (typeof u.id === "string") divisiOrang.set(u.id, u.division);
   }
 
+  // Rekap affiliator per akun per hari — sumber GMV laporan akun.
+  const rekap = petaRekapAkun(gabungGmv(isi));
+
   for (const l of daftar) {
     if (l === null || typeof l !== "object") continue;
     const mentah = l as Record<string, unknown>;
@@ -810,19 +819,27 @@ export async function terapkanLaporan(
     // GMV yang kosong berarti tidak ada GMV, bukan angka yang rusak.
     const gmvKosong =
       medan.gmv === undefined || medan.gmv === null || medan.gmv === "";
-    const gmv = gmvKosong ? 0 : keAngka(medan.gmv);
-    if (akun && gmv === null) {
+    const diketik = gmvKosong ? 0 : keAngka(medan.gmv);
+    if (akun && diketik === null) {
       tahan(idLama, `GMV '${String(medan.gmv ?? "")}' bukan angka yang sah.`);
       continue;
     }
+
+    // GMV laporan akun: rekap tanggal yang sama, atau nol. Laporan unit
+    // selalu nol; angkanya dari rekap unit.
+    const { gmv: gmvAkhir, keterangan } = akun
+      ? gmvLaporanAkun(rekap, akun, tanggal, diketik)
+      : { gmv: 0, keterangan: null };
 
     // Komisi tidak boleh melebihi GMV (kendala V2). Angka lama yang
     // melanggarnya tidak dibuang: komisinya dikosongkan dan nilai aslinya
     // ditulis di catatan, supaya laporannya tetap masuk dan angkanya
     // tetap bisa diperiksa orang.
-    const gmvAkhir = akun ? (gmv ?? 0) : 0;
     let komisi = keAngka(medan.komisi);
     let catatan = catatanLaporan(baris, medan.dipakai);
+    if (keterangan) {
+      catatan = `${catatan}\n${keterangan}`.trim().slice(0, 2000);
+    }
     if (komisi !== null && komisi > gmvAkhir) {
       catatan =
         `${catatan}\nKomisi lama: ${komisi} (lebih besar dari GMV ${gmvAkhir}; dikosongkan saat migrasi)`
@@ -895,14 +912,15 @@ export async function terapkanLaporan(
       peta,
       isi: {},
       lewatJalur: async (idSekarang) => {
-        // Laporan yang sudah pernah pindah diperbarui di tempat, bukan
-        // dibuat lagi: pemetaan sebelumnya bisa saja menaruhnya sebagai
-        // laporan unit tanpa GMV, dan menulis baris kedua akan
+        // Laporan yang sudah pernah pindah disamakan di tempat, bukan
+        // dibuat lagi: pemetaan sebelumnya bisa saja menaruhnya dengan
+        // angka yang diketik orang, dan menulis baris kedua akan
         // menggandakannya. Baris yang ternyata sudah dihapus dibuat ulang.
         if (idSekarang) {
-          const { data: ada, error: galatUbah } = await sb
-            .from("daily_reports")
-            .update({
+          const sama = await samakanLaporan(
+            sb,
+            idSekarang,
+            {
               user_id: orang.get(l.userLama) as string,
               tanggal: l.tanggal,
               account_id: accountId,
@@ -911,12 +929,10 @@ export async function terapkanLaporan(
               komisi: l.komisi,
               jumlah_upload: l.upload,
               catatan: l.catatan,
-            })
-            .eq("id", idSekarang)
-            .select("id")
-            .maybeSingle();
-          if (galatUbah) return { galat: galatUbah.message };
-          if (ada) return { id: ada.id };
+            },
+            ALASAN_GMV_LAPORAN,
+          );
+          if (sama !== null) return sama;
         }
 
         const { data, error } = await sb.rpc("migrasi_tulis_laporan", {
@@ -942,6 +958,319 @@ export async function terapkanLaporan(
       continue;
     }
 
+    hasil.ditulis += 1;
+  }
+
+  return hasil;
+}
+
+const ALASAN_GMV_LAPORAN =
+  "Migrasi K-Space lama: GMV laporan disamakan dengan rekap GMV affiliator tanggal yang sama; angka yang diketik di laporan lama menunjuk hari sebelumnya.";
+const ALASAN_GMV_REKAP =
+  "Migrasi K-Space lama: angka disamakan dengan rekap GMV harian sistem lama (affiliate-gmv:daily / gmv:daily).";
+
+const angkaDb = (n: unknown): number | null =>
+  n === null || n === undefined ? null : Number(n);
+
+type KolomLaporan = {
+  user_id: string;
+  tanggal: string;
+  account_id: string | null;
+  unit_id: string | null;
+  gmv: number;
+  komisi: number | null;
+  jumlah_upload: number | null;
+  catatan: string;
+};
+
+/**
+ * Menyamakan satu baris `daily_reports` yang sudah ada dengan nilai yang
+ * seharusnya, menulis sesedikit mungkin.
+ *
+ * Kolom angka (GMV, komisi, jumlah upload) diubah lewat
+ * `perbaiki_laporan_harian` supaya jejak revisinya (0005/0127) membawa
+ * alasan yang bisa dibaca orang, bukan "perbaikan tanpa alasan tercatat";
+ * kolom lainnya diubah langsung. Baris yang nilainya sudah sama tidak
+ * disentuh sama sekali — pengulangan migrasi tidak boleh menumpuk revisi.
+ * Hanya kolom yang disebut di `target` yang dibandingkan.
+ *
+ * Mengembalikan null bila barisnya sudah tidak ada (dihapus orang sesudah
+ * migrasi sebelumnya), supaya pemanggil membuatnya lagi.
+ */
+async function samakanLaporan(
+  sb: KlienDb,
+  id: string,
+  target: Partial<KolomLaporan>,
+  alasan: string,
+): Promise<{ id: string } | { galat: string } | null> {
+  const { data: ada, error } = await sb
+    .from("daily_reports")
+    .select(
+      "id, user_id, tanggal, account_id, unit_id, gmv, komisi, jumlah_upload, catatan",
+    )
+    .eq("id", id)
+    .maybeSingle();
+  if (error) return { galat: error.message };
+  if (!ada) return null;
+
+  const teks: Record<string, string | null> = {};
+  for (const k of ["user_id", "tanggal", "account_id", "unit_id"] as const) {
+    if (k in target && (ada[k] ?? null) !== (target[k] ?? null)) {
+      teks[k] = target[k] ?? null;
+    }
+  }
+  let catatan = "catatan" in target ? (target.catatan ?? "") : ada.catatan;
+
+  const gmv = "gmv" in target ? (target.gmv ?? 0) : (angkaDb(ada.gmv) ?? 0);
+  let komisi =
+    "komisi" in target ? (target.komisi ?? null) : angkaDb(ada.komisi);
+  const upload =
+    "jumlah_upload" in target
+      ? (target.jumlah_upload ?? null)
+      : angkaDb(ada.jumlah_upload);
+  // Komisi yang jadi lebih besar dari GMV barunya melanggar kendala V2;
+  // dikosongkan dan angkanya dicatat, bukan dibiarkan gagal.
+  if (komisi !== null && komisi > gmv) {
+    catatan =
+      `${catatan}\nKomisi lama: ${komisi} (lebih besar dari GMV ${gmv}; dikosongkan saat migrasi)`
+        .trim()
+        .slice(0, 2000);
+    komisi = null;
+  }
+  const catatanBeda = catatan !== ada.catatan;
+  const angkaBeda =
+    gmv !== angkaDb(ada.gmv) ||
+    komisi !== angkaDb(ada.komisi) ||
+    upload !== angkaDb(ada.jumlah_upload);
+
+  if (angkaBeda) {
+    const { error: galatRpc } = await sb.rpc("perbaiki_laporan_harian", {
+      p_report_id: id,
+      p_gmv: gmv,
+      p_alasan: alasan,
+      p_catatan: catatanBeda ? catatan : null,
+      p_komisi: komisi,
+      p_jumlah_upload: upload,
+    });
+    if (galatRpc) return { galat: galatRpc.message };
+  } else if (catatanBeda) {
+    teks.catatan = catatan;
+  }
+
+  if (Object.keys(teks).length > 0) {
+    const { error: galatUbah } = await sb
+      .from("daily_reports")
+      .update(teks as never)
+      .eq("id", id);
+    if (galatUbah) return { galat: galatUbah.message };
+  }
+  return { id };
+}
+
+/**
+ * Tanggal (WIB) ekspor lama yang sedang dipakai; hari ini bila unggahannya
+ * tidak mencatatnya. Rekap yang bertanggal sesudah itu adalah angka yang
+ * belum terjadi — target atau salah ketik — dan tidak dibawa.
+ */
+async function tanggalEksporLama(): Promise<string> {
+  const hariIni = tanggalWib(new Date().toISOString()) as string;
+  if (modeData() === "demo") return hariIni;
+
+  const sb = await klienServer();
+  const { data } = await sb
+    .from("kv_unggahan")
+    .select("meta")
+    .order("dimuat_pada", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const meta = (data?.meta ?? null) as Record<string, unknown> | null;
+  const diekspor =
+    meta && typeof meta.exportedAt === "string"
+      ? tanggalWib(meta.exportedAt)
+      : null;
+  return diekspor ?? hariIni;
+}
+
+/**
+ * Menerapkan rekap GMV lama ke `daily_reports`: `affiliate-gmv:daily`
+ * (per akun) dan `gmv:daily` (per unit MCN/TAP).
+ *
+ * Rekap tidak punya tabel sendiri di V2 — angka harian hidup di
+ * `daily_reports`, satu baris per sasaran per tanggal. Jadi tiap rekap
+ * mencari baris sasarannya: kalau sudah ada (laporan yang pindah lebih
+ * dulu, atau rekap ini sendiri pada jalan sebelumnya) angkanya disamakan
+ * bila berbeda; kalau belum, baris baru dibuat lewat jalur migrasi (0158)
+ * atas nama orang yang mencatat rekapnya. Mana yang dipakai bila beberapa
+ * sumber menyebut sasaran yang sama diputuskan `gabungGmv`.
+ */
+export async function terapkanRekapGmv(
+  tahap: "uji_coba" | "sungguhan",
+  kunci: "affiliate-gmv:daily" | "gmv:daily",
+): Promise<HasilTerap> {
+  const [isi, resolusi, batasTanggal] = await Promise.all([
+    isiEksporLama(),
+    resolusiOrangV1(),
+    tanggalEksporLama(),
+  ]);
+
+  const orang = new Map(resolusi.padanan.map((p) => [p.idLama, p.idBaru]));
+  const sumber = kunci === "affiliate-gmv:daily" ? "affiliate" : "harian";
+  const gabung = gabungGmv(isi);
+
+  const hasil: HasilTerap = {
+    kelompok: kunci,
+    diperiksa: Array.isArray(isi[kunci]) ? isi[kunci].length : 0,
+    ditulis: 0,
+    tertahan: 0,
+    catatan: [],
+  };
+  const tahan = (idLama: string, pesan: string) => {
+    hasil.tertahan += 1;
+    hasil.catatan.push({ idLama, pesan });
+  };
+
+  // Yang sengaja tidak dibawa (autoSynced, ganda, divisi internal) bukan
+  // tertahan — tidak ada keputusan yang ditunggu — tetapi tetap disebut.
+  for (const d of gabung.dilewati) {
+    if (d.sumber === sumber)
+      hasil.catatan.push({ idLama: d.idLama, pesan: d.alasan });
+  }
+
+  type SiapRekap = {
+    idLama: string;
+    userId: string;
+    tanggal: string;
+    akun: string | null;
+    unitKode: string | null;
+    gmv: number;
+    komisi: number | null;
+    upload: number | null;
+    catatan: string;
+    dikirim: string | null;
+  };
+  const siap: SiapRekap[] = [];
+  for (const b of gabung.baris) {
+    if (b.sumber !== sumber) continue;
+    if (b.tanggal > batasTanggal) {
+      tahan(
+        b.idLama,
+        `Bertanggal ${b.tanggal}, sesudah ekspor dibuat (${batasTanggal}); rekap yang belum terjadi tidak dibawa.`,
+      );
+      continue;
+    }
+    const userId = b.pencatat ? orang.get(b.pencatat) : undefined;
+    if (!userId) {
+      tahan(
+        b.idLama,
+        b.pencatat
+          ? `Pencatatnya (${b.pencatat}) belum tertaut.`
+          : "Rekap tanpa pencatat.",
+      );
+      continue;
+    }
+
+    const bagian = [
+      `Rekap GMV ${b.akun ? "affiliator" : "unit"} sistem lama`,
+      b.pesanan !== null ? `Pesanan: ${b.pesanan}` : null,
+    ];
+    siap.push({
+      idLama: b.idLama,
+      userId,
+      tanggal: b.tanggal,
+      akun: b.akun,
+      unitKode: b.unit,
+      gmv: b.gmv,
+      komisi: b.komisi !== null && b.komisi <= b.gmv ? b.komisi : null,
+      upload:
+        b.upload !== null && b.upload >= 0 && b.upload <= 500 ? b.upload : null,
+      catatan: bagian.filter((t) => t !== null).join(" · "),
+      dikirim: b.diperbarui,
+    });
+  }
+
+  if (tahap === "uji_coba" || modeData() === "demo") return hasil;
+
+  const sb = await klienServer();
+  const [unitDb, akunDb, peta] = await Promise.all([
+    sb.from("units").select("id, kode"),
+    sb.from("accounts").select("id, username"),
+    bacaPeta(sb, kunci),
+  ]);
+  const unitId = new Map<string, string>(
+    (unitDb.data ?? []).map((u) => [u.kode as string, u.id]),
+  );
+  const akunId = new Map<string, string>();
+  for (const a of akunDb.data ?? []) {
+    const baku = bakuAkun(a.username);
+    if (baku && !akunId.has(baku)) akunId.set(baku, a.id);
+  }
+
+  for (const r of siap) {
+    const accountId = r.akun ? (akunId.get(r.akun) ?? null) : null;
+    if (r.akun && !accountId) {
+      tahan(r.idLama, `Akun '${r.akun}' tidak ada di V2.`);
+      continue;
+    }
+    const unit = r.unitKode ? (unitId.get(r.unitKode) ?? null) : null;
+    if (!accountId && !unit) {
+      tahan(r.idLama, `Unit '${r.unitKode ?? ""}' tidak ada di V2.`);
+      continue;
+    }
+
+    const tulis = await tulisIdempoten(sb, {
+      kelompok: kunci,
+      idLama: r.idLama,
+      tabel: "daily_reports",
+      peta,
+      isi: {},
+      lewatJalur: async (idSekarang) => {
+        // Baris sasaran: yang sudah dipetakan, atau yang sudah ada untuk
+        // sasaran dan tanggal ini (laporan yang pindah lebih dulu).
+        let id = idSekarang;
+        if (!id) {
+          const dasar = sb
+            .from("daily_reports")
+            .select("id")
+            .eq("tanggal", r.tanggal);
+          const { data: ada, error: galatCari } = await (
+            accountId
+              ? dasar.eq("account_id", accountId)
+              : dasar.eq("unit_id", unit as string)
+          ).maybeSingle();
+          if (galatCari) return { galat: galatCari.message };
+          id = ada?.id ?? null;
+        }
+        if (id) {
+          // Hanya angkanya yang disamakan; pelapor, sasaran, tanggal, dan
+          // catatan baris yang ada adalah milik laporannya.
+          const sama = await samakanLaporan(
+            sb,
+            id,
+            { gmv: r.gmv },
+            ALASAN_GMV_REKAP,
+          );
+          if (sama !== null) return sama;
+        }
+
+        const { data, error } = await sb.rpc("migrasi_tulis_laporan", {
+          p_user: r.userId,
+          p_tanggal: r.tanggal,
+          p_account: accountId,
+          p_unit: accountId ? null : unit,
+          p_gmv: r.gmv,
+          p_komisi: r.komisi,
+          p_upload: r.upload,
+          p_catatan: r.catatan,
+          p_dikirim: r.dikirim,
+        });
+        return error ? { galat: error.message } : { id: data };
+      },
+    });
+
+    if ("galat" in tulis) {
+      hasil.catatan.push({ idLama: r.idLama, pesan: tulis.galat });
+      continue;
+    }
     hasil.ditulis += 1;
   }
 

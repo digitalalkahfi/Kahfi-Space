@@ -22,6 +22,7 @@ import {
   terapkanKas,
   terapkanKehadiran,
   terapkanLaporan,
+  terapkanRekapGmv,
   terapkanPengaturanAbsensi,
   terapkanTodo,
   terapkanTugas,
@@ -226,6 +227,16 @@ export async function jalankanMigrasi(
     { label: "Anggota tim", jalankan: () => terapkanUsersList(tahap) },
     { label: "Akun affiliator", jalankan: () => terapkanAkun(tahap) },
     { label: "Laporan harian", jalankan: () => terapkanLaporan(tahap) },
+    // Rekap GMV mengisi sasaran yang tidak punya laporan dan menyamakan
+    // angka yang sudah ada; jadi dijalankan sesudah laporannya.
+    {
+      label: "GMV harian unit",
+      jalankan: () => terapkanRekapGmv(tahap, "gmv:daily"),
+    },
+    {
+      label: "GMV affiliator harian",
+      jalankan: () => terapkanRekapGmv(tahap, "affiliate-gmv:daily"),
+    },
     { label: "Kehadiran", jalankan: () => terapkanKehadiran(tahap) },
     { label: "Pengajuan izin", jalankan: () => terapkanIzin(tahap) },
     { label: "Tugas & QC", jalankan: () => terapkanTugas(tahap) },

@@ -75,10 +75,14 @@ export type HariKehadiran = {
  * jatuh pada hari yang sama (menurut WIB, bukan UTC — absen pulang jam
  * 22.00 masih hari yang sama) disatukan: masuk terawal, pulang terakhir.
  *
- * Penanda barisnya `userId#tanggal`, bukan id salah satu kejadiannya,
- * supaya pengulangan dengan ekspor yang lebih baru tetap mengenali hari
- * yang sama. Baris yang sudah berbentuk harian (punya `date`) dibiarkan
- * apa adanya, jadi ekspor gaya lama maupun contoh tetap terbaca.
+ * Penanda barisnya `attn_<userId>_<tanggal>`, bukan id salah satu
+ * kejadiannya, supaya pengulangan dengan ekspor yang lebih baru tetap
+ * mengenali hari yang sama. Ejaannya mengikuti ekspor "transformed" yang
+ * dipakai migrasi pertama (23 Sep 2026): peta `migrasi_peta` sudah berisi
+ * 951 hari dengan penanda itu, dan penanda lain akan membuat hari yang
+ * sama dianggap belum pernah pindah. Baris yang sudah berbentuk harian
+ * (punya `date`) dibiarkan apa adanya, jadi ekspor gaya lama maupun contoh
+ * tetap terbaca.
  */
 export function hariDariKejadian(daftar: unknown[]): unknown[] {
   const lolos: unknown[] = [];
@@ -103,7 +107,7 @@ export function hariDariKejadian(daftar: unknown[]): unknown[] {
 
     const kunci = `${userId}#${tanggal}`;
     const hari = perHari.get(kunci) ?? {
-      id: kunci,
+      id: `attn_${userId}_${tanggal}`,
       userId,
       date: tanggal,
       checkIn: null,

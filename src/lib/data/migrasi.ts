@@ -717,10 +717,12 @@ export async function ringkasGmvLama() {
   const r = ringkasGabungGmv(hasil);
 
   return {
+    // Urut menurut kepercayaannya (lihat gmv-v1): rekap affiliator adalah
+    // angka yang dipakai dasbor lama, laporan hanya mengisi yang tersisa.
     dipakai: [
-      { sumber: "laporan" as const, jumlah: r.laporan },
       { sumber: "affiliate" as const, jumlah: r.affiliate },
       { sumber: "harian" as const, jumlah: r.harian },
+      { sumber: "laporan" as const, jumlah: r.laporan },
     ],
     dilewati: sebabDilewati(hasil),
   };

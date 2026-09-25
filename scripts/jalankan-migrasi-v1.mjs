@@ -18,7 +18,13 @@
  *   node scripts/jalankan-migrasi-v1.mjs --uji-coba       # hitung saja, tidak menulis
  *   node scripts/jalankan-migrasi-v1.mjs --hanya=tasks:all,todos:all
  *   node scripts/jalankan-migrasi-v1.mjs --berkas-backup=/jalur/alkahfi-backup.json
+ *   node scripts/jalankan-migrasi-v1.mjs --berkas-backup=… --muat-backup
  *   node scripts/jalankan-migrasi-v1.mjs --tanpa-baseline --setiap=50
+ *
+ * `--muat-backup` memuat berkas backup itu ke `kv_store_lama` lebih dulu —
+ * persis yang dilakukan layar /migrasi saat berkas diunggah (kata sandi
+ * dibuang, satu kunci per baris, kunci yang diabaikan tidak disimpan) —
+ * supaya ekspor yang lebih baru bisa dipakai tanpa lewat Vercel.
  *
  * Kredensial dibaca dari env atau `.env.local` di akar repo:
  *   NEXT_PUBLIC_SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
@@ -63,6 +69,11 @@ const HANYA = argumen.has("hanya")
   : null;
 const TANPA_BASELINE = argumen.has("tanpa-baseline");
 const BERKAS_BACKUP = argumen.get("berkas-backup") ?? null;
+const MUAT_BACKUP = argumen.has("muat-backup");
+if (MUAT_BACKUP && !BERKAS_BACKUP) {
+  console.error("--muat-backup membutuhkan --berkas-backup=<jalur>.");
+  process.exit(2);
+}
 const SETIAP = Number(argumen.get("setiap") ?? 20) || 20;
 const DIR_LAPORAN = path.join(AKAR, ".tmp");
 
@@ -155,6 +166,20 @@ const KELOMPOK = [
     label: "Laporan harian",
     tabel: "daily_reports",
     jalankan: (t) => terap.terapkanLaporan(t),
+  },
+  // Rekap GMV sesudah laporan: mengisi tanggal yang tidak punya laporan
+  // dan menyamakan angka yang sudah ada (lihat gmv-v1).
+  {
+    kunci: "gmv:daily",
+    label: "GMV harian unit",
+    tabel: "daily_reports",
+    jalankan: (t) => terap.terapkanRekapGmv(t, "gmv:daily"),
+  },
+  {
+    kunci: "affiliate-gmv:daily",
+    label: "GMV affiliator harian",
+    tabel: "daily_reports",
+    jalankan: (t) => terap.terapkanRekapGmv(t, "affiliate-gmv:daily"),
   },
   {
     kunci: "attendance:config",
@@ -252,6 +277,8 @@ function jumlahSumber(isi) {
     "users:list": n("users:list"),
     "affiliate-accounts:all": n("affiliate-accounts:all"),
     "daily-reports:all": n("daily-reports:all"),
+    "gmv:daily": n("gmv:daily"),
+    "affiliate-gmv:daily": n("affiliate-gmv:daily"),
     "attendance:config": n("attendance:config"),
     // Kejadian masuk/pulang → hari; itulah yang menjadi baris V2.
     "attendance:all": Array.isArray(isi["attendance:all"])
@@ -408,6 +435,56 @@ console.log(
 console.log(`Kelompok: ${dipilih.map((g) => g.kunci).join(" → ")}`);
 if (TAHAP === "uji_coba")
   console.log("Uji coba: tidak satu baris pun ditulis ke tabel tujuan.");
+
+// Memuat berkas backup ke kv_store_lama — jalur yang sama dengan
+// unggahan di layar /migrasi (`unggahEksporV1`), tanpa sesi pengguna.
+// Dilakukan juga pada uji coba: kv_store_lama adalah tempat singgah,
+// bukan tabel tujuan, dan uji coba justru harus melihat data yang sama
+// dengan yang akan dipakai jalan sungguhan.
+if (MUAT_BACKUP) {
+  const dibaca = bacaEksporV1(
+    JSON.parse(fs.readFileSync(BERKAS_BACKUP, "utf8")),
+  );
+  if (!dibaca.ok) {
+    console.error(`Berkas backup tidak terbaca: ${dibaca.sebab}`);
+    process.exit(2);
+  }
+  const disimpan = dibaca.isi.filter((i) => i.disimpan);
+  {
+    const { data: unggahan, error: galatUnggahan } = await sb
+      .from("kv_unggahan")
+      .insert({
+        berkas: path.basename(BERKAS_BACKUP),
+        meta: dibaca.meta?.mentah ?? {},
+        jumlah_kunci: disimpan.length,
+        jumlah_entri: disimpan.reduce((a, i) => a + i.jumlah, 0),
+        oleh: null,
+      })
+      .select("id")
+      .single();
+    if (galatUnggahan || !unggahan) {
+      console.error(
+        `Gagal mencatat unggahan: ${galatUnggahan?.message ?? "tidak diketahui"}`,
+      );
+      process.exit(1);
+    }
+    for (const k of disimpan) {
+      const { error } = await sb
+        .from("kv_store_lama")
+        .upsert(
+          { key: k.kunci, value: k.nilai, unggahan_id: unggahan.id },
+          { onConflict: "key" },
+        );
+      if (error) {
+        console.error(`Gagal menyimpan kunci ${k.kunci}: ${error.message}`);
+        process.exit(1);
+      }
+    }
+    console.log(
+      `Berkas ${path.basename(BERKAS_BACKUP)} dimuat ke kv_store_lama: ${disimpan.length} kunci, ${angka(disimpan.reduce((a, i) => a + i.jumlah, 0))} entri (diekspor ${dibaca.meta?.diekspor ?? "?"}).`,
+    );
+  }
+}
 
 const sumberKeterangan = await keteranganSumber(sb);
 if (sumberKeterangan) {

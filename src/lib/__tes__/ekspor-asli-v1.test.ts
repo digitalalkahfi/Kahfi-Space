@@ -55,7 +55,8 @@ test("kejadian masuk/pulang disatukan menjadi satu hari per orang", () => {
   assert.equal(hari.length, 2);
   const u1 = hari.find((h) => h.userId === "u1");
   assert.ok(u1);
-  assert.equal(u1.id, "u1#2026-06-03");
+  // Ejaan penanda sama dengan ekspor transformed yang sudah ada di peta.
+  assert.equal(u1.id, "attn_u1_2026-06-03");
   assert.equal(u1.date, "2026-06-03");
   assert.equal(u1.checkIn, "2026-06-03T00:28:16Z");
   assert.equal(u1.checkOut, "2026-06-03T09:58:28Z");
