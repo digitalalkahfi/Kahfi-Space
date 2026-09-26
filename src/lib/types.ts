@@ -116,6 +116,11 @@ export type AnggotaKehadiran = {
   menitTelat: number;
   /** Izin berjam yang disetujui hari itu, bila ada. */
   izinSampai: string | null;
+  /**
+   * Orang ini wajib absen — Leader ke bawah. CEO, Manager, dan Finance
+   * memantau, bukan dipantau, jadi tidak pernah ditagih "belum absen".
+   */
+  wajibAbsen: boolean;
   /** Orang ini memang punya sasaran laporan (PIC akun / Leader unit). */
   wajibLapor: boolean;
   /** Laporan harian hari ini sudah terkirim atau belum. */
