@@ -33,10 +33,26 @@ export function AmbilSelfie({
   const matikan = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
     setNyala(false);
   }, []);
 
   useEffect(() => matikan, [matikan]);
+
+  // Elemen <video> baru dipasang setelah `nyala` benar, jadi aliran kamera
+  // dihubungkan di sini — bukan langsung setelah getUserMedia, saat
+  // elemennya belum ada. Tanpa ini kamera menyala tapi layar tetap gelap.
+  useEffect(() => {
+    const video = videoRef.current;
+    const stream = streamRef.current;
+    if (!nyala || !video || !stream) return;
+    video.srcObject = stream;
+    video.play().catch(() => {
+      setGalat(
+        "Pratinjau kamera tidak bisa diputar. Coba tekan Nyalakan kamera lagi.",
+      );
+    });
+  }, [nyala]);
 
   const nyalakan = async () => {
     setGalat(null);
@@ -47,10 +63,6 @@ export function AmbilSelfie({
       });
       streamRef.current = stream;
       setNyala(true);
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
     } catch {
       setGalat(
         "Kamera tidak bisa dibuka. Izinkan akses kamera di peramban, lalu coba lagi.",
@@ -61,6 +73,11 @@ export function AmbilSelfie({
   const jepret = async () => {
     const video = videoRef.current;
     if (!video) return;
+    if (!video.videoWidth || !video.videoHeight) {
+      setGalat("Gambar kamera belum siap. Tunggu sebentar, lalu jepret lagi.");
+      return;
+    }
+    setGalat(null);
 
     const kanvas = document.createElement("canvas");
     // Turunkan resolusi: bukti kehadiran, bukti wajah — tidak perlu besar.
