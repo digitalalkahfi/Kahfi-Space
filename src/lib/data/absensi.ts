@@ -31,6 +31,9 @@ export type AbsensiHariIni = {
   selisihMenit: number | null;
   /** Laporan harian hari ini sudah terkirim — kunci Absen Pulang. */
   sudahLapor: boolean;
+  /** Berapa kali absen masuk/pulang hari ini sudah diulang (migrasi 0171). */
+  ulangMasuk: number;
+  ulangPulang: number;
 };
 
 const KOSONG: AbsensiHariIni = {
@@ -45,6 +48,8 @@ const KOSONG: AbsensiHariIni = {
   persetujuan: null,
   selisihMenit: null,
   sudahLapor: false,
+  ulangMasuk: 0,
+  ulangPulang: 0,
 };
 
 /** Pengaturan operasional absensi; nilai bawaan bila belum diatur. */
@@ -138,6 +143,8 @@ export async function absensiHariIni(
         ? selisihDariBatas(a.jam_masuk, tanggal, "08:00", 15)
         : null,
       sudahLapor,
+      ulangMasuk: 0,
+      ulangPulang: 0,
     };
   }
 
@@ -146,7 +153,7 @@ export async function absensiHariIni(
     sb
       .from("attendance")
       .select(
-        "status, jam_masuk, jam_pulang, lokasi_valid, jarak_masuk_m, terlambat, alasan, persetujuan",
+        "status, jam_masuk, jam_pulang, lokasi_valid, jarak_masuk_m, terlambat, alasan, persetujuan, ulang_masuk, ulang_pulang",
       )
       .eq("user_id", pengguna.id)
       .eq("tanggal", tanggal)
@@ -183,6 +190,8 @@ export async function absensiHariIni(
         )
       : null,
     sudahLapor,
+    ulangMasuk: absen.ulang_masuk,
+    ulangPulang: absen.ulang_pulang,
   };
 }
 
@@ -202,6 +211,9 @@ export type BarisRekapAbsensi = {
   jarakMeter: number | null;
   alasan: string;
   sudahLapor: boolean;
+  /** Berapa kali absen masuk/pulang hari itu diulang (migrasi 0171). */
+  ulangMasuk: number;
+  ulangPulang: number;
 };
 
 /** Batas masuk mode demo: 08:00 + toleransi 15 menit (migrasi 0010). */
@@ -284,6 +296,8 @@ export async function rekapAbsensi(
           jarakMeter: jarak,
           alasan: a.alasan ?? "",
           sudahLapor: pelapor.has([a.tanggal, a.user].join("|")),
+          ulangMasuk: 0,
+          ulangPulang: 0,
         };
       })
       .sort(
@@ -315,6 +329,8 @@ export async function rekapAbsensi(
     jarakMeter: b.jarak_masuk_m,
     alasan: b.alasan,
     sudahLapor: b.sudah_lapor,
+    ulangMasuk: Number(b.ulang_masuk ?? 0),
+    ulangPulang: Number(b.ulang_pulang ?? 0),
   }));
 }
 
