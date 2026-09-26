@@ -28,6 +28,8 @@ export async function unggahSelfie(
   blob: Blob,
   tanggal: string,
   tahap: "masuk" | "pulang",
+  /** Absen ulang ke berapa; 0 untuk absen pertama hari itu. */
+  ulang = 0,
 ): Promise<HasilUnggah> {
   if (blob.size === 0)
     return { ok: false, pesan: "Foto kosong, coba jepret ulang." };
@@ -52,11 +54,13 @@ export async function unggahSelfie(
     if (!user)
       return { ok: false, pesan: "Sesi berakhir, silakan masuk lagi." };
 
-    const path = `${user.id}/${tanggal}-${tahap}.jpg`;
+    // Absen ulang (migrasi 0171) memakai nama berkas baru: foto lama
+    // tetap tersimpan sebagai bukti, dan unggahan tidak perlu izin menimpa.
+    const path = `${user.id}/${tanggal}-${tahap}${
+      ulang > 0 ? `-ulang${ulang}` : ""
+    }.jpg`;
     const { error } = await sb.storage.from(BUCKET).upload(path, blob, {
       contentType: blob.type || "image/jpeg",
-      // Absen ulang di hari yang sama tidak terjadi (unik per tanggal),
-      // jadi menimpa tidak perlu dan foto lama tetap jadi bukti.
       upsert: false,
     });
 
