@@ -72,20 +72,42 @@ export async function absenMasuk(input: {
   if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
 
   const sb = await klienServer();
+  const KOLOM = "status, terlambat, lokasi_valid, jarak_masuk_m, jam_masuk";
+  const isi = {
+    jam_masuk: new Date().toISOString(),
+    lat_masuk: input.titik.lat,
+    lng_masuk: input.titik.lng,
+    foto_masuk_url: input.fotoUrl ?? null,
+  };
+
+  // Setelah absen ulang (migrasi 0171) baris hari ini masih ada tetapi
+  // jam masuknya kosong; absen berikutnya mengisi baris itu, bukan
+  // membuat baris baru yang pasti ditolak kunci unik per tanggal.
+  const { data: ada } = await sb
+    .from("attendance")
+    .select("id, jam_masuk, status")
+    .eq("user_id", pengguna.id)
+    .eq("tanggal", input.tanggal)
+    .maybeSingle();
+
+  if (ada && (ada.jam_masuk !== null || ada.status !== "alpa")) {
+    return gagal("Kamu sudah absen masuk hari ini.", "validasi");
+  }
+
   // Status terlambat, validitas lokasi, dan jaraknya dihitung trigger database;
   // hasilnya diambil kembali supaya UI melaporkan angka yang sama persis.
-  const { data, error } = await sb
-    .from("attendance")
-    .insert({
-      user_id: pengguna.id,
-      tanggal: input.tanggal,
-      jam_masuk: new Date().toISOString(),
-      lat_masuk: input.titik.lat,
-      lng_masuk: input.titik.lng,
-      foto_masuk_url: input.fotoUrl ?? null,
-    })
-    .select("status, terlambat, lokasi_valid, jarak_masuk_m, jam_masuk")
-    .single();
+  const { data, error } = ada
+    ? await sb
+        .from("attendance")
+        .update({ ...isi, status: "hadir" })
+        .eq("id", ada.id)
+        .select(KOLOM)
+        .single()
+    : await sb
+        .from("attendance")
+        .insert({ user_id: pengguna.id, tanggal: input.tanggal, ...isi })
+        .select(KOLOM)
+        .single();
 
   if (error) {
     return error.code === "23505"
@@ -194,6 +216,41 @@ export async function absenPulang(input: {
     .replace(".", ":");
 
   return sukses(undefined, `Absen pulang tercatat ${jam} WIB. Terima kasih!`);
+}
+
+/**
+ * Absen ulang: kosongkan catatan masuk/pulang hari ini supaya bisa diabsen
+ * lagi. Untuk GPS yang meleset — waktu hanya maju, jadi yang bisa
+ * diperbaiki hanya lokasinya. Batas, syarat, dan hitungannya dijaga
+ * fungsi database `absen_ulang` (migrasi 0171).
+ */
+export async function absenUlang(
+  tahap: "masuk" | "pulang",
+): Promise<Hasil<{ sisa: number } | undefined>> {
+  if (tahap !== "masuk" && tahap !== "pulang") {
+    return gagal("Tahap absen ulang tidak dikenal.", "validasi");
+  }
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+
+  const sb = await klienServer();
+  const { data, error } = await sb.rpc("absen_ulang", { p_tahap: tahap });
+
+  if (error) {
+    // Pesan dari database sudah ditulis untuk dibaca orang.
+    return gagal(error.message.replace(/^.*?: /, ""), "validasi");
+  }
+
+  revalidatePath("/absensi");
+  revalidatePath("/beranda");
+
+  const sisa = Number(data?.[0]?.sisa ?? 0);
+  return sukses(
+    { sisa },
+    `Catatan absen ${tahap} dihapus. Silakan absen ${tahap} lagi sekarang.`,
+  );
 }
 
 /**
