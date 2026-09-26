@@ -28,29 +28,32 @@ export function PantauKehadiran({ tim }: { tim: AnggotaKehadiran[] }) {
   const [saringan, setSaringan] = useState<Saringan>("belum_lapor");
   const [diingatkan, setDiingatkan] = useState<string[]>([]);
 
-  const { belumAbsen, belumLapor, kurangUpload, sudahAbsen } = useMemo(() => {
-    const hadir = tim.filter(
-      (a) => a.statusAbsen === "hadir" || a.statusAbsen === "terlambat",
-    );
-    return {
-      sudahAbsen: hadir.length,
-      belumAbsen: tim.filter(
-        (a) => a.statusAbsen !== "hadir" && a.statusAbsen !== "terlambat",
-      ),
-      // Hanya yang memang punya sasaran laporan yang pantas ditagih.
-      belumLapor: hadir.filter((a) => a.wajibLapor && !a.sudahLapor),
-      // Yang SUDAH melapor tapi unggahannya di bawah minimum. Yang belum
-      // melapor sama sekali tidak masuk sini — ia sudah ada di daftar
-      // sebelahnya, dan menagihnya dua kali hanya membuat kedua daftar
-      // itu sama-sama diabaikan.
-      kurangUpload: hadir.filter(
-        (a) =>
-          a.minimumUnggahan !== null &&
-          a.unggahanHariIni !== null &&
-          a.unggahanHariIni < a.minimumUnggahan,
-      ),
-    };
-  }, [tim]);
+  const { belumAbsen, belumLapor, kurangUpload, sudahAbsen, ditagih } =
+    useMemo(() => {
+      const masuk = (a: AnggotaKehadiran) =>
+        a.statusAbsen === "hadir" || a.statusAbsen === "terlambat";
+      const hadir = tim.filter(masuk);
+      // Yang ditagih absennya hanya Leader ke bawah; CEO, Manager, dan
+      // Finance memantau, bukan dipantau.
+      const ditagih = tim.filter((a) => a.wajibAbsen);
+      return {
+        ditagih,
+        sudahAbsen: ditagih.filter(masuk).length,
+        belumAbsen: ditagih.filter((a) => !masuk(a)),
+        // Hanya yang memang punya sasaran laporan yang pantas ditagih.
+        belumLapor: hadir.filter((a) => a.wajibLapor && !a.sudahLapor),
+        // Yang SUDAH melapor tapi unggahannya di bawah minimum. Yang belum
+        // melapor sama sekali tidak masuk sini — ia sudah ada di daftar
+        // sebelahnya, dan menagihnya dua kali hanya membuat kedua daftar
+        // itu sama-sama diabaikan.
+        kurangUpload: hadir.filter(
+          (a) =>
+            a.minimumUnggahan !== null &&
+            a.unggahanHariIni !== null &&
+            a.unggahanHariIni < a.minimumUnggahan,
+        ),
+      };
+    }, [tim]);
 
   const daftar =
     saringan === "belum_absen"
@@ -100,7 +103,7 @@ export function PantauKehadiran({ tim }: { tim: AnggotaKehadiran[] }) {
             Pantau Kehadiran
           </h2>
           <p className="tabular text-[13px] leading-[18px] text-muted-foreground">
-            {sudahAbsen} dari {tim.length} staf telah check-in
+            {sudahAbsen} dari {ditagih.length} staf telah check-in
           </p>
         </div>
         <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-card text-muted-foreground ring-1 ring-border-subtle">
