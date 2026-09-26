@@ -5,9 +5,16 @@ import "server-only";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { dataContoh } from "@/lib/data/contoh";
+import { aktifDemo } from "@/lib/demo";
 import { jamEfektifMasuk, menitTelat } from "@/lib/izin";
 import { batasMinimum } from "@/lib/batas-minimum";
-import type { AnggotaKehadiran, Pengguna, StatusAbsen } from "@/lib/types";
+import { wajibAbsen } from "@/lib/rekap-kehadiran";
+import type {
+  AnggotaKehadiran,
+  Peran,
+  Pengguna,
+  StatusAbsen,
+} from "@/lib/types";
 
 export type RekapKehadiran = {
   tim: AnggotaKehadiran[];
@@ -28,10 +35,14 @@ function keStatus(s: string): StatusAbsen {
 
 function rangkum(tim: AnggotaKehadiran[]): RekapKehadiran {
   const wajib = tim.filter((a) => a.wajibLapor);
+  // Penyebut kehadiran hanya yang wajib absen (Leader ke bawah). CEO,
+  // Manager, dan Finance memantau, bukan dipantau — ikut menghitung
+  // mereka membuat tim tidak pernah 100% hadir.
+  const ditagih = tim.filter((a) => a.wajibAbsen);
   return {
     tim,
-    total: tim.length,
-    sudahAbsen: tim.filter(
+    total: ditagih.length,
+    sudahAbsen: ditagih.filter(
       (a) => a.statusAbsen === "hadir" || a.statusAbsen === "terlambat",
     ).length,
     // Penyebutnya orang yang memang punya sasaran lapor, bukan seluruh tim.
@@ -113,7 +124,9 @@ function hitungDemo(pengguna: Pengguna, tanggal: string): RekapKehadiran {
       Boolean(u.unit) &&
       !unitBerakun.has(u.unit as string));
 
+  // Sama seperti `status_tim_harian` di SQL: hanya anggota aktif.
   const tim = users
+    .filter(aktifDemo)
     .map((u) => {
       const unitNama = u.unit
         ? (units.find((x) => x.kode === u.unit)?.nama.split(" (")[0] ?? "")
@@ -141,6 +154,7 @@ function hitungDemo(pengguna: Pengguna, tanggal: string): RekapKehadiran {
           a?.izin_jenis === "jam" && a?.persetujuan === "disetujui"
             ? (a.izin_selesai ?? null)
             : null,
+        wajibAbsen: wajibAbsen(u.role as Peran),
         wajibLapor: wajibLapor(u),
         sudahLapor: pelapor.has(u.nama),
         ...unggahanDemo(u.nama, tanggal),
@@ -204,6 +218,7 @@ type BarisStatus = {
   sudah_lapor: boolean;
   unggahan_hari_ini: number | null;
   minimum_unggahan: number | null;
+  wajib_absen: boolean;
 };
 
 /**
@@ -234,6 +249,7 @@ export async function rekapKehadiran(
       jamMasuk: b.jam_masuk,
       menitTelat: Number(b.menit_telat ?? 0),
       izinSampai: b.izin_jenis === "jam" ? b.izin_selesai : null,
+      wajibAbsen: b.wajib_absen,
       wajibLapor: b.wajib_lapor,
       sudahLapor: b.sudah_lapor,
       unggahanHariIni: b.unggahan_hari_ini,
