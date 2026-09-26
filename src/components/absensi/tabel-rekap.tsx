@@ -87,6 +87,12 @@ export function TabelRekapAbsensi({
       lebar: 12,
     },
     {
+      // Berapa kali catatan hari itu diulang (migrasi 0171).
+      judul: "Absen ulang",
+      ambil: (b) => b.ulangMasuk + b.ulangPulang,
+      lebar: 11,
+    },
+    {
       judul: "Terlambat",
       ambil: (b) => (b.terlambat ? "Ya" : "Tidak"),
       lebar: 10,
@@ -225,11 +231,21 @@ export function TabelRekapAbsensi({
                   </TableCell>
                   <TableCell className="tabular whitespace-nowrap">
                     {b.jamMasuk ? jamWib(b.jamMasuk).replace(" WIB", "") : "—"}
+                    {b.ulangMasuk > 0 ? (
+                      <span className="block text-[10px] leading-[12px] text-warn-text">
+                        diulang {b.ulangMasuk}×
+                      </span>
+                    ) : null}
                   </TableCell>
                   <TableCell className="tabular whitespace-nowrap">
                     {b.jamPulang
                       ? jamWib(b.jamPulang).replace(" WIB", "")
                       : "—"}
+                    {b.ulangPulang > 0 ? (
+                      <span className="block text-[10px] leading-[12px] text-warn-text">
+                        diulang {b.ulangPulang}×
+                      </span>
+                    ) : null}
                   </TableCell>
                   <TableCell>
                     {!b.jamMasuk ? (
@@ -304,6 +320,11 @@ export function TabelRekapAbsensi({
                 ) : null}
                 {b.sudahLapor ? (
                   <span className="text-ok-text">Laporan terkirim</span>
+                ) : null}
+                {b.ulangMasuk + b.ulangPulang > 0 ? (
+                  <span className="text-warn-text">
+                    Absen diulang {b.ulangMasuk + b.ulangPulang}×
+                  </span>
                 ) : null}
               </p>
 
