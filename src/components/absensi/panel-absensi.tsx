@@ -15,6 +15,7 @@ import {
   AmbilSelfie,
   type HasilSelfie,
 } from "@/components/absensi/ambil-selfie";
+import { AbsenUlang } from "@/components/absensi/absen-ulang";
 import { KartuStatusMasuk } from "@/components/absensi/kartu-status-masuk";
 import { KunciPulang } from "@/components/absensi/kunci-pulang";
 import { useLokasi } from "@/components/absensi/use-lokasi";
@@ -81,7 +82,9 @@ export function PanelAbsensi({
       let fotoUrl: string | null = null;
       let catatanFoto = "";
       if (selfie) {
-        const unggah = await unggahSelfie(selfie.blob, tanggal, tahap);
+        // Absen ulang memakai nama berkas baru supaya foto lama tetap ada.
+        const ulang = tahap === "masuk" ? absen.ulangMasuk : absen.ulangPulang;
+        const unggah = await unggahSelfie(selfie.blob, tanggal, tahap, ulang);
         if (unggah.ok) {
           fotoUrl = unggah.path;
         } else {
@@ -193,6 +196,29 @@ export function PanelAbsensi({
           </Card>
         </MunculPop>
       </div>
+
+      {/* Absen ulang: hanya untuk tahap yang sudah tercatat hari ini ---- */}
+      {tahap === "pulang" ? (
+        <AbsenUlang
+          absen={absen}
+          tahap="masuk"
+          jamAturan={jamAturan}
+          onSelesai={() => {
+            setSelfie(null);
+            setPesan(null);
+          }}
+        />
+      ) : tahap === "selesai" ? (
+        <AbsenUlang
+          absen={absen}
+          tahap="pulang"
+          jamAturan={jamAturan}
+          onSelesai={() => {
+            setSelfie(null);
+            setPesan(null);
+          }}
+        />
+      ) : null}
 
       {/* Alur absen --------------------------------------------------- */}
       {tahap === "selesai" ? (
