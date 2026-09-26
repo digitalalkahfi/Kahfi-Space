@@ -387,6 +387,10 @@ export type BarisAttendance = {
   alasan_keputusan: string;
   /** Migrasi 0157 — asal bukti kehadiran; terisi untuk baris hasil migrasi. */
   catatan_bukti: string;
+  /** Migrasi 0171 — berapa kali absen masuk/pulang hari itu diulang (maks 3). */
+  ulang_masuk: number;
+  ulang_pulang: number;
+  ulang_terakhir: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -2156,7 +2160,18 @@ export type Database = {
           persetujuan: StatusPersetujuanDb | null;
           alasan_keputusan: string;
           sudah_lapor: boolean;
+          /** Migrasi 0171 — berapa kali absen hari itu diulang. */
+          ulang_masuk: number;
+          ulang_pulang: number;
         }[];
+      };
+      /**
+       * Kosongkan absen masuk/pulang hari ini milik sendiri supaya bisa
+       * diabsen lagi; maksimal 3 kali per tahap (migrasi 0171).
+       */
+      absen_ulang: {
+        Args: { p_tahap: "masuk" | "pulang" };
+        Returns: { jam_lama: string | null; sisa: number }[];
       };
       /** Akun/unit yang boleh dilaporkan pengguna aktif, beserta targetnya. */
       sasaran_laporan_saya: {
