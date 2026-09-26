@@ -1656,6 +1656,36 @@ export type Database = {
           /** Migrasi 0145 — unggahan & batas minimum harian orang itu. */
           unggahan_hari_ini: number | null;
           minimum_unggahan: number | null;
+          /** Migrasi 0170 — Leader ke bawah; CEO, Manager, Finance tidak. */
+          wajib_absen: boolean;
+        }[];
+      };
+      /** Leader ke bawah wajib absen (migrasi 0170). */
+      peran_wajib_absen: { Args: { p_role: PeranDb }; Returns: boolean };
+      /** Senin–Sabtu di luar libur perusahaan di kalender (migrasi 0170). */
+      hari_kerja_absensi: { Args: { p_tanggal: string }; Returns: boolean };
+      /**
+       * Satu baris per orang per hari kerja, termasuk hari tanpa catatan
+       * (status null); cakupannya `boleh_orang` (migrasi 0170).
+       */
+      rekap_kehadiran_orang: {
+        Args: { p_dari: string; p_sampai: string; p_user?: string | null };
+        Returns: {
+          user_id: string;
+          nama: string;
+          unit_nama: string;
+          role: PeranDb;
+          wajib_absen: boolean;
+          tanggal: string;
+          status: StatusKehadiranDb | null;
+          jam_masuk: string | null;
+          jam_pulang: string | null;
+          menit_telat: number;
+          izin_jenis: JenisIzinDb | null;
+          izin_selesai: string | null;
+          lokasi_valid: boolean;
+          alasan: string;
+          persetujuan: StatusPersetujuanDb | null;
         }[];
       };
       /** Scorecard KPI seluruh tim yang terlihat pemanggil. */
