@@ -52,9 +52,12 @@ export default async function AbsensiPage({
   const sasaranSaya = sasaran.filter((s) =>
     s.jenis === "akun" ? s.akun.picNama === pengguna.nama : true,
   );
-  const belumDilapor = sasaranSaya.filter(
-    (s) => !terlapor.includes(kunciSasaran(s)),
-  );
+  // Yang tidak punya sasaran laporan (Manager, CEO) tidak terkunci, jadi
+  // sasaran unit yang tampil untuknya bukan tagihan — tidak ditampilkan
+  // sebagai alasan kunci.
+  const belumDilapor = absen.sudahLapor
+    ? []
+    : sasaranSaya.filter((s) => !terlapor.includes(kunciSasaran(s)));
 
   // Leader ke bawah wajib absen. CEO, Manager, dan Finance memantau,
   // bukan dipantau: bagi mereka rekap timlah yang utama, dan absen di
