@@ -149,23 +149,24 @@ export async function absensiHariIni(
   }
 
   const sb = await klienServer();
-  const [{ data: absen }, { count }] = await Promise.all([
-    sb
-      .from("attendance")
-      .select(
-        "status, jam_masuk, jam_pulang, lokasi_valid, jarak_masuk_m, terlambat, alasan, persetujuan, ulang_masuk, ulang_pulang",
-      )
-      .eq("user_id", pengguna.id)
-      .eq("tanggal", tanggal)
-      .maybeSingle(),
-    sb
-      .from("daily_reports")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", pengguna.id)
-      .eq("tanggal", tanggal),
-  ]);
+  const [{ data: absen }, { data: wajibLapor }, { data: sudahAdaLaporan }] =
+    await Promise.all([
+      sb
+        .from("attendance")
+        .select(
+          "status, jam_masuk, jam_pulang, lokasi_valid, jarak_masuk_m, terlambat, alasan, persetujuan, ulang_masuk, ulang_pulang",
+        )
+        .eq("user_id", pengguna.id)
+        .eq("tanggal", tanggal)
+        .maybeSingle(),
+      // Aturan yang sama dengan trigger `jaga_absen_pulang` (migrasi 0016):
+      // hanya yang punya sasaran laporan yang terkunci. Manager dan CEO
+      // tidak punya, jadi tidak boleh ditagih laporan unit orang lain.
+      sb.rpc("wajib_lapor_harian", { p_user: pengguna.id }),
+      sb.rpc("sudah_lapor_harian", { p_user: pengguna.id, p_tanggal: tanggal }),
+    ]);
 
-  const sudahLapor = (count ?? 0) > 0;
+  const sudahLapor = wajibLapor === true ? sudahAdaLaporan === true : true;
   if (!absen) return { ...KOSONG, sudahLapor };
 
   const aturan = await pengaturanAbsensi();
