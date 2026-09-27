@@ -12,7 +12,7 @@ import {
   kepatuhanSemuaAkun,
   type JejakLevel,
 } from "@/lib/data/kepatuhan";
-import type { KodeUnit, Pengguna } from "@/lib/types";
+import type { KodeUnit, Pengguna, Peran } from "@/lib/types";
 
 export type StatusAkun = "aktif" | "nonaktif";
 
@@ -45,10 +45,18 @@ export type KandidatPic = {
   id: string;
   nama: string;
   jabatan: string;
+  peran: Peran;
   inisial: string;
   /** Banyaknya akun aktif yang sudah ia pegang. */
   jumlahAkun: number;
 };
+
+/**
+ * Peran yang boleh memegang akun sebagai PIC: anggota unit itu sendiri.
+ * Leader dan Co-Leader ikut memegang akun di lapangan, jadi tidak
+ * dibedakan dari Staff — sejalan penjagaan database 0172.
+ */
+export const PERAN_PIC: readonly Peran[] = ["Staff", "Leader", "Co-Leader"];
 
 /** Hanya CEO dan Manager yang boleh mengubah akun — sejalan `accounts_kelola`. */
 export function bolehKelolaAkun(pengguna: Pengguna) {
@@ -133,8 +141,8 @@ export async function kandidatPic(unitKode: KodeUnit): Promise<KandidatPic[]> {
   const sb = await klienServer();
   const { data, error } = await sb
     .from("users")
-    .select("id, nama, jabatan, unit:units!inner (kode)")
-    .eq("role", "Staff")
+    .select("id, nama, jabatan, role, unit:units!inner (kode)")
+    .in("role", [...PERAN_PIC])
     .eq("status", "aktif")
     .eq("unit.kode", unitKode)
     .order("nama");
@@ -156,6 +164,7 @@ export async function kandidatPic(unitKode: KodeUnit): Promise<KandidatPic[]> {
     id: u.id,
     nama: u.nama,
     jabatan: u.jabatan,
+    peran: u.role as Peran,
     inisial: inisialDari(u.nama),
     jumlahAkun: beban.get(u.id) ?? 0,
   }));
@@ -186,6 +195,7 @@ export async function kandidatCoLeader(
         id: u.id,
         nama: u.nama,
         jabatan: u.jabatan,
+        peran: u.role as Peran,
         inisial: u.inisial,
         jumlahAkun: beban.get(u.nama) ?? 0,
       }))
@@ -195,7 +205,7 @@ export async function kandidatCoLeader(
   const sb = await klienServer();
   const { data, error } = await sb
     .from("users")
-    .select("id, nama, jabatan, unit:units!inner (kode)")
+    .select("id, nama, jabatan, role, unit:units!inner (kode)")
     .in("role", ["Leader", "Co-Leader"])
     .eq("status", "aktif")
     .eq("unit.kode", unitKode)
@@ -218,6 +228,7 @@ export async function kandidatCoLeader(
     id: u.id,
     nama: u.nama,
     jabatan: u.jabatan,
+    peran: u.role as Peran,
     inisial: inisialDari(u.nama),
     jumlahAkun: beban.get(u.id) ?? 0,
   }));
@@ -326,13 +337,19 @@ function kandidatDemo(unitKode: KodeUnit): KandidatPic[] {
 
   return (
     users
-      // Staf nonaktif tidak boleh muncul sebagai calon: menunjuknya akan
-      // ditolak database (0038) dan akun itu berhenti tertagih laporan.
-      .filter((u) => u.role === "Staff" && u.unit === unitKode && aktifDemo(u))
+      // Anggota nonaktif tidak boleh muncul sebagai calon: menunjuknya
+      // akan ditolak database (0038) dan akun itu berhenti tertagih laporan.
+      .filter(
+        (u) =>
+          PERAN_PIC.includes(u.role as Peran) &&
+          u.unit === unitKode &&
+          aktifDemo(u),
+      )
       .map((u) => ({
         id: u.id,
         nama: u.nama,
         jabatan: u.jabatan,
+        peran: u.role as Peran,
         inisial: u.inisial,
         jumlahAkun: beban.get(u.nama) ?? 0,
       }))
