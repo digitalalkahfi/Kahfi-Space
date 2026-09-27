@@ -1664,6 +1664,13 @@ export type Database = {
           wajib_absen: boolean;
         }[];
       };
+      /** Punya sasaran laporan: PIC akun aktif atau Leader unit tanpa akun (0011). */
+      wajib_lapor_harian: { Args: { p_user: string }; Returns: boolean };
+      /** Laporan harian orang itu pada tanggal tersebut sudah ada (0010). */
+      sudah_lapor_harian: {
+        Args: { p_user: string; p_tanggal: string };
+        Returns: boolean;
+      };
       /** Leader ke bawah wajib absen (migrasi 0170). */
       peran_wajib_absen: { Args: { p_role: PeranDb }; Returns: boolean };
       /** Senin–Sabtu di luar libur perusahaan di kalender (migrasi 0170). */
