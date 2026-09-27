@@ -19,9 +19,11 @@ const id = async (nama) =>
     .rows[0].id;
 
 const akunId = async (username) =>
-  (await sebagaiAdmin(db, "select id from accounts where username = $1", [
-    username,
-  ])).rows[0].id;
+  (
+    await sebagaiAdmin(db, "select id from accounts where username = $1", [
+      username,
+    ])
+  ).rows[0].id;
 
 uji("Manager melihat seluruh akun", async () => {
   const { rows } = await sebagai(
@@ -65,8 +67,17 @@ uji("Leader unitnya sendiri melihat akun unit itu", async () => {
 uji("Manager boleh memindahkan PIC", async () => {
   const akun = await akunId("@fashion_hijab");
   const baru = await id("Anisa Larasati");
-  await sebagai(db, await id("Farhan Pratama"), "update accounts set pic_user_id = $1 where id = $2", [baru, akun]);
-  const { rows } = await sebagaiAdmin(db, "select pic_user_id from accounts where id = $1", [akun]);
+  await sebagai(
+    db,
+    await id("Farhan Pratama"),
+    "update accounts set pic_user_id = $1 where id = $2",
+    [baru, akun],
+  );
+  const { rows } = await sebagaiAdmin(
+    db,
+    "select pic_user_id from accounts where id = $1",
+    [akun],
+  );
   harusSama(rows[0].pic_user_id, baru);
   await terapkanSeed(db);
 });
@@ -74,45 +85,115 @@ uji("Manager boleh memindahkan PIC", async () => {
 uji("Leader tidak boleh memindahkan PIC", async () => {
   const akun = await akunId("@fashion_hijab");
   const baru = await id("Anisa Larasati");
-  await sebagai(db, await id("Dewi Lestari"), "update accounts set pic_user_id = $1 where id = $2", [baru, akun]);
+  await sebagai(
+    db,
+    await id("Dewi Lestari"),
+    "update accounts set pic_user_id = $1 where id = $2",
+    [baru, akun],
+  );
   // RLS menyaring baris, jadi perubahannya tidak pernah terjadi.
-  const { rows } = await sebagaiAdmin(db, "select pic_user_id from accounts where id = $1", [akun]);
-  harus(rows[0].pic_user_id !== baru, "Leader seharusnya tidak bisa mengubah PIC");
+  const { rows } = await sebagaiAdmin(
+    db,
+    "select pic_user_id from accounts where id = $1",
+    [akun],
+  );
+  harus(
+    rows[0].pic_user_id !== baru,
+    "Leader seharusnya tidak bisa mengubah PIC",
+  );
 });
 
 uji("PIC dari unit lain ditolak database", async () => {
   const akun = await akunId("@fashion_hijab");
   const luar = await id("Rizky Ananda"); // Staff MCN
   await harusDitolak(
-    () => sebagaiAdmin(db, "update accounts set pic_user_id = $1 where id = $2", [luar, akun]),
+    () =>
+      sebagaiAdmin(db, "update accounts set pic_user_id = $1 where id = $2", [
+        luar,
+        akun,
+      ]),
     "PIC dari unit lain seharusnya ditolak",
   );
 });
 
-uji("PIC berperan Leader ditolak database", async () => {
+uji("Leader unitnya sendiri boleh menjadi PIC (0172)", async () => {
   const akun = await akunId("@fashion_hijab");
-  const leader = await id("Dewi Lestari");
+  const leader = await id("Dewi Lestari"); // Leader Affiliator
+  await sebagaiAdmin(db, "update accounts set pic_user_id = $1 where id = $2", [
+    leader,
+    akun,
+  ]);
+  const { rows } = await sebagaiAdmin(
+    db,
+    "select pic_user_id from accounts where id = $1",
+    [akun],
+  );
+  harusSama(rows[0].pic_user_id, leader);
+  // Kewajiban laporannya ikut pindah ke Leader itu.
+  const wajib = await sebagaiAdmin(db, "select wajib_lapor_harian($1) w", [
+    leader,
+  ]);
+  harusSama(wajib.rows[0].w, true, "Leader pemegang akun wajib lapor");
+  await terapkanSeed(db);
+});
+
+uji("Leader dari unit lain tetap ditolak sebagai PIC", async () => {
+  const akun = await akunId("@fashion_hijab");
+  const leaderLain = await id("Galih Prakoso"); // Leader MCN
   await harusDitolak(
-    () => sebagaiAdmin(db, "update accounts set pic_user_id = $1 where id = $2", [leader, akun]),
-    "PIC berperan Leader seharusnya ditolak",
+    () =>
+      sebagaiAdmin(db, "update accounts set pic_user_id = $1 where id = $2", [
+        leaderLain,
+        akun,
+      ]),
+    "Leader unit lain seharusnya ditolak",
+  );
+});
+
+uji("Manager tidak bisa menjadi PIC: ia tidak memegang unit", async () => {
+  const akun = await akunId("@fashion_hijab");
+  const manager = await id("Farhan Pratama");
+  await harusDitolak(
+    () =>
+      sebagaiAdmin(db, "update accounts set pic_user_id = $1 where id = $2", [
+        manager,
+        akun,
+      ]),
+    "Manager seharusnya ditolak",
   );
 });
 
 uji("PIC nonaktif ditolak database", async () => {
   const akun = await akunId("@fashion_hijab");
   const orang = await id("Teguh Wibowo");
-  await sebagaiAdmin(db, "update users set status = 'nonaktif' where id = $1", [orang]);
+  await sebagaiAdmin(db, "update users set status = 'nonaktif' where id = $1", [
+    orang,
+  ]);
   await harusDitolak(
-    () => sebagaiAdmin(db, "update accounts set pic_user_id = $1 where id = $2", [orang, akun]),
+    () =>
+      sebagaiAdmin(db, "update accounts set pic_user_id = $1 where id = $2", [
+        orang,
+        akun,
+      ]),
     "PIC nonaktif seharusnya ditolak",
   );
-  await sebagaiAdmin(db, "update users set status = 'aktif' where id = $1", [orang]);
+  await sebagaiAdmin(db, "update users set status = 'aktif' where id = $1", [
+    orang,
+  ]);
 });
 
 uji("akun boleh tanpa PIC", async () => {
   const akun = await akunId("@fashion_hijab");
-  await sebagaiAdmin(db, "update accounts set pic_user_id = null where id = $1", [akun]);
-  const { rows } = await sebagaiAdmin(db, "select pic_user_id from accounts where id = $1", [akun]);
+  await sebagaiAdmin(
+    db,
+    "update accounts set pic_user_id = null where id = $1",
+    [akun],
+  );
+  const { rows } = await sebagaiAdmin(
+    db,
+    "select pic_user_id from accounts where id = $1",
+    [akun],
+  );
   harusSama(rows[0].pic_user_id, null);
   await terapkanSeed(db);
 });
@@ -122,12 +203,18 @@ uji("akun nonaktif tidak lagi menagih laporan harian", async () => {
   const akun = await akunId("@fashion_hijab");
   const pic = await id("Nabila Putri");
   harusSama(
-    (await sebagaiAdmin(db, "select wajib_lapor_harian($1) w", [pic])).rows[0].w,
+    (await sebagaiAdmin(db, "select wajib_lapor_harian($1) w", [pic])).rows[0]
+      .w,
     true,
   );
-  await sebagaiAdmin(db, "update accounts set status = 'nonaktif' where id = $1", [akun]);
+  await sebagaiAdmin(
+    db,
+    "update accounts set status = 'nonaktif' where id = $1",
+    [akun],
+  );
   harusSama(
-    (await sebagaiAdmin(db, "select wajib_lapor_harian($1) w", [pic])).rows[0].w,
+    (await sebagaiAdmin(db, "select wajib_lapor_harian($1) w", [pic])).rows[0]
+      .w,
     false,
   );
   const { rows } = await sebagaiAdmin(
@@ -140,7 +227,9 @@ uji("akun nonaktif tidak lagi menagih laporan harian", async () => {
 });
 
 uji("username akun unik tanpa memandang huruf besar-kecil", async () => {
-  const unit = (await sebagaiAdmin(db, "select id from units where kode = 'affiliator'")).rows[0].id;
+  const unit = (
+    await sebagaiAdmin(db, "select id from units where kode = 'affiliator'")
+  ).rows[0].id;
   await harusDitolak(
     () =>
       sebagaiAdmin(
@@ -158,7 +247,11 @@ uji("co-leader dari unit lain ditolak database", async () => {
   const akun = await akunId("@fashion_hijab");
   const luar = await id("Galih Prakoso"); // Leader MCN
   await harusDitolak(
-    () => sebagaiAdmin(db, "update accounts set co_leader_id = $1 where id = $2", [luar, akun]),
+    () =>
+      sebagaiAdmin(db, "update accounts set co_leader_id = $1 where id = $2", [
+        luar,
+        akun,
+      ]),
     "co-leader dari unit lain seharusnya ditolak",
   );
 });
@@ -167,7 +260,11 @@ uji("co-leader berperan Staff ditolak database", async () => {
   const akun = await akunId("@fashion_hijab");
   const staf = await id("Nabila Putri");
   await harusDitolak(
-    () => sebagaiAdmin(db, "update accounts set co_leader_id = $1 where id = $2", [staf, akun]),
+    () =>
+      sebagaiAdmin(db, "update accounts set co_leader_id = $1 where id = $2", [
+        staf,
+        akun,
+      ]),
     "co-leader berperan Staff seharusnya ditolak",
   );
 });
@@ -175,9 +272,15 @@ uji("co-leader berperan Staff ditolak database", async () => {
 uji("co-leader nonaktif ditolak database", async () => {
   const akun = await akunId("@fashion_hijab");
   const leader = await id("Dewi Lestari");
-  await sebagaiAdmin(db, "update users set status = 'nonaktif' where id = $1", [leader]);
+  await sebagaiAdmin(db, "update users set status = 'nonaktif' where id = $1", [
+    leader,
+  ]);
   await harusDitolak(
-    () => sebagaiAdmin(db, "update accounts set co_leader_id = $1 where id = $2", [leader, akun]),
+    () =>
+      sebagaiAdmin(db, "update accounts set co_leader_id = $1 where id = $2", [
+        leader,
+        akun,
+      ]),
     "co-leader nonaktif seharusnya ditolak",
   );
   await terapkanSeed(db);
@@ -186,14 +289,28 @@ uji("co-leader nonaktif ditolak database", async () => {
 uji("pindah unit melepas akun yang dipegang", async () => {
   const akun = await akunId("@fashion_hijab");
   const pic = await id("Nabila Putri");
-  const mcn = (await sebagaiAdmin(db, "select id from units where kode = 'mcn'")).rows[0].id;
+  const mcn = (
+    await sebagaiAdmin(db, "select id from units where kode = 'mcn'")
+  ).rows[0].id;
 
-  await sebagaiAdmin(db, "update users set unit_id = $1 where id = $2", [mcn, pic]);
+  await sebagaiAdmin(db, "update users set unit_id = $1 where id = $2", [
+    mcn,
+    pic,
+  ]);
 
-  const { rows } = await sebagaiAdmin(db, "select pic_user_id from accounts where id = $1", [akun]);
-  harusSama(rows[0].pic_user_id, null, "PIC lama harus dilepas saat pindah unit");
+  const { rows } = await sebagaiAdmin(
+    db,
+    "select pic_user_id from accounts where id = $1",
+    [akun],
+  );
   harusSama(
-    (await sebagaiAdmin(db, "select wajib_lapor_harian($1) w", [pic])).rows[0].w,
+    rows[0].pic_user_id,
+    null,
+    "PIC lama harus dilepas saat pindah unit",
+  );
+  harusSama(
+    (await sebagaiAdmin(db, "select wajib_lapor_harian($1) w", [pic])).rows[0]
+      .w,
     false,
     "orang yang pindah unit tidak lagi ditagih laporan akun lama",
   );
@@ -202,9 +319,14 @@ uji("pindah unit melepas akun yang dipegang", async () => {
 
 uji("pindah unit melepas tugas co-leader juga", async () => {
   const leader = await id("Dewi Lestari");
-  const mcn = (await sebagaiAdmin(db, "select id from units where kode = 'mcn'")).rows[0].id;
+  const mcn = (
+    await sebagaiAdmin(db, "select id from units where kode = 'mcn'")
+  ).rows[0].id;
 
-  await sebagaiAdmin(db, "update users set unit_id = $1 where id = $2", [mcn, leader]);
+  await sebagaiAdmin(db, "update users set unit_id = $1 where id = $2", [
+    mcn,
+    leader,
+  ]);
 
   const { rows } = await sebagaiAdmin(
     db,
@@ -219,24 +341,41 @@ uji("akun unit baru tetap dipegang setelah pindah unit", async () => {
   // Pelepasan hanya menyasar akun yang tidak lagi se-unit; yang sah
   // ikut pindah bersama orangnya.
   const leader = await id("Dewi Lestari");
-  const mcn = (await sebagaiAdmin(db, "select id from units where kode = 'mcn'")).rows[0].id;
+  const mcn = (
+    await sebagaiAdmin(db, "select id from units where kode = 'mcn'")
+  ).rows[0].id;
   const akunMcn = (
-    await sebagaiAdmin(db, "select id from accounts where unit_id = $1 limit 1", [mcn])
+    await sebagaiAdmin(
+      db,
+      "select id from accounts where unit_id = $1 limit 1",
+      [mcn],
+    )
   ).rows[0];
 
   if (akunMcn) {
-    await sebagaiAdmin(db, "update users set unit_id = $1 where id = $2", [mcn, leader]);
-    await sebagaiAdmin(db, "update accounts set co_leader_id = $1 where id = $2", [
+    await sebagaiAdmin(db, "update users set unit_id = $1 where id = $2", [
+      mcn,
       leader,
-      akunMcn.id,
     ]);
-    await sebagaiAdmin(db, "update users set unit_id = $1 where id = $2", [mcn, leader]);
+    await sebagaiAdmin(
+      db,
+      "update accounts set co_leader_id = $1 where id = $2",
+      [leader, akunMcn.id],
+    );
+    await sebagaiAdmin(db, "update users set unit_id = $1 where id = $2", [
+      mcn,
+      leader,
+    ]);
     const { rows } = await sebagaiAdmin(
       db,
       "select co_leader_id from accounts where id = $1",
       [akunMcn.id],
     );
-    harusSama(rows[0].co_leader_id, leader, "akun se-unit tidak boleh ikut dilepas");
+    harusSama(
+      rows[0].co_leader_id,
+      leader,
+      "akun se-unit tidak boleh ikut dilepas",
+    );
   }
   await terapkanSeed(db);
 });
@@ -244,7 +383,11 @@ uji("akun unit baru tetap dipegang setelah pindah unit", async () => {
 uji("Manager boleh menunjuk pimpinan unit sebagai co-leader", async () => {
   const akun = await akunId("@fashion_hijab");
   const leader = await id("Dewi Lestari");
-  await sebagaiAdmin(db, "update accounts set co_leader_id = null where id = $1", [akun]);
+  await sebagaiAdmin(
+    db,
+    "update accounts set co_leader_id = null where id = $1",
+    [akun],
+  );
   await sebagai(
     db,
     await id("Farhan Pratama"),
@@ -252,8 +395,13 @@ uji("Manager boleh menunjuk pimpinan unit sebagai co-leader", async () => {
     [leader, akun],
   );
   harusSama(
-    (await sebagaiAdmin(db, "select co_leader_id from accounts where id = $1", [akun]))
-      .rows[0].co_leader_id,
+    (
+      await sebagaiAdmin(
+        db,
+        "select co_leader_id from accounts where id = $1",
+        [akun],
+      )
+    ).rows[0].co_leader_id,
     leader,
   );
   await terapkanSeed(db);
