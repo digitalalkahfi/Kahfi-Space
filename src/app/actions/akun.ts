@@ -4,11 +4,11 @@ import { revalidatePath } from "next/cache";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { sesiSaatIni } from "@/lib/data/sesi";
-import { bolehKelolaAkun } from "@/lib/data/akun";
+import { bolehKelolaAkun, PERAN_PIC } from "@/lib/data/akun";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
 import { levelSah, LEVEL_MAKS, LEVEL_MIN } from "@/lib/batas-minimum";
 import { kodeUnitSah } from "@/lib/unit-pelaporan";
-import type { KodeUnit } from "@/lib/types";
+import type { KodeUnit, Peran } from "@/lib/types";
 
 /** Username akun: diawali @, huruf/angka/titik/garis bawah. */
 const POLA_USERNAME = /^@[a-z0-9._]{3,30}$/i;
@@ -41,8 +41,9 @@ export async function ubahPicAkun(input: {
   const sb = await klienServer();
 
   if (input.picId) {
-    // PIC wajib staf aktif di unit akun tersebut — kalau tidak, kewajiban
-    // laporan harian jatuh ke orang yang tidak memegang unit itu.
+    // PIC wajib anggota aktif unit akun tersebut (Staff, Leader, atau
+    // Co-Leader) — kalau tidak, kewajiban laporan harian jatuh ke orang
+    // yang tidak memegang unit itu.
     const { data: akun, error: galatAkun } = await sb
       .from("accounts")
       .select("unit_id")
@@ -63,8 +64,11 @@ export async function ubahPicAkun(input: {
     if (!calon || calon.status !== "aktif") {
       return gagal("Calon PIC tidak aktif.", "validasi");
     }
-    if (calon.role !== "Staff") {
-      return gagal("PIC akun harus berperan Staff.", "validasi");
+    if (!PERAN_PIC.includes(calon.role as Peran)) {
+      return gagal(
+        "PIC akun harus Staff, Leader, atau Co-Leader unit itu.",
+        "validasi",
+      );
     }
     if (calon.unit_id !== akun.unit_id) {
       return gagal("PIC harus berasal dari unit akun tersebut.", "validasi");
