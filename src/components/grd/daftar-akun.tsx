@@ -66,8 +66,8 @@ function DialogPic({
         <DialogHeader>
           <DialogTitle>PIC {akun.username}</DialogTitle>
           <DialogDescription>
-            PIC bertanggung jawab mengisi Laporan Harian akun ini. Hanya staf di{" "}
-            {akun.unitNama} yang bisa ditunjuk.
+            PIC bertanggung jawab mengisi Laporan Harian akun ini. Yang bisa
+            ditunjuk: Staff, Leader, dan Co-Leader di {akun.unitNama}.
           </DialogDescription>
         </DialogHeader>
 
@@ -98,6 +98,11 @@ function DialogPic({
                   {k.jabatan}
                 </span>
               </span>
+              {k.peran !== "Staff" ? (
+                <span className="shrink-0 rounded-full bg-info-fill px-1.5 py-0.5 text-[10px] leading-[12px] font-semibold text-info-text">
+                  {k.peran}
+                </span>
+              ) : null}
               <span className="shrink-0 text-[11px] leading-[14px] text-muted-foreground">
                 {k.jumlahAkun === 0
                   ? "belum pegang akun"
@@ -108,7 +113,7 @@ function DialogPic({
 
           {kandidat.length === 0 ? (
             <p className="rounded-xl bg-muted px-3 py-2 text-[11px] leading-[14px] text-muted-foreground">
-              Belum ada staf aktif di unit ini yang bisa ditunjuk.
+              Belum ada anggota aktif di unit ini yang bisa ditunjuk.
             </p>
           ) : null}
         </div>
