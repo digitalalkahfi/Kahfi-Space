@@ -26,7 +26,6 @@ export async function AppShell({
   halaman: string;
   children: ReactNode;
 }) {
-  const lama = await statusKspaceLama();
   const bolehMigrasi = pengguna.role === "CEO" || pengguna.role === "Manager";
   const bolehKeuangan = bolehLihatKeuangan(pengguna.role);
 
@@ -34,7 +33,13 @@ export async function AppShell({
   // peran, dan peran tidak boleh dikirim ke browser sebagai bahan
   // keputusan. Yang menyeberang hanya hasil yang sudah disaring.
   const katalog = katalogUntuk(pengguna);
-  const susunan = await preferensiTampilanSaya(pengguna);
+  // Dua permintaan yang tidak saling bergantung dijalankan bersamaan;
+  // kerangka ini dirender di setiap halaman, jadi tiap perjalanan
+  // berurutan yang dihemat terasa di semua navigasi.
+  const [lama, susunan] = await Promise.all([
+    statusKspaceLama(),
+    preferensiTampilanSaya(pengguna),
+  ]);
 
   return (
     <PenyediaTampilan
