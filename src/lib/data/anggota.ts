@@ -5,6 +5,8 @@ import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { dataContoh } from "@/lib/data/contoh";
 import { inisialDari } from "@/lib/data/sesi";
+import { kontakOrang } from "@/lib/data/kontak-orang";
+import { saringLingkup } from "@/lib/lingkup";
 import { URUTAN_PERAN } from "@/lib/peran";
 import type { AnggotaTim, KodeUnit, Peran, Pengguna } from "@/lib/types";
 
@@ -53,7 +55,12 @@ export async function daftarAnggotaTim(
 ): Promise<AnggotaTim[]> {
   const bolehLihatNonaktif = bolehKelolaAnggota(pengguna);
 
-  if (modeData() === "demo") return anggotaDemo(bolehLihatNonaktif);
+  // Tabel `users` terbaca semua orang demi nama di seluruh aplikasi;
+  // direktori inilah yang menegakkan lingkup: dirinya dan bawahannya,
+  // atau semua bagi CEO/Manager (padanan `boleh_orang`, migrasi 0173).
+  if (modeData() === "demo") {
+    return saringLingkup(pengguna, anggotaDemo(bolehLihatNonaktif));
+  }
 
   const sb = await klienServer();
   const permintaan = sb.from("users").select(KOLOM_ANGGOTA).order("nama");
@@ -75,7 +82,40 @@ export async function daftarAnggotaTim(
     beban.set(a.pic_user_id, (beban.get(a.pic_user_id) ?? 0) + 1);
   }
 
-  return (data ?? []).map((u) => keAnggota(u, beban.get(u.id) ?? 0));
+  const terlihat = saringLingkup(
+    pengguna,
+    (data ?? []).map((u) => keAnggota(u, beban.get(u.id) ?? 0)),
+  );
+
+  // Email hanya untuk yang berhak (dirinya, atasannya, CEO/Manager) dan
+  // hanya lewat `kontak_orang`. Gagal membacanya tidak menjatuhkan
+  // direktori — kolom email kosong lebih baik daripada halaman gagal.
+  try {
+    const kontak = await kontakOrang(terlihat.map((a) => a.id));
+    return terlihat.map((a) => ({
+      ...a,
+      email: kontak.get(a.id)?.email ?? "",
+    }));
+  } catch (e) {
+    console.error((e as Error).message);
+    return terlihat;
+  }
+}
+
+/**
+ * Seluruh anggota tanpa saringan lingkup, HANYA kolom direktori (tanpa
+ * email/kontak). Dipakai untuk menggambar garis pelaporan ke atas —
+ * orang boleh tahu siapa atasannya walau tidak boleh melihat datanya.
+ */
+export async function strukturLengkap(): Promise<AnggotaTim[]> {
+  if (modeData() === "demo") {
+    return anggotaDemo(true).map((a) => ({ ...a, email: "" }));
+  }
+
+  const sb = await klienServer();
+  const { data, error } = await sb.from("users").select(KOLOM_ANGGOTA);
+  if (error) throw new Error(`Gagal memuat struktur: ${error.message}`);
+  return (data ?? []).map((u) => keAnggota(u, 0));
 }
 
 /**
@@ -92,7 +132,7 @@ export async function daftarAnggotaTim(
  * "atasan". Petunjuk bernama kendala bergantung pada nama kendala di
  * basis data yang ternyata berbeda di produksi.
  */
-export const KOLOM_ANGGOTA = `id, nama, email, role, jabatan, status,
+export const KOLOM_ANGGOTA = `id, nama, role, jabatan, status,
    unit:units (kode, nama),
    departemen:departments (id, nama),
    program:programs (id, nama),
@@ -101,7 +141,8 @@ export const KOLOM_ANGGOTA = `id, nama, email, role, jabatan, status,
 type BarisAnggota = {
   id: string;
   nama: string;
-  email: string | null;
+  /** Tidak ikut `KOLOM_ANGGOTA`; diisi dari `kontak_orang` bila boleh. */
+  email?: string | null;
   role: string;
   jabatan: string;
   status: string;
