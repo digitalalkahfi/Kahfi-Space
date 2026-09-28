@@ -44,8 +44,8 @@ export function PanelLaporan({
             sasaran={sasaran}
             sudahDilaporkan={sudahDilaporkan}
             tanggal={tanggal}
-            terkirim={sudahLapor}
-            onUbahTerkirim={setSudahLapor}
+            absenTerbuka={sudahLapor}
+            onTerkirim={() => setSudahLapor(true)}
             coSampel={coSampel}
           />
         </Reveal>
