@@ -36,6 +36,7 @@ import {
   MAKS_UPLOAD,
   periksaIsiLaporan,
   punyaKolom,
+  sasaranBelumDilapor,
   unitSasaran,
   type IsiLaporan,
 } from "@/lib/laporan";
@@ -49,6 +50,17 @@ import {
 import { kirimLaporanHarian } from "@/app/actions/laporan";
 import type { SasaranLaporan } from "@/lib/types";
 
+/** Ringkasan laporan yang baru saja terkirim dari layar ini. */
+type LaporanTerkirim = {
+  label: string;
+  gmv: number;
+  komisi: number | null;
+  jumlahUpload: number | null;
+  /** Upload di bawah batas minimum levelnya; null bila tidak dinilai. */
+  kurangUpload: number | null;
+  minimum: number | null;
+};
+
 /**
  * Satu-satunya tempat input GMV (PRD §2). Angka diketik manual sambil
  * melihat Partner Center — tidak ada integrasi API.
@@ -56,40 +68,51 @@ import type { SasaranLaporan } from "@/lib/types";
  * Isian menyesuaikan departemen sasaran yang dipilih (PRD Fase 1):
  * Affiliator menambah komisi, jumlah upload, dan CO sampel; MCN & TAP
  * cukup GMV dan catatan.
+ *
+ * "Sudah terkirim" dihitung PER SASARAN, bukan per orang: PIC yang
+ * memegang dua akun tetap mendapat form untuk akun keduanya setelah akun
+ * pertama dilapor. Form baru berganti menjadi kartu selesai ketika
+ * seluruh sasarannya hari ini sudah masuk.
  */
 export function FormLaporan({
   sasaran,
   sudahDilaporkan,
   tanggal,
-  terkirim,
-  onUbahTerkirim,
+  absenTerbuka,
+  onTerkirim,
   coSampel = {},
 }: {
   sasaran: SasaranLaporan[];
   tanggal: string;
   /** Kunci sasaran yang laporannya sudah masuk hari ini. */
   sudahDilaporkan: string[];
-  terkirim: boolean;
+  /** Absen Pulang sudah terbuka — laporan pertama hari ini sudah masuk. */
+  absenTerbuka: boolean;
   /** Dipakai induk untuk membuka kunci Absen Pulang. */
-  onUbahTerkirim: (nilai: boolean) => void;
+  onTerkirim: () => void;
   /**
    * CO sampel hari ini per kunci sasaran, dihitung dari log pemindaian
    * sampel. Read-only: pelapor tidak pernah mengetiknya sendiri.
    */
   coSampel?: Record<string, number>;
 }) {
-  const pertamaTersedia =
-    sasaran.find((s) => !sudahDilaporkan.includes(kunciSasaran(s))) ??
-    sasaran[0];
-  const [dipilih, setDipilih] = useState(
-    pertamaTersedia ? kunciSasaran(pertamaTersedia) : "",
+  // Yang terkirim dari layar ini ikut dihitung walau halaman belum
+  // dimuat ulang, supaya pemilih langsung berpindah ke sasaran berikutnya.
+  const [terkirimLokal, setTerkirimLokal] = useState<string[]>([]);
+  const terlapor = useMemo(
+    () => [...new Set([...sudahDilaporkan, ...terkirimLokal])],
+    [sudahDilaporkan, terkirimLokal],
   );
+  const sisa = sasaranBelumDilapor(sasaran, terlapor);
+
+  const [dipilih, setDipilih] = useState(sisa[0] ? kunciSasaran(sisa[0]) : "");
   const [nilai, setNilai] = useState(0);
   const [komisi, setKomisi] = useState(0);
   const [upload, setUpload] = useState(0);
   const [catatan, setCatatan] = useState("");
   const [mengirim, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
+  const [terakhir, setTerakhir] = useState<LaporanTerkirim | null>(null);
 
   const aktif = useMemo(
     () => sasaran.find((s) => kunciSasaran(s) === dipilih),
@@ -118,9 +141,37 @@ export function FormLaporan({
   // berpindah ke sasaran MCN.
   const bersih = bersihkanIsi(unit, isi);
   const salah = periksaIsiLaporan(unit, bersih);
-  const siap = Boolean(aktif) && !salah;
+  const siap = Boolean(aktif) && !terlapor.includes(dipilih) && !salah;
 
-  if (terkirim) {
+  /**
+   * Sesudah terkirim: sasaran ini dikunci, isian dikosongkan, dan pemilih
+   * langsung pindah ke sasaran berikutnya yang belum dilapor.
+   */
+  const catatTerkirim = () => {
+    const baru = [...terlapor, dipilih];
+    setTerkirimLokal((l) => [...l, dipilih]);
+    setTerakhir({
+      label: aktif ? labelSasaran(aktif) : "",
+      gmv: bersih.gmv,
+      komisi: bersih.komisi,
+      jumlahUpload: bersih.jumlahUpload,
+      kurangUpload:
+        statusTerkirim(bersih.jumlahUpload, minimum) === "kurang"
+          ? kurangnya(bersih.jumlahUpload, minimum)
+          : null,
+      minimum,
+    });
+    setNilai(0);
+    setKomisi(0);
+    setUpload(0);
+    setCatatan("");
+    const berikut = sasaranBelumDilapor(sasaran, baru)[0];
+    if (berikut) setDipilih(kunciSasaran(berikut));
+    onTerkirim();
+  };
+
+  // Seluruh sasaran hari ini sudah masuk: formnya tidak berguna lagi.
+  if (sasaran.length > 0 && sisa.length === 0) {
     return (
       <Card className="rounded-3xl shadow-card ring-border-subtle">
         <div className="space-y-3 px-5 py-2 text-center">
@@ -129,54 +180,32 @@ export function FormLaporan({
           </span>
           <div>
             <h2 className="text-base leading-6 font-semibold">
-              Laporan harian terkirim
+              {sasaran.length > 1
+                ? "Semua laporan hari ini terkirim"
+                : "Laporan harian terkirim"}
             </h2>
             <p className="mt-1 text-[13px] leading-[18px] text-muted-foreground">
               {/* Angka hanya ditampilkan kalau laporannya memang dikirim dari
                   layar ini; saat halaman dibuka dan laporan hari itu sudah
                   ada, form masih kosong dan "Rp 0" hanya menyesatkan. */}
-              {nilai > 0 ? (
-                <>
-                  {aktif ? labelSasaran(aktif) : ""} · {rupiahPenuh(nilai)}
-                  {bersih.komisi !== null
-                    ? ` · komisi ${rupiahRingkas(bersih.komisi)}`
-                    : ""}
-                  {bersih.jumlahUpload !== null
-                    ? ` · ${bilangan(bersih.jumlahUpload)} upload`
-                    : ""}
-                  {". "}
-                </>
-              ) : (
-                "Laporan hari ini sudah masuk. "
-              )}
+              {terakhir ? <RingkasTerkirim laporan={terakhir} /> : null}
+              {sasaran.length > 1
+                ? `${sasaran.map(labelSasaran).join(", ")} sudah dilapor. `
+                : terakhir
+                  ? ""
+                  : "Laporan hari ini sudah masuk. "}
               Tombol Absen Pulang sekarang terbuka.
             </p>
-
-            {/* Kalau unggahannya di bawah minimum, konfirmasi inilah
-                kesempatan terakhir menyebutkannya — sesudah ini layarnya
-                berpindah, dan angka itu baru muncul lagi besok di rekap
-                Leader. Laporannya tetap tersimpan apa adanya. */}
-            {statusTerkirim(bersih.jumlahUpload, minimum) === "kurang" ? (
-              <p
-                className={cn(
-                  "mx-auto mt-2 w-fit rounded-full px-3 py-1",
-                  "text-[11px] leading-[14px] font-semibold",
-                  GAYA_MINIMUM.kurang.pil,
-                )}
-              >
-                Di bawah minimum — kurang{" "}
-                {bilangan(kurangnya(bersih.jumlahUpload, minimum))} video dari{" "}
-                {bilangan(minimum ?? 0)} per hari kerja.
-              </p>
-            ) : null}
+            {terakhir ? <PeringatanMinimum laporan={terakhir} /> : null}
           </div>
           <Button
-            type="button"
+            asChild
             variant="outline"
-            onClick={() => onUbahTerkirim(false)}
             className="tekan-halus h-10 rounded-full px-5 text-[13px] font-semibold"
           >
-            Perbaiki laporan
+            <Link href="/laporan-harian/riwayat">
+              Perbaiki di riwayat laporan
+            </Link>
           </Button>
         </div>
       </Card>
@@ -199,6 +228,26 @@ export function FormLaporan({
         </span>
       </div>
 
+      {terakhir ? (
+        <div className="mx-5 space-y-1.5 rounded-2xl bg-ok-fill px-4 py-3 text-ok-text">
+          <p className="flex items-center gap-1.5 text-[13px] leading-[18px] font-semibold">
+            <CheckCircle2 className="size-4 shrink-0" />
+            Laporan {terakhir.label} terkirim
+          </p>
+          <p className="text-[11px] leading-[14px] text-pretty">
+            <RingkasTerkirim laporan={terakhir} />
+            Masih ada {sisa.length} sasaran yang belum dilapor hari ini:{" "}
+            {sisa.map(labelSasaran).join(", ")}.
+          </p>
+          <PeringatanMinimum laporan={terakhir} />
+        </div>
+      ) : sasaran.length > 1 && terlapor.length > 0 ? (
+        <p className="mx-5 rounded-2xl bg-info-fill px-4 py-2.5 text-[11px] leading-[14px] text-pretty text-info-text">
+          {sasaran.length - sisa.length} dari {sasaran.length} sasaran sudah
+          dilapor hari ini. Tinggal {sisa.map(labelSasaran).join(", ")}.
+        </p>
+      ) : null}
+
       <form
         className="space-y-4 px-5"
         onSubmit={(e) => {
@@ -214,12 +263,10 @@ export function FormLaporan({
               catatan: bersih.catatan,
               tanggal,
             });
-            if (hasil.ok) {
-              onUbahTerkirim(true);
-            } else if (hasil.kode === "demo") {
+            if (hasil.ok || hasil.kode === "demo") {
               // Mode demo: alurnya tetap diperlihatkan, datanya tidak disimpan.
-              setPesan(hasil.pesan);
-              onUbahTerkirim(true);
+              if (!hasil.ok) setPesan(hasil.pesan);
+              catatTerkirim();
             } else {
               setPesan(hasil.pesan);
             }
@@ -238,7 +285,7 @@ export function FormLaporan({
             sasaran={sasaran}
             nilai={dipilih}
             onUbah={setDipilih}
-            sudahDilaporkan={sudahDilaporkan}
+            sudahDilaporkan={terlapor}
           />
         </div>
 
@@ -471,9 +518,50 @@ export function FormLaporan({
           ) : (
             <Send className="size-4" />
           )}
-          {mengirim ? "Mengirim…" : "Kirim laporan harian & buka Absen Pulang"}
+          {mengirim
+            ? "Mengirim…"
+            : absenTerbuka
+              ? "Kirim laporan harian"
+              : "Kirim laporan harian & buka Absen Pulang"}
         </Button>
       </form>
     </Card>
+  );
+}
+
+/** "taokspill_ · Rp 12.500.000 · komisi … · 5 upload." */
+function RingkasTerkirim({ laporan }: { laporan: LaporanTerkirim }) {
+  return (
+    <>
+      {laporan.label} · {rupiahPenuh(laporan.gmv)}
+      {laporan.komisi !== null
+        ? ` · komisi ${rupiahRingkas(laporan.komisi)}`
+        : ""}
+      {laporan.jumlahUpload !== null
+        ? ` · ${bilangan(laporan.jumlahUpload)} upload`
+        : ""}
+      {". "}
+    </>
+  );
+}
+
+/**
+ * Kalau unggahannya di bawah minimum, konfirmasi inilah kesempatan
+ * terakhir menyebutkannya — angka itu baru muncul lagi besok di rekap
+ * Leader. Laporannya tetap tersimpan apa adanya.
+ */
+function PeringatanMinimum({ laporan }: { laporan: LaporanTerkirim }) {
+  if (laporan.kurangUpload === null) return null;
+  return (
+    <p
+      className={cn(
+        "mx-auto mt-2 w-fit rounded-full px-3 py-1",
+        "text-[11px] leading-[14px] font-semibold",
+        GAYA_MINIMUM.kurang.pil,
+      )}
+    >
+      Di bawah minimum — kurang {bilangan(laporan.kurangUpload)} video dari{" "}
+      {bilangan(laporan.minimum ?? 0)} per hari kerja.
+    </p>
   );
 }
