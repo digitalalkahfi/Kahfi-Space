@@ -133,10 +133,13 @@ async function agendaBulan(
 ): Promise<EntriKalender[]> {
   if (modeData() === "demo") {
     const { agenda, units } = dataContoh;
-    void pengguna;
+    // Padanan `agenda_baca` (0174): agenda perusahaan, agenda unitnya
+    // sendiri, atau semuanya bagi CEO/Manager.
+    const lintas = pengguna.role === "CEO" || pengguna.role === "Manager";
 
     return agenda
       .filter((a) => a.tanggal >= dari && a.tanggal <= sampai)
+      .filter((a) => lintas || !a.unit || a.unit === pengguna.unitId)
       .map((a, i) => {
         const unit = a.unit ? units.find((u) => u.kode === a.unit) : null;
         return {
