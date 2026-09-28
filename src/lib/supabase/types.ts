@@ -1673,6 +1673,20 @@ export type Database = {
       };
       /** Leader ke bawah wajib absen (migrasi 0170). */
       peran_wajib_absen: { Args: { p_role: PeranDb }; Returns: boolean };
+      /**
+       * Email & nomor WhatsApp orang dalam cakupan pemanggil — satu-satunya
+       * jalan membaca kolom itu (migrasi 0174/0175).
+       */
+      kontak_orang: {
+        Args: { p_ids?: string[] | null };
+        Returns: {
+          id: string;
+          email: string | null;
+          kontak: string | null;
+          kontak_terverifikasi_pada: string | null;
+          whatsapp_optin: boolean;
+        }[];
+      };
       /** Senin–Sabtu di luar libur perusahaan di kalender (migrasi 0170). */
       hari_kerja_absensi: { Args: { p_tanggal: string }; Returns: boolean };
       /**
