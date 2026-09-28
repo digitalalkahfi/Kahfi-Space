@@ -12,11 +12,11 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { rupiahRingkas } from "@/lib/format";
+import { kunciSasaranLaporan } from "@/lib/laporan";
 import type { SasaranLaporan } from "@/lib/types";
 
-export function kunciSasaran(s: SasaranLaporan) {
-  return s.jenis === "akun" ? `akun:${s.akun.id}` : `unit:${s.unitId}`;
-}
+/** Kunci sasaran; satu rumus dengan `kunciSasaranLaporan` di lib/laporan. */
+export const kunciSasaran = kunciSasaranLaporan;
 
 export function labelSasaran(s: SasaranLaporan) {
   return s.jenis === "akun" ? s.akun.username : s.nama;
