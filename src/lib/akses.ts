@@ -1,9 +1,4 @@
-import type {
-  AnggotaKehadiran,
-  CapaianUnit,
-  Peran,
-  Pengguna,
-} from "@/lib/types";
+import type { CapaianUnit, Peran, Pengguna } from "@/lib/types";
 
 /** Blok yang bisa muncul di Beranda. */
 export type WidgetBeranda =
@@ -98,27 +93,29 @@ export function bolehLihat(peran: Peran, widget: WidgetBeranda) {
   return widgetPerPeran[peran].includes(widget);
 }
 
-/** CEO/Manager/Finance melihat seluruh unit; sisanya hanya unitnya sendiri. */
+/**
+ * CEO/Manager/Finance melihat seluruh unit; sisanya hanya unitnya sendiri.
+ * Staff tim manajemen (tanpa unit) tidak melihat kartu unit mana pun —
+ * bukan lintas unit hanya karena tidak ditempatkan (migrasi 0173).
+ */
 export function unitTerlihat(pengguna: Pengguna, unit: CapaianUnit[]) {
   const lintasUnit: Peran[] = ["CEO", "Manager", "Finance"];
-  if (lintasUnit.includes(pengguna.role) || pengguna.unitId === null) {
-    return unit;
-  }
+  if (lintasUnit.includes(pengguna.role)) return unit;
   return unit.filter((u) => u.unitId === pengguna.unitId);
 }
 
-/** Leader & Co-Leader hanya memantau anggota di unitnya. */
-export function timTerlihat(pengguna: Pengguna, tim: AnggotaKehadiran[]) {
-  const lintasUnit: Peran[] = ["CEO", "Manager"];
-  if (lintasUnit.includes(pengguna.role) || pengguna.unitId === null) {
-    return tim;
-  }
-  const namaUnit: Record<string, string> = {
-    affiliator: "Affiliator",
-    mcn: "MCN",
-    tap: "TAP",
-  };
-  return tim.filter((a) => a.unit === namaUnit[pengguna.unitId as string]);
+/**
+ * Boleh melihat baris tingkat unit berkode ini? CEO/Manager/Finance semua;
+ * yang lain hanya unitnya sendiri. Baris tanpa unit (tingkat perusahaan)
+ * hanya untuk yang lintas unit.
+ */
+export function unitKodeTerlihat(
+  pengguna: Pengguna,
+  kode: string | null | undefined,
+) {
+  const lintasUnit: Peran[] = ["CEO", "Manager", "Finance"];
+  if (lintasUnit.includes(pengguna.role)) return true;
+  return kode != null && kode === pengguna.unitId;
 }
 
 /** Judul dasbor menyesuaikan cakupan yang dilihat peran tersebut. */
