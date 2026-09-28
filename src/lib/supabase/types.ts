@@ -1671,6 +1671,27 @@ export type Database = {
         Args: { p_user: string; p_tanggal: string };
         Returns: boolean;
       };
+      /**
+       * Mengubah goal dan (bila diberikan) seluruh anak tangga bulanannya
+       * dalam satu transaksi; hanya CEO/Manager (migrasi 0177).
+       */
+      ubah_goal: {
+        Args: {
+          p_goal: string;
+          p_judul: string;
+          p_level: LevelGoalDb;
+          p_pemilik: string;
+          p_induk: string | null;
+          p_unit: string | null;
+          p_akun: string | null;
+          p_base: number;
+          p_target: number;
+          p_stretch: number;
+          p_periode: string;
+          p_bulan?: { bulan: string; target: number }[] | null;
+        };
+        Returns: undefined;
+      };
       /** Leader ke bawah wajib absen (migrasi 0170). */
       peran_wajib_absen: { Args: { p_role: PeranDb }; Returns: boolean };
       /**
