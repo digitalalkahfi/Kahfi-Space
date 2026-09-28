@@ -22,16 +22,45 @@ const unitId = async (kode) =>
   (await sebagaiAdmin(db, "select id from units where kode = $1", [kode]))
     .rows[0].id;
 
-uji("agenda unit lain tetap terlihat", async () => {
-  // Rapat yang bentrok baru bisa dihindari kalau jadwalnya saling terlihat.
-  const { rows } = await sebagai(
-    db,
-    await id("Rian Hidayat"),
-    "select count(*)::int n from agenda",
-  );
-  const { rows: semua } = await sebagaiAdmin(db, "select count(*)::int n from agenda");
-  harusSama(rows[0].n, semua[0].n);
-});
+uji(
+  "agenda unit lain tidak terlihat; agenda perusahaan dan unit sendiri terlihat (0174)",
+  async () => {
+    // Bentrok hanya dihitung antar agenda seunit atau dengan agenda
+    // perusahaan (lib/kalender), jadi tidak ada yang hilang dari
+    // deteksinya.
+    const rian = await id("Rian Hidayat"); // Staff Affiliator
+    const { rows } = await sebagai(
+      db,
+      rian,
+      `select count(*)::int n,
+            count(*) filter (where u.kode is distinct from 'affiliator'
+                               and a.unit_id is not null)::int luar
+       from agenda a left join units u on u.id = a.unit_id`,
+    );
+    const { rows: boleh } = await sebagaiAdmin(
+      db,
+      `select count(*)::int n from agenda a left join units u on u.id = a.unit_id
+      where a.unit_id is null or u.kode = 'affiliator'`,
+    );
+    harusSama(rows[0].luar, 0, "agenda unit lain tidak boleh terlihat Staff");
+    harusSama(
+      rows[0].n,
+      boleh[0].n,
+      "agenda perusahaan & unitnya tetap terlihat",
+    );
+
+    const { rows: mgr } = await sebagai(
+      db,
+      await id("Farhan Pratama"),
+      "select count(*)::int n from agenda",
+    );
+    const { rows: semua } = await sebagaiAdmin(
+      db,
+      "select count(*)::int n from agenda",
+    );
+    harusSama(mgr[0].n, semua[0].n, "Manager melihat seluruh agenda");
+  },
+);
 
 uji("Staff tidak bisa membuat agenda", async () => {
   const orang = await id("Rian Hidayat");
@@ -89,7 +118,10 @@ uji("pembuat bisa membetulkan agendanya sendiri", async () => {
     db,
     "select jam_mulai from agenda where judul = 'Briefing unit affiliator'",
   );
-  harus(String(rows[0].jam_mulai).startsWith("10:00"), "jam mulai harus berubah");
+  harus(
+    String(rows[0].jam_mulai).startsWith("10:00"),
+    "jam mulai harus berubah",
+  );
 });
 
 uji("pembuat bisa menghapus agendanya sendiri", async () => {
@@ -161,10 +193,12 @@ uji("agenda bentrok tetap tersimpan — datanya tidak menolak", async () => {
 
   harusSama(
     Number(
-      (await sebagaiAdmin(
-        db,
-        "select count(*)::int n from agenda where tanggal = '2024-11-11'",
-      )).rows[0].n,
+      (
+        await sebagaiAdmin(
+          db,
+          "select count(*)::int n from agenda where tanggal = '2024-11-11'",
+        )
+      ).rows[0].n,
     ),
     2,
   );
@@ -207,41 +241,62 @@ uji("pembuat agenda boleh membetulkan jamnya sendiri", async () => {
     )
   ).rows[0].id;
 
-  await sebagai(db, leader, "update agenda set jam_mulai = '08:30' where id = $1", [
-    agenda,
-  ]);
+  await sebagai(
+    db,
+    leader,
+    "update agenda set jam_mulai = '08:30' where id = $1",
+    [agenda],
+  );
   harusSama(
-    (await sebagaiAdmin(db, "select jam_mulai from agenda where id = $1", [agenda]))
-      .rows[0].jam_mulai,
+    (
+      await sebagaiAdmin(db, "select jam_mulai from agenda where id = $1", [
+        agenda,
+      ])
+    ).rows[0].jam_mulai,
     "08:30:00",
   );
 });
 
-uji("agenda tidak bisa dipindahkan ke unit lain oleh pemimpin unit", async () => {
-  // Agenda unit lain ikut menutup jam tim yang tidak pernah diajak bicara.
-  const leader = (
-    await sebagaiAdmin(db, "select id from users where nama = 'Dewi Lestari'")
-  ).rows[0].id;
-  const mcn = (await sebagaiAdmin(db, "select id from units where kode = 'mcn'"))
-    .rows[0].id;
-  const agenda = (
-    await sebagaiAdmin(db, "select id from agenda where judul = 'Briefing unit'")
-  ).rows[0].id;
+uji(
+  "agenda tidak bisa dipindahkan ke unit lain oleh pemimpin unit",
+  async () => {
+    // Agenda unit lain ikut menutup jam tim yang tidak pernah diajak bicara.
+    const leader = (
+      await sebagaiAdmin(db, "select id from users where nama = 'Dewi Lestari'")
+    ).rows[0].id;
+    const mcn = (
+      await sebagaiAdmin(db, "select id from units where kode = 'mcn'")
+    ).rows[0].id;
+    const agenda = (
+      await sebagaiAdmin(
+        db,
+        "select id from agenda where judul = 'Briefing unit'",
+      )
+    ).rows[0].id;
 
-  await harusDitolak(
-    async () => sebagai(db, leader, "update agenda set unit_id = $1 where id = $2", [mcn, agenda]),
-    "pemindahan ke unit lain seharusnya ditolak",
-  );
-});
+    await harusDitolak(
+      async () =>
+        sebagai(db, leader, "update agenda set unit_id = $1 where id = $2", [
+          mcn,
+          agenda,
+        ]),
+      "pemindahan ke unit lain seharusnya ditolak",
+    );
+  },
+);
 
 uji("Manager tetap bisa memindahkan agenda antar unit", async () => {
   const manajer = (
     await sebagaiAdmin(db, "select id from users where nama = 'Farhan Pratama'")
   ).rows[0].id;
-  const mcn = (await sebagaiAdmin(db, "select id from units where kode = 'mcn'"))
-    .rows[0].id;
+  const mcn = (
+    await sebagaiAdmin(db, "select id from units where kode = 'mcn'")
+  ).rows[0].id;
   const agenda = (
-    await sebagaiAdmin(db, "select id from agenda where judul = 'Briefing unit'")
+    await sebagaiAdmin(
+      db,
+      "select id from agenda where judul = 'Briefing unit'",
+    )
   ).rows[0].id;
 
   await sebagai(db, manajer, "update agenda set unit_id = $1 where id = $2", [
@@ -249,8 +304,11 @@ uji("Manager tetap bisa memindahkan agenda antar unit", async () => {
     agenda,
   ]);
   harusSama(
-    (await sebagaiAdmin(db, "select unit_id from agenda where id = $1", [agenda]))
-      .rows[0].unit_id,
+    (
+      await sebagaiAdmin(db, "select unit_id from agenda where id = $1", [
+        agenda,
+      ])
+    ).rows[0].unit_id,
     mcn,
   );
   await terapkanSeed(db);
