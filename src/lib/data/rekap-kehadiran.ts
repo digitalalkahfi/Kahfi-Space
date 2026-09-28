@@ -4,8 +4,9 @@ import "server-only";
 
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
-import { dataContoh } from "@/lib/data/contoh";
+import { dataContoh, lingkupContoh } from "@/lib/data/contoh";
 import { aktifDemo } from "@/lib/demo";
+import { dalamLingkup } from "@/lib/lingkup";
 import { jamEfektifMasuk, menitTelat } from "@/lib/izin";
 import {
   daftarHariKerja,
@@ -44,21 +45,9 @@ type AbsenContoh = (typeof dataContoh.attendance)[number] & {
   izin_selesai?: string | null;
 };
 
-/**
- * Padanan `boleh_orang` (migrasi 0002) untuk mode demo: CEO & Manager
- * melihat semua; Leader & Co-Leader unitnya dan bawahan langsungnya;
- * yang lain hanya dirinya sendiri.
- */
+/** Padanan `boleh_orang` (migrasi 0173): dirinya dan bawahannya. */
 function dalamCakupanDemo(pengguna: Pengguna, u: UserContoh) {
-  if (u.nama === pengguna.nama) return true;
-  if (pengguna.role === "CEO" || pengguna.role === "Manager") return true;
-  if (pengguna.role === "Leader" || pengguna.role === "Co-Leader") {
-    return (
-      (pengguna.unitId !== null && u.unit === pengguna.unitId) ||
-      u.atasan === pengguna.nama
-    );
-  }
-  return false;
+  return dalamLingkup(pengguna, u.id, lingkupContoh());
 }
 
 function rekapDemo(
