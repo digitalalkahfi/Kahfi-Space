@@ -3,6 +3,7 @@ import "server-only";
 
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
+import { kontakOrang } from "@/lib/data/kontak-orang";
 import type {
   BarisVerifikasi,
   JalanMigrasi,
@@ -681,10 +682,20 @@ export async function calonPadanan(): Promise<
   const sb = await klienServer();
   const { data, error } = await sb
     .from("users")
-    .select("id, nama, email")
+    .select("id, nama")
     .order("nama");
   if (error || !data) return [];
-  return data;
+  // Email hanya terbaca lewat `kontak_orang` (0174); layar ini khusus
+  // CEO/Manager, yang memang melihat semua orang.
+  try {
+    const kontak = await kontakOrang(null);
+    return data.map((u) => ({
+      ...u,
+      email: kontak.get(u.id)?.email || null,
+    }));
+  } catch {
+    return [];
+  }
 }
 
 /**
