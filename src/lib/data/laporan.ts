@@ -4,7 +4,11 @@ import "server-only";
 
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
-import { dataContoh, TANGGAL_ACUAN } from "@/lib/data/contoh";
+import {
+  dataContoh,
+  TANGGAL_ACUAN,
+  namaTerlihatContoh,
+} from "@/lib/data/contoh";
 import { targetHarianGrd } from "@/lib/goal";
 import { bolehLihatLaporan } from "@/lib/laporan";
 import { batasMinimum } from "@/lib/batas-minimum";
@@ -284,12 +288,16 @@ export async function riwayatLaporan(
         const akun = l.akun
           ? accounts.find((a) => a.username === l.akun)
           : null;
-        return bolehLihatLaporan(pengguna, {
-          pelapor: l.user,
-          unitLaporan: (l.unit as KodeUnit) ?? null,
-          departemen: ((akun?.unit ?? l.unit) as KodeUnit) ?? null,
-          picAkun: akun?.pic ?? null,
-        });
+        return bolehLihatLaporan(
+          pengguna,
+          {
+            pelapor: l.user,
+            unitLaporan: (l.unit as KodeUnit) ?? null,
+            departemen: ((akun?.unit ?? l.unit) as KodeUnit) ?? null,
+            picAkun: akun?.pic ?? null,
+          },
+          namaTerlihatContoh(pengguna) ?? new Set(),
+        );
       })
       .sort((a, b) => b.tanggal.localeCompare(a.tanggal))
       .slice(0, batas)
