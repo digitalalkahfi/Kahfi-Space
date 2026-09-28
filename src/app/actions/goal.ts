@@ -6,8 +6,13 @@ import { klienServer } from "@/lib/supabase/server";
 import { sesiSaatIni } from "@/lib/data/sesi";
 import { bolehKelolaGoal } from "@/lib/data/goal";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
-import { anakTangga } from "@/lib/goal";
-import type { LevelGoal } from "@/lib/goal";
+import {
+  labelPeriode,
+  MAKS_BULAN_GOAL,
+  susunAnakTangga,
+  type LevelGoal,
+  type ModeTarget,
+} from "@/lib/goal";
 
 function segarkan() {
   revalidatePath("/grd");
@@ -40,10 +45,12 @@ export type MasukanGoal = {
   targetBase: number;
   targetGoal: number;
   targetStretch: number;
-  periode: string;
-  /** Bulan pertama anak tangga, mis. "2024-10-01". */
+  /** Bulan pertama periode, mis. "2026-10-01". */
   mulaiBulan: string;
+  /** Lama periode dalam bulan, 1–12. */
   jumlahBulan: number;
+  /** Target berlaku setiap bulan, atau total yang dibagi rata. */
+  modeTarget: ModeTarget;
 };
 
 function periksa(input: MasukanGoal): string | null {
@@ -73,10 +80,27 @@ function periksa(input: MasukanGoal): string | null {
   if (!/^\d{4}-\d{2}-01$/.test(input.mulaiBulan)) {
     return "Bulan mulai harus tanggal 1.";
   }
-  if (input.jumlahBulan < 1 || input.jumlahBulan > 12) {
-    return "Anak tangga bulanan antara 1 sampai 12 bulan.";
+  if (
+    !Number.isInteger(input.jumlahBulan) ||
+    input.jumlahBulan < 1 ||
+    input.jumlahBulan > MAKS_BULAN_GOAL
+  ) {
+    return `Periode goal antara 1 sampai ${MAKS_BULAN_GOAL} bulan.`;
+  }
+  if (input.modeTarget !== "bulanan" && input.modeTarget !== "total") {
+    return "Cara baca target tidak dikenal.";
   }
   return null;
+}
+
+/** Anak tangga yang akan disimpan untuk masukan ini. */
+function bulanDari(input: MasukanGoal) {
+  return susunAnakTangga(
+    input.mulaiBulan,
+    input.jumlahBulan,
+    input.targetGoal,
+    input.modeTarget,
+  );
 }
 
 /**
@@ -111,7 +135,7 @@ export async function tambahGoal(input: MasukanGoal): Promise<Hasil<string>> {
       target_base: input.targetBase,
       target_goal: input.targetGoal,
       target_stretch: input.targetStretch,
-      periode: input.periode,
+      periode: labelPeriode(input.mulaiBulan, input.jumlahBulan),
       dibuat_oleh: pengguna.id,
     })
     .select("id")
@@ -119,14 +143,16 @@ export async function tambahGoal(input: MasukanGoal): Promise<Hasil<string>> {
 
   if (error) return terjemahkan(error);
 
-  const tangga = anakTangga(
-    input.mulaiBulan,
-    input.jumlahBulan,
-    input.targetGoal,
-  );
-  const { error: galatBulan } = await sb.from("goal_months").insert(
-    tangga.map((t) => ({ goal_id: data.id, bulan: t.bulan, target: t.target })),
-  );
+  const tangga = bulanDari(input);
+  const { error: galatBulan } = await sb
+    .from("goal_months")
+    .insert(
+      tangga.map((t) => ({
+        goal_id: data.id,
+        bulan: t.bulan,
+        target: t.target,
+      })),
+    );
 
   if (galatBulan) {
     // Goal tanpa anak tangga lebih menyesatkan daripada tidak ada goal.
@@ -136,6 +162,54 @@ export async function tambahGoal(input: MasukanGoal): Promise<Hasil<string>> {
 
   segarkan();
   return sukses(data.id, `Goal "${input.judul.trim()}" dibuat.`);
+}
+
+/**
+ * Mengubah goal yang sudah ada: judul, level, pemilik, induk, sasaran,
+ * target, dan periodenya.
+ *
+ * Seluruhnya dikerjakan fungsi `ubah_goal` (migrasi 0177) dalam satu
+ * transaksi. Anak tangga hanya disusun ulang bila periode, target goal,
+ * atau cara baca targetnya berubah — memperbaiki judul saja tidak boleh
+ * meratakan anak tangga yang sengaja dibuat menanjak.
+ */
+export async function ubahGoal(
+  input: MasukanGoal & { goalId: string; aturUlangBulan: boolean },
+): Promise<Hasil> {
+  if (!input.goalId) return gagal("Goal tidak dikenali.", "validasi");
+  const salah = periksa(input);
+  if (salah) return gagal(salah, "validasi");
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (!bolehKelolaGoal(pengguna)) {
+    return gagal("Hanya CEO atau Manager yang boleh mengubah goal.", "izin");
+  }
+  if (input.indukId === input.goalId) {
+    return gagal("Goal tidak bisa menjadi induk dirinya sendiri.", "validasi");
+  }
+
+  const sb = await klienServer();
+  const { error } = await sb.rpc("ubah_goal", {
+    p_goal: input.goalId,
+    p_judul: input.judul.trim(),
+    p_level: input.level,
+    p_pemilik: input.pemilikId,
+    p_induk: input.indukId,
+    p_unit: input.unitId,
+    p_akun: input.akunId,
+    p_base: input.targetBase,
+    p_target: input.targetGoal,
+    p_stretch: input.targetStretch,
+    p_periode: labelPeriode(input.mulaiBulan, input.jumlahBulan),
+    p_bulan: input.aturUlangBulan ? bulanDari(input) : null,
+  });
+
+  if (error) return terjemahkan(error);
+
+  segarkan();
+  return sukses(undefined, `Goal "${input.judul.trim()}" diperbarui.`);
 }
 
 /** Mengubah tangga target sebuah goal beserta anak tangga bulanannya. */
