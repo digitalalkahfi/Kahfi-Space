@@ -61,6 +61,21 @@ export async function buatDb({ diam = true } = {}) {
   const db = new PGlite();
   await db.exec(SHIM_AUTH);
 
+  // Hak akses seperti di Supabase: diberikan SAAT objek dibuat (default
+  // privileges), bukan disapukan sesudah semua migrasi. Dengan begitu
+  // `revoke` di dalam migrasi — mis. mengunci kolom atau fungsi dari
+  // peran klien — berlaku di sini persis seperti di produksi, alih-alih
+  // tertimpa lagi oleh pemberian hak di akhir.
+  await db.exec(`
+    grant usage on schema public to anon, authenticated;
+    alter default privileges in schema public
+      grant select, insert, update, delete on tables to authenticated;
+    alter default privileges in schema public
+      grant select on tables to anon;
+    alter default privileges in schema public
+      grant execute on functions to anon, authenticated;
+  `);
+
   for (const berkas of await daftarMigrasi()) {
     const sql = await readFile(path.join(DIR_MIGRASI, berkas), "utf8");
     try {
@@ -74,15 +89,6 @@ export async function buatDb({ diam = true } = {}) {
       throw new Error(`Migrasi gagal di ${berkas}:\n${detail}`);
     }
   }
-  // Hak akses seperti di Supabase: role klien boleh DML, RLS yang membatasi.
-  await db.exec(`
-    grant usage on schema public to anon, authenticated;
-    grant select, insert, update, delete on all tables in schema public
-      to authenticated;
-    grant select on all tables in schema public to anon;
-    grant execute on all functions in schema public to anon, authenticated;
-  `);
-
   return db;
 }
 
