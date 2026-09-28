@@ -3,8 +3,12 @@ import { Card } from "@/components/ui/card";
 import { BarCapaian } from "@/components/motion/bar-capaian";
 import { DialogUbahGoal } from "@/components/grd/dialog-ubah-goal";
 import { cn } from "@/lib/utils";
-import { bulanPendek, persen, rupiahRingkas } from "@/lib/format";
-import { akhirPeriode, statusPeriode } from "@/lib/goal";
+import { persen, rupiahRingkas } from "@/lib/format";
+import {
+  jumlahHariPeriode,
+  keteranganTenggat,
+  statusPeriode,
+} from "@/lib/goal";
 import type { PilihanGoal, SimpulGoal } from "@/lib/data/goal";
 
 /** Goal itu sendiri beserta seluruh turunannya. */
@@ -42,11 +46,16 @@ function Simpul({
 }) {
   const kuat = goal.rasio >= 90;
   const sedang = goal.rasio >= 75;
-  // Capaian hanya berarti di dalam periodenya: goal Oktober yang dilihat
-  // pada September belum punya target bulan ini, bukan gagal 0%.
-  const status = goal.mulai
-    ? statusPeriode(goal.mulai, goal.jumlahBulan, acuan)
-    : "berjalan";
+  // Capaian hanya berarti di dalam periodenya: goal yang baru mulai
+  // 15 Oktober belum punya target pada 10 Oktober, bukan gagal 0%.
+  const status =
+    goal.mulai && goal.selesai
+      ? statusPeriode(goal.mulai, goal.selesai, acuan)
+      : "berjalan";
+  const tenggat =
+    goal.mulai && goal.selesai
+      ? keteranganTenggat(goal.mulai, goal.selesai, acuan)
+      : null;
 
   return (
     <li>
@@ -87,7 +96,11 @@ function Simpul({
             <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-[11px] leading-[14px] font-medium text-info-text ring-1 ring-border-subtle">
               <CalendarRange className="size-3 shrink-0" />
               {goal.periode}
-              {goal.jumlahBulan > 1 ? ` · ${goal.jumlahBulan} bulan` : ""}
+              {status === "berjalan" && tenggat
+                ? ` · ${tenggat}`
+                : goal.mulai && goal.selesai
+                  ? ` · ${jumlahHariPeriode(goal.mulai, goal.selesai)} hari`
+                  : ""}
             </p>
           </div>
 
@@ -107,13 +120,7 @@ function Simpul({
               </span>
             ) : (
               <span className="text-[11px] leading-[18px] font-semibold text-muted-foreground">
-                {status === "belum" && goal.mulai
-                  ? `Mulai ${bulanPendek(goal.mulai)}`
-                  : goal.mulai
-                    ? `Berakhir ${bulanPendek(
-                        akhirPeriode(goal.mulai, goal.jumlahBulan),
-                      )}`
-                    : null}
+                {tenggat}
               </span>
             )}
             {pilihan ? (
