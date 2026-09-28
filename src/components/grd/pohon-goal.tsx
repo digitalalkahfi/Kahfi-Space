@@ -2,6 +2,7 @@ import { CalendarRange, CornerDownRight, Target } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { BarCapaian } from "@/components/motion/bar-capaian";
 import { DialogUbahGoal } from "@/components/grd/dialog-ubah-goal";
+import { TombolHapusGoal } from "@/components/grd/tombol-hapus-goal";
 import { cn } from "@/lib/utils";
 import { persen, rupiahRingkas } from "@/lib/format";
 import {
@@ -41,7 +42,7 @@ function Simpul({
   goal: SimpulGoal;
   dalam: number;
   acuan: string;
-  /** Ada bila pembaca boleh mengubah goal (CEO/Manager). */
+  /** Ada bila pembaca boleh mengubah dan menghapus goal (CEO/Manager). */
   pilihan: PilihanGoal | null;
 }) {
   const kuat = goal.rasio >= 90;
@@ -56,82 +57,79 @@ function Simpul({
     goal.mulai && goal.selesai
       ? keteranganTenggat(goal.mulai, goal.selesai, acuan)
       : null;
+  // Baris yang membentang selebar kartu: dua kolom, atau tiga bila ada
+  // kolom tombol di layar lebar.
+  const lebarPenuh = pilihan ? "col-span-2 sm:col-span-3" : "col-span-2";
 
   return (
     <li>
       <div
         className={cn(
-          "baris-interaktif rounded-2xl p-3.5",
+          // Grid supaya tombol Ubah dan Hapus bisa berpindah tempat tanpa
+          // digandakan: di HP turun ke baris bawah agar judul tidak
+          // terhimpit, di layar lebar tetap di kanan atas.
+          "baris-interaktif grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 rounded-2xl p-3.5",
+          pilihan && "sm:grid-cols-[minmax(0,1fr)_auto_auto]",
           dalam === 0 ? "bg-muted/70" : "bg-muted/40",
         )}
         // Indentasi menandai kedalaman roll-down; dibatasi agar tetap terbaca di HP.
         style={{ marginInlineStart: `${Math.min(dalam, 3) * 12}px` }}
       >
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-1.5">
-              {dalam > 0 ? (
-                <CornerDownRight className="size-3 shrink-0 text-muted-foreground" />
-              ) : null}
-              <span
-                className={cn(
-                  "rounded-full px-2 py-0.5 text-[10px] leading-[13px] font-semibold",
-                  GAYA_LEVEL[goal.level],
-                )}
-              >
-                {LABEL_LEVEL[goal.level]}
-              </span>
-              <p className="truncate text-sm leading-5 font-semibold">
-                {goal.judul}
-              </p>
-            </div>
-            <p className="tabular mt-0.5 text-[11px] leading-[14px] text-muted-foreground">
-              {goal.pemilik}
-              {goal.unit ? ` · ${goal.unit}` : ""}
-              {goal.akun ? ` · ${goal.akun}` : ""}
-              {status === "berjalan"
-                ? ` · ${rupiahRingkas(goal.targetBulan)} bulan ini`
-                : ""}
-            </p>
-            <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-[11px] leading-[14px] font-medium text-info-text ring-1 ring-border-subtle">
-              <CalendarRange className="size-3 shrink-0" />
-              {goal.periode}
-              {status === "berjalan" && tenggat
-                ? ` · ${tenggat}`
-                : goal.mulai && goal.selesai
-                  ? ` · ${jumlahHariPeriode(goal.mulai, goal.selesai)} hari`
-                  : ""}
-            </p>
-          </div>
-
-          <div className="flex shrink-0 items-start gap-2">
-            {status === "berjalan" ? (
-              <span
-                className={cn(
-                  "tabular text-[13px] leading-[18px] font-bold",
-                  kuat
-                    ? "text-ok-text"
-                    : sedang
-                      ? "text-warn-text"
-                      : "text-danger-text",
-                )}
-              >
-                {persen(goal.rasio)}
-              </span>
-            ) : (
-              <span className="text-[11px] leading-[18px] font-semibold text-muted-foreground">
-                {tenggat}
-              </span>
-            )}
-            {pilihan ? (
-              <DialogUbahGoal
-                goal={goal}
-                pilihan={pilihan}
-                acuan={acuan}
-                kecualiInduk={idCabang(goal)}
-              />
+        <div className="col-start-1 row-start-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {dalam > 0 ? (
+              <CornerDownRight className="size-3 shrink-0 text-muted-foreground" />
             ) : null}
+            <span
+              className={cn(
+                "rounded-full px-2 py-0.5 text-[10px] leading-[13px] font-semibold",
+                GAYA_LEVEL[goal.level],
+              )}
+            >
+              {LABEL_LEVEL[goal.level]}
+            </span>
+            <p className="truncate text-sm leading-5 font-semibold">
+              {goal.judul}
+            </p>
           </div>
+          <p className="tabular mt-0.5 text-[11px] leading-[14px] text-muted-foreground">
+            {goal.pemilik}
+            {goal.unit ? ` · ${goal.unit}` : ""}
+            {goal.akun ? ` · ${goal.akun}` : ""}
+            {status === "berjalan"
+              ? ` · ${rupiahRingkas(goal.targetBulan)} bulan ini`
+              : ""}
+          </p>
+          <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-[11px] leading-[14px] font-medium text-info-text ring-1 ring-border-subtle">
+            <CalendarRange className="size-3 shrink-0" />
+            {goal.periode}
+            {status === "berjalan" && tenggat
+              ? ` · ${tenggat}`
+              : goal.mulai && goal.selesai
+                ? ` · ${jumlahHariPeriode(goal.mulai, goal.selesai)} hari`
+                : ""}
+          </p>
+        </div>
+
+        <div className="col-start-2 row-start-1">
+          {status === "berjalan" ? (
+            <span
+              className={cn(
+                "tabular text-[13px] leading-[18px] font-bold",
+                kuat
+                  ? "text-ok-text"
+                  : sedang
+                    ? "text-warn-text"
+                    : "text-danger-text",
+              )}
+            >
+              {persen(goal.rasio)}
+            </span>
+          ) : (
+            <span className="text-[11px] leading-[18px] font-semibold text-muted-foreground">
+              {tenggat}
+            </span>
+          )}
         </div>
 
         {status === "berjalan" ? (
@@ -140,15 +138,36 @@ function Simpul({
             label={`Capaian ${goal.judul}`}
             warna={kuat ? "bg-ok" : sedang ? "bg-warn" : "bg-danger"}
             tinggi="h-1.5"
-            className="mt-2.5 bg-card"
+            className={cn("row-start-2 mt-2.5 bg-card", lebarPenuh)}
           />
         ) : null}
 
-        <p className="tabular mt-1.5 text-[11px] leading-[14px] text-muted-foreground">
-          Base {rupiahRingkas(goal.targetBase)} · Goal{" "}
-          {rupiahRingkas(goal.targetGoal)} · Stretch{" "}
-          {rupiahRingkas(goal.targetStretch)}
-        </p>
+        {/* Di HP: target dan tombol berbagi satu baris di bawah. Di layar
+            lebar pembungkus ini lebur (display: contents), sehingga tombol
+            naik ke kanan atas dan barisnya tidak ikut melebarkan kolom. */}
+        <div className="col-span-2 row-start-3 mt-1.5 flex items-center justify-between gap-2 sm:contents">
+          <p
+            className={cn(
+              "tabular min-w-0 text-[11px] leading-[14px] text-muted-foreground sm:row-start-3 sm:mt-1.5",
+              pilihan ? "sm:col-span-3" : "sm:col-span-2",
+            )}
+          >
+            Base {rupiahRingkas(goal.targetBase)} · Goal{" "}
+            {rupiahRingkas(goal.targetGoal)} · Stretch{" "}
+            {rupiahRingkas(goal.targetStretch)}
+          </p>
+          {pilihan ? (
+            <div className="flex shrink-0 items-center gap-2 sm:col-start-3 sm:row-start-1 sm:self-start">
+              <DialogUbahGoal
+                goal={goal}
+                pilihan={pilihan}
+                acuan={acuan}
+                kecualiInduk={idCabang(goal)}
+              />
+              <TombolHapusGoal goalId={goal.id} judul={goal.judul} />
+            </div>
+          ) : null}
+        </div>
       </div>
 
       {goal.anak.length > 0 ? (
