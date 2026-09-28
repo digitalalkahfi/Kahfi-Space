@@ -1,7 +1,7 @@
 // Modul khusus server.
 import "server-only";
 
-import { dataContoh } from "@/lib/data/contoh";
+import { dataContoh, lingkupContoh } from "@/lib/data/contoh";
 import { bolehLihatKeuangan } from "@/lib/keuangan";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
@@ -12,7 +12,11 @@ import type {
   KejadianAset,
   StatusAset,
 } from "@/lib/aset";
-import { bandingkanJejak, kodeAsetBerikutnya } from "@/lib/aset";
+import {
+  bandingkanJejak,
+  bolehLihatAset,
+  kodeAsetBerikutnya,
+} from "@/lib/aset";
 import type { KodeUnit, Pengguna } from "@/lib/types";
 
 function satu<T>(nilai: T | T[] | null | undefined): T | null {
@@ -21,16 +25,17 @@ function satu<T>(nilai: T | T[] | null | undefined): T | null {
 }
 
 /**
- * Daftar aset perusahaan.
+ * Daftar aset yang boleh dilihat pengguna.
  *
  * Dua jalan baca, sengaja: yang berhak melihat angka perusahaan membaca
  * tabel `assets` lengkap dengan rupiahnya, yang lain membaca view
  * `aset_publik` yang memang tidak memuat kolom itu (migrasi 0102). RLS
  * tidak bisa menyembunyikan satu kolom, jadi pemisahannya di sini —
- * bukan sekadar di tampilan, yang mana pun mudah dilewati.
+ * bukan sekadar di tampilan, yang mana pun mudah dilewati. Barisnya
+ * disaring basis data lewat `boleh_aset` (migrasi 0176).
  */
 export async function daftarAset(pengguna: Pengguna): Promise<Aset[]> {
-  if (modeData() === "demo") return asetDemo();
+  if (modeData() === "demo") return asetDemo(pengguna);
 
   const sb = await klienServer();
 
@@ -107,50 +112,56 @@ export async function daftarAset(pengguna: Pengguna): Promise<Aset[]> {
   });
 }
 
-function asetDemo(): Aset[] {
+function asetDemo(pengguna: Pengguna): Aset[] {
   const { units, users } = dataContoh;
+  const lingkup = lingkupContoh();
 
-  return (dataContoh.aset ?? [])
-    .map((a) => {
-      const unit = a.unit ? units.find((u) => u.kode === a.unit) : null;
-      const pemegang = a.pemegang
-        ? users.find((u) => u.nama === a.pemegang)
-        : null;
-      const transaksi = a.transaksi
-        ? (dataContoh.transaksi ?? []).find((t) => t.keterangan === a.transaksi)
-        : null;
+  return (
+    (dataContoh.aset ?? [])
+      .map((a) => {
+        const unit = a.unit ? units.find((u) => u.kode === a.unit) : null;
+        const pemegang = a.pemegang
+          ? users.find((u) => u.nama === a.pemegang)
+          : null;
+        const transaksi = a.transaksi
+          ? (dataContoh.transaksi ?? []).find(
+              (t) => t.keterangan === a.transaksi,
+            )
+          : null;
 
-      return {
-        // Id yang sama dengan seed.sql: mode demo dan Supabase menyebut
-        // aset yang sama dengan nama yang sama.
-        id: a.id,
-        kode: a.kode,
-        nama: a.nama,
-        kategori: a.kategori,
-        unitKode: (a.unit as KodeUnit) ?? null,
-        unitNama: unit?.nama ? unit.nama.split(" (")[0] : "Perusahaan",
-        tanggal: a.tanggal,
-        nilaiPerolehan: a.nilai,
-        masaManfaat: a.masa_manfaat,
-        residu: a.residu,
-        status: a.status as StatusAset,
-        pemegangId: pemegang?.id ?? null,
-        pemegangNama: a.pemegang ?? null,
-        lokasi: a.lokasi,
-        berakhir: a.berakhir ?? null,
-        transaksiId: transaksi?.id ?? null,
-        catatan: a.catatan,
-      } satisfies Aset;
-    })
-    .sort((a, b) => a.kode.localeCompare(b.kode));
+        return {
+          // Id yang sama dengan seed.sql: mode demo dan Supabase menyebut
+          // aset yang sama dengan nama yang sama.
+          id: a.id,
+          kode: a.kode,
+          nama: a.nama,
+          kategori: a.kategori,
+          unitKode: (a.unit as KodeUnit) ?? null,
+          unitNama: unit?.nama ? unit.nama.split(" (")[0] : "Perusahaan",
+          tanggal: a.tanggal,
+          nilaiPerolehan: a.nilai,
+          masaManfaat: a.masa_manfaat,
+          residu: a.residu,
+          status: a.status as StatusAset,
+          pemegangId: pemegang?.id ?? null,
+          pemegangNama: a.pemegang ?? null,
+          lokasi: a.lokasi,
+          berakhir: a.berakhir ?? null,
+          transaksiId: transaksi?.id ?? null,
+          catatan: a.catatan,
+        } satisfies Aset;
+      })
+      // Padanan `boleh_aset` (0176) untuk mode demo, yang tidak punya RLS.
+      .filter((a) => bolehLihatAset(pengguna, a, lingkup))
+      .sort((a, b) => a.kode.localeCompare(b.kode))
+  );
 }
 
 /**
  * Riwayat satu aset, terbaru dulu.
  *
- * Dibaca lewat RPC `riwayat_aset` (migrasi 0103) yang sengaja terbuka
- * untuk semua pengguna: riwayatnya tidak memuat rupiah, dan yang tahu di
- * mana barang terakhir terlihat sering bukan pemegang terdaftarnya.
+ * Dibaca lewat RPC `riwayat_aset`, yang tidak memuat rupiah dan hanya
+ * mengembalikan aset yang boleh dilihat pemanggil (migrasi 0176).
  */
 export async function riwayatAset(kode: string): Promise<KejadianAset[]> {
   if (modeData() === "demo") return riwayatDemo(kode);
@@ -362,12 +373,11 @@ export async function kodeBerikutnya(): Promise<string> {
 }
 
 /**
- * Siapa boleh melihat angka rupiah aset.
+ * Siapa boleh melihat angka rupiah aset — dan seluruh daftar aset.
  *
- * Daftar barangnya sendiri terbuka — mengetahui siapa memegang apa adalah
- * urusan operasional, dan menyembunyikannya justru membuat barang hilang
- * tanpa ada yang menyadari. Nilai perolehan dan nilai bukunya angka
- * perusahaan, jadi mengikuti pagar yang sama dengan modul Keuangan.
+ * Nilai perolehan dan nilai bukunya angka perusahaan, jadi mengikuti
+ * pagar yang sama dengan modul Keuangan. Yang lain hanya melihat aset
+ * dalam cakupannya, tanpa rupiah (`boleh_aset`, migrasi 0176).
  */
 export function bolehLihatNilaiAset(pengguna: Pengguna) {
   return bolehLihatKeuangan(pengguna.role);
