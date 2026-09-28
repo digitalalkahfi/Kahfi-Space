@@ -3,7 +3,7 @@ import "server-only";
 
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
-import { dataContoh } from "@/lib/data/contoh";
+import { dataContoh, namaTerlihatContoh } from "@/lib/data/contoh";
 import type { Pengguna } from "@/lib/types";
 import {
   predikatDariSkor,
@@ -25,9 +25,9 @@ export { predikatDariSkor, skorKpi };
  * dimatikan harus tetap terlihat agar bisa dihidupkan lagi, tetapi tidak
  * boleh ikut ke mana pun skor dihitung.
  */
-export async function definisiKpi(
-  { termasukNonaktif = false }: { termasukNonaktif?: boolean } = {},
-): Promise<DefinisiKpi[]> {
+export async function definisiKpi({
+  termasukNonaktif = false,
+}: { termasukNonaktif?: boolean } = {}): Promise<DefinisiKpi[]> {
   if (modeData() === "demo") {
     return dataContoh.kpi_definitions.map((k, i) => ({
       id: `contoh-${i}`,
@@ -386,12 +386,9 @@ function scorecardDemo(
       } satisfies BarisScorecard;
     })
     .filter((b) => {
-      if (pengguna.role === "CEO" || pengguna.role === "Manager") return true;
-      if (pengguna.role === "Leader" || pengguna.role === "Co-Leader") {
-        const u = users.find((x) => x.nama === b.nama);
-        return u?.unit === pengguna.unitId || b.nama === pengguna.nama;
-      }
-      return b.nama === pengguna.nama;
+      // Padanan `scorecard_tim` (0173): dirinya dan bawahannya.
+      const terlihat = namaTerlihatContoh(pengguna);
+      return terlihat === null || terlihat.has(b.nama);
     })
     .sort(
       (a, b) =>
