@@ -19,7 +19,13 @@ import {
   kodeBerikutnya,
 } from "@/lib/data/aset";
 import { pilihanOrganisasi } from "@/lib/data/organisasi";
-import { asetTersaring, bacaSaringanAset, saringAset } from "@/lib/aset";
+import {
+  asetTersaring,
+  bacaSaringanAset,
+  judulCakupanAset,
+  keteranganCakupanAset,
+  saringAset,
+} from "@/lib/aset";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
@@ -46,8 +52,10 @@ export default async function AsetPage({ searchParams }: PageProps<"/aset">) {
   const [semua, pilihan, kodeAsetBaru] = await Promise.all([
     daftarAset(pengguna),
     pilihanOrganisasi(),
-    kodeBerikutnya(),
+    // Nomor aset berikutnya hanya perlu bagi yang mencatat aset baru.
+    bolehKelola ? kodeBerikutnya() : Promise.resolve(""),
   ]);
+  const keteranganCakupan = keteranganCakupanAset(pengguna.role);
   const saringan = bacaSaringanAset(params);
   const tersaring = saringAset(semua, saringan);
 
@@ -93,6 +101,12 @@ export default async function AsetPage({ searchParams }: PageProps<"/aset">) {
 
         <TabInventaris />
 
+        {keteranganCakupan ? (
+          <p className="rounded-2xl bg-info-fill px-4 py-2.5 text-[11px] leading-[14px] text-pretty text-info-text">
+            {keteranganCakupan}
+          </p>
+        ) : null}
+
         <CatatanDataContoh pesan="Register aset ini berasal dari data contoh; mode demo tidak menyimpan apa pun." />
 
         <RingkasanAset
@@ -120,7 +134,11 @@ export default async function AsetPage({ searchParams }: PageProps<"/aset">) {
             daftar={tersaring}
             sampai={hariIni}
             bolehLihatNilai={bolehNilai}
-            judul={asetTersaring(saringan) ? "Aset tersaring" : "Seluruh aset"}
+            judul={
+              asetTersaring(saringan)
+                ? "Aset tersaring"
+                : judulCakupanAset(pengguna.role)
+            }
           />
         </Reveal>
 
