@@ -6,8 +6,11 @@ import {
   bacaSaringanAset,
   bacaSaringanLogAset,
   bandingkanJejak,
+  bolehLihatAset,
   bulanPenuh,
   jadwalPenyusutan,
+  judulCakupanAset,
+  keteranganCakupanAset,
   logAsetTersaring,
   kodeAsetBerikutnya,
   nilaiAsetPer,
@@ -546,4 +549,115 @@ test("perubahan yang hanya berbeda tipe tidak dianggap berubah", () => {
     ),
     [],
   );
+});
+
+// ---------------------------------------------------------------------
+// Cakupan baca aset — padanan `boleh_aset` (migrasi 0176)
+// ---------------------------------------------------------------------
+
+const LINGKUP = [
+  { id: "mgr", atasanId: null },
+  { id: "leader", atasanId: "mgr" },
+  { id: "co", atasanId: "leader" },
+  { id: "staf", atasanId: "co" },
+  { id: "rekan", atasanId: "leader" },
+  { id: "leaderLain", atasanId: "mgr" },
+  { id: "stafLain", atasanId: "leaderLain" },
+];
+
+const orangAset = (
+  id: string,
+  role: "CEO" | "Manager" | "Finance" | "Leader" | "Co-Leader" | "Staff",
+  unitId: "affiliator" | "mcn" | "tap" | null = "mcn",
+) => ({ id, role, unitId });
+
+test("Staff hanya melihat aset yang ia pegang", () => {
+  const staf = orangAset("staf", "Staff");
+  assert.equal(
+    bolehLihatAset(staf, { pemegangId: "staf", unitKode: "mcn" }, LINGKUP),
+    true,
+  );
+  assert.equal(
+    bolehLihatAset(staf, { pemegangId: "rekan", unitKode: "mcn" }, LINGKUP),
+    false,
+    "aset rekan seunit",
+  );
+  assert.equal(
+    bolehLihatAset(staf, { pemegangId: null, unitKode: "mcn" }, LINGKUP),
+    false,
+    "aset unit tanpa pemegang hanya untuk pimpinan",
+  );
+});
+
+test("Co-Leader: cabangnya dan aset unit tanpa pemegang", () => {
+  const co = orangAset("co", "Co-Leader");
+  assert.equal(
+    bolehLihatAset(co, { pemegangId: "staf", unitKode: "mcn" }, LINGKUP),
+    true,
+  );
+  assert.equal(
+    bolehLihatAset(co, { pemegangId: "rekan", unitKode: "mcn" }, LINGKUP),
+    false,
+    "bukan bawahannya",
+  );
+  assert.equal(
+    bolehLihatAset(co, { pemegangId: null, unitKode: "mcn" }, LINGKUP),
+    true,
+  );
+  assert.equal(
+    bolehLihatAset(co, { pemegangId: null, unitKode: "tap" }, LINGKUP),
+    false,
+    "aset unit lain",
+  );
+});
+
+test("Leader: seluruh cabangnya, tidak cabang Leader lain", () => {
+  const leader = orangAset("leader", "Leader");
+  for (const pemegang of ["leader", "co", "staf", "rekan"]) {
+    assert.equal(
+      bolehLihatAset(
+        leader,
+        { pemegangId: pemegang, unitKode: "mcn" },
+        LINGKUP,
+      ),
+      true,
+      pemegang,
+    );
+  }
+  assert.equal(
+    bolehLihatAset(
+      leader,
+      { pemegangId: "stafLain", unitKode: "mcn" },
+      LINGKUP,
+    ),
+    false,
+  );
+  assert.equal(
+    bolehLihatAset(leader, { pemegangId: null, unitKode: null }, LINGKUP),
+    false,
+    "aset perusahaan tanpa pemegang hanya untuk pusat",
+  );
+});
+
+test("CEO, Manager, dan Finance melihat semua aset", () => {
+  for (const role of ["CEO", "Manager", "Finance"] as const) {
+    assert.equal(
+      bolehLihatAset(
+        orangAset("x", role, null),
+        { pemegangId: null, unitKode: null },
+        LINGKUP,
+      ),
+      true,
+      role,
+    );
+  }
+});
+
+test("judul dan keterangan daftar mengikuti cakupan", () => {
+  assert.equal(judulCakupanAset("Finance"), "Seluruh aset");
+  assert.equal(judulCakupanAset("Leader"), "Aset tim Anda");
+  assert.equal(judulCakupanAset("Staff"), "Aset yang Anda pegang");
+  assert.equal(keteranganCakupanAset("Manager"), null);
+  assert.match(keteranganCakupanAset("Staff") ?? "", /sedang Anda pegang/);
+  assert.match(keteranganCakupanAset("Co-Leader") ?? "", /orang di bawah Anda/);
 });
