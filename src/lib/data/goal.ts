@@ -6,7 +6,14 @@ import { klienServer } from "@/lib/supabase/server";
 import { dataContoh } from "@/lib/data/contoh";
 import { aktifDemo } from "@/lib/demo";
 import type { Pengguna } from "@/lib/types";
-import { labelPeriode, type LevelGoal } from "@/lib/goal";
+import {
+  labelPeriode,
+  lengkapiRentang,
+  periodeDariTangga,
+  type AnakTanggaGoal,
+  type AnakTanggaLonggar,
+  type LevelGoal,
+} from "@/lib/goal";
 
 /** Goal hanya dibuat/diubah CEO dan Manager — sejalan policy `goals_buat`. */
 export function bolehKelolaGoal(pengguna: Pengguna) {
@@ -76,13 +83,13 @@ export type SimpulGoal = {
   pemilikId: string | null;
   unitId: string | null;
   akunId: string | null;
-  /** Label periode, mis. "Okt – Des 2026"; dari anak tangganya bila ada. */
+  /** Label periode, mis. "15 Okt – 14 Des 2026"; dari anak tangganya bila ada. */
   periode: string;
-  /** Anak tangga bulanan, urut dari bulan pertama. */
-  bulan: { bulan: string; target: number }[];
-  /** Bulan pertama periode; null bila goal belum punya anak tangga. */
+  /** Anak tangga bulanan beserta rentang tanggalnya, urut dari bulan pertama. */
+  bulan: AnakTanggaGoal[];
+  /** Tanggal mulai dan selesai periode; null bila goal belum punya anak tangga. */
   mulai: string | null;
-  jumlahBulan: number;
+  selesai: string | null;
   satuan: string;
   targetBase: number;
   targetGoal: number;
@@ -96,20 +103,23 @@ export type SimpulGoal = {
 
 const URUTAN_LEVEL = ["company", "manager", "leader", "account", "staff"];
 
-/** Periode sebuah goal dibaca dari anak tangganya. */
+/**
+ * Periode sebuah goal dibaca dari anak tangganya — bukan dari label yang
+ * tersimpan, supaya goal lama berlabel "2026-Q3" pun tampil bertanggal.
+ */
 function periodeDari(
-  bulanMentah: readonly { bulan: string; target: number | string }[],
+  bulanMentah: readonly AnakTanggaLonggar[],
   cadangan: string,
 ) {
-  const bulan = [...bulanMentah]
-    .map((b) => ({ bulan: b.bulan.slice(0, 10), target: Number(b.target) }))
+  const bulan = bulanMentah
+    .map(lengkapiRentang)
     .sort((a, b) => a.bulan.localeCompare(b.bulan));
-  const mulai = bulan[0]?.bulan ?? null;
+  const periode = periodeDariTangga(bulan);
   return {
     bulan,
-    mulai,
-    jumlahBulan: bulan.length,
-    periode: mulai ? labelPeriode(mulai, bulan.length) : cadangan,
+    mulai: periode?.mulai ?? null,
+    selesai: periode?.selesai ?? null,
+    periode: periode ? labelPeriode(periode.mulai, periode.selesai) : cadangan,
   };
 }
 
@@ -141,6 +151,7 @@ function keTree(datar: Omit<SimpulGoal, "anak">[]): SimpulGoal[] {
 /**
  * Pohon goal berjenjang beserta capaian bulan berjalan.
  * Inilah bentuk "roll-down": company → manager → leader → akun/staf.
+ * Capaian dihitung di dalam rentang tanggal anak tangga bulan ini.
  */
 export async function pohonGoal(
   pengguna: Pengguna,
@@ -153,22 +164,30 @@ export async function pohonGoal(
     const akunUnit = Object.fromEntries(
       accounts.map((a) => [a.username, a.unit]),
     );
-    const dalamBulan = daily_reports.filter(
-      (l) => l.tanggal >= awalBulan && l.tanggal <= tanggal,
-    );
 
+    // Sama dengan `progres_goal` (0178): dari awal rentang anak tangga
+    // bulan ini sampai tanggal acuan atau akhir rentangnya.
     const realisasiUntuk = (g: (typeof goals)[number]) => {
+      const langkah = (g.bulan_list ?? [])
+        .map(lengkapiRentang)
+        .find((b) => b.bulan === awalBulan);
+      const dari = langkah?.dari ?? awalBulan;
+      const sampai =
+        langkah && langkah.sampai < tanggal ? langkah.sampai : tanggal;
+      const dalamRentang = daily_reports.filter(
+        (l) => l.tanggal >= dari && l.tanggal <= sampai,
+      );
       if (g.account) {
-        return dalamBulan
+        return dalamRentang
           .filter((l) => l.akun === g.account)
           .reduce((a, l) => a + l.gmv, 0);
       }
       if (g.unit) {
-        return dalamBulan
+        return dalamRentang
           .filter((l) => (l.unit ?? akunUnit[l.akun as string]) === g.unit)
           .reduce((a, l) => a + l.gmv, 0);
       }
-      return dalamBulan.reduce((a, l) => a + l.gmv, 0);
+      return dalamRentang.reduce((a, l) => a + l.gmv, 0);
     };
 
     const datar = goals.map((g) => {
@@ -216,7 +235,7 @@ export async function pohonGoal(
        pemilik:pemilik_id (nama, jabatan),
        units:unit_id (nama),
        accounts:account_id (username),
-       goal_months (bulan, target)`,
+       goal_months (bulan, target, dari, sampai)`,
     )
     .eq("status", "aktif");
 
@@ -264,10 +283,7 @@ export async function pohonGoal(
       pemilikId: g.pemilik_id,
       unitId: g.unit_id,
       akunId: g.account_id,
-      ...periodeDari(
-        (g.goal_months ?? []) as { bulan: string; target: number }[],
-        g.periode,
-      ),
+      ...periodeDari((g.goal_months ?? []) as AnakTanggaLonggar[], g.periode),
       satuan: g.satuan,
       targetBase: Number(g.target_base),
       targetGoal: Number(g.target_goal),
@@ -284,22 +300,46 @@ export async function pohonGoal(
 
 export type AnakTanggaBulan = {
   bulan: string;
+  /** Rentang tanggal periode di bulan ini (0178). */
+  dari: string;
+  sampai: string;
   target: number;
   realisasi: number;
   rasio: number;
+  /** Tanggal acuan berada di dalam rentang anak tangga ini. */
   berjalan: boolean;
+  /** Rentangnya belum dimulai pada tanggal acuan. */
+  mendatang: boolean;
 };
+
+/** Anak tangga beserta capaiannya dari GMV dalam rentangnya. */
+function capaianLangkah(
+  b: AnakTanggaGoal,
+  tanggal: string,
+  realisasi: number,
+): AnakTanggaBulan {
+  return {
+    ...b,
+    realisasi,
+    rasio: b.target ? Math.round((realisasi / b.target) * 1000) / 10 : 0,
+    berjalan: tanggal >= b.dari && tanggal <= b.sampai,
+    mendatang: tanggal < b.dari,
+  };
+}
 
 /**
  * Anak tangga bulanan sebuah goal: target tiap bulan beserta capaiannya.
- * Bulan yang sudah lewat memakai realisasi penuh, bulan berjalan sampai
- * tanggal acuan, bulan mendatang belum punya realisasi.
+ * Realisasi dihitung di dalam rentang tanggal tiap anak tangga — penuh
+ * untuk yang sudah lewat, sampai tanggal acuan untuk yang berjalan —
+ * dan anak tangga yang belum dimulai belum punya realisasi.
  */
 export async function anakTanggaBulanan(
   goalId: string,
   tanggal: string,
 ): Promise<AnakTanggaBulan[]> {
-  const bulanIni = `${tanggal.slice(0, 7)}-01`;
+  /** Akhir hitungan sebuah anak tangga: akhir rentang, atau hari ini. */
+  const sampaiHitung = (b: AnakTanggaGoal) =>
+    b.sampai < tanggal ? b.sampai : tanggal;
 
   if (modeData() === "demo") {
     const { goals, daily_reports, accounts } = dataContoh;
@@ -315,70 +355,49 @@ export async function anakTanggaBulanan(
       return true;
     };
 
-    return (g.bulan_list ?? []).map((b) => {
-      const akhir =
-        b.bulan === bulanIni ? tanggal : `${b.bulan.slice(0, 7)}-31`;
-      const realisasi = daily_reports
-        .filter(cocok)
-        .filter((l) => l.tanggal >= b.bulan && l.tanggal <= akhir)
-        .reduce((a, l) => a + l.gmv, 0);
-      return {
-        bulan: b.bulan,
-        target: b.target,
-        realisasi,
-        rasio: b.target ? Math.round((realisasi / b.target) * 1000) / 10 : 0,
-        berjalan: b.bulan === bulanIni,
-      };
+    return (g.bulan_list ?? []).map(lengkapiRentang).map((b) => {
+      const realisasi =
+        tanggal < b.dari
+          ? 0
+          : daily_reports
+              .filter(cocok)
+              .filter(
+                (l) => l.tanggal >= b.dari && l.tanggal <= sampaiHitung(b),
+              )
+              .reduce((a, l) => a + l.gmv, 0);
+      return capaianLangkah(b, tanggal, realisasi);
     });
   }
 
   const sb = await klienServer();
-  const { data: bulan } = await sb
-    .from("goal_months")
-    .select("bulan, target")
-    .eq("goal_id", goalId)
-    .order("bulan");
+  const [{ data: bulan }, { data: goal }] = await Promise.all([
+    sb
+      .from("goal_months")
+      .select("bulan, target, dari, sampai")
+      .eq("goal_id", goalId)
+      .order("bulan"),
+    sb
+      .from("goals")
+      .select("unit_id, account_id")
+      .eq("id", goalId)
+      .maybeSingle(),
+  ]);
 
-  const { data: goal } = await sb
-    .from("goals")
-    .select("unit_id, account_id")
-    .eq("id", goalId)
-    .maybeSingle();
-
-  const hasil: AnakTanggaBulan[] = [];
-  for (const b of bulan ?? []) {
-    const akhirBulan = new Date(
-      Number(b.bulan.slice(0, 4)),
-      Number(b.bulan.slice(5, 7)),
-      0,
-    )
-      .toISOString()
-      .slice(0, 10);
-    const sampai = b.bulan === bulanIni ? tanggal : akhirBulan;
-
-    let q = sb
-      .from("daily_reports")
-      .select("gmv")
-      .gte("tanggal", b.bulan)
-      .lte("tanggal", sampai);
-    if (goal?.account_id) q = q.eq("account_id", goal.account_id);
-    else if (goal?.unit_id) q = q.eq("unit_id", goal.unit_id);
-
-    const { data: laporan } = await q;
-    const realisasi = (laporan ?? []).reduce((a, r) => a + Number(r.gmv), 0);
-
-    hasil.push({
-      bulan: b.bulan,
-      target: Number(b.target),
-      realisasi,
-      rasio: Number(b.target)
-        ? Math.round((realisasi / Number(b.target)) * 1000) / 10
-        : 0,
-      berjalan: b.bulan === bulanIni,
-    });
-  }
-
-  return hasil;
+  // Lingkup GMV-nya lewat `gmv_goal_rentang` (0178): goal unit ikut
+  // menghitung laporan akun-akun di unit itu, sama dengan pohon goal.
+  const tangga = ((bulan ?? []) as AnakTanggaLonggar[]).map(lengkapiRentang);
+  return Promise.all(
+    tangga.map(async (b) => {
+      if (tanggal < b.dari) return capaianLangkah(b, tanggal, 0);
+      const { data: gmv } = await sb.rpc("gmv_goal_rentang", {
+        p_akun: goal?.account_id ?? null,
+        p_unit: goal?.unit_id ?? null,
+        p_dari: b.dari,
+        p_sampai: sampaiHitung(b),
+      });
+      return capaianLangkah(b, tanggal, Number(gmv ?? 0));
+    }),
+  );
 }
 
 export type PilihanGoal = {
