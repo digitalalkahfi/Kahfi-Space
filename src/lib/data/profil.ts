@@ -4,6 +4,7 @@ import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { dataContoh } from "@/lib/data/contoh";
 import { KOLOM_ANGGOTA, daftarAnggotaTim, keAnggota } from "@/lib/data/anggota";
+import { kontakOrang, type KontakOrang } from "@/lib/data/kontak-orang";
 import { kontakSah, normalkanKontak, type ProfilDiri } from "@/lib/profil";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
 import type { Pengguna } from "@/lib/types";
@@ -60,18 +61,15 @@ async function kesiapanDiri(pengguna: Pengguna): Promise<{
     };
   }
 
-  const sb = await klienServer();
-  const { data, error } = await sb
-    .from("users")
-    .select("kontak_terverifikasi_pada, whatsapp_optin")
-    .eq("id", pengguna.id)
-    .maybeSingle();
-
-  if (error || !data) return { terverifikasiPada: null, optin: false };
-  return {
-    terverifikasiPada: data.kontak_terverifikasi_pada,
-    optin: data.whatsapp_optin,
-  };
+  try {
+    const diri = (await kontakOrang([pengguna.id])).get(pengguna.id);
+    return {
+      terverifikasiPada: diri?.terverifikasiPada ?? null,
+      optin: diri?.optin === true,
+    };
+  } catch {
+    return { terverifikasiPada: null, optin: false };
+  }
 }
 
 async function barisDiri(pengguna: Pengguna) {
@@ -102,7 +100,8 @@ async function barisDiri(pengguna: Pengguna) {
     .eq("pic_user_id", pengguna.id)
     .eq("status", "aktif");
 
-  return keAnggota(data, count ?? 0);
+  // Email diri sendiri = identitas masuknya (lihat `sesiSaatIni`).
+  return { ...keAnggota(data, count ?? 0), email: pengguna.email };
 }
 
 async function kontakDiri(pengguna: Pengguna): Promise<string | null> {
@@ -115,15 +114,8 @@ async function kontakDiri(pengguna: Pengguna): Promise<string | null> {
     return mentah ? normalkanKontak(mentah) : null;
   }
 
-  const sb = await klienServer();
-  const { data, error } = await sb
-    .from("users")
-    .select("kontak")
-    .eq("id", pengguna.id)
-    .maybeSingle();
-
-  if (error) throw new Error(`Gagal memuat nomor kontak: ${error.message}`);
-  return data?.kontak ?? null;
+  const diri = (await kontakOrang([pengguna.id])).get(pengguna.id);
+  return diri?.kontak ?? null;
 }
 
 /**
@@ -186,7 +178,8 @@ export async function simpanKontak(
  * profilnya: pengelola perlu keduanya untuk memutuskan verifikasi, dan
  * tidak perlu apa pun lagi dari kotak masuk orang itu.
  *
- * RLS pada `users` yang menentukan siapa boleh membacanya; tidak ada
+ * `kontak_orang` (0174) yang menentukan siapa boleh membacanya: dirinya,
+ * atasannya lewat garis pelaporan, dan CEO/Manager. Tidak ada
  * pemeriksaan peran yang ditulis ulang di sini.
  */
 export async function kontakAnggota(userId: string): Promise<{
@@ -202,16 +195,15 @@ export async function kontakAnggota(userId: string): Promise<{
     };
   }
 
-  const sb = await klienServer();
-  const { data, error } = await sb
-    .from("users")
-    .select("kontak, kontak_terverifikasi_pada")
-    .eq("id", userId)
-    .maybeSingle();
-
-  if (error || !data) return { kontak: null, terverifikasi: false };
+  let data: KontakOrang | undefined;
+  try {
+    data = (await kontakOrang([userId])).get(userId);
+  } catch {
+    return { kontak: null, terverifikasi: false };
+  }
+  if (!data) return { kontak: null, terverifikasi: false };
   return {
     kontak: data.kontak,
-    terverifikasi: data.kontak_terverifikasi_pada !== null,
+    terverifikasi: data.terverifikasiPada !== null,
   };
 }
