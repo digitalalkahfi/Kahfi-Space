@@ -19,12 +19,14 @@ import {
   type NilaiGoal,
 } from "@/components/grd/form-goal";
 import { ubahGoal } from "@/app/actions/goal";
-import { tebakModeTarget } from "@/lib/goal";
+import { akhirBulan, satuBulanPenuh, tebakModeTarget } from "@/lib/goal";
 import type { PilihanGoal, SimpulGoal } from "@/lib/data/goal";
 
 /** Isi awal formulir dari goal yang tersimpan. */
 function dariGoal(goal: SimpulGoal, acuan: string): NilaiGoal {
   const mode = tebakModeTarget(goal.bulan, goal.targetGoal);
+  // Goal tanpa anak tangga (data lama) diberi periode bulan berjalan.
+  const mulai = goal.mulai ?? `${acuan.slice(0, 7)}-01`;
   return {
     judul: goal.judul,
     level: goal.level,
@@ -35,19 +37,20 @@ function dariGoal(goal: SimpulGoal, acuan: string): NilaiGoal {
     base: goal.targetBase,
     target: goal.targetGoal,
     stretch: goal.targetStretch,
-    mulai: goal.mulai ?? `${acuan.slice(0, 7)}-01`,
-    jumlahBulan: Math.max(1, goal.jumlahBulan),
+    mulai,
+    selesai: goal.selesai ?? akhirBulan(mulai),
     mode: mode === "kustom" ? "bulanan" : mode,
   };
 }
 
 /**
- * Mengubah goal yang sudah dibuat: judul, level, pemilik, induk, periode,
- * dan targetnya. Semua perubahan meninggalkan jejak (audit goal).
+ * Mengubah goal yang sudah dibuat: judul, level, pemilik, induk, periode
+ * (tanggal mulai dan selesai), dan targetnya. Semua perubahan meninggalkan
+ * jejak (audit goal).
  *
- * Anak tangga bulanan disusun ulang hanya bila periode, target goal, atau
- * cara baca targetnya berubah. Memperbaiki salah ketik di judul tidak
- * boleh meratakan anak tangga yang sengaja dibuat berbeda tiap bulan.
+ * Anak tangga bulanan disusun ulang hanya bila tanggal periode, target
+ * goal, atau cara baca targetnya berubah. Memperbaiki salah ketik di judul
+ * tidak boleh meratakan anak tangga yang sengaja dibuat berbeda tiap bulan.
  */
 export function DialogUbahGoal({
   goal,
@@ -68,15 +71,15 @@ export function DialogUbahGoal({
 
   const awal = dariGoal(goal, acuan);
   const kustom =
-    goal.jumlahBulan > 1 &&
+    goal.bulan.length > 0 &&
     tebakModeTarget(goal.bulan, goal.targetGoal) === "kustom";
 
   const aturUlangBulan =
-    goal.jumlahBulan === 0 ||
+    goal.bulan.length === 0 ||
     nilai.mulai !== awal.mulai ||
-    nilai.jumlahBulan !== awal.jumlahBulan ||
+    nilai.selesai !== awal.selesai ||
     nilai.target !== awal.target ||
-    (nilai.jumlahBulan > 1 && nilai.mode !== awal.mode);
+    (!satuBulanPenuh(nilai.mulai, nilai.selesai) && nilai.mode !== awal.mode);
 
   const ubah = (sebagian: Partial<NilaiGoal>) =>
     setNilai((n) => ({ ...n, ...sebagian }));
@@ -107,9 +110,9 @@ export function DialogUbahGoal({
         targetBase: nilai.base,
         targetGoal: nilai.target,
         targetStretch: nilai.stretch,
-        mulaiBulan: nilai.mulai,
-        jumlahBulan: nilai.jumlahBulan,
-        modeTarget: nilai.jumlahBulan > 1 ? nilai.mode : "bulanan",
+        mulai: nilai.mulai,
+        selesai: nilai.selesai,
+        modeTarget: nilai.mode,
         aturUlangBulan,
       });
 
@@ -149,16 +152,15 @@ export function DialogUbahGoal({
           nilai={nilai}
           ubah={ubah}
           pilihan={pilihan}
-          acuan={acuan}
           kecualiInduk={kecualiInduk}
           pratinjauBulan={aturUlangBulan ? undefined : goal.bulan}
           catatanBulan={
             aturUlangBulan
-              ? goal.jumlahBulan > 0
-                ? "Anak tangga akan disusun ulang mengikuti periode dan target baru."
+              ? goal.bulan.length > 0
+                ? "Anak tangga akan disusun ulang mengikuti tanggal dan target baru."
                 : null
               : kustom
-                ? "Anak tangga goal ini berbeda tiap bulan dan tidak diubah, kecuali periode atau targetnya Anda ganti."
+                ? "Anak tangga goal ini berbeda tiap bulan dan tidak diubah, kecuali tanggal periode atau targetnya Anda ganti."
                 : "Anak tangga tidak berubah."
           }
         />
