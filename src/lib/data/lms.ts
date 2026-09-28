@@ -1,6 +1,8 @@
 // Modul khusus server.
 import "server-only";
 
+import { saringLingkup } from "@/lib/lingkup";
+
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { dataContoh } from "@/lib/data/contoh";
@@ -64,7 +66,8 @@ export async function daftarKursus(pengguna: Pengguna): Promise<Kursus[]> {
     .select("id, course_id, selesai_pada")
     .eq("user_id", pengguna.id);
 
-  if (galatIkut) throw new Error(`Gagal memuat pendaftaran: ${galatIkut.message}`);
+  if (galatIkut)
+    throw new Error(`Gagal memuat pendaftaran: ${galatIkut.message}`);
 
   const ikutPerKursus = new Map(
     (daftarIkut ?? []).map((e) => [e.course_id, e]),
@@ -83,32 +86,32 @@ export async function daftarKursus(pengguna: Pengguna): Promise<Kursus[]> {
   return (data ?? [])
     .filter((k) => k.aktif || kelola)
     .map((k) => {
-    const unit = satu(k.unit);
-    const ikut = ikutPerKursus.get(k.id);
-    return {
-      id: k.id,
-      judul: k.judul,
-      ringkasan: k.ringkasan,
-      kategori: k.kategori,
-      tingkat: k.tingkat as TingkatKursus,
-      unitKode: (unit?.kode as KodeUnit) ?? null,
-      unitNama: unit?.nama ? unit.nama.split(" (")[0] : "Semua unit",
-      wajibUntuk: (k.wajib_untuk ?? []) as Peran[],
-      aktif: k.aktif,
-      modul: (k.modul ?? [])
-        .map((m) => ({
-          id: m.id,
-          urutan: m.urutan,
-          judul: m.judul,
-          isi: m.isi,
-          durasiMenit: m.durasi_menit,
-          tuntas: modulTuntas.has(m.id),
-        }))
-        .sort((a, b) => a.urutan - b.urutan) satisfies ModulKursus[],
-      terdaftar: ikut !== undefined,
-      selesaiPada: ikut?.selesai_pada ?? null,
-    };
-  });
+      const unit = satu(k.unit);
+      const ikut = ikutPerKursus.get(k.id);
+      return {
+        id: k.id,
+        judul: k.judul,
+        ringkasan: k.ringkasan,
+        kategori: k.kategori,
+        tingkat: k.tingkat as TingkatKursus,
+        unitKode: (unit?.kode as KodeUnit) ?? null,
+        unitNama: unit?.nama ? unit.nama.split(" (")[0] : "Semua unit",
+        wajibUntuk: (k.wajib_untuk ?? []) as Peran[],
+        aktif: k.aktif,
+        modul: (k.modul ?? [])
+          .map((m) => ({
+            id: m.id,
+            urutan: m.urutan,
+            judul: m.judul,
+            isi: m.isi,
+            durasiMenit: m.durasi_menit,
+            tuntas: modulTuntas.has(m.id),
+          }))
+          .sort((a, b) => a.urutan - b.urutan) satisfies ModulKursus[],
+        terdaftar: ikut !== undefined,
+        selesaiPada: ikut?.selesai_pada ?? null,
+      };
+    });
 }
 
 /** Satu kursus beserta kemajuan pengguna. */
@@ -309,7 +312,9 @@ export async function soalDenganKunci(
   const sb = await klienServer();
   const { data, error } = await sb
     .from("quiz_questions")
-    .select("id, urutan, pertanyaan, pilihan, kunci:quiz_keys (jawaban_benar, penjelasan)")
+    .select(
+      "id, urutan, pertanyaan, pilihan, kunci:quiz_keys (jawaban_benar, penjelasan)",
+    )
     .eq("module_id", modulId)
     .order("urutan");
 
@@ -341,14 +346,9 @@ export async function progresBelajarTim(
   const semuaKursus = await daftarKursus(pengguna);
   const anggota = await daftarAnggota();
 
-  // Siapa yang boleh dilihat: cerminan `boleh_orang()` di database.
-  const terlihat = anggota.filter((a) => {
-    if (pengguna.role === "CEO" || pengguna.role === "Manager") return true;
-    if (pengguna.role === "Leader" || pengguna.role === "Co-Leader") {
-      return a.unitId === pengguna.unitId;
-    }
-    return a.id === pengguna.id;
-  });
+  // Siapa yang boleh dilihat: cerminan `boleh_orang()` di database —
+  // dirinya dan bawahannya lewat garis pelaporan (migrasi 0173).
+  const terlihat = saringLingkup(pengguna, anggota);
 
   if (modeData() === "demo") {
     const { enrollments, courses } = dataContoh;
