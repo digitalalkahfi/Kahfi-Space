@@ -16,6 +16,7 @@ import {
   bolehKelolaAnggota,
   daftarAnggotaTim,
   jejakAnggota,
+  strukturLengkap,
 } from "@/lib/data/anggota";
 import { daftarAkun } from "@/lib/data/akun";
 import { kontakAnggota } from "@/lib/data/profil";
@@ -73,7 +74,10 @@ export default async function ProfilAnggotaPage({
     asetDipegang(id),
   ]);
 
-  const rantai = petaRantai(semua)[anggota.id] ?? [];
+  // Garis pelaporan ke atas digambar dari struktur lengkap (kolom
+  // direktori saja): orang boleh tahu siapa atasannya walau data
+  // atasannya tidak terbuka baginya (0173).
+  const rantai = petaRantai(await strukturLengkap())[anggota.id] ?? [];
   const bawahanLangsung = semua.filter(
     (a) => a.atasanId === anggota.id && a.status === "aktif",
   );
