@@ -37,7 +37,10 @@ const hitung = async (nama, sql, params = []) =>
   Number((await sebagai(db, await id(nama), sql, params)).rows[0].n);
 
 uji("CEO dan Manager melihat seluruh goal", async () => {
-  const semua = await hitung("Hafidz Alkahfi", "select count(*)::int n from goals");
+  const semua = await hitung(
+    "Hafidz Alkahfi",
+    "select count(*)::int n from goals",
+  );
   const total = Number(
     (await sebagaiAdmin(db, "select count(*)::int n from goals")).rows[0].n,
   );
@@ -60,17 +63,20 @@ uji("Leader hanya melihat goal unitnya sendiri", async () => {
   harusSama(rows[0].lain, 0, "goal unit lain tidak boleh terlihat");
 });
 
-uji("Staff melihat goal akun yang ia pegang, bukan akun orang lain", async () => {
-  const { rows } = await sebagai(
-    db,
-    await id(ORANG.stafAff),
-    `select count(*)::int n from goals g
+uji(
+  "Staff melihat goal akun yang ia pegang, bukan akun orang lain",
+  async () => {
+    const { rows } = await sebagai(
+      db,
+      await id(ORANG.stafAff),
+      `select count(*)::int n from goals g
        join accounts a on a.id = g.account_id
       where a.pic_user_id <> $1`,
-    [await id(ORANG.stafAff)],
-  );
-  harusSama(rows[0].n, 0, "goal akun orang lain tidak boleh terlihat");
-});
+      [await id(ORANG.stafAff)],
+    );
+    harusSama(rows[0].n, 0, "goal akun orang lain tidak boleh terlihat");
+  },
+);
 
 uji("Finance melihat angkanya, tetapi tidak boleh mengubah goal", async () => {
   // RLS tidak menolak dengan galat: baris yang tak boleh disentuh sekadar
@@ -80,7 +86,10 @@ uji("Finance melihat angkanya, tetapi tidak boleh mengubah goal", async () => {
     "Finance harus bisa membaca goal",
   );
   const sebelum = (
-    await sebagaiAdmin(db, "select target_goal from goals where level = 'company'")
+    await sebagaiAdmin(
+      db,
+      "select target_goal from goals where level = 'company'",
+    )
   ).rows[0].target_goal;
 
   await sebagai(
@@ -91,8 +100,12 @@ uji("Finance melihat angkanya, tetapi tidak boleh mengubah goal", async () => {
 
   harusSama(
     Number(
-      (await sebagaiAdmin(db, "select target_goal from goals where level = 'company'"))
-        .rows[0].target_goal,
+      (
+        await sebagaiAdmin(
+          db,
+          "select target_goal from goals where level = 'company'",
+        )
+      ).rows[0].target_goal,
     ),
     Number(sebelum),
     "target goal perusahaan tidak boleh tersentuh Finance",
@@ -119,7 +132,11 @@ uji("Leader tidak boleh membuat maupun menghapus goal", async () => {
     ORANG.manager,
     "select count(*)::int n from goals where level = 'leader'",
   );
-  await sebagai(db, await id(ORANG.leaderMcn), "delete from goals where level = 'leader'");
+  await sebagai(
+    db,
+    await id(ORANG.leaderMcn),
+    "delete from goals where level = 'leader'",
+  );
   harusSama(
     await hitung(
       ORANG.manager,
@@ -134,10 +151,15 @@ uji("Staff tidak boleh mengubah target bulanan", async () => {
   const sebelum = (
     await sebagaiAdmin(db, "select sum(target)::numeric t from goal_months")
   ).rows[0].t;
-  await sebagai(db, await id(ORANG.stafAff), "update goal_months set target = 1");
+  await sebagai(
+    db,
+    await id(ORANG.stafAff),
+    "update goal_months set target = 1",
+  );
   harusSama(
     Number(
-      (await sebagaiAdmin(db, "select sum(target)::numeric t from goal_months")).rows[0].t,
+      (await sebagaiAdmin(db, "select sum(target)::numeric t from goal_months"))
+        .rows[0].t,
     ),
     Number(sebelum),
     "anak tangga bulanan tidak boleh tersentuh Staff",
@@ -159,9 +181,8 @@ uji("progres goal ikut batas pandang pemanggilnya", async () => {
 });
 
 uji("Staff boleh mengisi lead measure, tidak boleh menyusunnya", async () => {
-  const lm = (
-    await sebagaiAdmin(db, "select id from lead_measures limit 1")
-  ).rows[0].id;
+  const lm = (await sebagaiAdmin(db, "select id from lead_measures limit 1"))
+    .rows[0].id;
   await sebagai(
     db,
     await id(ORANG.stafAff),
@@ -184,9 +205,8 @@ uji("Staff boleh mengisi lead measure, tidak boleh menyusunnya", async () => {
 });
 
 uji("Staff tidak boleh mengisi realisasi atas nama orang lain", async () => {
-  const lm = (
-    await sebagaiAdmin(db, "select id from lead_measures limit 1")
-  ).rows[0].id;
+  const lm = (await sebagaiAdmin(db, "select id from lead_measures limit 1"))
+    .rows[0].id;
   await harusDitolak(
     async () =>
       sebagai(
@@ -202,7 +222,10 @@ uji("Staff tidak boleh mengisi realisasi atas nama orang lain", async () => {
 
 uji("Staff melihat definisi KPI, tidak boleh mengubahnya", async () => {
   harus(
-    (await hitung(ORANG.stafAff, "select count(*)::int n from kpi_definitions")) > 0,
+    (await hitung(
+      ORANG.stafAff,
+      "select count(*)::int n from kpi_definitions",
+    )) > 0,
     "definisi KPI harus terbuka untuk semua yang sudah masuk",
   );
   const sebelum = (
@@ -218,17 +241,19 @@ uji("Staff melihat definisi KPI, tidak boleh mengubahnya", async () => {
   );
   harusSama(
     Number(
-      (await sebagaiAdmin(
-        db,
-        "select sum(bobot)::numeric t from kpi_definitions where jabatan = 'Staff'",
-      )).rows[0].t,
+      (
+        await sebagaiAdmin(
+          db,
+          "select sum(bobot)::numeric t from kpi_definitions where jabatan = 'Staff'",
+        )
+      ).rows[0].t,
     ),
     Number(sebelum),
     "bobot KPI tidak boleh tersentuh Staff",
   );
 });
 
-uji("Staff hanya melihat snapshot KPI dirinya dan seunitnya", async () => {
+uji("Staff hanya melihat snapshot KPI dirinya sendiri (0173)", async () => {
   await sebagaiAdmin(
     db,
     `insert into kpi_snapshots (user_id, periode_bulan, skor_total, predikat, cakupan)
@@ -239,19 +264,25 @@ uji("Staff hanya melihat snapshot KPI dirinya dan seunitnya", async () => {
     db,
     stafId,
     `select count(*) filter (where s.user_id = $1)::int diri,
-            count(*) filter (where u.unit_id is distinct from
-              (select unit_id from users where id = $1)
-              and s.user_id <> $1)::int luar
-       from kpi_snapshots s join users u on u.id = s.user_id`,
+            count(*) filter (where s.user_id <> $1)::int lain
+       from kpi_snapshots s`,
     [stafId],
   );
   harusSama(rows[0].diri, 1);
-  harusSama(rows[0].luar, 0, "snapshot orang di luar unitnya tidak boleh terlihat");
+  harusSama(
+    rows[0].lain,
+    0,
+    "snapshot orang lain, seunit sekalipun, tidak boleh terlihat",
+  );
   await terapkanSeed(db);
 });
 
 uji("Leader melihat laporan mingguan unitnya saja", async () => {
-  await sebagai(db, await id(ORANG.manager), "select buat_laporan_mingguan('2024-10-14')");
+  await sebagai(
+    db,
+    await id(ORANG.manager),
+    "select buat_laporan_mingguan('2024-10-14')",
+  );
   const { rows } = await sebagai(
     db,
     await id(ORANG.leaderMcn),
@@ -281,58 +312,65 @@ uji("Leader tidak boleh menulis laporan mingguan secara langsung", async () => {
 });
 
 uji("jejak audit goal hanya terbuka untuk pengelola angka", async () => {
-  await harusDitolak(
-    async () => {
-      const { rows } = await sebagai(
-        db,
-        await id(ORANG.stafAff),
-        "select count(*)::int n from audit_logs",
-      );
-      if (rows[0].n > 0) return;
-      throw new Error("kosong");
-    },
-    "jejak audit seharusnya tidak terbaca Staff",
-  );
+  await harusDitolak(async () => {
+    const { rows } = await sebagai(
+      db,
+      await id(ORANG.stafAff),
+      "select count(*)::int n from audit_logs",
+    );
+    if (rows[0].n > 0) return;
+    throw new Error("kosong");
+  }, "jejak audit seharusnya tidak terbaca Staff");
   harus(
-    (await hitung(ORANG.manager, "select count(*)::int n from audit_logs")) >= 0,
+    (await hitung(ORANG.manager, "select count(*)::int n from audit_logs")) >=
+      0,
     "Manager harus bisa membaca jejak audit",
   );
 });
 
-uji("Staff unit lain tidak bisa mengisi lead measure unit tetangga", async () => {
-  // KRI unit menentukan keputusan WRM-nya; entri dari unit lain akan
-  // menggeser keputusan tim yang bukan pemiliknya.
-  const lmMcn = (
-    await sebagaiAdmin(
-      db,
-      `select lm.id from lead_measures lm
+uji(
+  "Staff unit lain tidak bisa mengisi lead measure unit tetangga",
+  async () => {
+    // KRI unit menentukan keputusan WRM-nya; entri dari unit lain akan
+    // menggeser keputusan tim yang bukan pemiliknya.
+    const lmMcn = (
+      await sebagaiAdmin(
+        db,
+        `select lm.id from lead_measures lm
          join goals g on g.id = lm.goal_id
          join units u on u.id = g.unit_id where u.kode = 'mcn'`,
-    )
-  ).rows[0].id;
-  const stafTap = await id("Yoga Saputra");
+      )
+    ).rows[0].id;
+    const stafTap = await id("Yoga Saputra");
 
-  harusSama(
-    Number(
-      (await sebagai(db, stafTap, "select count(*)::int n from lead_measures where id = $1", [lmMcn]))
-        .rows[0].n,
-    ),
-    0,
-    "lead measure unit lain tidak boleh terlihat",
-  );
-
-  await harusDitolak(
-    () =>
-      sebagai(
-        db,
-        stafTap,
-        `insert into lead_measure_entries (lead_measure_id, user_id, tanggal, nilai)
-         values ($1, $2, '2024-11-06', 9)`,
-        [lmMcn, stafTap],
+    harusSama(
+      Number(
+        (
+          await sebagai(
+            db,
+            stafTap,
+            "select count(*)::int n from lead_measures where id = $1",
+            [lmMcn],
+          )
+        ).rows[0].n,
       ),
-    "entri lintas unit seharusnya ditolak",
-  );
-});
+      0,
+      "lead measure unit lain tidak boleh terlihat",
+    );
+
+    await harusDitolak(
+      () =>
+        sebagai(
+          db,
+          stafTap,
+          `insert into lead_measure_entries (lead_measure_id, user_id, tanggal, nilai)
+         values ($1, $2, '2024-11-06', 9)`,
+          [lmMcn, stafTap],
+        ),
+      "entri lintas unit seharusnya ditolak",
+    );
+  },
+);
 
 const gagal = await jalankan();
 await db.close();
