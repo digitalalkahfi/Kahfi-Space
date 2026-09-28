@@ -5,11 +5,13 @@ import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { sesiSaatIni } from "@/lib/data/sesi";
 import { bolehKelolaGoal } from "@/lib/data/goal";
+import { dataContoh } from "@/lib/data/contoh";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
 import {
   labelPeriode,
   periksaPeriode,
   susunAnakTangga,
+  type DampakHapusGoal,
   type LevelGoal,
   type ModeTarget,
 } from "@/lib/goal";
@@ -264,6 +266,121 @@ export async function ubahTargetGoal(input: {
 
   segarkan();
   return sukses(undefined, "Target goal diperbarui.");
+}
+
+/** Pemeriksaan bersama sebelum goal dihapus atau dihitung dampaknya. */
+async function bolehHapus(): Promise<Hasil<null>> {
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (!bolehKelolaGoal(pengguna)) {
+    return gagal("Hanya CEO atau Manager yang boleh menghapus goal.", "izin");
+  }
+  return sukses(null);
+}
+
+/**
+ * Apa saja yang ikut terdampak bila goal ini dihapus, supaya dialog
+ * konfirmasi bisa menyebutnya satu per satu sebelum orang memutuskan.
+ */
+export async function dampakHapusGoal(
+  goalId: string,
+): Promise<Hasil<DampakHapusGoal>> {
+  if (!goalId) return gagal("Goal tidak dikenali.", "validasi");
+
+  if (modeData() === "demo") {
+    const { goals, lead_measures, lead_measure_entries, tasks } = dataContoh;
+    const g = goals.find((x) => x.id === goalId);
+    if (!g) return gagal("Goal tidak ditemukan.", "validasi");
+    // Data contoh menautkan lead measure dan komitmen ke goal unitnya.
+    const unit = g.level === "leader" ? g.unit : null;
+    const lm = unit ? lead_measures.filter((m) => m.unit === unit) : [];
+    const idLm = new Set(lm.map((m) => m.id));
+    return sukses({
+      anakTangga: (g.bulan_list ?? []).length,
+      turunan: goals.filter((x) => x.parent === g.id).length,
+      leadMeasure: lm.length,
+      catatanLeadMeasure: lead_measure_entries.filter((e) => idLm.has(e.lead))
+        .length,
+      komitmen: unit
+        ? tasks.filter(
+            (t) =>
+              t.tipe === "komitmen_mingguan" &&
+              (t as { goal_unit?: string }).goal_unit === unit,
+          ).length
+        : 0,
+    });
+  }
+
+  const izin = await bolehHapus();
+  if (!izin.ok) return izin;
+
+  const sb = await klienServer();
+  const hitung = { count: "exact", head: true } as const;
+  const [bulan, turunan, lm, komitmen] = await Promise.all([
+    sb.from("goal_months").select("id", hitung).eq("goal_id", goalId),
+    sb.from("goals").select("id", hitung).eq("parent_goal_id", goalId),
+    sb.from("lead_measures").select("id").eq("goal_id", goalId),
+    sb
+      .from("tasks")
+      .select("id", hitung)
+      .eq("goal_id", goalId)
+      .eq("tipe", "komitmen_mingguan"),
+  ]);
+  const galat = bulan.error ?? turunan.error ?? lm.error ?? komitmen.error;
+  if (galat) return terjemahkan(galat);
+
+  const idLm = (lm.data ?? []).map((m) => m.id);
+  let catatan = 0;
+  if (idLm.length > 0) {
+    const { count, error } = await sb
+      .from("lead_measure_entries")
+      .select("id", hitung)
+      .in("lead_measure_id", idLm);
+    if (error) return terjemahkan(error);
+    catatan = count ?? 0;
+  }
+
+  return sukses({
+    anakTangga: bulan.count ?? 0,
+    turunan: turunan.count ?? 0,
+    leadMeasure: idLm.length,
+    catatanLeadMeasure: catatan,
+    komitmen: komitmen.count ?? 0,
+  });
+}
+
+/**
+ * Menghapus goal secara permanen; hanya CEO/Manager (policy `goals_hapus`).
+ *
+ * Dalam satu pernyataan database: anak tangga bulanan serta lead measure
+ * beserta catatannya ikut terhapus, goal turunannya dilepas menjadi goal
+ * teratas, dan komitmen mingguannya diturunkan menjadi tiket biasa
+ * (0022). Jejak goal dan anak tangganya tetap tercatat di audit (0025).
+ * Untuk goal yang tidak dilanjutkan tetapi riwayatnya masih dibutuhkan,
+ * `tutupGoal` tetap tersedia.
+ */
+export async function hapusGoal(goalId: string): Promise<Hasil> {
+  if (!goalId) return gagal("Goal tidak dikenali.", "validasi");
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const izin = await bolehHapus();
+  if (!izin.ok) return izin;
+
+  const sb = await klienServer();
+  const { data, error } = await sb
+    .from("goals")
+    .delete()
+    .eq("id", goalId)
+    .select("judul");
+
+  if (error) return terjemahkan(error);
+  // Penolakan RLS tidak memunculkan galat, hanya nol baris yang terhapus.
+  if (!data || data.length === 0) {
+    return gagal("Goal tidak ditemukan atau sudah dihapus.", "validasi");
+  }
+
+  segarkan();
+  return sukses(undefined, `Goal "${data[0].judul}" dihapus.`);
 }
 
 /**
