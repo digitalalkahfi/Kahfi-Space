@@ -60,11 +60,10 @@ uji("bulan penuh dihitung sama dengan hitungan aplikasi", async () => {
   ];
 
   for (const [dari, sampai] of pasangan) {
-    const { rows } = await sebagaiAdmin(
-      db,
-      "select bulan_penuh($1, $2) as n",
-      [dari, sampai],
-    );
+    const { rows } = await sebagaiAdmin(db, "select bulan_penuh($1, $2) as n", [
+      dari,
+      sampai,
+    ]);
     harusSama(rows[0].n, bulanPenuh(dari, sampai), `${dari} → ${sampai}`);
   }
 });
@@ -142,7 +141,10 @@ uji("penyusutan berhenti di residu, tidak pernah minus", async () => {
       Number(baris.nilai_buku) >= 0,
       `${baris.kode}: nilai buku tidak minus`,
     );
-    if (!["dilepas", "hilang"].includes(layar.status) && layar.masaManfaat > 0) {
+    if (
+      !["dilepas", "hilang"].includes(layar.status) &&
+      layar.masaManfaat > 0
+    ) {
       harusSama(
         Number(baris.nilai_buku),
         layar.residu,
@@ -186,22 +188,28 @@ uji("aset tanpa masa manfaat tidak disusutkan", async () => {
 });
 
 uji("ringkasan perusahaan tidak dijawab sebagian", async () => {
-  // Staff memang melihat aset yang ia pegang sendiri (migrasi 0102),
-  // tetapi menjumlahkan sisa itu lalu menyebutnya nilai aset perusahaan
-  // akan menyesatkan. Jadi jawabannya nol, bukan sebagian.
-  const { rows } = await sebagai(db, staf, "select * from ringkas_nilai_aset()");
+  // Menjumlahkan sebagian lalu menyebutnya nilai aset perusahaan akan
+  // menyesatkan. Jadi jawabannya nol, bukan sebagian.
+  const { rows } = await sebagai(
+    db,
+    staf,
+    "select * from ringkas_nilai_aset()",
+  );
 
   harusSama(Number(rows[0].nilai_buku), 0, "tanpa hak, tidak ada angka");
   harusSama(rows[0].total, 0, "tidak juga jumlah asetnya");
 
+  // Sejak 0176 angka rupiah hanya untuk CEO, Manager, dan Finance —
+  // termasuk nilai buku aset yang dipegang Staff itu sendiri.
   const { rows: miliknya } = await sebagai(
     db,
     staf,
     "select * from nilai_buku_aset()",
   );
-  harus(
-    miliknya.length > 0 && miliknya.length < asetLayar.length,
-    "yang ia pegang sendiri tetap terbaca, sisanya tidak",
+  harusSama(
+    miliknya.length,
+    0,
+    "Staff tidak melihat nilai buku, miliknya sekalipun",
   );
 });
 
