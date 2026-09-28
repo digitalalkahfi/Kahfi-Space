@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { BarCapaian } from "@/components/motion/bar-capaian";
 import { cn } from "@/lib/utils";
 import { persen, rupiahRingkas } from "@/lib/format";
+import { jumlahHariPeriode, labelPeriode, satuBulanPenuh } from "@/lib/goal";
 import type { AnakTanggaBulan } from "@/lib/data/goal";
 
 const NAMA_BULAN = (b: string) =>
@@ -12,7 +13,10 @@ const NAMA_BULAN = (b: string) =>
     timeZone: "UTC",
   });
 
-/** Anak tangga bulanan: target dipecah per bulan, bukan satu angka besar. */
+/**
+ * Anak tangga bulanan: target dipecah per bulan, bukan satu angka besar.
+ * Bulan yang hanya terpakai sebagian menyebut rentang tanggalnya.
+ */
 export function TanggaBulanan({
   judul,
   bulan,
@@ -43,7 +47,8 @@ export function TanggaBulanan({
       ) : (
         <ol className="space-y-2.5 px-5">
           {bulan.map((b) => {
-            const mendatang = b.realisasi === 0 && !b.berjalan;
+            const mendatang = b.mendatang;
+            const sebagian = !satuBulanPenuh(b.dari, b.sampai);
             const kuat = b.rasio >= 90;
             return (
               <li
@@ -54,14 +59,22 @@ export function TanggaBulanan({
                 )}
               >
                 <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                  <p className="text-sm leading-5 font-semibold">
-                    {NAMA_BULAN(b.bulan)}
-                    {b.berjalan ? (
-                      <span className="ml-1.5 rounded-full bg-card px-2 py-0.5 text-[10px] leading-[13px] font-semibold text-info-text">
-                        Berjalan
-                      </span>
+                  <div>
+                    <p className="text-sm leading-5 font-semibold">
+                      {NAMA_BULAN(b.bulan)}
+                      {b.berjalan ? (
+                        <span className="ml-1.5 rounded-full bg-card px-2 py-0.5 text-[10px] leading-[13px] font-semibold text-info-text">
+                          Berjalan
+                        </span>
+                      ) : null}
+                    </p>
+                    {sebagian ? (
+                      <p className="tabular text-[11px] leading-[14px] text-muted-foreground">
+                        {labelPeriode(b.dari, b.sampai)} ·{" "}
+                        {jumlahHariPeriode(b.dari, b.sampai)} hari
+                      </p>
                     ) : null}
-                  </p>
+                  </div>
                   <p className="tabular text-[13px] leading-[18px]">
                     <span className="font-semibold">
                       {mendatang ? "—" : rupiahRingkas(b.realisasi)}
