@@ -244,20 +244,32 @@ test("Staff hanya melihat laporannya sendiri dan akun yang ia pegang", () => {
   );
 });
 
-test("Leader melihat laporan seluruh unitnya, bukan unit lain", () => {
+test("Leader melihat laporan orang di bawahnya, bukan unit lain", () => {
   const dewi = orang("Leader", "Dewi Lestari", "affiliator");
+  const bawahan = new Set(["Nabila Putri"]);
   assert.equal(
     bolehLihatLaporan(
       dewi,
       lap({ pelapor: "Nabila Putri", picAkun: "Nabila Putri" }),
+      bawahan,
     ),
     true,
-    "rekap Leader mencakup anggotanya",
+    "rekap Leader mencakup bawahannya",
+  );
+  assert.equal(
+    bolehLihatLaporan(
+      dewi,
+      lap({ pelapor: "Arif Setiawan", picAkun: "Arif Setiawan" }),
+      bawahan,
+    ),
+    false,
+    "rekan seunit yang bukan bawahannya tidak termasuk (0173)",
   );
   assert.equal(
     bolehLihatLaporan(
       dewi,
       lap({ pelapor: "Galih Prakoso", departemen: "mcn", picAkun: null }),
+      bawahan,
     ),
     false,
   );
