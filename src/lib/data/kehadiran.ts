@@ -4,10 +4,11 @@ import "server-only";
 
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
-import { dataContoh } from "@/lib/data/contoh";
+import { dataContoh, lingkupContoh } from "@/lib/data/contoh";
 import { aktifDemo } from "@/lib/demo";
 import { jamEfektifMasuk, menitTelat } from "@/lib/izin";
 import { batasMinimum } from "@/lib/batas-minimum";
+import { dalamLingkup } from "@/lib/lingkup";
 import { wajibAbsen } from "@/lib/rekap-kehadiran";
 import type {
   AnggotaKehadiran,
@@ -55,14 +56,9 @@ function rangkum(tim: AnggotaKehadiran[]): RekapKehadiran {
   };
 }
 
-/** Cakupan sama dengan RLS: Leader & Co-Leader hanya unitnya sendiri. */
-function dalamCakupan(pengguna: Pengguna, unitNama: string) {
-  if (pengguna.role === "CEO" || pengguna.role === "Manager") return true;
-  if (!pengguna.unitId) return false;
-  const milik = { affiliator: "Affiliator", mcn: "MCN", tap: "TAP" }[
-    pengguna.unitId
-  ];
-  return unitNama.startsWith(milik);
+/** Cakupan sama dengan `status_tim_harian` (0173): dirinya dan bawahannya. */
+function dalamCakupan(pengguna: Pengguna, userId: string) {
+  return dalamLingkup(pengguna, userId, lingkupContoh());
 }
 
 /**
@@ -160,7 +156,7 @@ function hitungDemo(pengguna: Pengguna, tanggal: string): RekapKehadiran {
         ...unggahanDemo(u.nama, tanggal),
       } satisfies AnggotaKehadiran;
     })
-    .filter((a) => dalamCakupan(pengguna, a.unit))
+    .filter((a) => dalamCakupan(pengguna, a.id))
     .sort((a, b) => a.nama.localeCompare(b.nama));
 
   return rangkum(tim);
