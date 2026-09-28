@@ -97,7 +97,8 @@ export default async function BerandaPage({
       : Promise.resolve(null),
   ]);
 
-  // Cakupan angka sudah dibatasi di lapisan data (RLS di mode Supabase).
+  // Cakupan angka sudah dibatasi di lapisan data (RLS di mode Supabase);
+  // kartu unit lain pun tidak ditampilkan kepada yang bukan lintas unit.
   const unit = gmv.unit;
   const rasioHariIni =
     gmv.targetHarian > 0 ? (gmv.gmvHariIni / gmv.targetHarian) * 100 : 0;
