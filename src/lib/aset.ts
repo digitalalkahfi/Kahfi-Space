@@ -8,7 +8,8 @@
  * sehari-hari: barang ini nilainya tinggal berapa, dan sekarang ada pada
  * siapa.
  */
-import type { KodeUnit } from "@/lib/types";
+import { dalamLingkup, type OrangLingkup } from "@/lib/lingkup";
+import type { KodeUnit, Peran } from "@/lib/types";
 
 export type StatusAset =
   "dipakai" | "cadangan" | "perbaikan" | "hilang" | "dilepas";
@@ -661,4 +662,46 @@ export function kodeAsetBerikutnya(kode: string[]): string {
     .map((k) => Number(k.slice(4)));
   const berikut = angka.length === 0 ? 1 : Math.max(...angka) + 1;
   return `AST-${String(berikut).padStart(4, "0")}`;
+}
+
+/** Peran yang melihat seluruh aset beserta nilai rupiahnya. */
+export const PERAN_SEMUA_ASET: readonly Peran[] = ["CEO", "Manager", "Finance"];
+
+/**
+ * Siapa boleh melihat sebuah aset — padanan `boleh_aset` (migrasi 0176).
+ *
+ * Staff melihat aset yang sedang ia pegang. Leader dan Co-Leader melihat
+ * aset yang dipegang dirinya atau orang di bawahnya, ditambah aset
+ * unitnya yang belum dipegang siapa pun. CEO, Manager, dan Finance
+ * melihat semuanya.
+ */
+export function bolehLihatAset(
+  pengguna: { id: string; role: Peran; unitId: KodeUnit | null },
+  aset: { pemegangId: string | null; unitKode: KodeUnit | null },
+  lingkup: readonly OrangLingkup[],
+): boolean {
+  if (PERAN_SEMUA_ASET.includes(pengguna.role)) return true;
+  if (aset.pemegangId !== null) {
+    return dalamLingkup(pengguna, aset.pemegangId, lingkup);
+  }
+  const memimpin = pengguna.role === "Leader" || pengguna.role === "Co-Leader";
+  return (
+    memimpin && aset.unitKode !== null && aset.unitKode === pengguna.unitId
+  );
+}
+
+/** Judul daftar aset sesuai cakupan pembacanya. */
+export function judulCakupanAset(role: Peran): string {
+  if (PERAN_SEMUA_ASET.includes(role)) return "Seluruh aset";
+  if (role === "Leader" || role === "Co-Leader") return "Aset tim Anda";
+  return "Aset yang Anda pegang";
+}
+
+/** Penjelasan cakupan untuk yang tidak melihat seluruh aset; null bila semua. */
+export function keteranganCakupanAset(role: Peran): string | null {
+  if (PERAN_SEMUA_ASET.includes(role)) return null;
+  if (role === "Leader" || role === "Co-Leader") {
+    return "Yang tampil: aset yang dipegang Anda dan orang di bawah Anda, serta aset unit Anda yang belum dipegang siapa pun. Daftar lengkap beserta nilainya hanya untuk Finance, Manager, dan CEO.";
+  }
+  return "Yang tampil: aset yang sedang Anda pegang. Daftar lengkap beserta nilainya hanya untuk Finance, Manager, dan CEO.";
 }
