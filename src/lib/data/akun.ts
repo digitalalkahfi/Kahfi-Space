@@ -3,8 +3,9 @@ import "server-only";
 
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
-import { dataContoh } from "@/lib/data/contoh";
+import { dataContoh, lingkupContoh } from "@/lib/data/contoh";
 import { aktifDemo } from "@/lib/demo";
+import { idTerlihat } from "@/lib/lingkup";
 import { batasMinimum, KEPATUHAN_KOSONG } from "@/lib/batas-minimum";
 import type { Kepatuhan } from "@/lib/batas-minimum";
 import {
@@ -319,11 +320,14 @@ async function akunDemo(
       ) {
         return true;
       }
-      if (pengguna.role === "Leader" || pengguna.role === "Co-Leader") {
-        // `unitId` pada Pengguna sudah berupa kode unit, bukan UUID.
-        return a.unitKode === pengguna.unitId;
-      }
-      return a.picNama === pengguna.nama;
+      // Padanan `accounts_baca` (0173): pemegangnya, pendampingnya, atasan
+      // pemegangnya, dan pimpinan unit untuk akun yang belum punya PIC.
+      const ids = idTerlihat(pengguna, lingkupContoh());
+      if (a.picId && (ids === null || ids.has(a.picId))) return true;
+      if (a.coLeaderId === pengguna.id) return true;
+      const memimpin =
+        pengguna.role === "Leader" || pengguna.role === "Co-Leader";
+      return memimpin && a.picId === null && a.unitKode === pengguna.unitId;
     })
     .sort((a, b) => a.username.localeCompare(b.username));
 }
