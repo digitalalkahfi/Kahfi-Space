@@ -4,6 +4,7 @@ import {
   akhirBulan,
   batasSelesaiGoal,
   bolehJadiInduk,
+  kalimatDampakHapus,
   keteranganTenggat,
   labelPeriode,
   lengkapiRentang,
@@ -238,4 +239,40 @@ test("anak tangga lama tanpa rentang dibaca bulan penuh", () => {
     { mulai: "2026-10-15", selesai: "2026-11-30" },
   );
   assert.equal(periodeDariTangga([]), null);
+});
+
+test("dialog hapus goal hanya menyebut dampak yang memang ada", () => {
+  const kosong = {
+    anakTangga: 0,
+    turunan: 0,
+    leadMeasure: 0,
+    catatanLeadMeasure: 0,
+    komitmen: 0,
+  };
+  assert.deepEqual(kalimatDampakHapus(kosong), [
+    "Riwayat perubahan goal ini tetap tersimpan di jejak audit.",
+  ]);
+
+  const lengkap = kalimatDampakHapus({
+    anakTangga: 2,
+    turunan: 1,
+    leadMeasure: 3,
+    catatanLeadMeasure: 45,
+    komitmen: 1,
+  });
+  assert.equal(lengkap.length, 5);
+  assert.match(lengkap[0], /2 anak tangga/);
+  assert.match(lengkap[1], /3 lead measure beserta 45 catatan/);
+  assert.match(
+    lengkap[2],
+    /tidak ikut terhapus/,
+    "turunan dilepas, bukan dihapus",
+  );
+  assert.match(lengkap[3], /tiket biasa/, "komitmen diturunkan, bukan dihapus");
+
+  assert.match(
+    kalimatDampakHapus({ ...kosong, leadMeasure: 1 })[0],
+    /^1 lead measure-nya ikut terhapus/,
+    "lead measure tanpa catatan",
+  );
 });
