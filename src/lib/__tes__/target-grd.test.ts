@@ -33,6 +33,22 @@ test("bulan tanpa anak tangga bernilai nol, bukan NaN", () => {
   assert.equal(targetHarianGrd([], "2024-12-31"), 0);
 });
 
+test("rentang tanggal: di luar rentang nol, di dalamnya dibagi hari rentang", () => {
+  // Goal yang mulai 15 Oktober (0178): 17 hari, jadi 170.000 = 10.000/hari.
+  const tangga = [
+    {
+      bulan: "2024-10-01",
+      dari: "2024-10-15",
+      sampai: "2024-10-31",
+      target: 170_000,
+    },
+  ];
+  assert.equal(targetHarianGrd(tangga, "2024-10-14"), 0);
+  assert.equal(targetHarianGrd(tangga, "2024-10-15"), 10_000);
+  assert.equal(targetHarianGrd(tangga, "2024-10-31"), 10_000);
+  assert.equal(targetHarianGrd(tangga, "2024-11-01"), 0);
+});
+
 test("beberapa goal pada bulan yang sama dijumlahkan dulu", () => {
   // Satu unit bisa punya lebih dari satu goal aktif; SQL menjumlahkannya.
   const tangga = [
