@@ -55,7 +55,7 @@ export const HAK_AKSES: BarisHak[] = [
   {
     kunci: "statusTim",
     label: "Melihat status tim harian",
-    alasan: "Ringkasan kehadiran & laporan unit yang ia pimpin.",
+    alasan: "Ringkasan kehadiran & laporan orang-orang di bawahnya.",
     punya: (p) => bolehLihat(p, "statusTim"),
   },
   {
