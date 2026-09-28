@@ -8,7 +8,7 @@ import { bolehKelolaGoal } from "@/lib/data/goal";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
 import {
   labelPeriode,
-  MAKS_BULAN_GOAL,
+  periksaPeriode,
   susunAnakTangga,
   type LevelGoal,
   type ModeTarget,
@@ -45,11 +45,11 @@ export type MasukanGoal = {
   targetBase: number;
   targetGoal: number;
   targetStretch: number;
-  /** Bulan pertama periode, mis. "2026-10-01". */
-  mulaiBulan: string;
-  /** Lama periode dalam bulan, 1–12. */
-  jumlahBulan: number;
-  /** Target berlaku setiap bulan, atau total yang dibagi rata. */
+  /** Tanggal mulai periode, mis. "2026-10-15". */
+  mulai: string;
+  /** Tanggal selesai (tenggat) periode, paling lama 12 bulan sejak mulai. */
+  selesai: string;
+  /** Target berlaku setiap bulan penuh, atau total yang dibagi rata per hari. */
   modeTarget: ModeTarget;
 };
 
@@ -77,27 +77,19 @@ function periksa(input: MasukanGoal): string | null {
   ) {
     return "Target harus menanjak: base ≤ goal ≤ stretch.";
   }
-  if (!/^\d{4}-\d{2}-01$/.test(input.mulaiBulan)) {
-    return "Bulan mulai harus tanggal 1.";
-  }
-  if (
-    !Number.isInteger(input.jumlahBulan) ||
-    input.jumlahBulan < 1 ||
-    input.jumlahBulan > MAKS_BULAN_GOAL
-  ) {
-    return `Periode goal antara 1 sampai ${MAKS_BULAN_GOAL} bulan.`;
-  }
+  const periodeSalah = periksaPeriode(input.mulai, input.selesai);
+  if (periodeSalah) return periodeSalah;
   if (input.modeTarget !== "bulanan" && input.modeTarget !== "total") {
     return "Cara baca target tidak dikenal.";
   }
   return null;
 }
 
-/** Anak tangga yang akan disimpan untuk masukan ini. */
+/** Anak tangga (beserta rentang tanggalnya) yang akan disimpan. */
 function bulanDari(input: MasukanGoal) {
   return susunAnakTangga(
-    input.mulaiBulan,
-    input.jumlahBulan,
+    input.mulai,
+    input.selesai,
     input.targetGoal,
     input.modeTarget,
   );
@@ -135,7 +127,7 @@ export async function tambahGoal(input: MasukanGoal): Promise<Hasil<string>> {
       target_base: input.targetBase,
       target_goal: input.targetGoal,
       target_stretch: input.targetStretch,
-      periode: labelPeriode(input.mulaiBulan, input.jumlahBulan),
+      periode: labelPeriode(input.mulai, input.selesai),
       dibuat_oleh: pengguna.id,
     })
     .select("id")
@@ -144,15 +136,15 @@ export async function tambahGoal(input: MasukanGoal): Promise<Hasil<string>> {
   if (error) return terjemahkan(error);
 
   const tangga = bulanDari(input);
-  const { error: galatBulan } = await sb
-    .from("goal_months")
-    .insert(
-      tangga.map((t) => ({
-        goal_id: data.id,
-        bulan: t.bulan,
-        target: t.target,
-      })),
-    );
+  const { error: galatBulan } = await sb.from("goal_months").insert(
+    tangga.map((t) => ({
+      goal_id: data.id,
+      bulan: t.bulan,
+      dari: t.dari,
+      sampai: t.sampai,
+      target: t.target,
+    })),
+  );
 
   if (galatBulan) {
     // Goal tanpa anak tangga lebih menyesatkan daripada tidak ada goal.
@@ -168,10 +160,10 @@ export async function tambahGoal(input: MasukanGoal): Promise<Hasil<string>> {
  * Mengubah goal yang sudah ada: judul, level, pemilik, induk, sasaran,
  * target, dan periodenya.
  *
- * Seluruhnya dikerjakan fungsi `ubah_goal` (migrasi 0177) dalam satu
- * transaksi. Anak tangga hanya disusun ulang bila periode, target goal,
- * atau cara baca targetnya berubah — memperbaiki judul saja tidak boleh
- * meratakan anak tangga yang sengaja dibuat menanjak.
+ * Seluruhnya dikerjakan fungsi `ubah_goal` (migrasi 0177, 0178) dalam satu
+ * transaksi. Anak tangga hanya disusun ulang bila tanggal periode, target
+ * goal, atau cara baca targetnya berubah — memperbaiki judul saja tidak
+ * boleh meratakan anak tangga yang sengaja dibuat menanjak.
  */
 export async function ubahGoal(
   input: MasukanGoal & { goalId: string; aturUlangBulan: boolean },
@@ -202,7 +194,7 @@ export async function ubahGoal(
     p_base: input.targetBase,
     p_target: input.targetGoal,
     p_stretch: input.targetStretch,
-    p_periode: labelPeriode(input.mulaiBulan, input.jumlahBulan),
+    p_periode: labelPeriode(input.mulai, input.selesai),
     p_bulan: input.aturUlangBulan ? bulanDari(input) : null,
   });
 
