@@ -1,9 +1,16 @@
-import { CornerDownRight, Target } from "lucide-react";
+import { CalendarRange, CornerDownRight, Target } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { BarCapaian } from "@/components/motion/bar-capaian";
+import { DialogUbahGoal } from "@/components/grd/dialog-ubah-goal";
 import { cn } from "@/lib/utils";
-import { persen, rupiahRingkas } from "@/lib/format";
-import type { SimpulGoal } from "@/lib/data/goal";
+import { bulanPendek, persen, rupiahRingkas } from "@/lib/format";
+import { akhirPeriode, statusPeriode } from "@/lib/goal";
+import type { PilihanGoal, SimpulGoal } from "@/lib/data/goal";
+
+/** Goal itu sendiri beserta seluruh turunannya. */
+function idCabang(goal: SimpulGoal): string[] {
+  return [goal.id, ...goal.anak.flatMap(idCabang)];
+}
 
 const LABEL_LEVEL: Record<SimpulGoal["level"], string> = {
   company: "Perusahaan",
@@ -21,9 +28,25 @@ const GAYA_LEVEL: Record<SimpulGoal["level"], string> = {
   staff: "bg-muted text-muted-foreground",
 };
 
-function Simpul({ goal, dalam }: { goal: SimpulGoal; dalam: number }) {
+function Simpul({
+  goal,
+  dalam,
+  acuan,
+  pilihan,
+}: {
+  goal: SimpulGoal;
+  dalam: number;
+  acuan: string;
+  /** Ada bila pembaca boleh mengubah goal (CEO/Manager). */
+  pilihan: PilihanGoal | null;
+}) {
   const kuat = goal.rasio >= 90;
   const sedang = goal.rasio >= 75;
+  // Capaian hanya berarti di dalam periodenya: goal Oktober yang dilihat
+  // pada September belum punya target bulan ini, bukan gagal 0%.
+  const status = goal.mulai
+    ? statusPeriode(goal.mulai, goal.jumlahBulan, acuan)
+    : "berjalan";
 
   return (
     <li>
@@ -56,32 +79,63 @@ function Simpul({ goal, dalam }: { goal: SimpulGoal; dalam: number }) {
             <p className="tabular mt-0.5 text-[11px] leading-[14px] text-muted-foreground">
               {goal.pemilik}
               {goal.unit ? ` · ${goal.unit}` : ""}
-              {goal.akun ? ` · ${goal.akun}` : ""} ·{" "}
-              {rupiahRingkas(goal.targetBulan)}
+              {goal.akun ? ` · ${goal.akun}` : ""}
+              {status === "berjalan"
+                ? ` · ${rupiahRingkas(goal.targetBulan)} bulan ini`
+                : ""}
+            </p>
+            <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-[11px] leading-[14px] font-medium text-info-text ring-1 ring-border-subtle">
+              <CalendarRange className="size-3 shrink-0" />
+              {goal.periode}
+              {goal.jumlahBulan > 1 ? ` · ${goal.jumlahBulan} bulan` : ""}
             </p>
           </div>
 
-          <span
-            className={cn(
-              "tabular shrink-0 text-[13px] leading-[18px] font-bold",
-              kuat
-                ? "text-ok-text"
-                : sedang
-                  ? "text-warn-text"
-                  : "text-danger-text",
+          <div className="flex shrink-0 items-start gap-2">
+            {status === "berjalan" ? (
+              <span
+                className={cn(
+                  "tabular text-[13px] leading-[18px] font-bold",
+                  kuat
+                    ? "text-ok-text"
+                    : sedang
+                      ? "text-warn-text"
+                      : "text-danger-text",
+                )}
+              >
+                {persen(goal.rasio)}
+              </span>
+            ) : (
+              <span className="text-[11px] leading-[18px] font-semibold text-muted-foreground">
+                {status === "belum" && goal.mulai
+                  ? `Mulai ${bulanPendek(goal.mulai)}`
+                  : goal.mulai
+                    ? `Berakhir ${bulanPendek(
+                        akhirPeriode(goal.mulai, goal.jumlahBulan),
+                      )}`
+                    : null}
+              </span>
             )}
-          >
-            {persen(goal.rasio)}
-          </span>
+            {pilihan ? (
+              <DialogUbahGoal
+                goal={goal}
+                pilihan={pilihan}
+                acuan={acuan}
+                kecualiInduk={idCabang(goal)}
+              />
+            ) : null}
+          </div>
         </div>
 
-        <BarCapaian
-          rasio={goal.rasio}
-          label={`Capaian ${goal.judul}`}
-          warna={kuat ? "bg-ok" : sedang ? "bg-warn" : "bg-danger"}
-          tinggi="h-1.5"
-          className="mt-2.5 bg-card"
-        />
+        {status === "berjalan" ? (
+          <BarCapaian
+            rasio={goal.rasio}
+            label={`Capaian ${goal.judul}`}
+            warna={kuat ? "bg-ok" : sedang ? "bg-warn" : "bg-danger"}
+            tinggi="h-1.5"
+            className="mt-2.5 bg-card"
+          />
+        ) : null}
 
         <p className="tabular mt-1.5 text-[11px] leading-[14px] text-muted-foreground">
           Base {rupiahRingkas(goal.targetBase)} · Goal{" "}
@@ -93,7 +147,13 @@ function Simpul({ goal, dalam }: { goal: SimpulGoal; dalam: number }) {
       {goal.anak.length > 0 ? (
         <ul className="mt-2 space-y-2">
           {goal.anak.map((a) => (
-            <Simpul key={a.id} goal={a} dalam={dalam + 1} />
+            <Simpul
+              key={a.id}
+              goal={a}
+              dalam={dalam + 1}
+              acuan={acuan}
+              pilihan={pilihan}
+            />
           ))}
         </ul>
       ) : null}
@@ -102,7 +162,17 @@ function Simpul({ goal, dalam }: { goal: SimpulGoal; dalam: number }) {
 }
 
 /** Pohon goal berjenjang: perusahaan → manager → unit → akun. */
-export function PohonGoal({ pohon }: { pohon: SimpulGoal[] }) {
+export function PohonGoal({
+  pohon,
+  acuan,
+  pilihan = null,
+}: {
+  pohon: SimpulGoal[];
+  /** Tanggal hari ini, dasar status periode tiap goal. */
+  acuan: string;
+  /** Bahan dialog ubah; hanya diisi untuk CEO/Manager. */
+  pilihan?: PilihanGoal | null;
+}) {
   return (
     <Card className="kartu-interaktif rounded-3xl shadow-card ring-border-subtle">
       <div className="flex items-start justify-between gap-3 px-5">
@@ -124,7 +194,13 @@ export function PohonGoal({ pohon }: { pohon: SimpulGoal[] }) {
       ) : (
         <ul className="space-y-2 px-5">
           {pohon.map((g) => (
-            <Simpul key={g.id} goal={g} dalam={0} />
+            <Simpul
+              key={g.id}
+              goal={g}
+              dalam={0}
+              acuan={acuan}
+              pilihan={pilihan}
+            />
           ))}
         </ul>
       )}
