@@ -22,6 +22,8 @@ export type Pengguna = {
   unitId: KodeUnit | null;
   fotoUrl: string | null;
   inisial: string;
+  /** Atasan langsung — dasar lingkup hierarki (migrasi 0173). */
+  atasanId?: string | null;
 };
 
 export type Unit = {
