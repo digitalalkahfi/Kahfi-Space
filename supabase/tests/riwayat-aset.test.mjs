@@ -1,4 +1,7 @@
-/** Riwayat pemegang aset: terbuka untuk semua, tanpa membuka angka. */
+/**
+ * Riwayat pemegang aset: tanpa angka rupiah, dan hanya untuk aset yang
+ * boleh dilihat pemanggil (migrasi 0176).
+ */
 import {
   buatDb,
   buatSuite,
@@ -18,35 +21,48 @@ const id = async (nama) =>
     .rows[0].id;
 
 const staf = await id("Rian Hidayat");
+const dewi = await id("Dewi Lestari"); // Leader Affiliator, atasan Yusuf
 const manager = await id("Farhan Pratama");
 const finance = await id("Laras Ayuningtyas");
 const yusuf = await id("Yusuf Ramadhan");
 const fajar = await id("Fajar Ramadhan");
 
-uji("Staff melihat riwayat seluruh aset, bukan hanya miliknya", async () => {
+uji("Staff hanya melihat riwayat aset yang ia pegang (0176)", async () => {
   const { rows } = await sebagai(db, staf, "select * from riwayat_aset()");
-  const semua = Number(
-    (await sebagaiAdmin(db, "select count(*)::int as n from asset_events")).rows[0]
-      .n,
+
+  harus(rows.length > 0, "riwayat asetnya sendiri terbaca");
+  harus(
+    rows.every((r) => r.kode === "AST-0006"),
+    "riwayat aset orang lain tidak terbaca Staff",
   );
-
-  harusSama(rows.length, semua, "seluruh perpindahan terbaca");
   harus(!("nilai_perolehan" in rows[0]), "tanpa satu pun angka rupiah");
-});
 
-uji("riwayat menyebut barang, keadaan, dan tangan yang memegangnya", async () => {
-  const { rows } = await sebagai(db, staf, "select * from riwayat_aset($1)", [
+  const lain = await sebagai(db, staf, "select * from riwayat_aset($1)", [
     "AST-0010",
   ]);
-
-  harus(rows.length >= 3, "laptop hilang punya jejak berlapis");
-  harusSama(rows[0].ke, "hilang", "kejadian terbaru lebih dulu");
-  harusSama(rows[0].pemegang_nama, "Yusuf Ramadhan", "di tangan siapa terakhir");
-  harusSama(rows.at(-1).dari, null, "kejadian tertua adalah perolehannya");
+  harusSama(lain.rows.length, 0, "meminta kode aset orang lain tetap kosong");
 });
 
+uji(
+  "riwayat menyebut barang, keadaan, dan tangan yang memegangnya",
+  async () => {
+    const { rows } = await sebagai(db, dewi, "select * from riwayat_aset($1)", [
+      "AST-0010",
+    ]);
+
+    harus(rows.length >= 3, "laptop hilang punya jejak berlapis");
+    harusSama(rows[0].ke, "hilang", "kejadian terbaru lebih dulu");
+    harusSama(
+      rows[0].pemegang_nama,
+      "Yusuf Ramadhan",
+      "di tangan siapa terakhir",
+    );
+    harusSama(rows.at(-1).dari, null, "kejadian tertua adalah perolehannya");
+  },
+);
+
 uji("kode dicocokkan tanpa memandang huruf besar-kecil", async () => {
-  const { rows } = await sebagai(db, staf, "select * from riwayat_aset($1)", [
+  const { rows } = await sebagai(db, dewi, "select * from riwayat_aset($1)", [
     "ast-0010",
   ]);
   harus(rows.length > 0, "stiker yang diketik ulang tetap ketemu");
@@ -93,18 +109,24 @@ uji("daftar milik orang lain hanya untuk yang berhak", async () => {
   harus(olehFinance.length > 0, "Finance juga, karena ia memegang angkanya");
 });
 
-uji("barang yang belum kembali tetap tercatat atas nama pemegangnya", async () => {
-  // Yusuf sudah tidak aktif, tetapi laptopnya belum kembali — justru
-  // inilah yang perlu terlihat saat serah terima.
-  const { rows } = await sebagai(db, manager, "select * from aset_dipegang($1)", [
-    yusuf,
-  ]);
+uji(
+  "barang yang belum kembali tetap tercatat atas nama pemegangnya",
+  async () => {
+    // Yusuf sudah tidak aktif, tetapi laptopnya belum kembali — justru
+    // inilah yang perlu terlihat saat serah terima.
+    const { rows } = await sebagai(
+      db,
+      manager,
+      "select * from aset_dipegang($1)",
+      [yusuf],
+    );
 
-  harus(
-    rows.some((r) => r.kode === "AST-0010"),
-    "laptop yang hilang masih di namanya",
-  );
-});
+    harus(
+      rows.some((r) => r.kode === "AST-0010"),
+      "laptop yang hilang masih di namanya",
+    );
+  },
+);
 
 await jalankan();
 await db.close();
