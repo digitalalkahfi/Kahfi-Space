@@ -6,6 +6,7 @@ import { cache } from "react";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { kePengguna, personaContoh, penggunaContoh } from "@/lib/data/contoh";
+import { saringLingkup } from "@/lib/lingkup";
 import type { KodeUnit, Peran, Pengguna } from "@/lib/types";
 
 export const DAFTAR_PERAN: Peran[] = [
@@ -45,7 +46,7 @@ export const sesiSaatIni = cache(
     const { data, error } = await sb
       .from("users")
       .select(
-        "id, nama, email, role, jabatan, unit_id, foto_url, units:unit_id (kode)",
+        "id, nama, role, jabatan, unit_id, atasan_id, foto_url, units:unit_id (kode)",
       )
       .eq("id", user.id)
       .single();
@@ -56,12 +57,16 @@ export const sesiSaatIni = cache(
     return {
       id: data.id,
       nama: data.nama,
-      email: data.email ?? "",
+      // Email diambil dari identitas masuknya, bukan kolom `users.email`:
+      // kolom itu hanya terbaca lewat `kontak_orang` (0174/0175), dan
+      // email yang dipakai untuk masuk memang yang ini.
+      email: user.email ?? "",
       role: data.role as Peran,
       jabatan: data.jabatan,
       unitId: unit?.kode ?? null,
       fotoUrl: data.foto_url,
       inisial: inisialDari(data.nama),
+      atasanId: data.atasan_id,
     };
   },
 );
@@ -82,7 +87,7 @@ export async function daftarAnggota(): Promise<Pengguna[]> {
   const { data, error } = await sb
     .from("users")
     .select(
-      "id, nama, email, role, jabatan, unit_id, foto_url, units:unit_id (kode)",
+      "id, nama, role, jabatan, unit_id, atasan_id, foto_url, units:unit_id (kode)",
     )
     .eq("status", "aktif")
     .order("nama");
@@ -94,12 +99,15 @@ export async function daftarAnggota(): Promise<Pengguna[]> {
     return {
       id: d.id,
       nama: d.nama,
-      email: d.email ?? "",
+      // Daftar ini dipakai untuk memilih orang (penerima tugas, pemegang
+      // aset), bukan menghubunginya; email tidak ikut dimuat.
+      email: "",
       role: d.role as Peran,
       jabatan: d.jabatan,
       unitId: unit?.kode ?? null,
       fotoUrl: d.foto_url,
       inisial: inisialDari(d.nama),
+      atasanId: d.atasan_id,
     };
   });
 }
@@ -108,22 +116,12 @@ export { kePengguna };
 
 /**
  * Anggota yang boleh ditugasi oleh pengguna ini.
- * CEO & Manager menugasi siapa pun; Leader/Co-Leader hanya unitnya atau
- * bawahan langsungnya — cerminan policy `tasks_buat`.
+ * CEO & Manager menugasi siapa pun; yang lain hanya bawahannya lewat
+ * garis pelaporan — cerminan policy `tasks_buat` dan `boleh_orang` (0173).
  */
 export async function anggotaBisaDitugasi(
   pengguna: Pengguna,
 ): Promise<Pengguna[]> {
   const semua = await daftarAnggota();
-  if (pengguna.role === "CEO" || pengguna.role === "Manager") {
-    return semua.filter((a) => a.id !== pengguna.id);
-  }
-
-  if (pengguna.role === "Leader" || pengguna.role === "Co-Leader") {
-    return semua.filter(
-      (a) => a.id !== pengguna.id && a.unitId === pengguna.unitId,
-    );
-  }
-
-  return [];
+  return saringLingkup(pengguna, semua).filter((a) => a.id !== pengguna.id);
 }
