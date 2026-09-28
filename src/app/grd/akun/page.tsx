@@ -36,14 +36,16 @@ export default async function AkunPage({
       ? TANGGAL_ACUAN
       : new Date().toISOString().slice(0, 10);
 
+  const bolehKelola = bolehKelolaAkun(pengguna);
+
+  // Daftar calon PIC/co-leader adalah direktori staf: hanya diambil bagi
+  // yang memang berwenang menunjuk (CEO/Manager), bukan setiap pembaca.
   const [daftar, kandidat, pendamping, program] = await Promise.all([
     daftarAkun(pengguna, `${tanggal.slice(0, 7)}-01`, tanggal),
-    kandidatPic("affiliator"),
-    kandidatCoLeader("affiliator"),
+    bolehKelola ? kandidatPic("affiliator") : Promise.resolve([]),
+    bolehKelola ? kandidatCoLeader("affiliator") : Promise.resolve([]),
     programUnit("affiliator"),
   ]);
-
-  const bolehKelola = bolehKelolaAkun(pengguna);
 
   return (
     <AppShell pengguna={pengguna} halaman="GRD">
