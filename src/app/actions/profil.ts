@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
+import { kontakOrang, type KontakOrang } from "@/lib/data/kontak-orang";
 import { sesiSaatIni } from "@/lib/data/sesi";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
 import { periksaNama, rapikanNama } from "@/lib/profil";
@@ -154,17 +155,16 @@ export async function ubahOptinWhatsapp(setuju: boolean): Promise<Hasil> {
   const sb = await klienServer();
 
   if (setuju) {
-    const { data, error: galatBaca } = await sb
-      .from("users")
-      .select("kontak, kontak_terverifikasi_pada")
-      .eq("id", pengguna.id)
-      .maybeSingle();
-
-    if (galatBaca) return gagal(`Gagal membaca profil: ${galatBaca.message}`);
+    let data: KontakOrang | undefined;
+    try {
+      data = (await kontakOrang([pengguna.id])).get(pengguna.id);
+    } catch (e) {
+      return gagal(`Gagal membaca profil: ${(e as Error).message}`);
+    }
     if (!data?.kontak) {
       return gagal("Isi dulu nomor kontak di halaman ini.", "validasi");
     }
-    if (!data.kontak_terverifikasi_pada) {
+    if (!data.terverifikasiPada) {
       return gagal(
         "Nomor belum diverifikasi. Pengelola yang memverifikasinya setelah kamu mengirim pesan pertama ke nomor resmi perusahaan.",
         "validasi",
