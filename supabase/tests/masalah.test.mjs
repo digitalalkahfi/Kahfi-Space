@@ -129,13 +129,38 @@ uji("manajemen tetap boleh melapor sekaligus menjawab", async () => {
   harus(rows[0].solusi.length > 0, "solusi dari manajer harus tersimpan");
 });
 
-uji("Staff melihat masalah unitnya", async () => {
+uji("Staff hanya melihat masalah yang ia laporkan sendiri (0174)", async () => {
+  const rian = await id("Rian Hidayat");
   const { rows } = await sebagai(
     db,
-    await id("Rian Hidayat"),
-    "select count(*)::int n from problems",
+    rian,
+    `select count(*)::int n,
+            count(*) filter (where dilaporkan_oleh is distinct from $1)::int lain
+       from problems`,
+    [rian],
   );
-  harus(rows[0].n > 0, "Staff affiliator harus melihat masalah unitnya");
+  harusSama(rows[0].lain, 0, "laporan rekan seunit tidak boleh terlihat Staff");
+});
+
+uji("Leader melihat masalah yang dilaporkan bawahannya", async () => {
+  const dewi = await id("Dewi Lestari"); // Leader Affiliator
+  const nabila = await id("Nabila Putri"); // bawahannya
+  const unit = (
+    await sebagaiAdmin(db, "select id from units where kode = 'affiliator'")
+  ).rows[0].id;
+  await sebagai(
+    db,
+    nabila,
+    `insert into problems (judul, konteks, unit_id, dilaporkan_oleh)
+     values ('Masalah dari bawahan', 'konteks', $1, $2)`,
+    [unit, nabila],
+  );
+  const { rows } = await sebagai(
+    db,
+    dewi,
+    "select count(*)::int n from problems where judul = 'Masalah dari bawahan'",
+  );
+  harusSama(rows[0].n, 1);
 });
 
 uji("Staff tidak melihat masalah unit lain", async () => {
