@@ -1,5 +1,6 @@
 import seed from "../../../supabase/seed/data.json";
 import { aktifDemo } from "@/lib/demo";
+import { idTerlihat, type OrangLingkup } from "@/lib/lingkup";
 import type { KodeUnit, Peran, Pengguna, Pengumuman } from "@/lib/types";
 
 /**
@@ -36,7 +37,32 @@ export function kePengguna(u: UserContoh): Pengguna {
     unitId: u.unit ? (u.unit as KodeUnit) : null,
     fotoUrl: null,
     inisial: u.inisial,
+    atasanId: u.atasan
+      ? (seed.users.find((x) => x.nama === u.atasan)?.id ?? null)
+      : null,
   };
+}
+
+/**
+ * Pohon atasan data contoh dalam bentuk id — padanan `bawahan_saya()`
+ * (migrasi 0173) untuk mode demo, yang tidak punya RLS.
+ */
+export function lingkupContoh(): OrangLingkup[] {
+  const idDari = new Map(seed.users.map((u) => [u.nama, u.id]));
+  return seed.users.map((u) => ({
+    id: u.id,
+    atasanId: u.atasan ? (idDari.get(u.atasan) ?? null) : null,
+  }));
+}
+
+/** Nama orang-orang yang boleh dilihat pengguna di mode demo; null = semua. */
+export function namaTerlihatContoh(pengguna: {
+  id: string;
+  role: Peran;
+}): Set<string> | null {
+  const ids = idTerlihat(pengguna, lingkupContoh());
+  if (ids === null) return null;
+  return new Set(seed.users.filter((u) => ids.has(u.id)).map((u) => u.nama));
 }
 
 export function penggunaContoh(): Pengguna[] {
