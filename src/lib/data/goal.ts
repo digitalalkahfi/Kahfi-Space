@@ -6,7 +6,7 @@ import { klienServer } from "@/lib/supabase/server";
 import { dataContoh } from "@/lib/data/contoh";
 import { aktifDemo } from "@/lib/demo";
 import type { Pengguna } from "@/lib/types";
-import type { LevelGoal } from "@/lib/goal";
+import { labelPeriode, type LevelGoal } from "@/lib/goal";
 
 /** Goal hanya dibuat/diubah CEO dan Manager — sejalan policy `goals_buat`. */
 export function bolehKelolaGoal(pengguna: Pengguna) {
@@ -72,7 +72,17 @@ export type SimpulGoal = {
   jabatan: string;
   unit: string | null;
   akun: string | null;
+  /** Id untuk mengisi ulang dialog ubah goal. */
+  pemilikId: string | null;
+  unitId: string | null;
+  akunId: string | null;
+  /** Label periode, mis. "Okt – Des 2026"; dari anak tangganya bila ada. */
   periode: string;
+  /** Anak tangga bulanan, urut dari bulan pertama. */
+  bulan: { bulan: string; target: number }[];
+  /** Bulan pertama periode; null bila goal belum punya anak tangga. */
+  mulai: string | null;
+  jumlahBulan: number;
   satuan: string;
   targetBase: number;
   targetGoal: number;
@@ -85,6 +95,23 @@ export type SimpulGoal = {
 };
 
 const URUTAN_LEVEL = ["company", "manager", "leader", "account", "staff"];
+
+/** Periode sebuah goal dibaca dari anak tangganya. */
+function periodeDari(
+  bulanMentah: readonly { bulan: string; target: number | string }[],
+  cadangan: string,
+) {
+  const bulan = [...bulanMentah]
+    .map((b) => ({ bulan: b.bulan.slice(0, 10), target: Number(b.target) }))
+    .sort((a, b) => a.bulan.localeCompare(b.bulan));
+  const mulai = bulan[0]?.bulan ?? null;
+  return {
+    bulan,
+    mulai,
+    jumlahBulan: bulan.length,
+    periode: mulai ? labelPeriode(mulai, bulan.length) : cadangan,
+  };
+}
 
 /** Menyusun daftar datar menjadi pohon roll-down. */
 function keTree(datar: Omit<SimpulGoal, "anak">[]): SimpulGoal[] {
@@ -156,7 +183,14 @@ export async function pohonGoal(
           ? (units.find((u) => u.kode === g.unit)?.nama.split(" (")[0] ?? null)
           : null,
         akun: g.account ?? null,
-        periode: g.periode,
+        pemilikId: users.find((u) => u.nama === g.pemilik)?.id ?? null,
+        unitId: g.unit
+          ? (units.find((u) => u.kode === g.unit)?.id ?? null)
+          : null,
+        akunId: g.account
+          ? (accounts.find((a) => a.username === g.account)?.id ?? null)
+          : null,
+        ...periodeDari(g.bulan_list ?? [], g.periode),
         satuan: "IDR",
         targetBase: g.target_base,
         targetGoal: g.target_goal,
@@ -178,7 +212,7 @@ export async function pohonGoal(
     .from("goals")
     .select(
       `id, judul, level, periode, satuan, target_base, target_goal,
-       target_stretch, parent_goal_id, unit_id, account_id,
+       target_stretch, parent_goal_id, unit_id, account_id, pemilik_id,
        pemilik:pemilik_id (nama, jabatan),
        units:unit_id (nama),
        accounts:account_id (username),
@@ -227,7 +261,13 @@ export async function pohonGoal(
       akun:
         (g.accounts as unknown as { username: string } | null)?.username ??
         null,
-      periode: g.periode,
+      pemilikId: g.pemilik_id,
+      unitId: g.unit_id,
+      akunId: g.account_id,
+      ...periodeDari(
+        (g.goal_months ?? []) as { bulan: string; target: number }[],
+        g.periode,
+      ),
       satuan: g.satuan,
       targetBase: Number(g.target_base),
       targetGoal: Number(g.target_goal),
@@ -343,7 +383,12 @@ export async function anakTanggaBulanan(
 
 export type PilihanGoal = {
   orang: { id: string; nama: string; jabatan: string }[];
-  induk: { id: string; judul: string; level: LevelGoal; unitId: string | null }[];
+  induk: {
+    id: string;
+    judul: string;
+    level: LevelGoal;
+    unitId: string | null;
+  }[];
   unit: { id: string; kode: string; nama: string }[];
   akun: { id: string; username: string; unitId: string }[];
 };
@@ -384,7 +429,9 @@ export async function pilihanGoal(): Promise<PilihanGoal> {
       .order("nama"),
     sb
       .from("goals")
-      .select("id, judul, level, unit_id, account_id, accounts:account_id (unit_id)")
+      .select(
+        "id, judul, level, unit_id, account_id, accounts:account_id (unit_id)",
+      )
       .eq("status", "aktif")
       .order("judul"),
     sb.from("units").select("id, kode, nama").order("kode"),
