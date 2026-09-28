@@ -31,6 +31,26 @@ export function punyaKolom(unit: KodeUnit | null, kolom: KolomLaporan) {
 }
 
 /** Departemen pelapor sebuah sasaran; akun mewarisi unit akunnya. */
+/** Kunci sebuah sasaran laporan: "akun:<uuid>" atau "unit:<kode>". */
+export function kunciSasaranLaporan(s: SasaranLaporan): string {
+  return s.jenis === "akun" ? `akun:${s.akun.id}` : `unit:${s.unitId}`;
+}
+
+/**
+ * Sasaran yang belum dilapor pada hari itu, urut seperti daftarnya.
+ *
+ * Dihitung per SASARAN, bukan per orang: PIC yang memegang dua akun
+ * masih punya satu sasaran tersisa setelah akun pertamanya dilapor.
+ * Menyamakan keduanya pernah membuat form tertutup setelah laporan
+ * pertama, sehingga akun kedua tidak bisa dilapor sama sekali.
+ */
+export function sasaranBelumDilapor(
+  sasaran: readonly SasaranLaporan[],
+  terlapor: readonly string[],
+): SasaranLaporan[] {
+  return sasaran.filter((s) => !terlapor.includes(kunciSasaranLaporan(s)));
+}
+
 export function unitSasaran(sasaran: SasaranLaporan): KodeUnit {
   return sasaran.jenis === "akun" ? sasaran.akun.unitId : sasaran.unitId;
 }
