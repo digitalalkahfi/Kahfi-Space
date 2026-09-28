@@ -23,7 +23,8 @@ import { tambahGoal } from "@/app/actions/goal";
 import type { PilihanGoal } from "@/lib/data/goal";
 
 /**
- * Membuat goal baru beserta periode dan anak tangga bulanannya.
+ * Membuat goal baru beserta periodenya (tanggal mulai sampai tanggal
+ * selesai) dan anak tangga bulanannya.
  *
  * Induk yang ditawarkan hanya goal yang sah menurut tangga roll-down, jadi
  * penolakan database (0065) tidak perlu dialami pemakai lebih dulu.
@@ -33,7 +34,7 @@ export function DialogTambahGoal({
   acuan,
 }: {
   pilihan: PilihanGoal;
-  /** Tanggal hari ini; periode bawaannya bulan ini. */
+  /** Tanggal hari ini; periode bawaannya bulan ini, tanggal 1 sampai akhir. */
   acuan: string;
 }) {
   const [buka, setBuka] = useState(false);
@@ -60,9 +61,9 @@ export function DialogTambahGoal({
         targetBase: nilai.base,
         targetGoal: nilai.target,
         targetStretch: nilai.stretch,
-        mulaiBulan: nilai.mulai,
-        jumlahBulan: nilai.jumlahBulan,
-        modeTarget: nilai.jumlahBulan > 1 ? nilai.mode : "bulanan",
+        mulai: nilai.mulai,
+        selesai: nilai.selesai,
+        modeTarget: nilai.mode,
       });
 
       if (hasil.ok) {
@@ -90,8 +91,8 @@ export function DialogTambahGoal({
         <DialogHeader>
           <DialogTitle>Goal baru</DialogTitle>
           <DialogDescription>
-            Tentukan periodenya, lalu target dipecah menjadi anak tangga bulanan
-            begitu goal disimpan.
+            Tentukan tanggal mulai dan tanggal selesainya. Target dipecah
+            menjadi anak tangga bulanan begitu goal disimpan.
           </DialogDescription>
         </DialogHeader>
 
@@ -100,7 +101,6 @@ export function DialogTambahGoal({
           nilai={nilai}
           ubah={ubah}
           pilihan={pilihan}
-          acuan={acuan}
         />
 
         {pesan ? (
