@@ -4,7 +4,7 @@ import "server-only";
 
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
-import { dataContoh } from "@/lib/data/contoh";
+import { dataContoh, namaTerlihatContoh } from "@/lib/data/contoh";
 import { jamEfektifMasuk, menitTelat } from "@/lib/izin";
 import { KANTOR, jarakDariKantor } from "@/lib/geo";
 import type { Pengguna, StatusAbsen } from "@/lib/types";
@@ -362,15 +362,16 @@ export async function pengajuanMenunggu(
 ): Promise<PengajuanIzin[]> {
   if (modeData() === "demo") {
     const { attendance, users, units } = dataContoh;
-    const lintas = pengguna.role === "CEO" || pengguna.role === "Manager";
+    // Padanan `attendance_ubah`/`boleh_orang` (0173): hanya bawahannya.
+    const terlihat = namaTerlihatContoh(pengguna);
 
     return attendance
       .filter((a) => a.persetujuan === "diajukan")
-      .filter((a) => {
-        if (lintas) return true;
-        const u = users.find((x) => x.nama === a.user);
-        return u?.atasan === pengguna.nama || u?.unit === pengguna.unitId;
-      })
+      .filter(
+        (a) =>
+          a.user !== pengguna.nama &&
+          (terlihat === null || terlihat.has(a.user)),
+      )
       .map((a, i) => {
         const u = users.find((x) => x.nama === a.user);
         return {
