@@ -1,6 +1,8 @@
 // Modul khusus server.
 import "server-only";
 
+import { unitKodeTerlihat } from "@/lib/akses";
+
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { dataContoh } from "@/lib/data/contoh";
@@ -250,10 +252,26 @@ function hitungDemo(tanggal: string) {
   return { goal, wrm, papan, tangga };
 }
 
-/** Semua angka yang dibutuhkan satu layar GRD. */
+/**
+ * Semua angka yang dibutuhkan satu layar GRD.
+ *
+ * Angkanya sudah dibatasi RLS; yang disaring di sini adalah barisnya:
+ * papan lead measure dan anak tangga unit lain tidak ditampilkan kepada
+ * yang bukan lintas unit (migrasi 0173).
+ */
 export async function ringkasanGrd(pengguna: Pengguna, tanggal: string) {
-  if (modeData() === "demo") return hitungDemo(tanggal);
+  const hasil =
+    modeData() === "demo"
+      ? hitungDemo(tanggal)
+      : await ringkasanGrdSupabase(tanggal);
+  return {
+    ...hasil,
+    papan: hasil.papan.filter((m) => unitKodeTerlihat(pengguna, m.unit)),
+    tangga: hasil.tangga.filter((t) => unitKodeTerlihat(pengguna, t.unit)),
+  };
+}
 
+async function ringkasanGrdSupabase(tanggal: string) {
   const sb = await klienServer();
   const [g, w, p, t] = await Promise.all([
     sb.rpc("goal_korporasi", { p_tanggal: tanggal }),
