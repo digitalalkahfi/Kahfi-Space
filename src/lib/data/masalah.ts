@@ -3,7 +3,7 @@ import "server-only";
 
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
-import { dataContoh } from "@/lib/data/contoh";
+import { dataContoh, namaTerlihatContoh } from "@/lib/data/contoh";
 import type { DampakMasalah, Masalah, StatusMasalah } from "@/lib/masalah";
 import type { KodeUnit, Pengguna } from "@/lib/types";
 
@@ -84,14 +84,14 @@ function masalahDemo(pengguna: Pengguna): Masalah[] {
       } satisfies Masalah;
     })
     .filter((m) => {
-      if (
-        pengguna.role === "CEO" ||
-        pengguna.role === "Manager" ||
-        pengguna.role === "Finance"
-      ) {
-        return true;
-      }
-      return m.unitKode === pengguna.unitId || m.pelaporNama === pengguna.nama;
+      // Padanan `problems_baca` (0174): pelapornya dan atasan pelapor
+      // lewat garis pelaporan; CEO/Manager semua.
+      const terlihat = namaTerlihatContoh(pengguna);
+      return (
+        terlihat === null ||
+        m.pelaporNama === pengguna.nama ||
+        (m.pelaporNama !== null && terlihat.has(m.pelaporNama))
+      );
     });
 }
 
