@@ -112,7 +112,7 @@ export async function kirimLaporanHarian(input: {
   if (error) {
     if (error.code === "23505") {
       return gagal(
-        "Laporan untuk sasaran ini hari ini sudah ada. Gunakan Perbaiki laporan.",
+        "Laporan untuk sasaran ini hari ini sudah ada. Perbaiki lewat Riwayat laporan bila angkanya keliru.",
         "validasi",
       );
     }
