@@ -186,6 +186,8 @@ update goals set parent_goal_id = '0844d12e-eb26-5be5-ac8a-db6e4d7113e2' where i
 update goals set parent_goal_id = '0844d12e-eb26-5be5-ac8a-db6e4d7113e2' where id = 'd8b3f49b-4999-5c04-85e2-e135bc6826d5';
 
 -- Anak tangga bulanan --------------------------------------------------
+-- Rentang tanggal tidak disebut: trigger 0178 mengisinya bulan penuh, dan
+-- nilai itulah yang dipulihkan bila seed dijalankan ulang.
 insert into goal_months (goal_id, bulan, target) values
   ('3fb5b63e-0edc-5124-8ccf-504549fc9de7', '2024-10-01', 1162500000),
   ('3fb5b63e-0edc-5124-8ccf-504549fc9de7', '2024-11-01', 1255500000),
@@ -220,7 +222,8 @@ insert into goal_months (goal_id, bulan, target) values
   ('d8b3f49b-4999-5c04-85e2-e135bc6826d5', '2024-10-01', 77500000),
   ('d8b3f49b-4999-5c04-85e2-e135bc6826d5', '2024-11-01', 83700000),
   ('d8b3f49b-4999-5c04-85e2-e135bc6826d5', '2024-12-01', 93000000)
-on conflict (goal_id, bulan) do update set target = excluded.target;
+on conflict (goal_id, bulan) do update
+  set target = excluded.target, dari = excluded.dari, sampai = excluded.sampai;
 
 -- Laporan harian per akun ----------------------------------------------
 insert into daily_reports
