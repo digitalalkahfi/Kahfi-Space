@@ -174,13 +174,11 @@ export function perubahanRevisi(r: {
 /**
  * Siapa boleh melihat sebuah laporan harian.
  *
- * Cerminan policy `daily_reports_baca` (migrasi 0005) untuk mode demo,
- * yang tidak punya RLS. Tanpa ini Leader di mode demo hanya melihat
- * laporannya sendiri, padahal di mode Supabase ia melihat seluruh
- * unitnya — rekap Leader jadi kosong hanya saat dicoba.
- *
- * Rantai atasan tidak ikut dimodelkan di sini: data contoh menautkan
- * laporan ke nama pelapor, bukan ke pohon `atasan_id`.
+ * Cerminan policy `daily_reports_baca` (migrasi 0173) untuk mode demo,
+ * yang tidak punya RLS: pelapor dan PIC akunnya sendiri, orang-orang di
+ * bawahnya lewat garis pelaporan (`terlihat`), dan laporan tingkat unit
+ * bagi anggota unit itu. Rekan seunit yang bukan bawahannya tidak
+ * termasuk — itulah beda hierarki dengan aturan per unit yang lama.
  */
 export function bolehLihatLaporan(
   pengguna: { role: string; nama: string; unitId: KodeUnit | null },
@@ -194,16 +192,17 @@ export function bolehLihatLaporan(
     /** Nama PIC akun yang dilaporkan, bila sasarannya akun. */
     picAkun: string | null;
   },
+  /** Nama orang-orang di bawah pengguna; kosong berarti tidak punya bawahan. */
+  terlihat: ReadonlySet<string> = new Set(),
 ): boolean {
   if (["CEO", "Manager", "Finance"].includes(pengguna.role)) return true;
   if (laporan.pelapor === pengguna.nama) return true;
   if (laporan.picAkun === pengguna.nama) return true;
+  if (terlihat.has(laporan.pelapor)) return true;
+  if (laporan.picAkun !== null && terlihat.has(laporan.picAkun)) return true;
 
-  const memimpin = pengguna.role === "Leader" || pengguna.role === "Co-Leader";
-  if (!memimpin || !pengguna.unitId) return false;
-
+  // Laporan tingkat unit (MCN/TAP) adalah konteks bersama unit itu.
   return (
-    laporan.departemen === pengguna.unitId ||
-    laporan.unitLaporan === pengguna.unitId
+    laporan.unitLaporan !== null && laporan.unitLaporan === pengguna.unitId
   );
 }
