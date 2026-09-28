@@ -8,7 +8,6 @@ import { PohonGoal } from "@/components/grd/pohon-goal";
 import { TanggaBulanan } from "@/components/grd/tangga-bulanan";
 import { Reveal } from "@/components/motion/reveal";
 import { DialogTambahGoal } from "@/components/grd/dialog-tambah-goal";
-import { periodeKuartal } from "@/lib/goal";
 import {
   anakTanggaBulanan,
   bolehKelolaGoal,
@@ -67,11 +66,7 @@ export default async function GoalPage({
             </p>
           </div>
           {pilihan ? (
-            <DialogTambahGoal
-              pilihan={pilihan}
-              bulanMulai={`${tanggal.slice(0, 7)}-01`}
-              periode={periodeKuartal(tanggal)}
-            />
+            <DialogTambahGoal pilihan={pilihan} acuan={tanggal} />
           ) : null}
         </div>
 
@@ -82,7 +77,7 @@ export default async function GoalPage({
         ) : null}
 
         <Reveal>
-          <PohonGoal pohon={pohon} />
+          <PohonGoal pohon={pohon} acuan={tanggal} pilihan={pilihan} />
         </Reveal>
       </div>
     </AppShell>
