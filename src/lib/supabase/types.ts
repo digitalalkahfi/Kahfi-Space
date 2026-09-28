@@ -316,6 +316,9 @@ export type BarisGoalMonth = {
   goal_id: string;
   bulan: string;
   target: number;
+  /** Rentang tanggal periode di bulan ini; bawaannya bulan penuh (0178). */
+  dari: string;
+  sampai: string;
 };
 
 /** @tabel tasks */
@@ -1672,8 +1675,9 @@ export type Database = {
         Returns: boolean;
       };
       /**
-       * Mengubah goal dan (bila diberikan) seluruh anak tangga bulanannya
-       * dalam satu transaksi; hanya CEO/Manager (migrasi 0177).
+       * Mengubah goal dan (bila diberikan) seluruh anak tangga beserta
+       * rentang tanggalnya dalam satu transaksi; hanya CEO/Manager
+       * (migrasi 0177, 0178).
        */
       ubah_goal: {
         Args: {
@@ -1688,7 +1692,9 @@ export type Database = {
           p_target: number;
           p_stretch: number;
           p_periode: string;
-          p_bulan?: { bulan: string; target: number }[] | null;
+          p_bulan?:
+            | { bulan: string; dari: string; sampai: string; target: number }[]
+            | null;
         };
         Returns: undefined;
       };
@@ -2102,6 +2108,19 @@ export type Database = {
       };
       buat_laporan_mingguan: {
         Args: { p_pekan: string };
+        Returns: number;
+      };
+      /**
+       * GMV dalam rentang tanggal untuk lingkup goal: akun, unit beserta
+       * akunnya, atau seluruh perusahaan bila keduanya null (0178).
+       */
+      gmv_goal_rentang: {
+        Args: {
+          p_akun: string | null;
+          p_unit: string | null;
+          p_dari: string;
+          p_sampai: string;
+        };
         Returns: number;
       };
       progres_goal: {
