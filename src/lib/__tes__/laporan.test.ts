@@ -10,6 +10,8 @@ import {
   punyaKolom,
   unitSasaran,
   type IsiLaporan,
+  kunciSasaranLaporan,
+  sasaranBelumDilapor,
 } from "@/lib/laporan";
 import type { AkunAffiliator, SasaranLaporan } from "@/lib/types";
 
@@ -297,5 +299,55 @@ test("Leader tanpa unit tidak melihat apa pun selain miliknya", () => {
     bolehLihatLaporan(tanpaUnit, lap({ picAkun: null })),
     false,
     "unit kosong tidak boleh cocok dengan departemen mana pun",
+  );
+});
+
+// ---------------------------------------------------------------------
+// Sasaran yang belum dilapor dihitung per sasaran, bukan per orang
+// ---------------------------------------------------------------------
+
+const akunSasaran = (id: string, username: string): SasaranLaporan => ({
+  jenis: "akun",
+  akun: {
+    id,
+    platform: "TikTok Shop",
+    username,
+    picNama: "Agnes",
+    unitId: "affiliator",
+    program: null,
+    targetHarian: 0,
+    level: null,
+    status: "aktif",
+  },
+});
+
+test("PIC dua akun masih punya sasaran setelah akun pertama dilapor", () => {
+  const dua = [
+    akunSasaran("a1", "taokspill_"),
+    akunSasaran("a2", "serbaaada.store"),
+  ];
+  assert.deepEqual(sasaranBelumDilapor(dua, []).map(kunciSasaranLaporan), [
+    "akun:a1",
+    "akun:a2",
+  ]);
+  assert.deepEqual(
+    sasaranBelumDilapor(dua, ["akun:a2"]).map((s) =>
+      s.jenis === "akun" ? s.akun.username : "",
+    ),
+    ["taokspill_"],
+    "akun yang belum dilapor tetap bisa dipilih",
+  );
+  assert.deepEqual(sasaranBelumDilapor(dua, ["akun:a1", "akun:a2"]), []);
+});
+
+test("kunci sasaran unit memakai kode unitnya", () => {
+  assert.equal(
+    kunciSasaranLaporan({
+      jenis: "unit",
+      unitId: "mcn",
+      nama: "MCN",
+      targetHarian: 0,
+    }),
+    "unit:mcn",
   );
 });
