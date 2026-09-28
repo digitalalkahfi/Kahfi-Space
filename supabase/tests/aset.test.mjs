@@ -82,13 +82,21 @@ uji("aset yang berhenti dimiliki punya tanggal berhentinya", async () => {
   }
 
   const dipakai = await aset("AST-0001");
-  harusSama(dipakai.berakhir, null, "yang masih dimiliki tidak punya tanggal akhir");
+  harusSama(
+    dipakai.berakhir,
+    null,
+    "yang masih dimiliki tidak punya tanggal akhir",
+  );
 });
 
 uji("status tidak bisa disetel langsung", async () => {
   await harusDitolak(
     () =>
-      sebagai(db, manager, "update assets set status = 'hilang' where kode = 'AST-0001'"),
+      sebagai(
+        db,
+        manager,
+        "update assets set status = 'hilang' where kode = 'AST-0001'",
+      ),
     "menyetel status tanpa jejak",
   );
 });
@@ -148,40 +156,59 @@ uji("hilang dan dilepas wajib berketerangan", async () => {
 });
 
 uji("riwayat aset tidak bisa disunting atau dihapus", async () => {
-  const { rows } = await sebagaiAdmin(db, "select id from asset_events limit 1");
+  const { rows } = await sebagaiAdmin(
+    db,
+    "select id from asset_events limit 1",
+  );
 
   await harusDitolak(
     () =>
-      sebagaiAdmin(db, "update asset_events set catatan = 'diubah' where id = $1", [
-        rows[0].id,
-      ]),
+      sebagaiAdmin(
+        db,
+        "update asset_events set catatan = 'diubah' where id = $1",
+        [rows[0].id],
+      ),
     "menyunting riwayat aset",
   );
   await harusDitolak(
-    () => sebagaiAdmin(db, "delete from asset_events where id = $1", [rows[0].id]),
+    () =>
+      sebagaiAdmin(db, "delete from asset_events where id = $1", [rows[0].id]),
     "menghapus riwayat aset",
   );
 });
 
-uji("Staff hanya melihat aset yang ia pegang sendiri", async () => {
-  const { rows } = await sebagai(db, staf, "select kode from assets");
-  const semua = Number(
-    (await sebagaiAdmin(db, "select count(*)::int as n from assets")).rows[0].n,
-  );
+uji(
+  "tabel beraset rupiah hanya untuk pemegang angka perusahaan (0176)",
+  async () => {
+    const { rows } = await sebagai(db, staf, "select kode from assets");
+    harusSama(
+      rows.length,
+      0,
+      "Staff tidak membaca tabel ber-rupiah, miliknya sekalipun",
+    );
+
+    const olehFinance = await sebagai(
+      db,
+      finance,
+      "select count(*)::int n from assets",
+    );
+    const semua = Number(
+      (await sebagaiAdmin(db, "select count(*)::int as n from assets")).rows[0]
+        .n,
+    );
+    harusSama(Number(olehFinance.rows[0].n), semua, "Finance melihat semuanya");
+  },
+);
+
+uji("daftar tanpa angka hanya memuat aset yang ia pegang (0176)", async () => {
+  const { rows } = await sebagai(db, staf, "select * from aset_publik");
 
   harus(rows.length > 0, "aset yang dipegangnya terlihat");
-  harus(rows.length < semua, "sisanya tidak");
-});
-
-uji("daftar tanpa angka terbuka untuk semua yang sudah masuk", async () => {
-  const { rows } = await sebagai(db, staf, "select * from aset_publik");
-  const semua = Number(
-    (await sebagaiAdmin(db, "select count(*)::int as n from assets")).rows[0].n,
+  harus(
+    rows.every((r) => r.pemegang_id === staf),
+    "aset orang lain dan aset tanpa pemegang tidak terlihat Staff",
   );
-
-  harusSama(rows.length, semua, "seluruh barang terlihat");
   harus(!("nilai_perolehan" in rows[0]), "tanpa kolom rupiah");
-  harus("pemegang_id" in rows[0], "tetapi dengan pemegangnya");
 });
 
 uji("Leader tidak bisa mencatat perpindahan aset", async () => {
