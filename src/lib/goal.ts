@@ -345,3 +345,48 @@ export function keteranganTenggat(
   const sisa = jumlahHariPeriode(tanggal, selesai) - 1;
   return sisa === 0 ? "Hari terakhir" : `Sisa ${sisa} hari`;
 }
+
+// ---------------------------------------------------------------------
+// Hapus goal
+// ---------------------------------------------------------------------
+
+/** Apa saja yang ikut terdampak bila sebuah goal dihapus. */
+export type DampakHapusGoal = {
+  anakTangga: number;
+  turunan: number;
+  leadMeasure: number;
+  catatanLeadMeasure: number;
+  komitmen: number;
+};
+
+/**
+ * Kalimat dampak untuk dialog konfirmasi hapus goal; hanya yang memang
+ * terdampak yang disebut. Sejalan aturan database: anak tangga dan lead
+ * measure ikut terhapus (cascade), goal turunan dilepas dari induknya
+ * (set null), dan komitmen mingguan diturunkan menjadi tiket (0022).
+ */
+export function kalimatDampakHapus(d: DampakHapusGoal): string[] {
+  const kalimat: string[] = [];
+  if (d.anakTangga > 0) {
+    kalimat.push(`${d.anakTangga} anak tangga bulanannya ikut terhapus.`);
+  }
+  if (d.leadMeasure > 0) {
+    kalimat.push(
+      d.catatanLeadMeasure > 0
+        ? `${d.leadMeasure} lead measure beserta ${d.catatanLeadMeasure} catatan hariannya ikut terhapus.`
+        : `${d.leadMeasure} lead measure-nya ikut terhapus.`,
+    );
+  }
+  if (d.turunan > 0) {
+    kalimat.push(
+      `${d.turunan} goal turunannya tidak ikut terhapus, tetapi kehilangan induk dan menjadi goal teratas.`,
+    );
+  }
+  if (d.komitmen > 0) {
+    kalimat.push(
+      `${d.komitmen} komitmen mingguannya tidak dihapus, tetapi diubah menjadi tiket biasa.`,
+    );
+  }
+  kalimat.push("Riwayat perubahan goal ini tetap tersimpan di jejak audit.");
+  return kalimat;
+}
