@@ -1,8 +1,10 @@
 import "server-only";
 
+import { unitTerlihat } from "@/lib/akses";
+
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
-import { dataContoh } from "@/lib/data/contoh";
+import { dataContoh, namaTerlihatContoh } from "@/lib/data/contoh";
 import { sasaranUntuk } from "@/lib/data/laporan";
 import type { BarisGmv, BarisUnitHarian } from "@/lib/gmv";
 import type { CapaianUnit, KodeUnit, Pengguna } from "@/lib/types";
@@ -51,18 +53,29 @@ export async function laporanGmv(
 
   if (modeData() === "demo") {
     const { daily_reports, accounts, units } = dataContoh;
-    const lintas = pengguna.role === "CEO" || pengguna.role === "Manager";
-    const akunSaya = new Set(
-      accounts.filter((a) => a.pic === pengguna.nama).map((a) => a.username),
+    // Padanan `daily_reports_baca` (0173): dirinya, bawahannya, dan akun
+    // yang dipegang orang-orang itu; laporan unit untuk anggota unitnya.
+    const terlihat = namaTerlihatContoh(pengguna);
+    const akunTerlihat = new Set(
+      accounts
+        .filter(
+          (a) =>
+            a.pic === pengguna.nama ||
+            a.co_leader === pengguna.nama ||
+            (terlihat !== null && terlihat.has(a.pic)),
+        )
+        .map((a) => a.username),
     );
 
     return daily_reports
       .filter((l) => l.tanggal >= dari && l.tanggal <= sampai)
       .filter(
         (l) =>
-          lintas ||
+          terlihat === null ||
+          pengguna.role === "Finance" ||
           l.user === pengguna.nama ||
-          (l.akun && akunSaya.has(l.akun)),
+          terlihat.has(l.user) ||
+          (l.akun ? akunTerlihat.has(l.akun) : l.unit === pengguna.unitId),
       )
       .map((l) => {
         const akun = l.akun
@@ -158,12 +171,15 @@ export async function ringkasanGmv(
   pengguna: Pengguna,
   tanggal: string,
 ): Promise<RingkasanGmv> {
-  const unit =
+  // Angka tiap unit sudah dibatasi RLS; yang disaring di sini adalah
+  // unitnya sendiri: Staff/Leader hanya melihat unitnya, bukan kartu
+  // unit lain berisi nol (migrasi 0173).
+  const unit = unitTerlihat(
+    pengguna,
     modeData() === "demo"
       ? ringkasanDemo(tanggal)
-      : await ringkasanSupabase(tanggal);
-
-  void pengguna; // Cakupan dibatasi RLS di mode supabase, bukan di sini.
+      : await ringkasanSupabase(tanggal),
+  );
 
   return {
     unit,
