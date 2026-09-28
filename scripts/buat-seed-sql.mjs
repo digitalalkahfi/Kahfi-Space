@@ -213,6 +213,8 @@ ${data.goals
   .join("\n")}
 
 -- Anak tangga bulanan --------------------------------------------------
+-- Rentang tanggal tidak disebut: trigger 0178 mengisinya bulan penuh, dan
+-- nilai itulah yang dipulihkan bila seed dijalankan ulang.
 insert into goal_months (goal_id, bulan, target) values
 ${data.goals
   .flatMap((g) =>
@@ -221,7 +223,8 @@ ${data.goals
     ),
   )
   .join(",\n")}
-on conflict (goal_id, bulan) do update set target = excluded.target;`);
+on conflict (goal_id, bulan) do update
+  set target = excluded.target, dari = excluded.dari, sampai = excluded.sampai;`);
 
 // --- Laporan harian -----------------------------------------------------
 const laporanAkun = data.daily_reports.filter((l) => l.akun);
