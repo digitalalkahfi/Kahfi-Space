@@ -5,21 +5,24 @@ import { CalendarRange } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   LEVEL_GOAL,
-  MAKS_BULAN_GOAL,
   NAMA_LEVEL,
   NAMA_MODE_TARGET,
-  akhirPeriode,
+  akhirBulan,
+  batasSelesaiGoal,
   bolehJadiInduk,
-  jumlahBulanAntara,
+  jumlahHariPeriode,
   labelPeriode,
-  pilihanBulanMulai,
+  periksaPeriode,
+  satuBulanPenuh,
+  selesaiSetelah,
   susunAnakTangga,
+  tanggalSah,
+  type AnakTanggaGoal,
   type LevelGoal,
   type ModeTarget,
 } from "@/lib/goal";
-import { geserBulan } from "@/lib/kalender";
 import type { PilihanGoal } from "@/lib/data/goal";
-import { bulanPanjang, bulanPendek, rupiahRingkas } from "@/lib/format";
+import { bulanPanjang, rupiahRingkas } from "@/lib/format";
 
 /** Isi formulir goal — dipakai dialog tambah maupun dialog ubah. */
 export type NilaiGoal = {
@@ -32,13 +35,16 @@ export type NilaiGoal = {
   base: number;
   target: number;
   stretch: number;
-  /** Bulan pertama periode, "YYYY-MM-01". */
+  /** Tanggal mulai periode, "YYYY-MM-DD". */
   mulai: string;
-  jumlahBulan: number;
+  /** Tanggal selesai (tenggat) periode, "YYYY-MM-DD". */
+  selesai: string;
   mode: ModeTarget;
 };
 
+/** Isi awal goal baru: periodenya bulan berjalan, tanggal 1 sampai akhir. */
 export function nilaiAwalGoal(acuan: string): NilaiGoal {
+  const mulai = `${acuan.slice(0, 7)}-01`;
   return {
     judul: "",
     level: "leader",
@@ -49,8 +55,8 @@ export function nilaiAwalGoal(acuan: string): NilaiGoal {
     base: 0,
     target: 0,
     stretch: 0,
-    mulai: `${acuan.slice(0, 7)}-01`,
-    jumlahBulan: 1,
+    mulai,
+    selesai: akhirBulan(mulai),
     mode: "bulanan",
   };
 }
@@ -63,8 +69,7 @@ export function siapSimpanGoal(n: NilaiGoal) {
     n.target > 0 &&
     n.base <= n.target &&
     n.target <= n.stretch &&
-    n.jumlahBulan >= 1 &&
-    n.jumlahBulan <= MAKS_BULAN_GOAL &&
+    periksaPeriode(n.mulai, n.selesai) === null &&
     (n.level !== "leader" || n.unitId !== null) &&
     (n.level !== "account" || n.akunId !== null)
   );
@@ -112,23 +117,27 @@ const pil = (aktif: boolean) =>
       : "bg-muted text-muted-foreground hover:text-foreground",
   );
 
-const kotakPilih =
-  "h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring/40";
+const kotakTanggal =
+  "tabular h-12 w-full min-w-0 rounded-xl bg-muted px-4 text-[15px] outline-none focus-visible:ring-2 focus-visible:ring-ring/40";
+
+/** Pintasan lama periode; tanggal selesai dihitung dari tanggal mulai. */
+const PINTASAN_BULAN = [1, 3, 6, 12] as const;
 
 /**
  * Isian goal: judul, sasaran, pemilik, induk, periode, dan target.
  *
- * Periode dipilih sebagai bulan mulai dan bulan selesai; anak tangga
- * bulanannya dipratinjau persis seperti yang akan disimpan. Induk yang
- * ditawarkan hanya yang sah menurut tangga roll-down (0065), dan goal
- * yang sedang diubah beserta turunannya tidak pernah ditawarkan.
+ * Periode ditulis sampai ke tanggalnya — tanggal mulai dan tanggal
+ * selesai — karena goal yang SMART harus tahu kapan harus tercapai. Anak
+ * tangga bulanannya, lengkap dengan rentang tanggal tiap bulan,
+ * dipratinjau persis seperti yang akan disimpan. Induk yang ditawarkan
+ * hanya yang sah menurut tangga roll-down (0065), dan goal yang sedang
+ * diubah beserta turunannya tidak pernah ditawarkan.
  */
 export function FormGoal({
   awalan,
   nilai,
   ubah,
   pilihan,
-  acuan,
   kecualiInduk = [],
   pratinjauBulan,
   catatanBulan,
@@ -138,11 +147,9 @@ export function FormGoal({
   nilai: NilaiGoal;
   ubah: (sebagian: Partial<NilaiGoal>) => void;
   pilihan: PilihanGoal;
-  /** Tanggal hari ini, dasar pilihan bulan. */
-  acuan: string;
   kecualiInduk?: readonly string[];
   /** Anak tangga yang akan tersimpan; bawaannya disusun dari isian. */
-  pratinjauBulan?: { bulan: string; target: number }[];
+  pratinjauBulan?: AnakTanggaGoal[];
   catatanBulan?: string | null;
 }) {
   const unitTerpilih =
@@ -163,29 +170,40 @@ export function FormGoal({
     [pilihan.induk, nilai.level, unitTerpilih, kecualiInduk],
   );
 
-  const bulanMulai = pilihanBulanMulai(acuan, nilai.mulai);
-  const bulanSelesai = Array.from({ length: MAKS_BULAN_GOAL }, (_, i) =>
-    geserBulan(nilai.mulai, i),
-  );
-  const selesai = akhirPeriode(nilai.mulai, nilai.jumlahBulan);
+  const salahPeriode = periksaPeriode(nilai.mulai, nilai.selesai);
+  const periodeSah = salahPeriode === null;
+  const bulanPenuh = periodeSah && satuBulanPenuh(nilai.mulai, nilai.selesai);
+  const mulaiSah = tanggalSah(nilai.mulai);
+
+  // Tanggal mulai yang digeser tidak boleh meninggalkan tanggal selesai
+  // di belakangnya atau lebih dari setahun di depannya.
+  const ubahMulai = (mulai: string) => {
+    if (!tanggalSah(mulai)) return ubah({ mulai });
+    if (!tanggalSah(nilai.selesai) || nilai.selesai < mulai) {
+      return ubah({ mulai, selesai: akhirBulan(mulai) });
+    }
+    const batas = batasSelesaiGoal(mulai);
+    ubah({ mulai, selesai: nilai.selesai > batas ? batas : nilai.selesai });
+  };
 
   const tangga =
     pratinjauBulan ??
-    (nilai.target > 0
-      ? susunAnakTangga(
-          nilai.mulai,
-          nilai.jumlahBulan,
-          nilai.target,
-          nilai.mode,
-        )
+    (nilai.target > 0 && periodeSah
+      ? susunAnakTangga(nilai.mulai, nilai.selesai, nilai.target, nilai.mode)
       : []);
+  const totalTangga = tangga.reduce((a, t) => a + t.target, 0);
+  const hariTangga = tangga.reduce(
+    (a, t) => a + jumlahHariPeriode(t.dari, t.sampai),
+    0,
+  );
 
-  const labelTarget =
-    nilai.jumlahBulan === 1
-      ? `untuk ${bulanPendek(nilai.mulai)}`
+  const labelTarget = !periodeSah
+    ? "isi periode dulu"
+    : bulanPenuh
+      ? `untuk ${bulanPanjang(nilai.mulai)}`
       : nilai.mode === "bulanan"
-        ? "per bulan"
-        : "total seluruh periode";
+        ? "per bulan penuh"
+        : `total ${labelPeriode(nilai.mulai, nilai.selesai)}`;
 
   return (
     <div className="space-y-3">
@@ -347,59 +365,72 @@ export function FormGoal({
           Periode target
         </legend>
         <div className="grid grid-cols-2 gap-2">
-          <div className="space-y-1">
+          <div className="min-w-0 space-y-1">
             <label
               htmlFor={`${awalan}-mulai`}
               className="text-[11px] leading-[14px] text-muted-foreground"
             >
-              Mulai
+              Tanggal mulai
             </label>
-            <select
+            <input
               id={`${awalan}-mulai`}
+              type="date"
+              required
               value={nilai.mulai}
-              onChange={(e) => ubah({ mulai: e.target.value })}
-              className={kotakPilih}
-            >
-              {bulanMulai.map((b) => (
-                <option key={b} value={b}>
-                  {bulanPanjang(b)}
-                </option>
-              ))}
-            </select>
+              onChange={(e) => ubahMulai(e.target.value)}
+              className={kotakTanggal}
+            />
           </div>
-          <div className="space-y-1">
+          <div className="min-w-0 space-y-1">
             <label
               htmlFor={`${awalan}-selesai`}
               className="text-[11px] leading-[14px] text-muted-foreground"
             >
-              Sampai
+              Tanggal selesai
             </label>
-            <select
+            <input
               id={`${awalan}-selesai`}
-              value={selesai}
-              onChange={(e) =>
-                ubah({
-                  jumlahBulan: jumlahBulanAntara(nilai.mulai, e.target.value),
-                })
-              }
-              className={kotakPilih}
-            >
-              {bulanSelesai.map((b) => (
-                <option key={b} value={b}>
-                  {bulanPanjang(b)}
-                </option>
-              ))}
-            </select>
+              type="date"
+              required
+              value={nilai.selesai}
+              min={mulaiSah ? nilai.mulai : undefined}
+              max={mulaiSah ? batasSelesaiGoal(nilai.mulai) : undefined}
+              onChange={(e) => ubah({ selesai: e.target.value })}
+              className={kotakTanggal}
+            />
           </div>
         </div>
-        <p className="flex items-center gap-1.5 text-[11px] leading-[14px] font-semibold text-info-text">
-          <CalendarRange className="size-3.5 shrink-0" />
-          {labelPeriode(nilai.mulai, nilai.jumlahBulan)} · {nilai.jumlahBulan}{" "}
-          bulan
-        </p>
+        <div className="flex flex-wrap gap-1" aria-label="Lama periode">
+          {PINTASAN_BULAN.map((n) => {
+            const selesai = mulaiSah ? selesaiSetelah(nilai.mulai, n) : null;
+            return (
+              <button
+                key={n}
+                type="button"
+                disabled={!selesai}
+                onClick={() => selesai && ubah({ selesai })}
+                aria-pressed={selesai === nilai.selesai}
+                className={pil(selesai === nilai.selesai)}
+              >
+                {n} bulan
+              </button>
+            );
+          })}
+        </div>
+        {periodeSah ? (
+          <p className="flex items-center gap-1.5 text-[11px] leading-[14px] font-semibold text-info-text">
+            <CalendarRange className="size-3.5 shrink-0" />
+            {labelPeriode(nilai.mulai, nilai.selesai)} ·{" "}
+            {jumlahHariPeriode(nilai.mulai, nilai.selesai)} hari
+          </p>
+        ) : (
+          <p className="text-[11px] leading-[14px] text-warn-text">
+            {salahPeriode}
+          </p>
+        )}
       </fieldset>
 
-      {nilai.jumlahBulan > 1 ? (
+      {periodeSah && !bulanPenuh ? (
         <fieldset className="space-y-1.5">
           <legend className="text-[13px] leading-[18px] font-semibold">
             Target berlaku
@@ -419,8 +450,8 @@ export function FormGoal({
           </div>
           <p className="text-[11px] leading-[14px] text-pretty text-muted-foreground">
             {nilai.mode === "bulanan"
-              ? "Angka target di bawah berlaku untuk setiap bulan dalam periode, cocok untuk GMV bulanan."
-              : "Angka target di bawah adalah total seluruh periode dan dibagi rata ke setiap bulan."}
+              ? "Angka target di bawah berlaku untuk setiap bulan penuh, cocok untuk GMV bulanan. Bulan yang hanya terpakai sebagian mendapat bagian sesuai jumlah harinya."
+              : "Angka target di bawah adalah total dari tanggal mulai sampai tanggal selesai, dibagi rata ke setiap hari."}
           </p>
         </fieldset>
       ) : null}
@@ -467,11 +498,26 @@ export function FormGoal({
           <ul className="space-y-0.5 text-[11px] leading-[14px] text-muted-foreground">
             {tangga.map((t) => (
               <li key={t.bulan} className="flex justify-between gap-2">
-                <span>{bulanPendek(t.bulan)}</span>
+                <span>
+                  {labelPeriode(t.dari, t.sampai)}
+                  <span className="text-muted-foreground/70">
+                    {" "}
+                    · {jumlahHariPeriode(t.dari, t.sampai)} hari
+                  </span>
+                </span>
                 <span className="tabular-nums">{rupiahRingkas(t.target)}</span>
               </li>
             ))}
           </ul>
+          {tangga.length > 1 && hariTangga > 0 ? (
+            <p className="flex justify-between gap-2 border-t border-border-subtle pt-1 text-[11px] leading-[14px] font-semibold">
+              <span>Total periode</span>
+              <span className="tabular-nums">
+                {rupiahRingkas(totalTangga)} · ±
+                {rupiahRingkas(totalTangga / hariTangga)}/hari
+              </span>
+            </p>
+          ) : null}
           {catatanBulan ? (
             <p className="pt-1 text-[11px] leading-[14px] text-pretty text-muted-foreground">
               {catatanBulan}
