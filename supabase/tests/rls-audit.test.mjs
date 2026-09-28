@@ -174,15 +174,20 @@ uji("CEO melihat seluruh absensi", async () => {
   harus(n >= 24, `CEO harus melihat semua absensi, dapat ${n}`);
 });
 
-uji("Staff hanya melihat absensi dirinya dan rekan seunit", async () => {
+uji("Staff hanya melihat absensinya sendiri (0173)", async () => {
   const { rows } = await sebagai(
-    U.staffTap ? db : db,
+    db,
     U.staffTap,
-    `select count(*)::int n from attendance`,
+    `select count(*)::int semua,
+            count(*) filter (where user_id = $1)::int diri
+       from attendance`,
+    [U.staffTap],
   );
-  harus(
-    Number(rows[0].n) >= 1 && Number(rows[0].n) < 24,
-    `Staff tidak boleh melihat semua absensi, dapat ${rows[0].n}`,
+  harus(Number(rows[0].diri) >= 1, "absensinya sendiri harus terbaca");
+  harusSama(
+    Number(rows[0].semua),
+    Number(rows[0].diri),
+    "absensi rekan seunit tidak boleh terlihat Staff",
   );
 });
 
