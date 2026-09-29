@@ -17,6 +17,10 @@ import { Button } from "@/components/ui/button";
 import { InputGmv } from "@/components/laporan-harian/input-gmv";
 import { KolomCatatan } from "@/components/laporan-harian/kolom-catatan";
 import {
+  PilihTanggalLaporan,
+  tautanTanggalLaporan,
+} from "@/components/laporan-harian/pilih-tanggal-laporan";
+import {
   PemilihSasaran,
   kunciSasaran,
   labelSasaran,
@@ -32,12 +36,16 @@ import {
 } from "@/lib/batas-minimum";
 import {
   bersihkanIsi,
+  kapanLaporan,
   MAKS_KOMISI,
   MAKS_UPLOAD,
   periksaIsiLaporan,
   punyaKolom,
   sasaranBelumDilapor,
+  tanggalLaporanPanjang,
+  tanggalLaporanSingkat,
   unitSasaran,
+  type HariTerlewat,
   type IsiLaporan,
 } from "@/lib/laporan";
 import {
@@ -73,23 +81,36 @@ type LaporanTerkirim = {
  * memegang dua akun tetap mendapat form untuk akun keduanya setelah akun
  * pertama dilapor. Form baru berganti menjadi kartu selesai ketika
  * seluruh sasarannya hari ini sudah masuk.
+ *
+ * Laporan susulan: bila ada hari dalam batas susulan yang laporannya
+ * belum lengkap, pelapor bisa memilih tanggal itu. Laporan susulan tidak
+ * membuka Absen Pulang — kunci itu milik laporan hari ini.
  */
 export function FormLaporan({
   sasaran,
   sudahDilaporkan,
   tanggal,
+  hariIni,
+  terlewat = [],
+  persona,
   absenTerbuka,
   onTerkirim,
   coSampel = {},
 }: {
   sasaran: SasaranLaporan[];
+  /** Tanggal yang sedang dilapor: hari ini, atau tanggal susulan. */
   tanggal: string;
-  /** Kunci sasaran yang laporannya sudah masuk hari ini. */
+  hariIni: string;
+  /** Hari-hari dalam batas susulan yang laporannya belum lengkap. */
+  terlewat?: readonly HariTerlewat[];
+  /** Persona mode demo; ikut dibawa saat berpindah tanggal. */
+  persona?: string;
+  /** Kunci sasaran yang laporannya sudah masuk pada tanggal itu. */
   sudahDilaporkan: string[];
   /** Absen Pulang sudah terbuka — laporan pertama hari ini sudah masuk. */
   absenTerbuka: boolean;
-  /** Dipakai induk untuk membuka kunci Absen Pulang. */
-  onTerkirim: () => void;
+  /** Dipakai induk untuk membuka kunci Absen Pulang (hanya laporan hari ini). */
+  onTerkirim?: () => void;
   /**
    * CO sampel hari ini per kunci sasaran, dihitung dari log pemindaian
    * sampel. Read-only: pelapor tidak pernah mengetiknya sendiri.
@@ -104,6 +125,23 @@ export function FormLaporan({
     [sudahDilaporkan, terkirimLokal],
   );
   const sisa = sasaranBelumDilapor(sasaran, terlapor);
+
+  const susulan = tanggal !== hariIni;
+  // "hari ini" atau "pada Sab, 26 Sep" — dipakai di kalimat bantuan.
+  const kapan = kapanLaporan(tanggal, hariIni);
+  const untukTanggal = susulan
+    ? `untuk ${tanggalLaporanSingkat(tanggal)}`
+    : "hari ini";
+  // Pilihan tanggal hanya muncul bila ada yang terlewat atau sedang susulan.
+  const pilihTanggal =
+    terlewat.length > 0 || susulan ? (
+      <PilihTanggalLaporan
+        hariIni={hariIni}
+        tanggal={tanggal}
+        terlewat={terlewat}
+        persona={persona}
+      />
+    ) : null;
 
   const [dipilih, setDipilih] = useState(sisa[0] ? kunciSasaran(sisa[0]) : "");
   const [nilai, setNilai] = useState(0);
@@ -167,10 +205,10 @@ export function FormLaporan({
     setCatatan("");
     const berikut = sasaranBelumDilapor(sasaran, baru)[0];
     if (berikut) setDipilih(kunciSasaran(berikut));
-    onTerkirim();
+    onTerkirim?.();
   };
 
-  // Seluruh sasaran hari ini sudah masuk: formnya tidak berguna lagi.
+  // Seluruh sasaran pada tanggal itu sudah masuk: formnya tidak berguna lagi.
   if (sasaran.length > 0 && sisa.length === 0) {
     return (
       <Card className="rounded-3xl shadow-card ring-border-subtle">
@@ -180,9 +218,13 @@ export function FormLaporan({
           </span>
           <div>
             <h2 className="text-base leading-6 font-semibold">
-              {sasaran.length > 1
-                ? "Semua laporan hari ini terkirim"
-                : "Laporan harian terkirim"}
+              {susulan
+                ? sasaran.length > 1
+                  ? `Semua laporan ${tanggalLaporanSingkat(tanggal)} terkirim`
+                  : `Laporan ${tanggalLaporanSingkat(tanggal)} terkirim`
+                : sasaran.length > 1
+                  ? "Semua laporan hari ini terkirim"
+                  : "Laporan harian terkirim"}
             </h2>
             <p className="mt-1 text-[13px] leading-[18px] text-muted-foreground">
               {/* Angka hanya ditampilkan kalau laporannya memang dikirim dari
@@ -193,20 +235,35 @@ export function FormLaporan({
                 ? `${sasaran.map(labelSasaran).join(", ")} sudah dilapor. `
                 : terakhir
                   ? ""
-                  : "Laporan hari ini sudah masuk. "}
-              Tombol Absen Pulang sekarang terbuka.
+                  : susulan
+                    ? `Laporan ${tanggalLaporanSingkat(tanggal)} sudah masuk. `
+                    : "Laporan hari ini sudah masuk. "}
+              {susulan ? null : "Tombol Absen Pulang sekarang terbuka."}
             </p>
             {terakhir ? <PeringatanMinimum laporan={terakhir} /> : null}
           </div>
-          <Button
-            asChild
-            variant="outline"
-            className="tekan-halus h-10 rounded-full px-5 text-[13px] font-semibold"
-          >
-            <Link href="/laporan-harian/riwayat">
-              Perbaiki di riwayat laporan
-            </Link>
-          </Button>
+          {pilihTanggal}
+          <div className="flex flex-wrap justify-center gap-2">
+            {susulan ? (
+              <Button
+                asChild
+                className="tekan-halus h-10 rounded-full px-5 text-[13px] font-semibold"
+              >
+                <Link href={tautanTanggalLaporan(hariIni, hariIni, persona)}>
+                  Kembali ke laporan hari ini
+                </Link>
+              </Button>
+            ) : null}
+            <Button
+              asChild
+              variant="outline"
+              className="tekan-halus h-10 rounded-full px-5 text-[13px] font-semibold"
+            >
+              <Link href="/laporan-harian/riwayat">
+                Perbaiki di riwayat laporan
+              </Link>
+            </Button>
+          </div>
         </div>
       </Card>
     );
@@ -217,16 +274,28 @@ export function FormLaporan({
       <div className="flex items-start justify-between gap-3 px-5">
         <div>
           <h2 className="text-base leading-6 font-semibold">
-            Input GMV Hari Ini
+            {susulan ? "Laporan Susulan" : "Input GMV Hari Ini"}
           </h2>
           <p className="text-[13px] leading-[18px] text-muted-foreground">
-            Sumber angka: TikTok Shop Partner Center
+            {susulan
+              ? `Untuk ${tanggalLaporanPanjang(tanggal)}`
+              : "Sumber angka: TikTok Shop Partner Center"}
           </p>
         </div>
         <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-info-fill text-info-text">
           <Store className="size-4" />
         </span>
       </div>
+
+      {pilihTanggal ? <div className="px-5">{pilihTanggal}</div> : null}
+
+      {susulan ? (
+        <p className="mx-5 rounded-2xl bg-warn-fill px-4 py-2.5 text-[11px] leading-[14px] text-pretty text-warn-text">
+          Laporan ini dicatat untuk {tanggalLaporanPanjang(tanggal)}, bukan hari
+          ini, dan tidak membuka Absen Pulang. Isi angka GMV hari itu sesuai
+          Partner Center.
+        </p>
+      ) : null}
 
       {terakhir ? (
         <div className="mx-5 space-y-1.5 rounded-2xl bg-ok-fill px-4 py-3 text-ok-text">
@@ -236,7 +305,7 @@ export function FormLaporan({
           </p>
           <p className="text-[11px] leading-[14px] text-pretty">
             <RingkasTerkirim laporan={terakhir} />
-            Masih ada {sisa.length} sasaran yang belum dilapor hari ini:{" "}
+            Masih ada {sisa.length} sasaran yang belum dilapor {untukTanggal}:{" "}
             {sisa.map(labelSasaran).join(", ")}.
           </p>
           <PeringatanMinimum laporan={terakhir} />
@@ -244,7 +313,7 @@ export function FormLaporan({
       ) : sasaran.length > 1 && terlapor.length > 0 ? (
         <p className="mx-5 rounded-2xl bg-info-fill px-4 py-2.5 text-[11px] leading-[14px] text-pretty text-info-text">
           {sasaran.length - sisa.length} dari {sasaran.length} sasaran sudah
-          dilapor hari ini. Tinggal {sisa.map(labelSasaran).join(", ")}.
+          dilapor {untukTanggal}. Tinggal {sisa.map(labelSasaran).join(", ")}.
         </p>
       ) : null}
 
@@ -358,7 +427,7 @@ export function FormLaporan({
               id="gmv-bantuan"
               className="text-[11px] leading-[14px] text-muted-foreground"
             >
-              Buka Partner Center, salin angka GMV hari ini apa adanya.
+              Buka Partner Center, salin angka GMV {kapan} apa adanya.
             </p>
           )}
         </div>
@@ -388,7 +457,7 @@ export function FormLaporan({
                 >
                   {komisi > 0 && nilai > 0
                     ? `${persen(rasioCapaian(komisi, nilai))} dari GMV`
-                    : "Kosongkan kalau hari ini belum ada komisi."}
+                    : `Kosongkan kalau ${kapan} belum ada komisi.`}
                 </p>
               </div>
             ) : null}
@@ -449,8 +518,8 @@ export function FormLaporan({
                     : statusUpload === "kurang"
                       ? `Di bawah minimum — kurang ${bilangan(kurangnya(upload, minimum))} video lagi.`
                       : minimum !== null
-                        ? `Konten yang tayang hari ini. Standar level ${level} adalah ${bilangan(minimum)} video per hari kerja.`
-                        : `Konten yang tayang hari ini, maksimal ${MAKS_UPLOAD}.`}
+                        ? `Konten yang tayang ${kapan}. Standar level ${level} adalah ${bilangan(minimum)} video per hari kerja.`
+                        : `Konten yang tayang ${kapan}, maksimal ${MAKS_UPLOAD}.`}
                 </p>
               </div>
             ) : null}
@@ -477,12 +546,16 @@ export function FormLaporan({
         {punyaKolom(unit, "coSampel") ? (
           <p className="-mt-2 text-[11px] leading-[14px] text-muted-foreground">
             {co > 0
-              ? "Dihitung dari pemindaian sampel hari ini; tidak bisa diketik."
-              : "Belum ada sampel yang dipindai hari ini, jadi masih 0."}
+              ? `Dihitung dari pemindaian sampel ${kapan}; tidak bisa diketik.`
+              : `Belum ada sampel yang dipindai ${kapan}, jadi masih 0.`}
           </p>
         ) : null}
 
-        <KolomCatatan nilai={catatan} onUbah={setCatatan} />
+        <KolomCatatan
+          nilai={catatan}
+          onUbah={setCatatan}
+          hari={susulan ? "hari itu" : "hari ini"}
+        />
 
         <p
           className={cn(
@@ -520,9 +593,11 @@ export function FormLaporan({
           )}
           {mengirim
             ? "Mengirim…"
-            : absenTerbuka
-              ? "Kirim laporan harian"
-              : "Kirim laporan harian & buka Absen Pulang"}
+            : susulan
+              ? "Kirim laporan susulan"
+              : absenTerbuka
+                ? "Kirim laporan harian"
+                : "Kirim laporan harian & buka Absen Pulang"}
         </Button>
       </form>
     </Card>
