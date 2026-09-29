@@ -33,8 +33,9 @@ export function hariIniTugas(): string {
 }
 
 const KOLOM = `
-  id, tipe, judul, deskripsi, konteks, tenggat, tanpa_jam, prioritas, status,
-  qc_status, qc_note, hasil_kerja, penerima_id, pembuat_id, goal_id, selesai_at,
+  id, tipe, judul, deskripsi, konteks, kriteria_selesai, target_angka,
+  target_satuan, tenggat, tanpa_jam, prioritas, status, qc_status, qc_note,
+  hasil_kerja, penerima_id, pembuat_id, goal_id, selesai_at,
   penerima:penerima_id (nama),
   pembuat:pembuat_id (nama),
   goal:goal_id (judul, periode)
@@ -51,6 +52,9 @@ type BarisTugas = {
   judul: string;
   deskripsi: string;
   konteks: string;
+  kriteria_selesai?: string;
+  target_angka?: number | string | null;
+  target_satuan?: string;
   tenggat: string | null;
   tanpa_jam?: boolean;
   prioritas: Prioritas;
@@ -86,6 +90,13 @@ function keTugas(b: BarisTugas): Tugas {
     pembuatId: b.pembuat_id ?? "",
     tenggat: b.tenggat ?? "",
     tanpaJam: b.tanpa_jam ?? false,
+    kriteriaSelesai: b.kriteria_selesai ?? "",
+    // `numeric` bisa tiba sebagai teks dari PostgREST; dibaca sebagai angka.
+    targetAngka:
+      b.target_angka === null || b.target_angka === undefined
+        ? null
+        : Number(b.target_angka),
+    targetSatuan: b.target_satuan ?? "",
     prioritas: b.prioritas,
     status: keStatus(b.status),
     statusAsli: b.status,
@@ -159,6 +170,13 @@ function tugasContoh(pengguna: Pengguna): BarisTugas[] {
       konteks: t.konteks,
       tenggat: t.tenggat ?? null,
       tanpa_jam: "tanpa_jam" in t && t.tanpa_jam === true,
+      kriteria_selesai:
+        "kriteria_selesai" in t ? String(t.kriteria_selesai ?? "") : "",
+      target_angka:
+        "target_angka" in t && typeof t.target_angka === "number"
+          ? t.target_angka
+          : null,
+      target_satuan: "target_satuan" in t ? String(t.target_satuan ?? "") : "",
       prioritas: t.prioritas as Prioritas,
       status: t.status as BarisTugas["status"],
       qc_status: t.qc as BarisTugas["qc_status"],
@@ -221,6 +239,9 @@ function dariTersaring(r: BarisTugasTersaring): BarisTugas {
     judul: r.judul,
     deskripsi: r.deskripsi,
     konteks: r.konteks,
+    kriteria_selesai: r.kriteria_selesai,
+    target_angka: r.target_angka,
+    target_satuan: r.target_satuan,
     tenggat: r.tenggat,
     tanpa_jam: r.tanpa_jam,
     prioritas: r.prioritas,
@@ -449,6 +470,44 @@ export async function riwayatToDo(
 
   if (error) throw new Error(`Gagal memuat riwayat to-do: ${error.message}`);
   return (data as unknown as BarisTugas[]).map(keToDo);
+}
+
+/**
+ * Beban seorang penerima pada satu tanggal (unsur A pada SMART): jumlah
+ * tiket & komitmen yang belum selesai/dibatalkan dengan tenggat di tanggal
+ * itu (WIB). To-do pribadinya TIDAK dihitung — itu catatan pribadinya.
+ * Tunduk RLS: pemberi tiket hanya menghitung yang memang boleh dilihatnya.
+ */
+export async function bebanPenerima(
+  pengguna: Pengguna,
+  penerimaId: string,
+  tanggal: string,
+): Promise<number> {
+  if (modeData() === "demo") {
+    return tugasContoh(pengguna).filter(
+      (b) =>
+        b.penerima_id === penerimaId &&
+        b.tipe !== "pribadi" &&
+        b.status !== "selesai" &&
+        b.status !== "dibatalkan" &&
+        b.tenggat !== null &&
+        keTanggalWib(b.tenggat) === tanggal,
+    ).length;
+  }
+
+  const sb = await klienServer();
+  const { awal, akhir } = rentangHariWib(tanggal);
+  const { count, error } = await sb
+    .from("tasks")
+    .select("id", { count: "exact", head: true })
+    .eq("penerima_id", penerimaId)
+    .in("tipe", ["tiket", "komitmen_mingguan"])
+    .not("status", "in", "(selesai,dibatalkan)")
+    .gte("tenggat", awal)
+    .lt("tenggat", akhir);
+
+  if (error) throw new Error(`Gagal menghitung beban: ${error.message}`);
+  return count ?? 0;
 }
 
 /**

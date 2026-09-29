@@ -57,6 +57,11 @@ export type Tugas = {
   tenggat: string;
   /** Tenggat hanya bertanggal (to-do tanpa jam); jamnya jangan ditampilkan. */
   tanpaJam: boolean;
+  /** "Tiket dianggap selesai bila …" — dibaca pemeriksa saat QC (D5). */
+  kriteriaSelesai: string;
+  /** Target terukur opsional, mis. 14 sesi; null bila tidak ada. */
+  targetAngka: number | null;
+  targetSatuan: string;
   prioritas: Prioritas;
   status: StatusTugas;
   /** Status apa adanya dari database, termasuk "revisi" & "dibatalkan". */

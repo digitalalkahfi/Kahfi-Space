@@ -7,6 +7,7 @@ import {
   CheckCircle2,
   ChevronRight,
   Clock,
+  Gauge,
   Loader2,
   ShieldCheck,
   Target,
@@ -144,6 +145,7 @@ export function KartuTugas({
   const [hasilKerja, setHasilKerja] = useState(tugas.hasilKerja);
   const [isiHasil, setIsiHasil] = useState(hasilTerbukaAwal);
   const [isiTenggat, setIsiTenggat] = useState(false);
+  const [kriteriaTerbuka, setKriteriaTerbuka] = useState(false);
   const [tanggalBaru, setTanggalBaru] = useState("");
   const [jamBaru, setJamBaru] = useState("");
 
@@ -166,6 +168,15 @@ export function KartuTugas({
   const bolehUbahTenggat =
     (todo ? sayaPenerima : sayaPembuat) && status !== "selesai";
   const namaTipe = NAMA_TIPE[tugas.tipe];
+  const labelTarget =
+    tugas.targetAngka !== null
+      ? `${tugas.targetAngka.toLocaleString("id-ID", {
+          maximumFractionDigits: 2,
+        })} ${tugas.targetSatuan}`
+      : "";
+  // Kriteria panjang dipotong dua baris; tombolnya hanya muncul bila
+  // memang ada yang terpotong.
+  const kriteriaPanjang = tugas.kriteriaSelesai.length > 90;
   const labelKonteks =
     tugas.label && tugas.label !== namaTipe ? tugas.label : gaya.label;
 
@@ -286,6 +297,31 @@ export function KartuTugas({
                   {tugas.deskripsi}
                 </p>
               ) : null}
+              {/* Saat menunggu QC, kriteria tampil utuh di atas hasil
+                  kerja (di bawah); di sini cukup ringkasnya. */}
+              {tugas.kriteriaSelesai && status !== "menunggu_qc" ? (
+                <div className="mt-1.5 text-[12px] leading-[16px]">
+                  <p
+                    className={cn(
+                      "text-pretty",
+                      !kriteriaTerbuka && "line-clamp-2",
+                    )}
+                  >
+                    <span className="font-semibold">Selesai bila: </span>
+                    {tugas.kriteriaSelesai}
+                  </p>
+                  {kriteriaPanjang ? (
+                    <button
+                      type="button"
+                      onClick={() => setKriteriaTerbuka(!kriteriaTerbuka)}
+                      aria-expanded={kriteriaTerbuka}
+                      className="tekan-halus mt-0.5 text-[11px] leading-[14px] font-semibold text-secondary hover:underline"
+                    >
+                      {kriteriaTerbuka ? "Ringkas" : "Selengkapnya"}
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
             </div>
           </div>
 
@@ -319,6 +355,12 @@ export function KartuTugas({
           <span className="rounded-full bg-card px-2 py-0.5 text-[11px] leading-[14px] font-medium text-muted-foreground">
             {LABEL_STATUS[status]}
           </span>
+          {labelTarget ? (
+            <span className="tabular inline-flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-[11px] leading-[14px] font-semibold text-foreground">
+              <Gauge className="size-3" />
+              Target {labelTarget}
+            </span>
+          ) : null}
           {qc === "lolos" ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-ok-fill px-2 py-0.5 text-[11px] leading-[14px] font-semibold text-ok-text">
               <ShieldCheck className="size-3" />
@@ -436,6 +478,20 @@ export function KartuTugas({
             <Undo2 className="size-3.5" />
             {mundur.label}
           </Button>
+        ) : null}
+
+        {/* Pemeriksa menilai hasil terhadap kriteria yang disepakati di
+            awal — jadi kriterianya dibaca lebih dulu (D5). */}
+        {status === "menunggu_qc" && tugas.kriteriaSelesai ? (
+          <div className="rounded-xl bg-info-fill px-3 py-2 text-[11px] leading-[14px] text-info-text">
+            <p className="font-semibold">Kriteria selesai</p>
+            <p className="mt-0.5 text-pretty">{tugas.kriteriaSelesai}</p>
+            {labelTarget ? (
+              <p className="tabular mt-0.5 font-semibold">
+                Target: {labelTarget}
+              </p>
+            ) : null}
+          </div>
         ) : null}
 
         {status === "menunggu_qc" && hasilKerja ? (

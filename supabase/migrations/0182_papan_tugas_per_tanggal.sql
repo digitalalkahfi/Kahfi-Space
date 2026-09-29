@@ -31,8 +31,14 @@
 
 -- ---------------------------------------------------------------------
 -- 1. Isi papan satu tanggal
+--
+--    Dibuang dulu, bukan `create or replace`: migrasi sesudahnya (0183)
+--    menambah kolom keluarannya, dan `create or replace` tidak bisa
+--    mengubah bentuk keluaran — menjalankan ulang berkas ini akan gagal.
 -- ---------------------------------------------------------------------
-create or replace function papan_tugas(
+drop function if exists papan_tugas(date, date, int);
+
+create function papan_tugas(
   p_tanggal  date,
   p_hari_ini date,
   p_batas    int default 300

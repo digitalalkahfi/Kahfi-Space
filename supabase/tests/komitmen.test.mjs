@@ -35,8 +35,10 @@ uji("komitmen tanpa goal ditolak", async () => {
       sebagai(
         db,
         MANAGER,
-        `insert into tasks (tipe, judul, pembuat_id, penerima_id)
-         values ('komitmen_mingguan', 'Tanpa goal', $1, $2)`,
+        `insert into tasks (tipe, judul, pembuat_id, penerima_id, tenggat,
+                            kriteria_selesai)
+         values ('komitmen_mingguan', 'Tanpa goal', $1, $2, now(),
+                 'Konversi naik 5 persen')`,
         [MANAGER, DEWI],
       ),
     "constraint tasks_komitmen_punya_goal tidak bekerja",
@@ -47,9 +49,11 @@ uji("komitmen dengan goal diterima", async () => {
   await sebagai(
     db,
     MANAGER,
-    `insert into tasks (tipe, goal_id, judul, pembuat_id, penerima_id, tenggat)
+    `insert into tasks (tipe, goal_id, judul, pembuat_id, penerima_id, tenggat,
+                        kriteria_selesai)
      values ('komitmen_mingguan', $3, 'Naikkan konversi live 5%', $1, $2,
-             '2024-11-02T23:59:00+07:00')`,
+             '2024-11-02T23:59:00+07:00',
+             'Konversi live naik minimal 5% dari pekan lalu')`,
     [MANAGER, DEWI, goalAff],
   );
 

@@ -3,7 +3,7 @@
  *
  * Form memakainya untuk memberi tahu sebelum mengirim, Server Action
  * memakainya lagi sebelum menulis, dan basis data menjaga yang paling
- * penting sekali lagi (migrasi 0179–0181). Ditulis sekali di sini supaya
+ * penting sekali lagi (migrasi 0179–0183). Ditulis sekali di sini supaya
  * form dan Server Action tidak pernah berselisih soal apa yang sah.
  *
  * Semua tanggal adalah tanggal kalender WIB (YYYY-MM-DD) dan semua jam
@@ -19,6 +19,9 @@ const tolak = (pesan: string) => ({ ok: false as const, pesan });
 
 /** Panjang minimal judul; sama dengan constraint `tasks.judul` (0009). */
 export const MIN_JUDUL = 3;
+
+/** Panjang minimal kriteria selesai tiket; sama dengan trigger 0183. */
+export const MIN_KRITERIA = 5;
 
 /** Jam yang disimpan untuk to-do tanpa jam: batas hari itu. */
 export const JAM_BATAS_HARI = "23:59";
@@ -95,17 +98,77 @@ export function periksaTenggat(input: {
   return { ok: true, nilai: susunTenggat(tanggal, jam) };
 }
 
-/** To-do baru: judul dan tanggal wajib, jam opsional (D3). */
+export type Target = {
+  targetAngka: number | null;
+  targetSatuan: string;
+};
+
+/**
+ * Target terukur (unsur M pada SMART): opsional, tetapi bila diisi harus
+ * lengkap — angka di atas nol beserta satuannya ("14 sesi"). Angka tanpa
+ * satuan tidak bisa dinilai, satuan tanpa angka tidak mengukur apa-apa.
+ */
+export function periksaTarget(input: {
+  angka?: string | number | null;
+  satuan?: string | null;
+}): Periksa<Target> {
+  const teks =
+    input.angka === null || input.angka === undefined
+      ? ""
+      : String(input.angka).trim().replace(",", ".");
+  const satuan = input.satuan?.trim() ?? "";
+
+  if (teks === "") {
+    return satuan === ""
+      ? { ok: true, nilai: { targetAngka: null, targetSatuan: "" } }
+      : tolak("Isi angka targetnya, atau kosongkan satuannya.");
+  }
+
+  const angka = Number(teks);
+  if (!Number.isFinite(angka) || angka <= 0) {
+    return tolak("Target harus berupa angka lebih dari 0.");
+  }
+  if (satuan === "") {
+    return tolak("Isi satuan targetnya, mis. sesi atau video.");
+  }
+
+  return { ok: true, nilai: { targetAngka: angka, targetSatuan: satuan } };
+}
+
+/** Kriteria selesai tiket: kapan tiket ini dianggap beres (D5). */
+export function periksaKriteria(
+  kriteria: string | null | undefined,
+): Periksa<string> {
+  const teks = kriteria?.trim() ?? "";
+  return teks.length < MIN_KRITERIA
+    ? tolak(
+        `Tulis kriteria selesainya (minimal ${MIN_KRITERIA} karakter): tiket dianggap selesai bila …`,
+      )
+    : { ok: true, nilai: teks };
+}
+
+/**
+ * To-do baru: judul dan tanggal wajib, jam opsional (D3); target
+ * opsional — versi ringan SMART (D5).
+ */
 export function periksaToDoBaru(input: {
   judul: string;
   tanggal: string | null | undefined;
   jam?: string | null;
+  targetAngka?: string | number | null;
+  targetSatuan?: string | null;
   hariIni: string;
-}): Periksa<{ judul: string } & Tenggat> {
+}): Periksa<{ judul: string } & Tenggat & Target> {
   const judul = input.judul.trim();
   if (judul.length < MIN_JUDUL) {
     return tolak(`Judul to-do minimal ${MIN_JUDUL} karakter.`);
   }
+
+  const target = periksaTarget({
+    angka: input.targetAngka,
+    satuan: input.targetSatuan,
+  });
+  if (!target.ok) return target;
 
   const tenggat = periksaTenggat({
     tanggal: input.tanggal,
@@ -115,22 +178,30 @@ export function periksaToDoBaru(input: {
   });
   if (!tenggat.ok) return tenggat;
 
-  return { ok: true, nilai: { judul, ...tenggat.nilai } };
+  return { ok: true, nilai: { judul, ...tenggat.nilai, ...target.nilai } };
 }
 
 /**
- * Tiket & komitmen baru: tanggal DAN jam wajib (D3). Komitmen mingguan
- * wajib menempel pada goal; tiket biasa boleh tanpa goal (D6).
+ * Tiket & komitmen baru, disusun SMART (D5):
+ *   S — judul (kata kerja + objek), M — kriteria selesai wajib dan target
+ *   opsional, R — goal (wajib untuk komitmen, opsional untuk tiket, D6),
+ *   T — tanggal DAN jam wajib (D3).
  */
 export function periksaTiketBaru(input: {
   judul: string;
   penerimaId: string;
   tipe: "tiket" | "komitmen_mingguan";
   goalId?: string | null;
+  kriteriaSelesai: string | null | undefined;
+  targetAngka?: string | number | null;
+  targetSatuan?: string | null;
   tanggal: string | null | undefined;
   jam?: string | null;
   hariIni: string;
-}): Periksa<{ judul: string; goalId: string | null } & Tenggat> {
+}): Periksa<
+  { judul: string; goalId: string | null; kriteriaSelesai: string } & Tenggat &
+    Target
+> {
   const judul = input.judul.trim();
   if (judul.length < MIN_JUDUL) {
     return tolak(`Judul tiket minimal ${MIN_JUDUL} karakter.`);
@@ -142,6 +213,15 @@ export function periksaTiketBaru(input: {
     return tolak("Komitmen mingguan harus terhubung ke sebuah goal.");
   }
 
+  const kriteria = periksaKriteria(input.kriteriaSelesai);
+  if (!kriteria.ok) return kriteria;
+
+  const target = periksaTarget({
+    angka: input.targetAngka,
+    satuan: input.targetSatuan,
+  });
+  if (!target.ok) return target;
+
   const tenggat = periksaTenggat({
     tanggal: input.tanggal,
     jam: input.jam,
@@ -150,5 +230,14 @@ export function periksaTiketBaru(input: {
   });
   if (!tenggat.ok) return tenggat;
 
-  return { ok: true, nilai: { judul, goalId, ...tenggat.nilai } };
+  return {
+    ok: true,
+    nilai: {
+      judul,
+      goalId,
+      kriteriaSelesai: kriteria.nilai,
+      ...tenggat.nilai,
+      ...target.nilai,
+    },
+  };
 }

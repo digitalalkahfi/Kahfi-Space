@@ -28,7 +28,8 @@ const PRIORITAS: { nilai: Prioritas; label: string }[] = [
  * untuk mencatat cepat di tengah kerja; sisanya opsional.
  *
  * Tanggal wajib (D3) supaya to-do selalu masuk papan tanggal tertentu;
- * tanpa jam, ia berlaku sampai akhir hari itu.
+ * tanpa jam, ia berlaku sampai akhir hari itu. Target (mis. 14 sesi)
+ * opsional — versi ringan SMART untuk to-do (D5).
  */
 export function DialogToDo({
   hariIni,
@@ -44,6 +45,8 @@ export function DialogToDo({
   const [konteks, setKonteks] = useState("");
   const [tanggal, setTanggal] = useState(tanggalAwal);
   const [jam, setJam] = useState("");
+  const [targetAngka, setTargetAngka] = useState("");
+  const [targetSatuan, setTargetSatuan] = useState("");
   const [prioritas, setPrioritas] = useState<Prioritas>("sedang");
   const [menyimpan, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
@@ -67,6 +70,8 @@ export function DialogToDo({
         konteks,
         tanggal,
         jam: jam || null,
+        targetAngka,
+        targetSatuan,
         prioritas,
       });
 
@@ -74,6 +79,8 @@ export function DialogToDo({
         setJudul("");
         setKonteks("");
         setJam("");
+        setTargetAngka("");
+        setTargetSatuan("");
         setBuka(false);
         if (!hasil.ok) setPesan(hasil.pesan);
         return;
@@ -182,6 +189,37 @@ export function DialogToDo({
           <p className="-mt-1.5 text-[11px] leading-[14px] text-muted-foreground">
             Tanpa jam, to-do berlaku sampai akhir hari itu.
           </p>
+
+          <fieldset className="space-y-1.5">
+            <legend className="text-[13px] leading-[18px] font-semibold">
+              Target{" "}
+              <span className="font-normal text-muted-foreground">
+                (opsional)
+              </span>
+            </legend>
+            <div className="grid grid-cols-[6rem_1fr] gap-2">
+              <input
+                type="number"
+                inputMode="decimal"
+                min={0}
+                step="any"
+                value={targetAngka}
+                onChange={(e) => setTargetAngka(e.target.value)}
+                placeholder="14"
+                aria-label="Angka target"
+                className="tabular h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
+              />
+              <input
+                value={targetSatuan}
+                maxLength={40}
+                autoComplete="off"
+                onChange={(e) => setTargetSatuan(e.target.value)}
+                placeholder="Satuan, mis. sesi"
+                aria-label="Satuan target"
+                className="h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
+              />
+            </div>
+          </fieldset>
 
           <div>
             <fieldset className="space-y-1.5">

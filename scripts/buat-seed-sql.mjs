@@ -271,14 +271,17 @@ const idGoalUnit = Object.fromEntries(
 bagian.push(`
 -- Tugas: to-do pribadi, tiket atasan, komitmen mingguan ----------------
 insert into tasks
-  (tipe, goal_id, judul, deskripsi, konteks, pembuat_id, penerima_id,
-   tenggat, tanpa_jam, prioritas, status, qc_status)
+  (tipe, goal_id, judul, deskripsi, konteks, kriteria_selesai, target_angka,
+   target_satuan, pembuat_id, penerima_id, tenggat, tanpa_jam, prioritas,
+   status, qc_status)
 select v.* from (values
 ${data.tasks
   .map(
     (t) =>
       `  (${q(t.tipe)}::tipe_tugas, ${q(t.goal_unit ? idGoalUnit[t.goal_unit] : null)}::uuid, ${q(t.judul)}, ` +
-      `${q(t.deskripsi)}, ${q(t.konteks)}, ${q(idUser[t.pembuat])}::uuid, ${q(idUser[t.penerima])}::uuid, ` +
+      `${q(t.deskripsi)}, ${q(t.konteks)}, ${q(t.kriteria_selesai ?? "")}, ` +
+      `${t.target_angka ?? "null"}::numeric, ${q(t.target_satuan ?? "")}, ` +
+      `${q(idUser[t.pembuat])}::uuid, ${q(idUser[t.penerima])}::uuid, ` +
       `${q(t.tenggat)}::timestamptz, ${t.tanpa_jam === true}, ${q(t.prioritas)}::prioritas_tugas, ` +
       `${q(t.status)}::status_tugas, ${q(t.qc)}::status_qc)`,
   )

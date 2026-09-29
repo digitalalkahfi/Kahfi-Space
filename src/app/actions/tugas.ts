@@ -4,13 +4,14 @@ import { revalidatePath } from "next/cache";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { sesiSaatIni } from "@/lib/data/sesi";
-import { hariIniTugas } from "@/lib/data/tugas";
+import { bebanPenerima, hariIniTugas } from "@/lib/data/tugas";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
 import { MIN_HASIL_KERJA, PESAN_TODO_TANPA_REVIEW } from "@/lib/kanban";
 import {
   periksaTenggat,
   periksaTiketBaru,
   periksaToDoBaru,
+  tanggalSah,
 } from "@/lib/validasi-tugas";
 import type { Prioritas } from "@/lib/types";
 
@@ -55,7 +56,8 @@ export async function ubahCentangToDo(
  * Tambah to-do pribadi baru.
  *
  * Tanggal wajib, jam opsional (D3): to-do tanpa jam disimpan sebagai
- * 23:59 WIB tanggal itu dengan penanda `tanpa_jam`.
+ * 23:59 WIB tanggal itu dengan penanda `tanpa_jam`. Target (angka +
+ * satuan) opsional — versi ringan SMART (D5).
  */
 export async function tambahToDo(input: {
   judul: string;
@@ -64,12 +66,16 @@ export async function tambahToDo(input: {
   tanggal: string;
   /** Jam WIB, HH:MM; kosong = tanpa jam. */
   jam?: string | null;
+  targetAngka?: string | number | null;
+  targetSatuan?: string;
   prioritas?: Prioritas;
 }): Promise<Hasil> {
   const cek = periksaToDoBaru({
     judul: input.judul,
     tanggal: input.tanggal,
     jam: input.jam,
+    targetAngka: input.targetAngka,
+    targetSatuan: input.targetSatuan,
     hariIni: hariIniTugas(),
   });
   if (!cek.ok) return gagal(cek.pesan, "validasi");
@@ -85,6 +91,8 @@ export async function tambahToDo(input: {
     konteks: input.konteks?.trim() ?? "",
     tenggat: cek.nilai.tenggat,
     tanpa_jam: cek.nilai.tanpaJam,
+    target_angka: cek.nilai.targetAngka,
+    target_satuan: cek.nilai.targetSatuan,
     prioritas: input.prioritas ?? "sedang",
     pembuat_id: pengguna.id,
     penerima_id: pengguna.id,
@@ -220,12 +228,17 @@ export async function periksaTugas(
  *
  * Database menolak bila penerima bukan bawahan pembuatnya, jadi daftar
  * penerima di UI hanya soal kenyamanan — bukan satu-satunya penjaga.
- * Tanggal dan jam tenggat wajib (D3); trigger 0180 menjaganya juga.
+ * Tanggal dan jam tenggat wajib (D3), begitu juga kriteria selesai (D5);
+ * trigger 0180 & 0183 menjaga keduanya.
  */
 export async function buatTiket(input: {
   judul: string;
   deskripsi?: string;
   konteks?: string;
+  /** "Tiket dianggap selesai bila …" — wajib (D5). */
+  kriteriaSelesai: string;
+  targetAngka?: string | number | null;
+  targetSatuan?: string;
   penerimaId: string;
   /** Tanggal WIB, YYYY-MM-DD. */
   tanggal: string;
@@ -242,6 +255,9 @@ export async function buatTiket(input: {
     penerimaId: input.penerimaId,
     tipe,
     goalId: input.goalId,
+    kriteriaSelesai: input.kriteriaSelesai,
+    targetAngka: input.targetAngka,
+    targetSatuan: input.targetSatuan,
     tanggal: input.tanggal,
     jam: input.jam,
     hariIni: hariIniTugas(),
@@ -260,6 +276,9 @@ export async function buatTiket(input: {
     judul: cek.nilai.judul,
     deskripsi: input.deskripsi?.trim() ?? "",
     konteks: input.konteks?.trim() ?? "",
+    kriteria_selesai: cek.nilai.kriteriaSelesai,
+    target_angka: cek.nilai.targetAngka,
+    target_satuan: cek.nilai.targetSatuan,
     pembuat_id: pengguna.id,
     penerima_id: input.penerimaId,
     tenggat: cek.nilai.tenggat,
@@ -273,8 +292,11 @@ export async function buatTiket(input: {
         "izin",
       );
     }
-    return error.message.includes("wajib punya tanggal")
-      ? gagal("Isi tanggal dan jam tenggat tiket.", "validasi")
+    if (error.message.includes("wajib punya tanggal")) {
+      return gagal("Isi tanggal dan jam tenggat tiket.", "validasi");
+    }
+    return error.message.includes("wajib punya kriteria selesai")
+      ? gagal("Tulis kriteria selesai tiketnya.", "validasi")
       : gagal(`Gagal menyimpan: ${error.message}`);
   }
 
@@ -367,4 +389,28 @@ export async function ubahTenggatTugas(
     undefined,
     todo ? "To-do dipindahkan ke tanggal lain." : "Tenggat tiket diperbarui.",
   );
+}
+
+/**
+ * Info beban penerima untuk form tiket (unsur A pada SMART): berapa tiket
+ * & komitmen aktif yang sudah bertenggat di tanggal itu. Hanya info — tidak
+ * memblokir. To-do pribadi penerima tidak ikut dihitung, dan hitungannya
+ * tunduk RLS.
+ */
+export async function hitungBebanPenerima(
+  penerimaId: string,
+  tanggal: string,
+): Promise<Hasil<number>> {
+  if (!penerimaId || !tanggalSah(tanggal)) {
+    return gagal("Pilih penerima dan tanggalnya dulu.", "validasi");
+  }
+
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+
+  try {
+    return sukses(await bebanPenerima(pengguna, penerimaId, tanggal));
+  } catch (e) {
+    return gagal(e instanceof Error ? e.message : "Gagal menghitung beban.");
+  }
 }

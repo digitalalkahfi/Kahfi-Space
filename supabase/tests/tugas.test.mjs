@@ -86,8 +86,10 @@ uji("Staff tidak boleh menugasi rekan sejawat", async () => {
       sebagai(
         db,
         U.staffRian,
-        `insert into tasks (tipe, judul, pembuat_id, penerima_id)
-         values ('tiket', 'Tolong kerjakan ini', $1, $2)`,
+        `insert into tasks (tipe, judul, pembuat_id, penerima_id, tenggat,
+                            kriteria_selesai)
+         values ('tiket', 'Tolong kerjakan ini', $1, $2, now(),
+                 'Selesai bila sudah dikirim')`,
         [U.staffRian, U.staffYoga],
       ),
     "Staff seharusnya tidak bisa menugasi rekan",
@@ -98,9 +100,10 @@ uji("Leader boleh menugasi anggota unitnya", async () => {
   await sebagai(
     db,
     U.leaderAff,
-    `insert into tasks (tipe, judul, pembuat_id, penerima_id, tenggat)
+    `insert into tasks (tipe, judul, pembuat_id, penerima_id, tenggat,
+                        kriteria_selesai)
      values ('tiket', 'Audit konten pekan ini', $1, $2,
-             now() + interval '2 days')`,
+             now() + interval '2 days', '10 konten diperiksa sesuai SOP')`,
     [U.leaderAff, U.staffBayu],
   );
 });
@@ -312,9 +315,10 @@ uji("atasan langsung boleh menugasi walau beda unit", async () => {
   await sebagai(
     db,
     U.manager,
-    `insert into tasks (tipe, judul, pembuat_id, penerima_id, tenggat)
+    `insert into tasks (tipe, judul, pembuat_id, penerima_id, tenggat,
+                        kriteria_selesai)
      values ('tiket', 'Susun rencana pekan depan', $1, $2,
-             now() + interval '7 days')`,
+             now() + interval '7 days', 'Rencana disetujui Manager')`,
     [U.manager, U.leaderAff],
   );
 });
@@ -326,8 +330,10 @@ uji("Leader tidak bisa menugasi Leader unit lain", async () => {
       sebagai(
         db,
         U.leaderAff,
-        `insert into tasks (tipe, judul, pembuat_id, penerima_id)
-         values ('tiket', 'Lintas unit tanpa wewenang', $1, $2)`,
+        `insert into tasks (tipe, judul, pembuat_id, penerima_id, tenggat,
+                            kriteria_selesai)
+         values ('tiket', 'Lintas unit tanpa wewenang', $1, $2, now(),
+                 'Selesai bila sudah dikirim')`,
         [U.leaderAff, galih],
       ),
     "Leader Affiliator bukan atasan Leader MCN",

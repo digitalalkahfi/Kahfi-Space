@@ -102,8 +102,8 @@ uji("tiket baru tanpa tenggat ditolak database", async () => {
     sebagai(
       db,
       DEWI,
-      `insert into tasks (tipe, judul, pembuat_id, penerima_id)
-       values ('tiket', 'Tiket tanpa tenggat', $1, $2)`,
+      `insert into tasks (tipe, judul, pembuat_id, penerima_id, kriteria_selesai)
+       values ('tiket', 'Tiket tanpa tenggat', $1, $2, 'Audit 5 akun beres')`,
       [DEWI, BAYU],
     ),
   );
@@ -125,8 +125,10 @@ uji("komitmen mingguan baru tanpa tenggat ditolak database", async () => {
       sebagai(
         db,
         DEWI,
-        `insert into tasks (tipe, goal_id, judul, pembuat_id, penerima_id)
-         values ('komitmen_mingguan', $3, 'Komitmen tanpa tenggat', $1, $2)`,
+        `insert into tasks (tipe, goal_id, judul, pembuat_id, penerima_id,
+                            kriteria_selesai)
+         values ('komitmen_mingguan', $3, 'Komitmen tanpa tenggat', $1, $2,
+                 'Konversi naik 5 persen')`,
         [DEWI, BAYU, g[0].id],
       ),
     "komitmen tanpa tenggat seharusnya ditolak",
@@ -137,8 +139,10 @@ uji("tiket bertanggal dan berjam diterima", async () => {
   const { rows } = await sebagai(
     db,
     DEWI,
-    `insert into tasks (tipe, judul, pembuat_id, penerima_id, tenggat)
-     values ('tiket', 'Audit konten Oktober', $1, $2, '2026-10-02T15:00:00+07:00')
+    `insert into tasks (tipe, judul, pembuat_id, penerima_id, tenggat,
+                        kriteria_selesai)
+     values ('tiket', 'Audit konten Oktober', $1, $2, '2026-10-02T15:00:00+07:00',
+             '12 konten diaudit sesuai SOP')
      returning tenggat`,
     [DEWI, BAYU],
   );
@@ -151,9 +155,10 @@ uji("tiket tidak boleh tanpa jam", async () => {
       sebagai(
         db,
         DEWI,
-        `insert into tasks (tipe, judul, pembuat_id, penerima_id, tenggat, tanpa_jam)
+        `insert into tasks (tipe, judul, pembuat_id, penerima_id, tenggat, tanpa_jam,
+                            kriteria_selesai)
          values ('tiket', 'Tiket tanpa jam', $1, $2,
-                 '2026-10-02T23:59:00+07:00', true)`,
+                 '2026-10-02T23:59:00+07:00', true, 'Audit 5 akun beres')`,
         [DEWI, BAYU],
       ),
     "constraint tasks_tanpa_jam_hanya_todo tidak bekerja",
