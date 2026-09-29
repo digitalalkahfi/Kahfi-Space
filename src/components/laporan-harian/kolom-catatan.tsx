@@ -16,11 +16,14 @@ export function KolomCatatan({
   nilai,
   onUbah,
   maks = MAKS_CATATAN,
+  hari = "hari ini",
 }: {
   id?: string;
   nilai: string;
   onUbah: (teks: string) => void;
   maks?: number;
+  /** "hari ini", atau "hari itu" untuk laporan susulan. */
+  hari?: "hari ini" | "hari itu";
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
@@ -56,14 +59,14 @@ export function KolomCatatan({
         maxLength={maks}
         value={nilai}
         onChange={(e) => onUbah(e.target.value)}
-        placeholder="Hal penting atau kendala hari ini…"
+        placeholder={`Hal penting atau kendala ${hari}…`}
         aria-describedby={`${id}-sisa`}
         className="min-h-[88px] w-full resize-none rounded-xl bg-muted px-4 py-3 text-[13px] leading-[18px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
       />
 
       <div className="flex items-center justify-between gap-2 text-[11px] leading-[14px]">
         <span className="text-muted-foreground">
-          Boleh dikosongkan kalau hari ini berjalan normal.
+          Boleh dikosongkan kalau {hari} berjalan normal.
         </span>
         <span
           id={`${id}-sisa`}
