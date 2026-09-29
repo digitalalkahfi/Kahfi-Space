@@ -1,7 +1,8 @@
 /**
  * Kalender bersama — tipe & perhitungan murni.
  */
-import type { KodeUnit } from "@/lib/types";
+import { keJamWib, keTanggalWib } from "@/lib/format";
+import type { KodeUnit, Tugas } from "@/lib/types";
 
 export type JenisAgenda = "rapat" | "libur" | "pelatihan" | "lainnya";
 
@@ -163,4 +164,68 @@ export function idBentrok(daftar: EntriKalender[]): Set<string> {
   }
 
   return hasil;
+}
+
+/** Bagian tugas yang dibutuhkan untuk menjadi entri tenggat. */
+export type TugasKalender = Pick<
+  Tugas,
+  | "id"
+  | "tipe"
+  | "judul"
+  | "deskripsi"
+  | "penerima"
+  | "penerimaId"
+  | "tenggat"
+  | "tanpaJam"
+  | "statusAsli"
+>;
+
+/**
+ * Tenggat ini masuk kalender `dari`–`sampai` (tanggal WIB, inklusif)?
+ * Padanan saringan kueri `ambilTenggatKalender` — dipakai mode demo.
+ *
+ * Yang sudah tuntas atau dibatalkan bukan lagi tenggat. To-do pribadi
+ * hanya milik sendiri, dibandingkan lewat id: aturan modul Tugas
+ * (`papan_tugas`/`daftar_tugas`, 0182), walau RLS mengizinkan
+ * CEO/Manager membacanya.
+ */
+export function masukKalender(
+  t: TugasKalender,
+  penggunaId: string,
+  dari: string,
+  sampai: string,
+): boolean {
+  if (t.statusAsli === "selesai" || t.statusAsli === "dibatalkan") {
+    return false;
+  }
+  if (t.tipe === "pribadi" && t.penerimaId !== penggunaId) return false;
+
+  const hari = t.tenggat ? keTanggalWib(t.tenggat) : "";
+  return hari !== "" && hari >= dari && hari <= sampai;
+}
+
+/**
+ * Tugas sebagai entri tenggat, bertanggal dan berjam WIB.
+ *
+ * `timestamptz` tiba dari basis data dalam UTC; memotong teksnya
+ * menaruh tenggat 00.00–06.59 WIB di hari sebelumnya dan menampilkan jam
+ * UTC berlabel WIB. To-do tanpa jam tersimpan 23.59 WIB — jam itu bukan
+ * janji, jadi entrinya sepanjang hari.
+ */
+export function keEntriTenggat(t: TugasKalender): EntriKalender {
+  return {
+    id: `tugas-${t.id}`,
+    sumber: "tugas",
+    judul: t.judul,
+    keterangan: t.deskripsi,
+    jenis: "tenggat",
+    tanggal: keTanggalWib(t.tenggat),
+    jamMulai: t.tanpaJam ? null : keJamWib(t.tenggat) || null,
+    jamSelesai: null,
+    unitKode: null,
+    unitNama: t.penerima,
+    lokasi: "",
+    tautan: "/tugas",
+    dibuatOleh: null,
+  };
 }

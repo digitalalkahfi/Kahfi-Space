@@ -5,6 +5,7 @@ import {
   masukToDoHariIni,
   penandaPapan,
   rentangHariWib,
+  rentangTanggalWib,
   ringkasToDoTanggal,
   susunPapan,
   tanggalDariParam,
@@ -219,6 +220,22 @@ test("rentang satu hari WIB dalam UTC", () => {
   });
   // Pergantian bulan & tahun.
   assert.equal(rentangHariWib("2026-12-31").akhir, "2026-12-31T17:00:00.000Z");
+});
+
+test("rentang beberapa hari WIB dalam UTC", () => {
+  assert.deepEqual(rentangTanggalWib("2026-10-01", "2026-10-31"), {
+    awal: "2026-09-30T17:00:00.000Z",
+    akhir: "2026-10-31T17:00:00.000Z",
+  });
+  // Satu hari sama dengan `rentangHariWib`.
+  assert.deepEqual(
+    rentangTanggalWib("2026-09-30", "2026-09-30"),
+    rentangHariWib("2026-09-30"),
+  );
+  assert.equal(
+    rentangTanggalWib("2026-12-01", "2026-12-31").akhir,
+    "2026-12-31T17:00:00.000Z",
+  );
 });
 
 test("To-do hari ini di Beranda: hari ini + yang terlambat belum selesai", () => {
