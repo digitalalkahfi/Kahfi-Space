@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
-import { sesiSaatIni } from "@/lib/data/sesi";
+import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import {
   BALASAN_DEMO,
   gagal,
@@ -12,13 +12,16 @@ import {
   type KodeGagal,
 } from "@/lib/data/hasil";
 import {
-  BATAS_SUSULAN_HARI,
+  alasanTanggalLaporan,
   periksaIsiLaporan,
-  tanggalBolehLapor,
   type IsiLaporan,
+  type KalenderLaporan,
 } from "@/lib/laporan";
 import {
   hariIniLaporan,
+  kalenderLaporan,
+  mulaiSasaranLaporan,
+  sasaranUntuk,
   unitLaporan,
   unitSasaranLaporan,
 } from "@/lib/data/laporan";
@@ -61,9 +64,9 @@ function uraikanSasaran(kunci: string) {
  * Kirim laporan harian — satu-satunya tempat GMV masuk ke sistem.
  * Database memaksa satu laporan per (sasaran, tanggal).
  *
- * Tanggalnya boleh hari ini atau susulan untuk hari yang terlewat, paling
- * lama `BATAS_SUSULAN_HARI` hari ke belakang — batas yang sama dengan
- * pilihan tanggal di form.
+ * Tanggalnya boleh hari ini atau susulan untuk tanggal yang terlewat,
+ * sejak sasarannya terdaftar di K-Space — aturan yang sama dengan
+ * kalender di form.
  */
 export async function kirimLaporanHarian(input: {
   sasaran: string;
@@ -75,12 +78,12 @@ export async function kirimLaporanHarian(input: {
 }): Promise<Hasil<{ id: string }>> {
   const sasaran = uraikanSasaran(input.sasaran);
   if (!sasaran) return gagal("Pilih akun atau unit dulu.", "validasi");
-  if (!tanggalBolehLapor(input.tanggal, hariIniLaporan())) {
-    return gagal(
-      `Tanggal laporan harus hari ini atau susulan paling lama ${BATAS_SUSULAN_HARI} hari ke belakang.`,
-      "validasi",
-    );
-  }
+  const salahTanggal = alasanTanggalLaporan(
+    input.tanggal,
+    hariIniLaporan(),
+    await mulaiSasaranLaporan(input.sasaran),
+  );
+  if (salahTanggal) return gagal(salahTanggal, "validasi");
 
   // Departemen sasaran menentukan kolom mana yang sah, dan pemeriksaannya
   // memakai fungsi yang sama dengan form — kiriman yang tidak lewat form
@@ -202,4 +205,27 @@ export async function perbaikiLaporan(input: {
   revalidatePath("/laporan-harian/riwayat");
   revalidatePath("/beranda");
   return sukses(undefined, "Perbaikan tersimpan beserta jejaknya.");
+}
+
+/**
+ * Isi kalender tanggal laporan untuk bulan lain, saat pelapor menggeser
+ * bulan di pemilih tanggal. Sasarannya milik pengguna yang sedang masuk.
+ */
+export async function ambilKalenderLaporan(
+  bulan: string,
+  persona?: string,
+): Promise<Hasil<KalenderLaporan>> {
+  if (!/^\d{4}-\d{2}-01$/.test(bulan)) {
+    return gagal("Bulan tidak dikenali.", "validasi");
+  }
+  const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+
+  const hariIni = hariIniLaporan();
+  try {
+    const sasaran = await sasaranUntuk(pengguna, hariIni);
+    return sukses(await kalenderLaporan(bulan, hariIni, sasaran));
+  } catch (e) {
+    return gagal(e instanceof Error ? e.message : "Gagal memuat kalender.");
+  }
 }
