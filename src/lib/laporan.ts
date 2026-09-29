@@ -228,16 +228,16 @@ export function bolehLihatLaporan(
 }
 
 // ---------------------------------------------------------------------
-// Laporan susulan
+// Tanggal laporan dan laporan susulan
 //
-// Orang yang sakit atau berhalangan tidak sempat melapor pada harinya.
-// Laporan untuk hari yang terlewat boleh dikirim menyusul, paling lama
-// `BATAS_SUSULAN_HARI` hari ke belakang. Database sendiri hanya menolak
-// tanggal masa depan (0128) dan laporan ganda per sasaran per tanggal.
+// Pelapor memilih tanggal laporannya dari kalender. Tanggal merah berarti
+// masih ada sasaran yang belum dilapor pada hari itu, hijau berarti semua
+// sudah; tanggal merah yang lewat bisa diisi menyusul — mis. karena
+// pelapornya sakit. Sebuah sasaran baru ditagih sejak ia terdaftar di
+// K-Space, jadi riwayat sebelum itu tidak berubah menjadi merah semua.
+// Database sendiri hanya menolak tanggal masa depan (0128) dan laporan
+// ganda per sasaran per tanggal.
 // ---------------------------------------------------------------------
-
-/** Laporan susulan paling lama sekian hari sebelum hari ini. */
-export const BATAS_SUSULAN_HARI = 7;
 
 /** Geser tanggal "YYYY-MM-DD" sebanyak `n` hari, bebas zona waktu. */
 function geserHari(tanggal: string, n: number): string {
@@ -245,44 +245,85 @@ function geserHari(tanggal: string, n: number): string {
   return new Date(Date.UTC(t, b - 1, h + n)).toISOString().slice(0, 10);
 }
 
-/** Tanggal yang boleh dilapor: hari ini, atau susulan dalam batasnya. */
-export function tanggalBolehLapor(tanggal: string, hariIni: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(tanggal)) return false;
-  if (geserHari(tanggal, 0) !== tanggal) return false; // mis. 2026-02-30
+/** Tanggal "YYYY-MM-DD" yang benar-benar ada di kalender. */
+function tanggalAda(tanggal: string): boolean {
   return (
-    tanggal <= hariIni && tanggal >= geserHari(hariIni, -BATAS_SUSULAN_HARI)
+    /^\d{4}-\d{2}-\d{2}$/.test(tanggal) && geserHari(tanggal, 0) === tanggal
   );
 }
 
-/** Satu hari yang laporannya belum lengkap. */
-export type HariTerlewat = {
-  tanggal: string;
-  /** Kunci sasaran yang belum dilapor pada tanggal itu. */
-  belum: string[];
+/**
+ * Alasan sebuah tanggal tidak bisa dilapor, atau null bila boleh.
+ * `mulai` = tanggal sasarannya terdaftar di K-Space.
+ */
+export function alasanTanggalLaporan(
+  tanggal: string,
+  hariIni: string,
+  mulai: string | null = null,
+): string | null {
+  if (!tanggalAda(tanggal)) return "Tanggal laporan tidak sah.";
+  if (tanggal > hariIni) return "Laporan tidak bisa bertanggal masa depan.";
+  if (mulai && tanggal < mulai) {
+    return `Sasaran ini baru terdaftar di K-Space sejak ${tanggalLaporanPanjang(mulai)}; laporan sebelum tanggal itu tidak bisa dikirim.`;
+  }
+  return null;
+}
+
+/** Tanggal yang boleh dilapor: hari ini atau susulan sejak sasaran terdaftar. */
+export function tanggalBolehLapor(
+  tanggal: string,
+  hariIni: string,
+  mulai: string | null = null,
+): boolean {
+  return alasanTanggalLaporan(tanggal, hariIni, mulai) === null;
+}
+
+/** Keadaan laporan satu tanggal untuk sasaran-sasaran seseorang. */
+export type StatusHariLaporan = {
+  /** Banyaknya sasaran yang wajib dilapor pada tanggal itu. */
+  wajib: number;
+  /** Yang belum dilapor; 0 berarti hijau, selebihnya merah. */
+  belum: number;
+};
+
+/** Isi kalender tanggal laporan untuk satu bulan. */
+export type KalenderLaporan = {
+  /** Bulan yang ditampilkan, "YYYY-MM-01". */
+  bulan: string;
+  /** Tanggal paling awal yang bisa dipilih: sasaran pertama terdaftar. */
+  mulai: string;
+  /** Status tiap tanggal; tanggal yang tidak ada berarti tanpa warna. */
+  status: Record<string, StatusHariLaporan>;
 };
 
 /**
- * Hari-hari dalam batas susulan yang laporannya belum lengkap, terbaru
- * dulu. Hari ini tidak ikut karena belum terlewat. Sasaran yang baru ada
- * sesudah suatu tanggal — akun yang baru dibuat — tidak dianggap
- * terlewat pada tanggal sebelumnya.
+ * Status laporan tiap tanggal dalam satu bulan, sampai hari ini.
+ * Tanggal tanpa sasaran wajib — sebelum sasaran pertama terdaftar, atau
+ * masa depan — tidak ikut, dan di kalender tampil tanpa warna.
  */
-export function hariTerlewat(
+export function statusLaporanBulan(
+  bulan: string,
   kunciSasaran: readonly string[],
   terlapor: readonly { tanggal: string; kunci: string }[],
   hariIni: string,
   mulaiBerlaku: Readonly<Record<string, string>> = {},
-): HariTerlewat[] {
+): Record<string, StatusHariLaporan> {
   const sudah = new Set(terlapor.map((t) => `${t.tanggal}|${t.kunci}`));
-  const hasil: HariTerlewat[] = [];
-  for (let i = 1; i <= BATAS_SUSULAN_HARI; i += 1) {
-    const tanggal = geserHari(hariIni, -i);
-    const belum = kunciSasaran.filter(
-      (k) =>
-        !sudah.has(`${tanggal}|${k}`) &&
-        !(mulaiBerlaku[k] && mulaiBerlaku[k] > tanggal),
+  const hasil: Record<string, StatusHariLaporan> = {};
+  const awal = `${bulan.slice(0, 7)}-01`;
+  for (
+    let tanggal = awal;
+    tanggal.slice(0, 7) === awal.slice(0, 7) && tanggal <= hariIni;
+    tanggal = geserHari(tanggal, 1)
+  ) {
+    const wajib = kunciSasaran.filter(
+      (k) => !(mulaiBerlaku[k] && mulaiBerlaku[k] > tanggal),
     );
-    if (belum.length > 0) hasil.push({ tanggal, belum });
+    if (wajib.length === 0) continue;
+    hasil[tanggal] = {
+      wajib: wajib.length,
+      belum: wajib.filter((k) => !sudah.has(`${tanggal}|${k}`)).length,
+    };
   }
   return hasil;
 }
