@@ -226,3 +226,101 @@ export function bolehLihatLaporan(
     laporan.unitLaporan !== null && laporan.unitLaporan === pengguna.unitId
   );
 }
+
+// ---------------------------------------------------------------------
+// Laporan susulan
+//
+// Orang yang sakit atau berhalangan tidak sempat melapor pada harinya.
+// Laporan untuk hari yang terlewat boleh dikirim menyusul, paling lama
+// `BATAS_SUSULAN_HARI` hari ke belakang. Database sendiri hanya menolak
+// tanggal masa depan (0128) dan laporan ganda per sasaran per tanggal.
+// ---------------------------------------------------------------------
+
+/** Laporan susulan paling lama sekian hari sebelum hari ini. */
+export const BATAS_SUSULAN_HARI = 7;
+
+/** Geser tanggal "YYYY-MM-DD" sebanyak `n` hari, bebas zona waktu. */
+function geserHari(tanggal: string, n: number): string {
+  const [t, b, h] = tanggal.split("-").map(Number);
+  return new Date(Date.UTC(t, b - 1, h + n)).toISOString().slice(0, 10);
+}
+
+/** Tanggal yang boleh dilapor: hari ini, atau susulan dalam batasnya. */
+export function tanggalBolehLapor(tanggal: string, hariIni: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(tanggal)) return false;
+  if (geserHari(tanggal, 0) !== tanggal) return false; // mis. 2026-02-30
+  return (
+    tanggal <= hariIni && tanggal >= geserHari(hariIni, -BATAS_SUSULAN_HARI)
+  );
+}
+
+/** Satu hari yang laporannya belum lengkap. */
+export type HariTerlewat = {
+  tanggal: string;
+  /** Kunci sasaran yang belum dilapor pada tanggal itu. */
+  belum: string[];
+};
+
+/**
+ * Hari-hari dalam batas susulan yang laporannya belum lengkap, terbaru
+ * dulu. Hari ini tidak ikut karena belum terlewat. Sasaran yang baru ada
+ * sesudah suatu tanggal — akun yang baru dibuat — tidak dianggap
+ * terlewat pada tanggal sebelumnya.
+ */
+export function hariTerlewat(
+  kunciSasaran: readonly string[],
+  terlapor: readonly { tanggal: string; kunci: string }[],
+  hariIni: string,
+  mulaiBerlaku: Readonly<Record<string, string>> = {},
+): HariTerlewat[] {
+  const sudah = new Set(terlapor.map((t) => `${t.tanggal}|${t.kunci}`));
+  const hasil: HariTerlewat[] = [];
+  for (let i = 1; i <= BATAS_SUSULAN_HARI; i += 1) {
+    const tanggal = geserHari(hariIni, -i);
+    const belum = kunciSasaran.filter(
+      (k) =>
+        !sudah.has(`${tanggal}|${k}`) &&
+        !(mulaiBerlaku[k] && mulaiBerlaku[k] > tanggal),
+    );
+    if (belum.length > 0) hasil.push({ tanggal, belum });
+  }
+  return hasil;
+}
+
+/** "Sab, 26 Sep" — dibaca dalam UTC agar tanggalnya tidak bergeser. */
+export function tanggalLaporanSingkat(tanggal: string): string {
+  return new Date(`${tanggal}T00:00:00Z`).toLocaleDateString("id-ID", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
+}
+
+/** Label pilihan tanggal: "Hari ini", "Kemarin", atau "Sab, 26 Sep". */
+export function labelHariLaporan(tanggal: string, hariIni: string): string {
+  if (tanggal === hariIni) return "Hari ini";
+  if (tanggal === geserHari(hariIni, -1)) return "Kemarin";
+  return tanggalLaporanSingkat(tanggal);
+}
+
+/**
+ * Keterangan waktu di dalam kalimat form: "hari ini" untuk laporan biasa,
+ * "pada Sab, 26 Sep" untuk susulan — mis. "salin angka GMV pada Sab, 26 Sep".
+ */
+export function kapanLaporan(tanggal: string, hariIni: string): string {
+  return tanggal === hariIni
+    ? "hari ini"
+    : `pada ${tanggalLaporanSingkat(tanggal)}`;
+}
+
+/** "Sabtu, 26 September 2026" — dibaca dalam UTC agar tanggalnya tidak bergeser. */
+export function tanggalLaporanPanjang(tanggal: string): string {
+  return new Date(`${tanggal}T00:00:00Z`).toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
