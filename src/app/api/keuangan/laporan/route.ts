@@ -14,6 +14,7 @@ import {
 import { barisCsv, berkasCsv } from "@/lib/csv";
 import { modeData } from "@/lib/supabase/config";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
+import { hariIniWib } from "@/lib/format";
 
 const POLA_TANGGAL = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -54,10 +55,7 @@ export async function GET(request: NextRequest) {
   }
 
   const params = request.nextUrl.searchParams;
-  const hariIni =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const hariIni = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
   const bawaan = rentangBulan(hariIni);
 
   const diminta = {

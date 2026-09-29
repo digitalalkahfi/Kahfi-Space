@@ -9,6 +9,7 @@ import {
   TANGGAL_ACUAN,
   namaTerlihatContoh,
 } from "@/lib/data/contoh";
+import { hariIniWib } from "@/lib/format";
 import { targetHarianGrd } from "@/lib/goal";
 import {
   bolehLihatLaporan,
@@ -398,15 +399,14 @@ function bentukLaporan(
 }
 
 /**
- * "Hari ini" versi Laporan Harian — sama dengan halaman lain (tanggal
- * UTC server), dan dipakai halaman maupun Server Action supaya batas
+ * "Hari ini" versi Laporan Harian — tanggal WIB, sama dengan halaman
+ * lain dan dengan penjaga tanggal di database (`jaga_tanggal_laporan`,
+ * migrasi 0128). Dipakai halaman maupun Server Action supaya batas
  * laporan susulan dihitung dari hari yang sama. Mode demo mengunci hari
  * ini ke tanggal acuan data contoh.
  */
 export function hariIniLaporan(): string {
-  return modeData() === "demo"
-    ? TANGGAL_ACUAN
-    : new Date().toISOString().slice(0, 10);
+  return modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 }
 
 /** Tanggal (WIB) sebuah cap waktu, bentuk "YYYY-MM-DD". */

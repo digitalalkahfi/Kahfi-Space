@@ -14,7 +14,7 @@ import { pilihanGoal } from "@/lib/data/goal";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
-import { tanggalPanjang } from "@/lib/format";
+import { hariIniWib, tanggalPanjang } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Lead Measure — K-Space V2",
@@ -28,10 +28,7 @@ export default async function LeadMeasurePage({
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
-  const tanggal =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const tanggal = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   const daftar = await detailLeadMeasure(pengguna, tanggal);
   const kelola = bolehKelolaLeadMeasure(pengguna);

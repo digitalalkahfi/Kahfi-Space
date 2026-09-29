@@ -18,6 +18,7 @@ import {
 } from "@/lib/periode-finance";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { modeData } from "@/lib/supabase/config";
+import { hariIniWib } from "@/lib/format";
 
 const POLA_TANGGAL = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -64,10 +65,7 @@ export async function GET(request: NextRequest) {
   }
 
   const p = request.nextUrl.searchParams;
-  const hariIni =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const hariIni = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   // Halaman boleh memaafkan parameter yang ngawur — ia punya tombol
   // untuk memperbaikinya. Endpoint tidak: skrip yang salah ketik

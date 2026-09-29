@@ -12,7 +12,7 @@ import { KanalAktif } from "@/components/notifikasi/kanal-aktif";
 import { riwayatKirimSaya } from "@/lib/data/kirim-wa";
 import { preferensiSaya } from "@/lib/data/preferensi-notifikasi";
 import { ringkasKirim } from "@/lib/kirim-wa";
-import { persen } from "@/lib/format";
+import { hariIniWib, persen } from "@/lib/format";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { modeData } from "@/lib/supabase/config";
@@ -37,10 +37,7 @@ export default async function PengirimanWhatsappPage({
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
-  const hariIni =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const hariIni = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   const [daftar, preferensi] = await Promise.all([
     riwayatKirimSaya(pengguna),

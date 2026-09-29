@@ -20,7 +20,7 @@ import {
   ringkasKeuangan,
   saringTransaksi,
 } from "@/lib/keuangan";
-import { bulanPanjang, tanggalPendek } from "@/lib/format";
+import { bulanPanjang, hariIniWib, tanggalPendek } from "@/lib/format";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { modeData } from "@/lib/supabase/config";
@@ -48,10 +48,7 @@ export default async function LaporanKeuanganPage({
     );
   }
 
-  const hariIni =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const hariIni = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   // Laporan selalu punya periode: tanpa rentang, angkanya tidak berarti.
   // Bawaannya bulan berjalan.

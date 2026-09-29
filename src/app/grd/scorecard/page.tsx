@@ -10,7 +10,7 @@ import { Scorecard } from "@/components/grd/scorecard";
 import { Reveal } from "@/components/motion/reveal";
 import { scorecardTim, statusKunciKpi } from "@/lib/data/kpi";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
-import { bulanPanjang } from "@/lib/format";
+import { bulanPanjang, hariIniWib } from "@/lib/format";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
 
@@ -26,10 +26,7 @@ export default async function ScorecardPage({
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
-  const tanggal =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const tanggal = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
   const bulanIni = `${tanggal.slice(0, 7)}-01`;
 
   // Bulan dari URL; yang tidak berbentuk atau di masa depan diabaikan.

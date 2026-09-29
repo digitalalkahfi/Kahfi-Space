@@ -28,6 +28,7 @@ import { bacaKembali } from "@/lib/drill-down";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
+import { hariIniWib } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Transaksi — K-Space V2",
@@ -61,10 +62,7 @@ export default async function TransaksiPage({
     );
   }
 
-  const tanggal =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const tanggal = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   const [transaksi, pilihan, saldoAwal] = await Promise.all([
     daftarTransaksi(pengguna),

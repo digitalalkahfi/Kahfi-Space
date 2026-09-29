@@ -19,7 +19,7 @@ import {
   ringkasKeuangan,
   saringTransaksi,
 } from "@/lib/keuangan";
-import { tanggalPendek } from "@/lib/format";
+import { hariIniWib, tanggalPendek } from "@/lib/format";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { modeData } from "@/lib/supabase/config";
@@ -48,10 +48,7 @@ export default async function WaterfallPage({
     );
   }
 
-  const hariIni =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const hariIni = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   const bawaan = rentangBulan(hariIni);
   const dibaca = bacaSaringanTransaksi(params);

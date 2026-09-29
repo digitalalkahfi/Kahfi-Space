@@ -8,6 +8,7 @@ import { daftarNotifikasi, jumlahBelumDibacaSaya } from "@/lib/data/notifikasi";
 import { kirimGagalPerNotifikasi } from "@/lib/data/kirim-wa";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { modeData } from "@/lib/supabase/config";
+import { hariIniWib } from "@/lib/format";
 import type { Pengguna } from "@/lib/types";
 
 /** App-bar atas: merek, pintasan, notifikasi, ringkasan profil. */
@@ -24,10 +25,7 @@ export async function TopBar({
     jumlahBelumDibacaSaya(pengguna),
     kirimGagalPerNotifikasi(pengguna),
   ]);
-  const hariIni =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const hariIni = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   return (
     <header className="sticky top-0 z-30 border-b border-border-subtle bg-canvas/90 backdrop-blur">

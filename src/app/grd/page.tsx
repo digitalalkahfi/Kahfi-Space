@@ -13,7 +13,7 @@ import { ringkasanGrd } from "@/lib/data/grd";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
-import { tanggalPendek } from "@/lib/format";
+import { hariIniWib, tanggalPendek } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "GRD — K-Space V2",
@@ -38,10 +38,7 @@ export default async function GrdPage({ searchParams }: PageProps<"/grd">) {
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
-  const tanggal =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const tanggal = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   const { goal, wrm, papan, tangga } = await ringkasanGrd(pengguna, tanggal);
 

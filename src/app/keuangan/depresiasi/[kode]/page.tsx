@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/card";
 import { akumulasiPenyusutan, nilaiBuku, penyusutanPerBulan } from "@/lib/aset";
 import { bolehLihatKeuangan } from "@/lib/keuangan";
 import { asetDariKode } from "@/lib/data/aset";
-import { rupiahPenuh, tanggalPendek } from "@/lib/format";
+import { hariIniWib, rupiahPenuh, tanggalPendek } from "@/lib/format";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
@@ -58,10 +58,7 @@ export default async function JadwalAsetPage({
   const aset = await asetDariKode(pengguna, decodeURIComponent(kode));
   if (!aset) notFound();
 
-  const hariIni =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const hariIni = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   return (
     <AppShell pengguna={pengguna} halaman="Keuangan">

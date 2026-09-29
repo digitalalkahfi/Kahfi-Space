@@ -17,6 +17,7 @@ import {
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
+import { hariIniWib } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Kelola Akun — K-Space V2",
@@ -31,10 +32,7 @@ export default async function AkunPage({
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
-  const tanggal =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const tanggal = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   const bolehKelola = bolehKelolaAkun(pengguna);
 
