@@ -10,7 +10,13 @@ import {
   namaTerlihatContoh,
 } from "@/lib/data/contoh";
 import { targetHarianGrd } from "@/lib/goal";
-import { bolehLihatLaporan } from "@/lib/laporan";
+import {
+  BATAS_SUSULAN_HARI,
+  bolehLihatLaporan,
+  hariTerlewat,
+  kunciSasaranLaporan,
+  type HariTerlewat,
+} from "@/lib/laporan";
 import { batasMinimum } from "@/lib/batas-minimum";
 import type {
   AkunAffiliator,
@@ -392,7 +398,88 @@ function bentukLaporan(
   };
 }
 
-/** Sasaran yang laporannya sudah masuk hari ini. */
+/**
+ * "Hari ini" versi Laporan Harian — sama dengan halaman lain (tanggal
+ * UTC server), dan dipakai halaman maupun Server Action supaya batas
+ * laporan susulan dihitung dari hari yang sama. Mode demo mengunci hari
+ * ini ke tanggal acuan data contoh.
+ */
+export function hariIniLaporan(): string {
+  return modeData() === "demo"
+    ? TANGGAL_ACUAN
+    : new Date().toISOString().slice(0, 10);
+}
+
+/**
+ * Hari-hari dalam batas susulan yang laporannya belum lengkap untuk
+ * sasaran-sasaran pengguna ini, terbaru dulu.
+ *
+ * Sasarannya diambil dari daftar hari ini; laporan dari siapa pun untuk
+ * sasaran itu dianggap sudah masuk. Akun yang baru dibuat tidak ditagih
+ * untuk hari sebelum ia ada.
+ */
+export async function laporanTerlewat(
+  hariIni: string,
+  sasaran: readonly SasaranLaporan[],
+): Promise<HariTerlewat[]> {
+  const kunci = sasaran.map(kunciSasaranLaporan);
+  if (kunci.length === 0) return [];
+
+  const dari = new Date(`${hariIni}T00:00:00Z`);
+  dari.setUTCDate(dari.getUTCDate() - BATAS_SUSULAN_HARI);
+  const awal = dari.toISOString().slice(0, 10);
+
+  if (modeData() === "demo") {
+    const { daily_reports, accounts } = dataContoh;
+    const terlapor = daily_reports
+      .filter((l) => l.tanggal >= awal && l.tanggal < hariIni)
+      .map((l) => ({
+        tanggal: l.tanggal,
+        kunci: l.akun
+          ? `akun:${accounts.find((a) => a.username === l.akun)?.id}`
+          : `unit:${l.unit}`,
+      }));
+    return hariTerlewat(kunci, terlapor, hariIni);
+  }
+
+  const sb = await klienServer();
+  const idAkun = sasaran.flatMap((s) =>
+    s.jenis === "akun" ? [s.akun.id] : [],
+  );
+  const [laporan, akun] = await Promise.all([
+    sb
+      .from("daily_reports")
+      .select("tanggal, account_id, units:unit_id (kode)")
+      .gte("tanggal", awal)
+      .lt("tanggal", hariIni),
+    idAkun.length > 0
+      ? sb.from("accounts").select("id, created_at").in("id", idAkun)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+  if (laporan.error) {
+    throw new Error(`Gagal memuat laporan terlewat: ${laporan.error.message}`);
+  }
+
+  const terlapor = (laporan.data ?? []).map((r) => {
+    const unit = r.units as unknown as { kode: string } | null;
+    return {
+      tanggal: r.tanggal,
+      kunci: r.account_id ? `akun:${r.account_id}` : `unit:${unit?.kode}`,
+    };
+  });
+  // Akun baru ditagih sejak tanggal (WIB) ia dibuat.
+  const mulaiBerlaku = Object.fromEntries(
+    (akun.data ?? []).map((a) => [
+      `akun:${a.id}`,
+      new Date(a.created_at).toLocaleDateString("en-CA", {
+        timeZone: "Asia/Jakarta",
+      }),
+    ]),
+  );
+  return hariTerlewat(kunci, terlapor, hariIni, mulaiBerlaku);
+}
+
+/** Sasaran yang laporannya sudah masuk pada tanggal itu. */
 export async function sudahDilaporkan(
   pengguna: Pengguna,
   tanggal: string,
