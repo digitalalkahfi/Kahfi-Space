@@ -1,10 +1,9 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import {
-  BATAS_SUSULAN_HARI,
+  alasanTanggalLaporan,
   bersihkanIsi,
   bolehLihatLaporan,
-  hariTerlewat,
   ISI_KOSONG,
   type IsiLaporan,
   kapanLaporan,
@@ -15,6 +14,7 @@ import {
   perubahanRevisi,
   punyaKolom,
   sasaranBelumDilapor,
+  statusLaporanBulan,
   tanggalBolehLapor,
   tanggalLaporanPanjang,
   unitSasaran,
@@ -358,53 +358,61 @@ test("kunci sasaran unit memakai kode unitnya", () => {
   );
 });
 
-test("laporan susulan boleh sampai 7 hari ke belakang, tidak ke depan", () => {
-  const hariIni = "2026-09-28";
-  assert.equal(BATAS_SUSULAN_HARI, 7);
-  assert.equal(tanggalBolehLapor("2026-09-28", hariIni), true, "hari ini");
-  assert.equal(tanggalBolehLapor("2026-09-27", hariIni), true, "kemarin");
-  assert.equal(tanggalBolehLapor("2026-09-21", hariIni), true, "7 hari lalu");
-  assert.equal(tanggalBolehLapor("2026-09-20", hariIni), false, "8 hari lalu");
-  assert.equal(tanggalBolehLapor("2026-09-29", hariIni), false, "besok");
-  assert.equal(tanggalBolehLapor("2026-02-30", "2026-03-02"), false);
-  assert.equal(tanggalBolehLapor("", hariIni), false);
-  // Menyeberang bulan dan tahun tetap dihitung per hari.
-  assert.equal(tanggalBolehLapor("2025-12-26", "2026-01-02"), true);
-});
-
-test("hari terlewat: hanya sasaran yang belum dilapor, terbaru dulu", () => {
-  const hariIni = "2026-09-28";
-  const sasaran = ["akun:a", "akun:b"];
-  const terlapor = [
-    { tanggal: "2026-09-27", kunci: "akun:a" },
-    { tanggal: "2026-09-27", kunci: "akun:b" },
-    { tanggal: "2026-09-26", kunci: "akun:a" },
-    // Laporan hari ini tidak menjadi urusan susulan.
-    { tanggal: "2026-09-28", kunci: "akun:a" },
-  ];
-  const hasil = hariTerlewat(sasaran, terlapor, hariIni);
-  assert.deepEqual(hasil[0], { tanggal: "2026-09-26", belum: ["akun:b"] });
+test("tanggal laporan: hari ini atau susulan sejak sasaran terdaftar", () => {
+  const hariIni = "2026-09-29";
+  assert.equal(alasanTanggalLaporan("2026-09-29", hariIni), null, "hari ini");
+  assert.equal(alasanTanggalLaporan("2026-09-25", hariIni), null, "susulan");
   assert.equal(
-    hasil.at(-1)?.tanggal,
-    "2026-09-21",
-    "sampai 7 hari ke belakang",
+    alasanTanggalLaporan("2026-06-01", hariIni),
+    null,
+    "tanpa batas hari, selama tidak sebelum sasaran terdaftar",
   );
-  assert.ok(!hasil.some((h) => h.tanggal === "2026-09-27"), "27 Sep lengkap");
-  assert.ok(
-    !hasil.some((h) => h.tanggal === hariIni),
-    "hari ini bukan susulan",
+  assert.match(alasanTanggalLaporan("2026-09-30", hariIni) ?? "", /masa depan/);
+  assert.match(
+    alasanTanggalLaporan("2026-09-20", hariIni, "2026-09-23") ?? "",
+    /sejak Rabu, 23 September 2026/,
   );
+  assert.equal(alasanTanggalLaporan("2026-09-23", hariIni, "2026-09-23"), null);
+  assert.equal(
+    alasanTanggalLaporan("2026-02-30", hariIni),
+    "Tanggal laporan tidak sah.",
+  );
+  assert.equal(tanggalBolehLapor("", hariIni), false);
+  assert.equal(tanggalBolehLapor("2026-09-28", hariIni, "2026-09-23"), true);
 });
 
-test("akun baru tidak ditagih untuk hari sebelum ia dibuat", () => {
-  const hasil = hariTerlewat(["akun:lama", "akun:baru"], [], "2026-09-28", {
-    "akun:baru": "2026-09-25",
-  });
-  const tgl24 = hasil.find((h) => h.tanggal === "2026-09-24");
-  const tgl25 = hasil.find((h) => h.tanggal === "2026-09-25");
-  assert.deepEqual(tgl24?.belum, ["akun:lama"]);
-  assert.deepEqual(tgl25?.belum, ["akun:lama", "akun:baru"]);
-  assert.deepEqual(hariTerlewat([], [], "2026-09-28"), []);
+test("kalender laporan: merah bila ada yang belum, hijau bila semua sudah", () => {
+  const status = statusLaporanBulan(
+    "2026-09-01",
+    ["akun:a", "akun:b"],
+    [
+      { tanggal: "2026-09-23", kunci: "akun:a" },
+      { tanggal: "2026-09-25", kunci: "akun:a" },
+      { tanggal: "2026-09-26", kunci: "akun:a" },
+      { tanggal: "2026-09-26", kunci: "akun:b" },
+      // Laporan riwayat sebelum terdaftar tidak membuat tanggal itu berwarna.
+      { tanggal: "2026-09-10", kunci: "akun:a" },
+    ],
+    "2026-09-29",
+    { "akun:a": "2026-09-23", "akun:b": "2026-09-25" },
+  );
+  assert.equal(status["2026-09-22"], undefined, "sebelum sasaran terdaftar");
+  assert.equal(status["2026-09-10"], undefined);
+  assert.deepEqual(status["2026-09-23"], { wajib: 1, belum: 0 }, "hijau");
+  assert.deepEqual(status["2026-09-24"], { wajib: 1, belum: 1 }, "merah");
+  assert.deepEqual(
+    status["2026-09-25"],
+    { wajib: 2, belum: 1 },
+    "akun kedua baru ditagih sejak ia terdaftar",
+  );
+  assert.deepEqual(status["2026-09-26"], { wajib: 2, belum: 0 });
+  assert.deepEqual(status["2026-09-29"], { wajib: 2, belum: 2 }, "hari ini");
+  assert.equal(status["2026-09-30"], undefined, "masa depan tanpa warna");
+  assert.deepEqual(
+    statusLaporanBulan("2026-10-01", ["akun:a"], [], "2026-09-29"),
+    {},
+    "bulan yang belum tiba",
+  );
 });
 
 test("label tanggal laporan dibaca orang", () => {
