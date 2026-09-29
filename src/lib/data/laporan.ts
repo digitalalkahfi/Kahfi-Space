@@ -11,11 +11,10 @@ import {
 } from "@/lib/data/contoh";
 import { targetHarianGrd } from "@/lib/goal";
 import {
-  BATAS_SUSULAN_HARI,
   bolehLihatLaporan,
-  hariTerlewat,
   kunciSasaranLaporan,
-  type HariTerlewat,
+  statusLaporanBulan,
+  type KalenderLaporan,
 } from "@/lib/laporan";
 import { batasMinimum } from "@/lib/batas-minimum";
 import type {
@@ -410,73 +409,156 @@ export function hariIniLaporan(): string {
     : new Date().toISOString().slice(0, 10);
 }
 
-/**
- * Hari-hari dalam batas susulan yang laporannya belum lengkap untuk
- * sasaran-sasaran pengguna ini, terbaru dulu.
- *
- * Sasarannya diambil dari daftar hari ini; laporan dari siapa pun untuk
- * sasaran itu dianggap sudah masuk. Akun yang baru dibuat tidak ditagih
- * untuk hari sebelum ia ada.
- */
-export async function laporanTerlewat(
-  hariIni: string,
-  sasaran: readonly SasaranLaporan[],
-): Promise<HariTerlewat[]> {
-  const kunci = sasaran.map(kunciSasaranLaporan);
-  if (kunci.length === 0) return [];
+/** Tanggal (WIB) sebuah cap waktu, bentuk "YYYY-MM-DD". */
+function tanggalWib(cap: string) {
+  return new Date(cap).toLocaleDateString("en-CA", {
+    timeZone: "Asia/Jakarta",
+  });
+}
 
-  const dari = new Date(`${hariIni}T00:00:00Z`);
-  dari.setUTCDate(dari.getUTCDate() - BATAS_SUSULAN_HARI);
-  const awal = dari.toISOString().slice(0, 10);
+/**
+ * Tanggal mulai tiap sasaran ditagih laporannya: sejak akun atau unitnya
+ * terdaftar di K-Space. Laporan sebelum itu adalah riwayat impor V1 dan
+ * tidak diwarnai merah. Mode demo memakai tanggal laporan contoh paling
+ * awal, karena data contoh tidak menyimpan kapan akunnya dibuat.
+ */
+export async function mulaiSasaran(
+  sasaran: readonly SasaranLaporan[],
+): Promise<Record<string, string>> {
+  if (sasaran.length === 0) return {};
 
   if (modeData() === "demo") {
-    const { daily_reports, accounts } = dataContoh;
-    const terlapor = daily_reports
-      .filter((l) => l.tanggal >= awal && l.tanggal < hariIni)
-      .map((l) => ({
-        tanggal: l.tanggal,
-        kunci: l.akun
-          ? `akun:${accounts.find((a) => a.username === l.akun)?.id}`
-          : `unit:${l.unit}`,
-      }));
-    return hariTerlewat(kunci, terlapor, hariIni);
+    const awal = dataContoh.daily_reports
+      .map((l) => l.tanggal)
+      .reduce((a, b) => (b < a ? b : a));
+    return Object.fromEntries(
+      sasaran.map((s) => [kunciSasaranLaporan(s), awal]),
+    );
   }
 
   const sb = await klienServer();
   const idAkun = sasaran.flatMap((s) =>
     s.jenis === "akun" ? [s.akun.id] : [],
   );
-  const [laporan, akun] = await Promise.all([
-    sb
-      .from("daily_reports")
-      .select("tanggal, account_id, units:unit_id (kode)")
-      .gte("tanggal", awal)
-      .lt("tanggal", hariIni),
+  const kodeUnit = sasaran.flatMap((s) =>
+    s.jenis === "unit" ? [s.unitId] : [],
+  );
+  const [akun, unit] = await Promise.all([
     idAkun.length > 0
       ? sb.from("accounts").select("id, created_at").in("id", idAkun)
       : Promise.resolve({ data: [], error: null }),
+    kodeUnit.length > 0
+      ? sb.from("units").select("kode, created_at").in("kode", kodeUnit)
+      : Promise.resolve({ data: [], error: null }),
   ]);
-  if (laporan.error) {
-    throw new Error(`Gagal memuat laporan terlewat: ${laporan.error.message}`);
+  const galat = akun.error ?? unit.error;
+  if (galat) throw new Error(`Gagal memuat sasaran laporan: ${galat.message}`);
+
+  return {
+    ...Object.fromEntries(
+      (akun.data ?? []).map((a) => [`akun:${a.id}`, tanggalWib(a.created_at)]),
+    ),
+    ...Object.fromEntries(
+      (unit.data ?? []).map((u) => [
+        `unit:${u.kode}`,
+        tanggalWib(u.created_at),
+      ]),
+    ),
+  };
+}
+
+/** Tanggal mulai satu sasaran ("akun:<uuid>" / "unit:<kode>"), untuk Server Action. */
+export async function mulaiSasaranLaporan(
+  kunci: string,
+): Promise<string | null> {
+  const [jenis, nilai] = kunci.split(":");
+  if (!nilai || (jenis !== "akun" && jenis !== "unit")) return null;
+
+  if (modeData() === "demo") {
+    return dataContoh.daily_reports
+      .map((l) => l.tanggal)
+      .reduce((a, b) => (b < a ? b : a));
   }
 
-  const terlapor = (laporan.data ?? []).map((r) => {
-    const unit = r.units as unknown as { kode: string } | null;
-    return {
-      tanggal: r.tanggal,
-      kunci: r.account_id ? `akun:${r.account_id}` : `unit:${unit?.kode}`,
-    };
-  });
-  // Akun baru ditagih sejak tanggal (WIB) ia dibuat.
-  const mulaiBerlaku = Object.fromEntries(
-    (akun.data ?? []).map((a) => [
-      `akun:${a.id}`,
-      new Date(a.created_at).toLocaleDateString("en-CA", {
-        timeZone: "Asia/Jakarta",
-      }),
-    ]),
-  );
-  return hariTerlewat(kunci, terlapor, hariIni, mulaiBerlaku);
+  const sb = await klienServer();
+  const { data } =
+    jenis === "akun"
+      ? await sb
+          .from("accounts")
+          .select("created_at")
+          .eq("id", nilai)
+          .maybeSingle()
+      : await sb
+          .from("units")
+          .select("created_at")
+          .eq("kode", nilai as KodeUnit)
+          .maybeSingle();
+  return data ? tanggalWib(data.created_at) : null;
+}
+
+/**
+ * Status laporan tiap tanggal dalam satu bulan untuk sasaran pengguna
+ * ini: merah bila ada yang belum dilapor, hijau bila semua sudah.
+ * Laporan dari siapa pun untuk sasaran itu dihitung sudah masuk.
+ */
+export async function kalenderLaporan(
+  bulan: string,
+  hariIni: string,
+  sasaran: readonly SasaranLaporan[],
+  mulaiPer?: Record<string, string>,
+): Promise<KalenderLaporan> {
+  const awalBulan = `${bulan.slice(0, 7)}-01`;
+  const mulai = mulaiPer ?? (await mulaiSasaran(sasaran));
+  const kunci = sasaran.map(kunciSasaranLaporan);
+  const mulaiTerawal =
+    Object.values(mulai).reduce<string | null>(
+      (a, b) => (a === null || b < a ? b : a),
+      null,
+    ) ?? hariIni;
+
+  const akhir = new Date(`${awalBulan}T00:00:00Z`);
+  akhir.setUTCMonth(akhir.getUTCMonth() + 1);
+  akhir.setUTCDate(0);
+  const akhirBulan = akhir.toISOString().slice(0, 10);
+  const sampai = akhirBulan < hariIni ? akhirBulan : hariIni;
+
+  let terlapor: { tanggal: string; kunci: string }[] = [];
+  if (kunci.length > 0 && awalBulan <= sampai) {
+    if (modeData() === "demo") {
+      const { daily_reports, accounts } = dataContoh;
+      terlapor = daily_reports
+        .filter((l) => l.tanggal >= awalBulan && l.tanggal <= sampai)
+        .map((l) => ({
+          tanggal: l.tanggal,
+          kunci: l.akun
+            ? `akun:${accounts.find((a) => a.username === l.akun)?.id}`
+            : `unit:${l.unit}`,
+        }));
+    } else {
+      const sb = await klienServer();
+      const { data, error } = await sb
+        .from("daily_reports")
+        .select("tanggal, account_id, units:unit_id (kode)")
+        .gte("tanggal", awalBulan)
+        .lte("tanggal", sampai);
+      if (error) {
+        throw new Error(`Gagal memuat kalender laporan: ${error.message}`);
+      }
+      terlapor = (data ?? []).map((r) => {
+        const unit = r.units as unknown as { kode: string } | null;
+        return {
+          tanggal: r.tanggal,
+          kunci: r.account_id ? `akun:${r.account_id}` : `unit:${unit?.kode}`,
+        };
+      });
+    }
+  }
+
+  return {
+    bulan: awalBulan,
+    mulai: mulaiTerawal,
+    status: statusLaporanBulan(awalBulan, kunci, terlapor, hariIni, mulai),
+  };
 }
 
 /** Sasaran yang laporannya sudah masuk pada tanggal itu. */
