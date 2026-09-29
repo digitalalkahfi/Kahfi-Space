@@ -11,8 +11,17 @@ import {
   type Hasil,
   type KodeGagal,
 } from "@/lib/data/hasil";
-import { periksaIsiLaporan, type IsiLaporan } from "@/lib/laporan";
-import { unitLaporan, unitSasaranLaporan } from "@/lib/data/laporan";
+import {
+  BATAS_SUSULAN_HARI,
+  periksaIsiLaporan,
+  tanggalBolehLapor,
+  type IsiLaporan,
+} from "@/lib/laporan";
+import {
+  hariIniLaporan,
+  unitLaporan,
+  unitSasaranLaporan,
+} from "@/lib/data/laporan";
 import type { KodeUnit } from "@/lib/types";
 
 /**
@@ -51,6 +60,10 @@ function uraikanSasaran(kunci: string) {
 /**
  * Kirim laporan harian — satu-satunya tempat GMV masuk ke sistem.
  * Database memaksa satu laporan per (sasaran, tanggal).
+ *
+ * Tanggalnya boleh hari ini atau susulan untuk hari yang terlewat, paling
+ * lama `BATAS_SUSULAN_HARI` hari ke belakang — batas yang sama dengan
+ * pilihan tanggal di form.
  */
 export async function kirimLaporanHarian(input: {
   sasaran: string;
@@ -62,6 +75,12 @@ export async function kirimLaporanHarian(input: {
 }): Promise<Hasil<{ id: string }>> {
   const sasaran = uraikanSasaran(input.sasaran);
   if (!sasaran) return gagal("Pilih akun atau unit dulu.", "validasi");
+  if (!tanggalBolehLapor(input.tanggal, hariIniLaporan())) {
+    return gagal(
+      `Tanggal laporan harus hari ini atau susulan paling lama ${BATAS_SUSULAN_HARI} hari ke belakang.`,
+      "validasi",
+    );
+  }
 
   // Departemen sasaran menentukan kolom mana yang sah, dan pemeriksaannya
   // memakai fungsi yang sama dengan form — kiriman yang tidak lewat form
@@ -112,7 +131,7 @@ export async function kirimLaporanHarian(input: {
   if (error) {
     if (error.code === "23505") {
       return gagal(
-        "Laporan untuk sasaran ini hari ini sudah ada. Perbaiki lewat Riwayat laporan bila angkanya keliru.",
+        "Laporan untuk sasaran ini pada tanggal tersebut sudah ada. Perbaiki lewat Riwayat laporan bila angkanya keliru.",
         "validasi",
       );
     }
