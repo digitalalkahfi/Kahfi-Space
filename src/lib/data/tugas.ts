@@ -5,7 +5,16 @@ import "server-only";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { TANGGAL_ACUAN, dataContoh } from "@/lib/data/contoh";
-import { hariIniWib } from "@/lib/format";
+import { hariIniWib, keTanggalWib } from "@/lib/format";
+import {
+  BATAS_DAFTAR,
+  BATAS_PAPAN,
+  masukPapan,
+  masukToDoHariIni,
+  rentangHariWib,
+  ringkasToDoTanggal,
+} from "@/lib/papan-tanggal";
+import type { BarisTugasTersaring } from "@/lib/supabase/types";
 import type {
   Prioritas,
   StatusTugas,
@@ -102,6 +111,7 @@ function keToDo(b: BarisTugas): ToDo {
     judul: b.judul,
     konteks: b.konteks,
     jam: b.tenggat,
+    tanggal: b.tenggat ? keTanggalWib(b.tenggat) : "",
     tanpaJam: b.tanpa_jam ?? false,
     prioritas: b.prioritas,
     selesai: b.status === "selesai",
@@ -117,12 +127,17 @@ function tugasContoh(pengguna: Pengguna): BarisTugas[] {
   // anggota contoh supaya kepemilikan dibandingkan lewat id, sama dengan
   // mode Supabase.
   const idDari = new Map(dataContoh.users.map((u) => [u.nama, u.id]));
+  const lintas = pengguna.role === "CEO" || pengguna.role === "Manager";
   return dataContoh.tasks
     .filter((t) => {
-      const lintas = pengguna.role === "CEO" || pengguna.role === "Manager";
-      if (t.penerima === pengguna.nama || t.pembuat === pengguna.nama) {
+      if (
+        idDari.get(t.penerima) === pengguna.id ||
+        idDari.get(t.pembuat) === pengguna.id
+      ) {
         return true;
       }
+      // To-do pribadi tidak pernah terlihat orang lain, sama dengan
+      // `papan_tugas`/`daftar_tugas` (0182).
       return lintas && t.tipe !== "pribadi";
     })
     .map((t, i) => ({
@@ -131,9 +146,12 @@ function tugasContoh(pengguna: Pengguna): BarisTugas[] {
       pembuat_id: idDari.get(t.pembuat),
       qc_note: "",
       hasil_kerja: "",
+      // Data contoh tidak mencatat kapan tugasnya beres; dianggap beres
+      // pada tenggatnya, supaya kolom Selesai tiap tanggal berisi yang
+      // memang jatuh di tanggal itu.
       selesai_at:
         t.status === "selesai"
-          ? `${dataContoh.tanggalAcuan}T16:40:00+07:00`
+          ? (t.tenggat ?? `${dataContoh.tanggalAcuan}T16:40:00+07:00`)
           : null,
       tipe: t.tipe as BarisTugas["tipe"],
       judul: t.judul,
@@ -158,6 +176,14 @@ function tugasContoh(pengguna: Pengguna): BarisTugas[] {
     }));
 }
 
+/**
+ * Semua tugas yang terlihat, 200 baris pertama.
+ *
+ * Kini HANYA dipakai kalender (`tenggatTugas`), yang menyaring rentang
+ * tanggalnya sendiri. Halaman Tugas dan Beranda tidak memakainya lagi:
+ * tanpa saringan tanggal, tugas di luar 200 baris pertama hilang tanpa
+ * tanda.
+ */
 async function ambilBaris(pengguna: Pengguna): Promise<BarisTugas[]> {
   if (modeData() === "demo") return tugasContoh(pengguna);
 
@@ -173,37 +199,218 @@ async function ambilBaris(pengguna: Pengguna): Promise<BarisTugas[]> {
   return data as unknown as BarisTugas[];
 }
 
-/** To-do pribadi milik pengguna untuk hari berjalan. */
-export async function ambilToDo(pengguna: Pengguna): Promise<ToDo[]> {
-  const baris = await ambilBaris(pengguna);
-  return baris
-    .filter((b) => b.tipe === "pribadi" && b.penerima?.nama === pengguna.nama)
-    .map(keToDo);
+/** Tugas hasil saringan basis data, lengkap dengan tanda batasnya. */
+export type TugasTersaring = {
+  tugas: Tugas[];
+  /** Jumlah yang cocok sebelum dibatasi. */
+  total: number;
+  /** Batas tercapai — layar wajib mengatakannya, bukan memotong diam-diam. */
+  terpotong: boolean;
+};
+
+/** Baris `papan_tugas`/`daftar_tugas` (0182) ke bentuk yang dikenal `keTugas`. */
+function dariTersaring(r: BarisTugasTersaring): BarisTugas {
+  return {
+    id: r.id,
+    penerima_id: r.penerima_id,
+    pembuat_id: r.pembuat_id,
+    qc_note: r.qc_note,
+    hasil_kerja: r.hasil_kerja,
+    selesai_at: r.selesai_at,
+    tipe: r.tipe,
+    judul: r.judul,
+    deskripsi: r.deskripsi,
+    konteks: r.konteks,
+    tenggat: r.tenggat,
+    tanpa_jam: r.tanpa_jam,
+    prioritas: r.prioritas,
+    status: r.status,
+    qc_status: r.qc_status,
+    penerima: r.penerima ? { nama: r.penerima } : null,
+    pembuat: r.pembuat ? { nama: r.pembuat } : null,
+    goal: r.goal_judul
+      ? { judul: r.goal_judul, periode: r.goal_periode ?? "" }
+      : null,
+  };
+}
+
+function keTersaring(baris: BarisTugasTersaring[]): TugasTersaring {
+  const total = Number(baris[0]?.total ?? 0);
+  return {
+    tugas: baris.map((r) => keTugas(dariTersaring(r))),
+    total,
+    terpotong: total > baris.length,
+  };
+}
+
+/** Mode demo: pembatasan yang sama dengan fungsi basis datanya. */
+function batasiContoh(cocok: Tugas[], batas: number): TugasTersaring {
+  return {
+    tugas: cocok.slice(0, batas),
+    total: cocok.length,
+    terpotong: cocok.length > batas,
+  };
+}
+
+/**
+ * Isi papan Kanban satu tanggal (D4).
+ *
+ * Disaring di basis data (`papan_tugas`, 0182) — bukan menarik semua
+ * baris ke server lalu memilihnya — dan tetap tunduk RLS.
+ */
+export async function ambilPapanTugas(
+  pengguna: Pengguna,
+  tanggal: string,
+  hariIni: string,
+): Promise<TugasTersaring> {
+  if (modeData() === "demo") {
+    const cocok = tugasContoh(pengguna)
+      .map(keTugas)
+      .filter((t) => masukPapan(t, tanggal, hariIni));
+    return batasiContoh(cocok, BATAS_PAPAN);
+  }
+
+  const sb = await klienServer();
+  const { data, error } = await sb.rpc("papan_tugas", {
+    p_tanggal: tanggal,
+    p_hari_ini: hariIni,
+    p_batas: BATAS_PAPAN,
+  });
+
+  if (error) throw new Error(`Gagal memuat papan tugas: ${error.message}`);
+  return keTersaring(data ?? []);
+}
+
+/**
+ * Tampilan Daftar: semua yang BELUM selesai, dikelompokkan menurut
+ * tenggat di layar. Tugas selesai tidak dimuat.
+ */
+export async function ambilDaftarTugas(
+  pengguna: Pengguna,
+  hariIni: string,
+): Promise<TugasTersaring> {
+  if (modeData() === "demo") {
+    const cocok = tugasContoh(pengguna)
+      .map(keTugas)
+      .filter(
+        (t) => t.statusAsli !== "selesai" && t.statusAsli !== "dibatalkan",
+      );
+    return batasiContoh(cocok, BATAS_DAFTAR);
+  }
+
+  const sb = await klienServer();
+  const { data, error } = await sb.rpc("daftar_tugas", {
+    p_acuan: hariIni,
+    p_saringan: "semua",
+    p_batas: BATAS_DAFTAR,
+  });
+
+  if (error) throw new Error(`Gagal memuat daftar tugas: ${error.message}`);
+  return keTersaring(data ?? []);
+}
+
+const KOLOM_TODO =
+  "id, judul, konteks, tenggat, tanpa_jam, prioritas, status, selesai_at";
+
+/**
+ * "To-do hari ini" di Beranda: to-do milik pengguna (dibandingkan lewat
+ * id, bukan nama) yang bertenggat hari ini WIB, ditambah yang terlambat
+ * dan belum selesai.
+ */
+export async function ambilToDo(
+  pengguna: Pengguna,
+  hariIni: string,
+): Promise<ToDo[]> {
+  const urut = (a: ToDo, b: ToDo) =>
+    (a.jam ?? "").localeCompare(b.jam ?? "");
+
+  if (modeData() === "demo") {
+    return tugasContoh(pengguna)
+      .filter(
+        (b) =>
+          b.tipe === "pribadi" &&
+          b.penerima_id === pengguna.id &&
+          masukToDoHariIni(
+            { status: b.status, tenggat: b.tenggat ?? "" },
+            hariIni,
+          ),
+      )
+      .map(keToDo)
+      .sort(urut);
+  }
+
+  const sb = await klienServer();
+  const { awal, akhir } = rentangHariWib(hariIni);
+  const milikSaya = () =>
+    sb
+      .from("tasks")
+      .select(KOLOM_TODO)
+      .eq("tipe", "pribadi")
+      .eq("penerima_id", pengguna.id);
+
+  // Dua saringan sederhana alih-alih satu `or` bersarang: rentang hari
+  // ini (apa pun statusnya, kecuali batal), dan yang terlambat.
+  const [hari, telat] = await Promise.all([
+    milikSaya()
+      .neq("status", "dibatalkan")
+      .gte("tenggat", awal)
+      .lt("tenggat", akhir)
+      .order("tenggat")
+      .limit(200),
+    milikSaya()
+      .not("status", "in", "(selesai,dibatalkan)")
+      .lt("tenggat", awal)
+      .order("tenggat")
+      .limit(200),
+  ]);
+
+  const galat = hari.error ?? telat.error;
+  if (galat) throw new Error(`Gagal memuat to-do: ${galat.message}`);
+
+  return [...(telat.data ?? []), ...(hari.data ?? [])]
+    .map((b) => keToDo(b as unknown as BarisTugas))
+    .sort(urut);
 }
 
 /**
  * Tiket & komitmen yang perlu perhatian: belum selesai, diurutkan dari
- * yang paling mendesak.
+ * yang paling mendesak. Disaring di basis data, jadi tidak ada yang
+ * tersisih oleh batas baris.
  */
 export async function ambilTugasMendesak(
   pengguna: Pengguna,
   batas = 4,
 ): Promise<Tugas[]> {
-  const baris = await ambilBaris(pengguna);
   const bobot: Record<Prioritas, number> = { tinggi: 0, sedang: 1, rendah: 2 };
 
-  return baris
-    .filter((b) => b.tipe !== "pribadi" && b.status !== "selesai")
-    .sort((a, b) => {
-      const p = bobot[a.prioritas] - bobot[b.prioritas];
-      if (p !== 0) return p;
-      return (a.tenggat ?? "9999").localeCompare(b.tenggat ?? "9999");
-    })
-    .slice(0, batas)
-    .map(keTugas);
+  if (modeData() === "demo") {
+    return tugasContoh(pengguna)
+      .filter((b) => b.tipe !== "pribadi" && b.status !== "selesai")
+      .sort((a, b) => {
+        const p = bobot[a.prioritas] - bobot[b.prioritas];
+        if (p !== 0) return p;
+        return (a.tenggat ?? "9999").localeCompare(b.tenggat ?? "9999");
+      })
+      .slice(0, batas)
+      .map(keTugas);
+  }
+
+  const sb = await klienServer();
+  const { data, error } = await sb
+    .from("tasks")
+    .select(KOLOM)
+    .neq("tipe", "pribadi")
+    .not("status", "in", "(selesai,dibatalkan)")
+    // Urutan enum prioritas_tugas: rendah < sedang < tinggi.
+    .order("prioritas", { ascending: false })
+    .order("tenggat", { ascending: true, nullsFirst: false })
+    .limit(batas);
+
+  if (error) throw new Error(`Gagal memuat tugas: ${error.message}`);
+  return (data as unknown as BarisTugas[]).map(keTugas);
 }
 
-/** Semua tugas untuk halaman Tugas. */
+/** Tenggat tugas untuk kalender; lihat catatan di `ambilBaris`. */
 export async function ambilSemuaTugas(pengguna: Pengguna): Promise<Tugas[]> {
   const baris = await ambilBaris(pengguna);
   return baris.map(keTugas);
@@ -217,32 +424,73 @@ export async function riwayatToDo(
   pengguna: Pengguna,
   batas = 50,
 ): Promise<ToDo[]> {
-  const baris = await ambilBaris(pengguna);
-  return baris
-    .filter(
-      (b) =>
-        b.tipe === "pribadi" &&
-        b.status === "selesai" &&
-        b.penerima?.nama === pengguna.nama,
-    )
-    .sort((a, b) => (b.selesai_at ?? "").localeCompare(a.selesai_at ?? ""))
-    .slice(0, batas)
-    .map(keToDo);
+  if (modeData() === "demo") {
+    return tugasContoh(pengguna)
+      .filter(
+        (b) =>
+          b.tipe === "pribadi" &&
+          b.status === "selesai" &&
+          b.penerima_id === pengguna.id,
+      )
+      .sort((a, b) => (b.selesai_at ?? "").localeCompare(a.selesai_at ?? ""))
+      .slice(0, batas)
+      .map(keToDo);
+  }
+
+  const sb = await klienServer();
+  const { data, error } = await sb
+    .from("tasks")
+    .select(KOLOM_TODO)
+    .eq("tipe", "pribadi")
+    .eq("penerima_id", pengguna.id)
+    .eq("status", "selesai")
+    .order("selesai_at", { ascending: false })
+    .limit(batas);
+
+  if (error) throw new Error(`Gagal memuat riwayat to-do: ${error.message}`);
+  return (data as unknown as BarisTugas[]).map(keToDo);
 }
 
-/** Ringkasan penyelesaian to-do untuk kartu statistik. */
-export async function ringkasToDo(pengguna: Pengguna) {
-  const baris = await ambilBaris(pengguna);
-  const milikSaya = baris.filter(
-    (b) => b.tipe === "pribadi" && b.penerima?.nama === pengguna.nama,
-  );
-  const selesai = milikSaya.filter((b) => b.status === "selesai").length;
+/**
+ * "To-do kamu: x dari y beres" untuk satu tanggal: to-do milik pengguna
+ * (lewat id) yang bertenggat tanggal itu.
+ */
+export async function ringkasToDo(pengguna: Pengguna, tanggal: string) {
+  let hitung: { total: number; selesai: number };
 
+  if (modeData() === "demo") {
+    hitung = ringkasToDoTanggal(
+      tugasContoh(pengguna)
+        .map(keTugas)
+        .filter((t) => t.penerimaId === pengguna.id),
+      tanggal,
+    );
+  } else {
+    const sb = await klienServer();
+    const { awal, akhir } = rentangHariWib(tanggal);
+    const { data, error } = await sb
+      .from("tasks")
+      .select("status")
+      .eq("tipe", "pribadi")
+      .eq("penerima_id", pengguna.id)
+      .neq("status", "dibatalkan")
+      .gte("tenggat", awal)
+      .lt("tenggat", akhir);
+
+    if (error) throw new Error(`Gagal meringkas to-do: ${error.message}`);
+    const baris = data ?? [];
+    hitung = {
+      total: baris.length,
+      selesai: baris.filter((b) => b.status === "selesai").length,
+    };
+  }
+
+  const { total, selesai } = hitung;
   return {
-    total: milikSaya.length,
+    total,
     selesai,
-    belum: milikSaya.length - selesai,
-    rasio: milikSaya.length > 0 ? (selesai / milikSaya.length) * 100 : 0,
+    belum: total - selesai,
+    rasio: total > 0 ? (selesai / total) * 100 : 0,
   };
 }
 

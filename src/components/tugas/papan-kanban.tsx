@@ -20,6 +20,7 @@ import { KartuTugas } from "@/components/tugas/kartu-tugas";
 import { PesanAksi } from "@/components/shared/pesan-aksi";
 import { cn } from "@/lib/utils";
 import { kolomMenerima, periksaPindah } from "@/lib/kanban";
+import { penandaPapan, urutkanKolom } from "@/lib/papan-tanggal";
 import { ubahCentangToDo, ubahStatusTugas } from "@/app/actions/tugas";
 import type { JejakQc } from "@/lib/data/tugas";
 import type { StatusTugas, Tugas } from "@/lib/types";
@@ -60,31 +61,6 @@ export const KOLOM_KANBAN: {
     aksen: "bg-ok",
   },
 ];
-
-const BOBOT = { tinggi: 0, sedang: 1, rendah: 2 } as const;
-
-/**
- * Urutan di dalam kolom mengikuti yang paling menuntut perhatian:
- * prioritas lebih dulu, lalu tenggat terdekat. Kolom "Selesai" justru
- * kebalikannya — yang baru saja beres yang paling berguna dilihat.
- */
-function urutkan(daftar: Tugas[], status: StatusTugas) {
-  const salinan = [...daftar];
-
-  if (status === "selesai") {
-    return salinan.sort((a, b) =>
-      (b.selesaiPada ?? b.tenggat ?? "").localeCompare(
-        a.selesaiPada ?? a.tenggat ?? "",
-      ),
-    );
-  }
-
-  return salinan.sort((a, b) => {
-    const p = BOBOT[a.prioritas] - BOBOT[b.prioritas];
-    if (p !== 0) return p;
-    return (a.tenggat || "9999").localeCompare(b.tenggat || "9999");
-  });
-}
 
 /**
  * Panah kiri/kanan memindahkan kartu satu kolom penuh, bukan 25 piksel
@@ -241,14 +217,18 @@ export function PapanKanban({
   tugas,
   idSaya,
   bolehQcSemua,
+  tanggal,
   hariIni,
   jejakQc = {},
 }: {
+  /** Isi papan tanggal ini, sudah disaring basis data (`papan_tugas`). */
   tugas: Tugas[];
   /** Id pengguna yang login — kepemilikan dibandingkan lewat id, bukan nama. */
   idSaya: string;
   /** CEO/Manager/Leader boleh memeriksa tugas orang lain. */
   bolehQcSemua: boolean;
+  /** Tanggal yang sedang ditampilkan (WIB). */
+  tanggal: string;
   hariIni: string;
   /** Riwayat pemeriksaan per id tugas. */
   jejakQc?: Record<string, JejakQc[]>;
@@ -273,16 +253,23 @@ export function PapanKanban({
 
   const statusKini = (t: Tugas) => pindahan[t.id] ?? t.status;
 
+  // Urutan di dalam kolom: yang terlambat paling atas (hanya saat
+  // melihat hari ini), lalu prioritas, lalu tenggat terdekat; kolom
+  // Selesai sebaliknya — yang baru saja beres paling atas.
   const perKolom = useMemo(
     () =>
       KOLOM_KANBAN.map((kolom) => ({
         ...kolom,
-        isi: urutkan(
-          tugas.filter((t) => (pindahan[t.id] ?? t.status) === kolom.status),
+        isi: urutkanKolom(
+          tugas
+            .map((t) => ({ ...t, status: pindahan[t.id] ?? t.status }))
+            .filter((t) => t.status === kolom.status),
           kolom.status,
+          tanggal,
+          hariIni,
         ),
       })),
-    [tugas, pindahan],
+    [tugas, pindahan, tanggal, hariIni],
   );
 
   const sayaPenerima = (t: Tugas) => t.penerimaId === idSaya;
@@ -418,6 +405,11 @@ export function PapanKanban({
       ) : null}
 
       <DndContext
+        // Id tetap: tanpa itu dnd-kit menomori `aria-describedby` dengan
+        // pencacah global yang terus bertambah di server, sehingga HTML
+        // server dan klien berselisih (galat hidrasi) setiap kali papan
+        // dirender ulang — mis. saat berpindah tanggal.
+        id="papan-kanban"
         sensors={sensor}
         // closestCorners, bukan pointerWithin: pemindahan lewat keyboard
         // tidak punya penunjuk sama sekali, jadi pointerWithin membuat
@@ -479,6 +471,7 @@ export function PapanKanban({
                                 sayaPembuat={sayaPembuat(t)}
                                 bolehQc={bolehQc(t)}
                                 hariIni={hariIni}
+                                penanda={penandaPapan(t, tanggal, hariIni)}
                                 jejakQc={jejakQc[t.id]}
                                 hasilTerbukaAwal={mintaHasil === t.id}
                               />

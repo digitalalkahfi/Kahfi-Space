@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import {
+  AlarmClock,
   CalendarClock,
   CheckCircle2,
   ChevronRight,
@@ -19,6 +20,7 @@ import {
   jamWib,
   keJamWib,
   keTanggalWib,
+  tanggalKalenderPendek,
   tanggalKalenderRelatif,
 } from "@/lib/format";
 import {
@@ -29,6 +31,7 @@ import {
 } from "@/app/actions/tugas";
 import { JejakPemeriksaan } from "@/components/tugas/jejak-qc";
 import type { JejakQc } from "@/lib/data/tugas";
+import type { Penanda } from "@/lib/papan-tanggal";
 import type { Prioritas, StatusTugas, TipeTugas, Tugas } from "@/lib/types";
 
 const GAYA_PRIORITAS: Record<
@@ -109,6 +112,7 @@ export function KartuTugas({
   hariIni,
   jejakQc = [],
   hasilTerbukaAwal = false,
+  penanda = null,
 }: {
   tugas: Tugas;
   sayaPenerima: boolean;
@@ -125,6 +129,11 @@ export function KartuTugas({
    * pemeriksaan", jadi kolomnya yang dibuka, bukan aturannya yang diubah.
    */
   hasilTerbukaAwal?: boolean;
+  /**
+   * Tanda di papan hari ini: tugas terlambat yang ikut naik ke hari ini,
+   * atau tiket lama tanpa tenggat.
+   */
+  penanda?: Penanda;
 }) {
   const [sibuk, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
@@ -233,6 +242,18 @@ export function KartuTugas({
   return (
     <Card className="kartu-interaktif rounded-2xl shadow-card ring-border-subtle">
       <div className={cn("mx-(--card-spacing) rounded-2xl p-3.5", gaya.kartu)}>
+        {penanda?.jenis === "terlambat" ? (
+          <p className="mb-2 inline-flex items-center gap-1 rounded-full bg-danger px-2 py-0.5 text-[11px] leading-[14px] font-semibold text-white">
+            <AlarmClock className="size-3" />
+            Terlambat · {tanggalKalenderPendek(penanda.tanggal, hariIni)}
+          </p>
+        ) : null}
+        {penanda?.jenis === "tanpa_tenggat" ? (
+          <p className="mb-2 inline-flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-[11px] leading-[14px] font-semibold text-muted-foreground ring-1 ring-border-subtle">
+            <Clock className="size-3" />
+            Tanpa tenggat
+          </p>
+        ) : null}
         {/* Dibungkus wrap: di kolom papan yang sempit, tenggat turun ke
             barisnya sendiri alih-alih memeras judul jadi satu kata per
             baris. Di daftar yang lebar keduanya tetap sebaris. */}

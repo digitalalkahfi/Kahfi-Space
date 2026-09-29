@@ -154,6 +154,8 @@ export type ToDo = {
   /** Konteks singkat: unit, akun, atau goal yang terkait. */
   konteks: string;
   jam: string | null;
+  /** Tanggal tenggat (WIB, YYYY-MM-DD); "" bila tanpa tenggat. */
+  tanggal: string;
   /** To-do tanpa jam: yang ditampilkan tanggalnya saja, bukan "23:59". */
   tanpaJam: boolean;
   prioritas: Prioritas;

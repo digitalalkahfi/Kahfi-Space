@@ -80,7 +80,9 @@ export default async function BerandaPage({
   ] = await Promise.all([
     ambilPengumuman(pengguna),
     ringkasanGmv(pengguna, tanggal),
-    ambilToDo(pengguna),
+    // To-do milik sendiri (lewat id) bertenggat hari ini WIB, ditambah
+    // yang terlambat dan belum selesai.
+    ambilToDo(pengguna, tanggal),
     ambilTugasMendesak(pengguna),
     rekapKehadiran(pengguna, tanggal),
     agendaAkanDatang(pengguna, tanggal),
@@ -254,7 +256,7 @@ export default async function BerandaPage({
                     kunci: "toDo" as const,
                     isi: (
                       <Reveal>
-                        <ToDoHariIni todo={toDo} />
+                        <ToDoHariIni todo={toDo} hariIni={tanggal} />
                       </Reveal>
                     ),
                   },

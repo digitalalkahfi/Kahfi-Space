@@ -2,11 +2,11 @@
 
 import { useOptimistic, useState, useTransition } from "react";
 import Link from "next/link";
-import { Clock, Plus } from "lucide-react";
+import { AlarmClock, Clock, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { jamWib, persen } from "@/lib/format";
+import { jamWib, persen, tanggalKalenderPendek } from "@/lib/format";
 import { ubahCentangToDo } from "@/app/actions/tugas";
 import type { Prioritas, ToDo } from "@/lib/types";
 
@@ -18,10 +18,19 @@ const warnaPrioritas: Record<Prioritas, string> = {
 
 /**
  * "To-do hari ini" (PRD §3 Beranda): daftar pekerjaan pribadi yang harus
- * kelar hari ini, bisa dicentang langsung dari beranda. Pembuatan dan
- * pengelolaan penuh tetap di menu Tugas.
+ * kelar hari ini — ditambah yang terlambat dan belum dicentang, supaya
+ * tidak hilang dari pandangan begitu tanggalnya lewat. Bisa dicentang
+ * langsung dari beranda; pembuatan dan penjadwalan ulang tetap di menu
+ * Tugas.
  */
-export function ToDoHariIni({ todo }: { todo: ToDo[] }) {
+export function ToDoHariIni({
+  todo,
+  hariIni,
+}: {
+  todo: ToDo[];
+  /** Hari ini (WIB) — pembeda to-do hari ini dari yang terlambat. */
+  hariIni: string;
+}) {
   const [, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
 
@@ -109,9 +118,14 @@ export function ToDoHariIni({ todo }: { todo: ToDo[] }) {
                   >
                     {t.judul}
                   </span>
-                  {/* To-do tanpa jam tersimpan 23:59 WIB; jamnya bukan
-                      pilihan siapa pun, jadi tidak ditampilkan. */}
-                  {t.jam && !t.tanpaJam ? (
+                  {t.tanggal && t.tanggal < hariIni ? (
+                    <span className="tabular flex shrink-0 items-center gap-1 text-[11px] leading-[14px] font-semibold text-danger-text">
+                      <AlarmClock className="size-3" />
+                      Terlambat · {tanggalKalenderPendek(t.tanggal, hariIni)}
+                    </span>
+                  ) : t.jam && !t.tanpaJam ? (
+                    // To-do tanpa jam tersimpan 23:59 WIB; jamnya bukan
+                    // pilihan siapa pun, jadi tidak ditampilkan.
                     <span className="tabular flex shrink-0 items-center gap-1 text-[11px] leading-[14px] text-muted-foreground">
                       <Clock className="size-3" />
                       {jamWib(t.jam)}

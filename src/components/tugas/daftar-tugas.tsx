@@ -4,11 +4,18 @@ import { useMemo, useState } from "react";
 import { AlarmClock, ListChecks } from "lucide-react";
 import { KartuTugas } from "@/components/tugas/kartu-tugas";
 import { cn } from "@/lib/utils";
+import { keTanggalWib } from "@/lib/format";
+import { geserTanggal } from "@/lib/validasi-tugas";
 import type { JejakQc } from "@/lib/data/tugas";
 import type { Tugas } from "@/lib/types";
 import { KeadaanKosong } from "@/components/shared/keadaan";
 
-type Saringan = "semua" | "saya" | "tiket" | "komitmen" | "qc" | "selesai";
+/**
+ * Saringan daftar. Tidak ada "Selesai": daftar ini hanya memuat yang
+ * belum selesai (tugas selesai sepanjang masa tidak lagi ditarik ke
+ * layar); yang sudah beres ada di kolom Selesai papan, per tanggal.
+ */
+type Saringan = "semua" | "saya" | "tiket" | "komitmen" | "qc";
 
 const PILIHAN: { kunci: Saringan; label: string }[] = [
   { kunci: "semua", label: "Semua" },
@@ -16,7 +23,6 @@ const PILIHAN: { kunci: Saringan; label: string }[] = [
   { kunci: "tiket", label: "Tiket" },
   { kunci: "komitmen", label: "Komitmen" },
   { kunci: "qc", label: "Perlu QC" },
-  { kunci: "selesai", label: "Selesai" },
 ];
 
 const BOBOT = { tinggi: 0, sedang: 1, rendah: 2 } as const;
@@ -39,16 +45,16 @@ const URUTAN: Kelompok[] = [
   "tanpa-tenggat",
 ];
 
-/** Mengelompokkan berdasarkan tenggat relatif terhadap hari berjalan. */
+/**
+ * Mengelompokkan berdasarkan tenggat relatif terhadap hari berjalan —
+ * tanggal tenggatnya dibaca di WIB, sama dengan `kelompok_tenggat_dari`.
+ */
 function kelompokTenggat(tenggat: string, hariIni: string): Kelompok {
   if (!tenggat) return "tanpa-tenggat";
-  const hari = tenggat.slice(0, 10);
+  const hari = keTanggalWib(tenggat);
   if (hari < hariIni) return "terlambat";
   if (hari === hariIni) return "hari-ini";
-
-  const besok = new Date(`${hariIni}T00:00:00Z`);
-  besok.setUTCDate(besok.getUTCDate() + 1);
-  return hari === besok.toISOString().slice(0, 10) ? "besok" : "nanti";
+  return hari === geserTanggal(hariIni, 1) ? "besok" : "nanti";
 }
 
 /**
@@ -84,7 +90,6 @@ export function DaftarTugas({
         (t) => t.tipe === "komitmen_mingguan" && t.status !== "selesai",
       ).length,
       qc: tugas.filter((t) => t.status === "menunggu_qc").length,
-      selesai: tugas.filter((t) => t.status === "selesai").length,
     }),
     [tugas],
   );
@@ -100,8 +105,6 @@ export function DaftarTugas({
           return t.tipe === "komitmen_mingguan" && t.status !== "selesai";
         case "qc":
           return t.status === "menunggu_qc";
-        case "selesai":
-          return t.status === "selesai";
         default:
           return t.status !== "selesai";
       }
@@ -165,7 +168,7 @@ export function DaftarTugas({
         ))}
       </div>
 
-      {terlambat > 0 && saringan !== "selesai" ? (
+      {terlambat > 0 ? (
         <p className="flex items-center gap-2 rounded-2xl bg-danger-fill px-4 py-2.5 text-[13px] leading-[18px] font-semibold text-danger-text">
           <AlarmClock className="size-4 shrink-0" />
           {terlambat} tugas sudah lewat tenggat
@@ -175,16 +178,8 @@ export function DaftarTugas({
       {daftar.length === 0 ? (
         <KeadaanKosong
           ikon={<ListChecks className="size-4" />}
-          judul={
-            saringan === "selesai"
-              ? "Belum ada tugas yang selesai"
-              : "Tidak ada tugas di saringan ini"
-          }
-          pesan={
-            saringan === "selesai"
-              ? "Tugas pindah ke sini begitu ditandai selesai."
-              : "Nikmati sebentar — atau longgarkan saringan untuk melihat tugas lain."
-          }
+          judul="Tidak ada tugas di saringan ini"
+          pesan="Nikmati sebentar — atau longgarkan saringan untuk melihat tugas lain. Yang sudah selesai ada di papan, kolom Selesai per tanggal."
         />
       ) : (
         <div className="space-y-5">

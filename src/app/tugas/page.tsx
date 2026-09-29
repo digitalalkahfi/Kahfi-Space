@@ -10,9 +10,12 @@ import {
 } from "@/components/tugas/pilih-tampilan";
 import { DialogTiket } from "@/components/tugas/dialog-tiket";
 import { DialogToDo } from "@/components/tugas/dialog-todo";
+import { StripTanggal } from "@/components/tugas/strip-tanggal";
+import { PesanAksi } from "@/components/shared/pesan-aksi";
 import { Reveal } from "@/components/motion/reveal";
 import {
-  ambilSemuaTugas,
+  ambilDaftarTugas,
+  ambilPapanTugas,
   hariIniTugas,
   jejakQcBanyak,
   ringkasToDo,
@@ -20,6 +23,8 @@ import {
 import { goalAktif } from "@/lib/data/goal";
 import { anggotaBisaDitugasi, peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { akhirPekan } from "@/lib/validasi-tugas";
+import { tanggalDariParam } from "@/lib/papan-tanggal";
+import { bilangan } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Tugas — K-Space V2",
@@ -31,7 +36,11 @@ export const metadata: Metadata = {
 const PEMERIKSA = ["CEO", "Manager", "Leader", "Co-Leader"];
 
 export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
-  const { persona, tampilan: tampilanParam } = await searchParams;
+  const {
+    persona,
+    tampilan: tampilanParam,
+    tanggal: tanggalParam,
+  } = await searchParams;
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
@@ -43,14 +52,21 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
 
   // Hari ini menurut WIB (D7), bukan UTC: antara 00.00 dan 06.59 WIB
   // tanggal UTC masih kemarin.
-  const tanggal = hariIniTugas();
+  const hariIni = hariIniTugas();
+  // Papan menampilkan satu tanggal (D4); `?tanggal=` yang rusak jatuh ke
+  // hari ini. Daftar tetap mengelompokkan semua yang belum selesai.
+  const tanggal =
+    tampilan === "papan" ? tanggalDariParam(tanggalParam, hariIni) : hariIni;
 
-  const [tugas, calonPenerima, goal, ringkas] = await Promise.all([
-    ambilSemuaTugas(pengguna),
+  const [isi, calonPenerima, goal, ringkas] = await Promise.all([
+    tampilan === "papan"
+      ? ambilPapanTugas(pengguna, tanggal, hariIni)
+      : ambilDaftarTugas(pengguna, hariIni),
     anggotaBisaDitugasi(pengguna),
     goalAktif(pengguna),
-    ringkasToDo(pengguna),
+    ringkasToDo(pengguna, tanggal),
   ]);
+  const { tugas } = isi;
 
   // Riwayat QC hanya diambil untuk tugas yang memang pernah diperiksa —
   // satu kueri untuk seluruh papan, bukan satu per kartu.
@@ -58,6 +74,9 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
     tugas.filter((t) => t.qcStatus !== "belum").map((t) => t.id),
   );
 
+  // Tugas baru selalu untuk hari ini atau sesudahnya — juga saat papan
+  // sedang menampilkan tanggal lampau.
+  const tanggalBaru = tanggal > hariIni ? tanggal : hariIni;
 
   return (
     <AppShell pengguna={pengguna} halaman="Tugas">
@@ -85,14 +104,28 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
             <DialogTiket
               penerima={calonPenerima}
               goal={goal}
-              hariIni={tanggal}
-              tanggalAwal={tanggal}
+              hariIni={hariIni}
+              tanggalAwal={tanggalBaru}
               // Minggu dianggap berakhir Sabtu; tenggat bawaan komitmen.
-              akhirPekan={akhirPekan(tanggal)}
+              akhirPekan={akhirPekan(hariIni)}
             />
-            <DialogToDo hariIni={tanggal} tanggalAwal={tanggal} />
+            <DialogToDo hariIni={hariIni} tanggalAwal={tanggalBaru} />
           </div>
         </div>
+
+        {tampilan === "papan" ? (
+          <StripTanggal tanggal={tanggal} hariIni={hariIni} />
+        ) : null}
+
+        {/* Batas aman tercapai: dikatakan, bukan dipotong diam-diam. */}
+        {isi.terpotong ? (
+          <PesanAksi nada="netral" ukuran="sedang">
+            Menampilkan {bilangan(tugas.length)} tugas pertama dari{" "}
+            {bilangan(isi.total)}
+            {tampilan === "papan" ? " untuk tanggal ini" : ""}. Yang lainnya
+            tidak dimuat.
+          </PesanAksi>
+        ) : null}
 
         <Reveal>
           {tampilan === "papan" ? (
@@ -100,7 +133,8 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
               tugas={tugas}
               idSaya={pengguna.id}
               bolehQcSemua={PEMERIKSA.includes(pengguna.role)}
-              hariIni={tanggal}
+              tanggal={tanggal}
+              hariIni={hariIni}
               jejakQc={jejak}
             />
           ) : (
@@ -108,7 +142,7 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
               tugas={tugas}
               idSaya={pengguna.id}
               bolehQcSemua={PEMERIKSA.includes(pengguna.role)}
-              hariIni={tanggal}
+              hariIni={hariIni}
               jejakQc={jejak}
             />
           )}
