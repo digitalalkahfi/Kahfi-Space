@@ -45,8 +45,8 @@ import {
   tanggalLaporanPanjang,
   tanggalLaporanSingkat,
   unitSasaran,
-  type HariTerlewat,
   type IsiLaporan,
+  type KalenderLaporan,
 } from "@/lib/laporan";
 import {
   bilangan,
@@ -82,16 +82,17 @@ type LaporanTerkirim = {
  * pertama dilapor. Form baru berganti menjadi kartu selesai ketika
  * seluruh sasarannya hari ini sudah masuk.
  *
- * Laporan susulan: bila ada hari dalam batas susulan yang laporannya
- * belum lengkap, pelapor bisa memilih tanggal itu. Laporan susulan tidak
- * membuka Absen Pulang — kunci itu milik laporan hari ini.
+ * Tanggal laporan dipilih dari kalender: merah bila masih ada sasaran yang
+ * belum dilapor, hijau bila sudah. Tanggal merah yang lewat bisa diisi
+ * menyusul. Laporan susulan tidak membuka Absen Pulang — kunci itu milik
+ * laporan hari ini.
  */
 export function FormLaporan({
   sasaran,
   sudahDilaporkan,
   tanggal,
   hariIni,
-  terlewat = [],
+  kalender,
   persona,
   absenTerbuka,
   onTerkirim,
@@ -101,8 +102,8 @@ export function FormLaporan({
   /** Tanggal yang sedang dilapor: hari ini, atau tanggal susulan. */
   tanggal: string;
   hariIni: string;
-  /** Hari-hari dalam batas susulan yang laporannya belum lengkap. */
-  terlewat?: readonly HariTerlewat[];
+  /** Status merah/hijau bulan tempat `tanggal` berada, untuk kalender. */
+  kalender: KalenderLaporan;
   /** Persona mode demo; ikut dibawa saat berpindah tanggal. */
   persona?: string;
   /** Kunci sasaran yang laporannya sudah masuk pada tanggal itu. */
@@ -132,16 +133,14 @@ export function FormLaporan({
   const untukTanggal = susulan
     ? `untuk ${tanggalLaporanSingkat(tanggal)}`
     : "hari ini";
-  // Pilihan tanggal hanya muncul bila ada yang terlewat atau sedang susulan.
-  const pilihTanggal =
-    terlewat.length > 0 || susulan ? (
-      <PilihTanggalLaporan
-        hariIni={hariIni}
-        tanggal={tanggal}
-        terlewat={terlewat}
-        persona={persona}
-      />
-    ) : null;
+  const pilihTanggal = (
+    <PilihTanggalLaporan
+      hariIni={hariIni}
+      tanggal={tanggal}
+      kalender={kalender}
+      persona={persona}
+    />
+  );
 
   const [dipilih, setDipilih] = useState(sisa[0] ? kunciSasaran(sisa[0]) : "");
   const [nilai, setNilai] = useState(0);
@@ -287,7 +286,7 @@ export function FormLaporan({
         </span>
       </div>
 
-      {pilihTanggal ? <div className="px-5">{pilihTanggal}</div> : null}
+      <div className="px-5">{pilihTanggal}</div>
 
       {susulan ? (
         <p className="mx-5 rounded-2xl bg-warn-fill px-4 py-2.5 text-[11px] leading-[14px] text-pretty text-warn-text">
