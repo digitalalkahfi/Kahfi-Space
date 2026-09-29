@@ -8,12 +8,14 @@ import { absensiHariIni } from "@/lib/data/absensi";
 import {
   coSampelHariIni,
   hariIniLaporan,
-  laporanTerlewat,
+  kalenderLaporan,
+  mulaiSasaran,
   riwayatLaporan,
   sasaranUntuk,
   sudahDilaporkan,
 } from "@/lib/data/laporan";
-import { tanggalBolehLapor } from "@/lib/laporan";
+import { bulanDari } from "@/lib/kalender";
+import { kunciSasaranLaporan, tanggalBolehLapor } from "@/lib/laporan";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 
 export const metadata: Metadata = {
@@ -32,25 +34,42 @@ export default async function LaporanHarianPage({
 
   // Mode demo mengunci "hari ini" ke tanggal acuan data contoh.
   const hariIni = hariIniLaporan();
-  // Tanggal yang dilapor: hari ini, atau susulan yang dipilih di form
-  // (?tanggal=YYYY-MM-DD). Di luar batas susulan kembali ke hari ini.
+
+  // Yang tidak bergantung pada tanggal terpilih dimuat lebih dulu, sekaligus
+  // tanggal mulai tiap sasaran (sejak terdaftar di K-Space).
+  const [[sasaranHariIni, mulaiPer], riwayat, absen] = await Promise.all([
+    sasaranUntuk(pengguna, hariIni).then(
+      async (s) => [s, await mulaiSasaran(s)] as const,
+    ),
+    riwayatLaporan(pengguna, hariIni),
+    // Absen selalu milik hari ini, berapa pun tanggal laporannya.
+    absensiHariIni(pengguna, hariIni),
+  ]);
+  const mulaiTerawal = Object.values(mulaiPer).reduce<string | null>(
+    (a, b) => (a === null || b < a ? b : a),
+    null,
+  );
+
+  // Tanggal yang dilapor: hari ini, atau susulan yang dipilih dari
+  // kalender (?tanggal=YYYY-MM-DD). Masa depan atau sebelum sasaran
+  // terdaftar kembali ke hari ini.
   const tanggal =
-    typeof diminta === "string" && tanggalBolehLapor(diminta, hariIni)
+    typeof diminta === "string" &&
+    tanggalBolehLapor(diminta, hariIni, mulaiTerawal)
       ? diminta
       : hariIni;
 
-  // Daftar sasaran hari ini juga menjadi dasar hari-hari yang terlewat.
-  const sasaranHariIni = sasaranUntuk(pengguna, hariIni);
-  const [sasaran, riwayat, terlapor, absen, coSampel, terlewat] =
-    await Promise.all([
-      tanggal === hariIni ? sasaranHariIni : sasaranUntuk(pengguna, tanggal),
-      riwayatLaporan(pengguna, hariIni),
-      sudahDilaporkan(pengguna, tanggal),
-      // Absen selalu milik hari ini, berapa pun tanggal laporannya.
-      absensiHariIni(pengguna, hariIni),
-      coSampelHariIni(tanggal),
-      sasaranHariIni.then((s) => laporanTerlewat(hariIni, s)),
-    ]);
+  const [sasaranTanggal, terlapor, coSampel, kalender] = await Promise.all([
+    tanggal === hariIni ? sasaranHariIni : sasaranUntuk(pengguna, tanggal),
+    sudahDilaporkan(pengguna, tanggal),
+    coSampelHariIni(tanggal),
+    kalenderLaporan(bulanDari(tanggal), hariIni, sasaranHariIni, mulaiPer),
+  ]);
+  // Sasaran yang baru terdaftar sesudah tanggal itu tidak ditagih.
+  const sasaran = sasaranTanggal.filter((s) => {
+    const mulai = mulaiPer[kunciSasaranLaporan(s)];
+    return !mulai || mulai <= tanggal;
+  });
 
   const jamMasuk = absen.jamMasuk
     ? new Date(absen.jamMasuk)
@@ -92,7 +111,7 @@ export default async function LaporanHarianPage({
           riwayat={riwayat.slice(0, 3)}
           hariIni={hariIni}
           tanggal={tanggal}
-          terlewat={terlewat}
+          kalender={kalender}
           persona={personaSah}
           jamMasuk={jamMasuk}
           lokasi={lokasi}
