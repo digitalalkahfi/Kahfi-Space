@@ -57,13 +57,14 @@ function kelompokTenggat(tenggat: string, hariIni: string): Kelompok {
  */
 export function DaftarTugas({
   tugas,
-  namaSaya,
+  idSaya,
   bolehQcSemua,
   hariIni,
   jejakQc = {},
 }: {
   tugas: Tugas[];
-  namaSaya: string;
+  /** Id pengguna yang login — kepemilikan dibandingkan lewat id, bukan nama. */
+  idSaya: string;
   /** CEO/Manager/Leader boleh memeriksa tugas orang lain. */
   bolehQcSemua: boolean;
   hariIni: string;
@@ -204,11 +205,11 @@ export function DaftarTugas({
                   <li key={t.id}>
                     <KartuTugas
                       tugas={t}
-                      sayaPenerima={t.penerimaLengkap === namaSaya}
+                      sayaPenerima={t.penerimaId === idSaya}
+                      sayaPembuat={t.pembuatId === idSaya}
                       bolehQc={
                         t.tipe !== "pribadi" &&
-                        (bolehQcSemua ||
-                          t.pembuat.startsWith(namaSaya.split(" ")[0]))
+                        (bolehQcSemua || t.pembuatId === idSaya)
                       }
                       hariIni={hariIni}
                       jejakQc={jejakQc[t.id]}

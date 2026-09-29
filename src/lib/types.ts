@@ -48,7 +48,15 @@ export type Tugas = {
   penerima: string;
   penerimaLengkap: string;
   pembuat: string;
+  /**
+   * Id penerima & pemberi tugas. Kepemilikan selalu dibandingkan lewat
+   * id, bukan nama: dua orang bisa bernama sama.
+   */
+  penerimaId: string;
+  pembuatId: string;
   tenggat: string;
+  /** Tenggat hanya bertanggal (to-do tanpa jam); jamnya jangan ditampilkan. */
+  tanpaJam: boolean;
   prioritas: Prioritas;
   status: StatusTugas;
   /** Status apa adanya dari database, termasuk "revisi" & "dibatalkan". */
@@ -146,6 +154,8 @@ export type ToDo = {
   /** Konteks singkat: unit, akun, atau goal yang terkait. */
   konteks: string;
   jam: string | null;
+  /** To-do tanpa jam: yang ditampilkan tanggalnya saja, bukan "23:59". */
+  tanpaJam: boolean;
   prioritas: Prioritas;
   selesai: boolean;
   /** Waktu tugas ditandai selesai; null bila belum. */

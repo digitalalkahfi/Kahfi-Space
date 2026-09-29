@@ -99,7 +99,17 @@ uji("hitungan lencana cocok dengan daftarnya", async () => {
   harusSama(Number(h.semua), (await daftar(MANAGER, "semua")).length);
   harusSama(Number(h.tiket), (await daftar(MANAGER, "tiket")).length);
   harusSama(Number(h.qc), (await daftar(MANAGER, "qc")).length);
-  harusSama(Number(h.terlambat), 1, "satu tugas telat yang baru dibuat");
+  // Data contoh sendiri punya to-do yang terlambat (0180 mewajibkan
+  // to-do bertanggal), jadi jumlahnya dicocokkan dengan daftarnya —
+  // bukan angka tetap.
+  const telat = (await daftar(MANAGER, "semua")).filter(
+    (t) => t.kelompok === "terlambat",
+  );
+  harusSama(Number(h.terlambat), telat.length, "terlambat cocok dengan daftar");
+  harus(
+    telat.some((t) => t.judul === "Tugas telat kemarin"),
+    "tugas telat yang baru dibuat ikut terhitung",
+  );
 });
 
 uji("cakupan peran tetap berlaku pada daftar tersaring", async () => {

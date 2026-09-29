@@ -24,19 +24,38 @@ const PRIORITAS: { nilai: Prioritas; label: string }[] = [
 ];
 
 /**
- * Tambah to-do pribadi. Sengaja ringkas — judul saja sudah cukup untuk
- * mencatat cepat di tengah kerja; sisanya opsional.
+ * Tambah to-do pribadi. Sengaja ringkas — judul dan tanggal sudah cukup
+ * untuk mencatat cepat di tengah kerja; sisanya opsional.
+ *
+ * Tanggal wajib (D3) supaya to-do selalu masuk papan tanggal tertentu;
+ * tanpa jam, ia berlaku sampai akhir hari itu.
  */
-export function DialogToDo({ tanggal }: { tanggal: string }) {
+export function DialogToDo({
+  hariIni,
+  tanggalAwal,
+}: {
+  /** Hari ini (WIB) — tanggal paling awal yang boleh dipilih. */
+  hariIni: string;
+  /** Tanggal bawaan isian; tidak pernah sebelum hari ini. */
+  tanggalAwal: string;
+}) {
   const [buka, setBuka] = useState(false);
   const [judul, setJudul] = useState("");
   const [konteks, setKonteks] = useState("");
+  const [tanggal, setTanggal] = useState(tanggalAwal);
   const [jam, setJam] = useState("");
   const [prioritas, setPrioritas] = useState<Prioritas>("sedang");
   const [menyimpan, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
 
-  const siap = judul.trim().length >= 3;
+  const siap = judul.trim().length >= 3 && tanggal !== "";
+
+  const bukaTutup = (b: boolean) => {
+    // Setiap kali dibuka, tanggal kembali ke bawaan halaman — bisa saja
+    // tanggal papan sudah berganti sejak isian terakhir.
+    if (b) setTanggal(tanggalAwal);
+    setBuka(b);
+  };
 
   const simpan = () => {
     if (!siap || menyimpan) return;
@@ -46,7 +65,8 @@ export function DialogToDo({ tanggal }: { tanggal: string }) {
       const hasil = await tambahToDo({
         judul,
         konteks,
-        tenggat: jam ? `${tanggal}T${jam}:00+07:00` : null,
+        tanggal,
+        jam: jam || null,
         prioritas,
       });
 
@@ -63,7 +83,7 @@ export function DialogToDo({ tanggal }: { tanggal: string }) {
   };
 
   return (
-    <Dialog open={buka} onOpenChange={setBuka}>
+    <Dialog open={buka} onOpenChange={bukaTutup}>
       <DialogTrigger asChild>
         <Button
           type="button"
@@ -74,7 +94,7 @@ export function DialogToDo({ tanggal }: { tanggal: string }) {
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="rounded-3xl sm:max-w-md">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto rounded-3xl sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Tambah to-do pribadi</DialogTitle>
           <DialogDescription>
@@ -122,8 +142,25 @@ export function DialogToDo({ tanggal }: { tanggal: string }) {
             />
           </div>
 
-          <div className="flex gap-3">
-            <div className="flex-1 space-y-1.5">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label
+                htmlFor="tanggal-todo"
+                className="text-[13px] leading-[18px] font-semibold"
+              >
+                Tanggal
+              </label>
+              <input
+                id="tanggal-todo"
+                type="date"
+                required
+                min={hariIni}
+                value={tanggal}
+                onChange={(e) => setTanggal(e.target.value)}
+                className="tabular h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+              />
+            </div>
+            <div className="space-y-1.5">
               <label
                 htmlFor="jam-todo"
                 className="text-[13px] leading-[18px] font-semibold"
@@ -141,8 +178,13 @@ export function DialogToDo({ tanggal }: { tanggal: string }) {
                 className="tabular h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
               />
             </div>
+          </div>
+          <p className="-mt-1.5 text-[11px] leading-[14px] text-muted-foreground">
+            Tanpa jam, to-do berlaku sampai akhir hari itu.
+          </p>
 
-            <fieldset className="flex-1 space-y-1.5">
+          <div>
+            <fieldset className="space-y-1.5">
               <legend className="text-[13px] leading-[18px] font-semibold">
                 Prioritas
               </legend>

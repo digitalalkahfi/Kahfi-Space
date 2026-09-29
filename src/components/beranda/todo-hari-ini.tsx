@@ -109,7 +109,9 @@ export function ToDoHariIni({ todo }: { todo: ToDo[] }) {
                   >
                     {t.judul}
                   </span>
-                  {t.jam ? (
+                  {/* To-do tanpa jam tersimpan 23:59 WIB; jamnya bukan
+                      pilihan siapa pun, jadi tidak ditampilkan. */}
+                  {t.jam && !t.tanpaJam ? (
                     <span className="tabular flex shrink-0 items-center gap-1 text-[11px] leading-[14px] text-muted-foreground">
                       <Clock className="size-3" />
                       {jamWib(t.jam)}

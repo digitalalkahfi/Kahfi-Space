@@ -4,7 +4,8 @@ import "server-only";
 
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
-import { dataContoh } from "@/lib/data/contoh";
+import { TANGGAL_ACUAN, dataContoh } from "@/lib/data/contoh";
+import { hariIniWib } from "@/lib/format";
 import type {
   Prioritas,
   StatusTugas,
@@ -13,9 +14,18 @@ import type {
   Pengguna,
 } from "@/lib/types";
 
+/**
+ * "Hari ini" modul Tugas: tanggal WIB, atau tanggal acuan data contoh di
+ * mode demo — supaya papan dan validasi tanggal memakai hari yang sama
+ * dengan datanya.
+ */
+export function hariIniTugas(): string {
+  return modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
+}
+
 const KOLOM = `
-  id, tipe, judul, deskripsi, konteks, tenggat, prioritas, status, qc_status,
-  qc_note, hasil_kerja, penerima_id, pembuat_id, goal_id, selesai_at,
+  id, tipe, judul, deskripsi, konteks, tenggat, tanpa_jam, prioritas, status,
+  qc_status, qc_note, hasil_kerja, penerima_id, pembuat_id, goal_id, selesai_at,
   penerima:penerima_id (nama),
   pembuat:pembuat_id (nama),
   goal:goal_id (judul, periode)
@@ -33,6 +43,7 @@ type BarisTugas = {
   deskripsi: string;
   konteks: string;
   tenggat: string | null;
+  tanpa_jam?: boolean;
   prioritas: Prioritas;
   status: StatusTugas | "revisi" | "dibatalkan";
   qc_status: "belum" | "lolos" | "revisi";
@@ -62,7 +73,10 @@ function keTugas(b: BarisTugas): Tugas {
     penerima: namaPendek(b.penerima?.nama ?? "—"),
     penerimaLengkap: b.penerima?.nama ?? "—",
     pembuat: namaPendek(b.pembuat?.nama ?? "—"),
+    penerimaId: b.penerima_id ?? "",
+    pembuatId: b.pembuat_id ?? "",
     tenggat: b.tenggat ?? "",
+    tanpaJam: b.tanpa_jam ?? false,
     prioritas: b.prioritas,
     status: keStatus(b.status),
     statusAsli: b.status,
@@ -72,7 +86,13 @@ function keTugas(b: BarisTugas): Tugas {
     goalJudul: b.goal?.judul ?? null,
     goalPeriode: b.goal?.periode ?? null,
     selesaiPada: b.selesai_at ?? null,
-    label: b.konteks || (b.tipe === "tiket" ? "Tiket" : "Komitmen"),
+    label:
+      b.konteks ||
+      (b.tipe === "tiket"
+        ? "Tiket"
+        : b.tipe === "pribadi"
+          ? "To-do"
+          : "Komitmen"),
   };
 }
 
@@ -82,6 +102,7 @@ function keToDo(b: BarisTugas): ToDo {
     judul: b.judul,
     konteks: b.konteks,
     jam: b.tenggat,
+    tanpaJam: b.tanpa_jam ?? false,
     prioritas: b.prioritas,
     selesai: b.status === "selesai",
     selesaiPada: b.selesai_at ?? null,
@@ -92,6 +113,10 @@ function keToDo(b: BarisTugas): ToDo {
 // Mode demo
 // ---------------------------------------------------------------------
 function tugasContoh(pengguna: Pengguna): BarisTugas[] {
+  // Data contoh menyebut orang dengan namanya; id-nya diambil dari daftar
+  // anggota contoh supaya kepemilikan dibandingkan lewat id, sama dengan
+  // mode Supabase.
+  const idDari = new Map(dataContoh.users.map((u) => [u.nama, u.id]));
   return dataContoh.tasks
     .filter((t) => {
       const lintas = pengguna.role === "CEO" || pengguna.role === "Manager";
@@ -102,6 +127,8 @@ function tugasContoh(pengguna: Pengguna): BarisTugas[] {
     })
     .map((t, i) => ({
       id: `contoh-${i}`,
+      penerima_id: idDari.get(t.penerima),
+      pembuat_id: idDari.get(t.pembuat),
       qc_note: "",
       hasil_kerja: "",
       selesai_at:
@@ -113,6 +140,7 @@ function tugasContoh(pengguna: Pengguna): BarisTugas[] {
       deskripsi: t.deskripsi,
       konteks: t.konteks,
       tenggat: t.tenggat ?? null,
+      tanpa_jam: "tanpa_jam" in t && t.tanpa_jam === true,
       prioritas: t.prioritas as Prioritas,
       status: t.status as BarisTugas["status"],
       qc_status: t.qc as BarisTugas["qc_status"],

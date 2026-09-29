@@ -2842,7 +2842,8 @@
       "deskripsi": "",
       "pembuat": "Farhan Pratama",
       "penerima": "Farhan Pratama",
-      "tenggat": null,
+      "tenggat": "2024-10-24T23:59:00+07:00",
+      "tanpa_jam": true,
       "prioritas": "sedang",
       "status": "todo",
       "qc": "belum"
@@ -2866,7 +2867,8 @@
       "deskripsi": "",
       "pembuat": "Farhan Pratama",
       "penerima": "Farhan Pratama",
-      "tenggat": null,
+      "tenggat": "2024-10-23T23:59:00+07:00",
+      "tanpa_jam": true,
       "prioritas": "rendah",
       "status": "todo",
       "qc": "belum"

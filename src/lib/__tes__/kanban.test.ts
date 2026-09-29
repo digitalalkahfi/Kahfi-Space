@@ -1,16 +1,22 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
-import { dapatDigeser, kolomMenerima, periksaPindah } from "@/lib/kanban";
-import type { StatusTugas } from "@/lib/types";
+import {
+  PESAN_TODO_TANPA_REVIEW,
+  dapatDigeser,
+  kolomMenerima,
+  periksaPindah,
+} from "@/lib/kanban";
+import type { StatusTugas, TipeTugas } from "@/lib/types";
 
 const pindah = (
   dari: StatusTugas,
   ke: StatusTugas,
-  p: { sayaPenerima?: boolean; hasilKerja?: string } = {},
+  p: { sayaPenerima?: boolean; hasilKerja?: string; tipe?: TipeTugas } = {},
 ) =>
   periksaPindah({
     dari,
     ke,
+    tipe: p.tipe ?? "tiket",
     sayaPenerima: p.sayaPenerima ?? true,
     hasilKerja: p.hasilKerja ?? "",
   });
@@ -74,6 +80,7 @@ test("kolom asal kartu bukan pertanyaan menerima atau menolak", () => {
   // karena kartunya memang sedang ada di sana.
   assert.equal(
     kolomMenerima({
+      tipe: "tiket",
       dari: "berjalan",
       ke: "berjalan",
       sayaPenerima: true,
@@ -88,6 +95,7 @@ test("kolom Review menerima meski hasil kerjanya belum ditulis", () => {
   // menolak akan menghalangi orang melakukan hal yang benar.
   assert.equal(
     kolomMenerima({
+      tipe: "tiket",
       dari: "berjalan",
       ke: "menunggu_qc",
       sayaPenerima: true,
@@ -102,6 +110,7 @@ test("kolom yang memang menolak tetap menolak", () => {
   // sekali — keduanya harus terbaca merah sebelum kartunya dilepas.
   assert.equal(
     kolomMenerima({
+      tipe: "tiket",
       dari: "berjalan",
       ke: "selesai",
       sayaPenerima: true,
@@ -111,6 +120,7 @@ test("kolom yang memang menolak tetap menolak", () => {
   );
   assert.equal(
     kolomMenerima({
+      tipe: "tiket",
       dari: "todo",
       ke: "berjalan",
       sayaPenerima: false,
@@ -123,6 +133,7 @@ test("kolom yang memang menolak tetap menolak", () => {
 test("perpindahan biasa diterima", () => {
   assert.equal(
     kolomMenerima({
+      tipe: "tiket",
       dari: "todo",
       ke: "berjalan",
       sayaPenerima: true,
@@ -132,6 +143,7 @@ test("perpindahan biasa diterima", () => {
   );
   assert.equal(
     kolomMenerima({
+      tipe: "tiket",
       dari: "menunggu_qc",
       ke: "berjalan",
       sayaPenerima: true,
@@ -139,4 +151,83 @@ test("perpindahan biasa diterima", () => {
     }),
     true,
   );
+});
+
+// ---------------------------------------------------------------------
+// To-do pribadi: tanpa Review/QC (D2)
+// ---------------------------------------------------------------------
+
+test("to-do pribadi ke Review ditolak dengan pesan yang jelas", () => {
+  const hasil = pindah("berjalan", "menunggu_qc", {
+    tipe: "pribadi",
+    hasilKerja: "sudah beres semua",
+  });
+  assert.deepEqual(hasil, {
+    boleh: false,
+    mintaHasilKerja: false,
+    pesan: PESAN_TODO_TANPA_REVIEW,
+  });
+  assert.match(PESAN_TODO_TANPA_REVIEW, /tidak perlu diperiksa/);
+});
+
+test("to-do pribadi boleh diseret langsung ke Selesai", () => {
+  assert.deepEqual(pindah("berjalan", "selesai", { tipe: "pribadi" }), {
+    boleh: true,
+    ke: "selesai",
+  });
+  assert.deepEqual(pindah("todo", "selesai", { tipe: "pribadi" }), {
+    boleh: true,
+    ke: "selesai",
+  });
+});
+
+test("to-do pribadi yang selesai boleh dibuka lagi ke To Do", () => {
+  // Sama dengan batal centang.
+  assert.deepEqual(pindah("selesai", "todo", { tipe: "pribadi" }), {
+    boleh: true,
+    ke: "todo",
+  });
+});
+
+test("to-do pribadi bergeser bebas antara To Do dan Sedang Dikerjakan", () => {
+  assert.deepEqual(pindah("todo", "berjalan", { tipe: "pribadi" }), {
+    boleh: true,
+    ke: "berjalan",
+  });
+  assert.deepEqual(pindah("berjalan", "todo", { tipe: "pribadi" }), {
+    boleh: true,
+    ke: "todo",
+  });
+});
+
+test("to-do orang lain tetap tidak bisa dipindahkan", () => {
+  const hasil = pindah("todo", "selesai", {
+    tipe: "pribadi",
+    sayaPenerima: false,
+  });
+  assert.equal(hasil.boleh, false);
+  assert.match(String("pesan" in hasil && hasil.pesan), /pemilik to-do/);
+});
+
+test("kolom Review menolak to-do pribadi; kolom Selesai menerimanya", () => {
+  const dasar = {
+    dari: "berjalan" as const,
+    tipe: "pribadi" as const,
+    sayaPenerima: true,
+    hasilKerja: "",
+  };
+  assert.equal(kolomMenerima({ ...dasar, ke: "menunggu_qc" }), false);
+  assert.equal(kolomMenerima({ ...dasar, ke: "selesai" }), true);
+});
+
+test("aturan tiket tidak berubah oleh aturan to-do", () => {
+  // Komitmen mingguan diperlakukan sama dengan tiket.
+  for (const tipe of ["tiket", "komitmen_mingguan"] as const) {
+    assert.equal(pindah("berjalan", "selesai", { tipe }).boleh, false);
+    assert.equal(pindah("selesai", "todo", { tipe }).boleh, false);
+    assert.deepEqual(pindah("berjalan", "menunggu_qc", { tipe }), {
+      boleh: false,
+      mintaHasilKerja: true,
+    });
+  }
 });

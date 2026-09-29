@@ -332,6 +332,7 @@ export type BarisTask = {
   pembuat_id: string;
   penerima_id: string;
   tenggat: string | null;
+  tanpa_jam: boolean;
   prioritas: PrioritasTugasDb;
   status: StatusTugasDb;
   qc_status: StatusQcDb;

@@ -20,7 +20,7 @@ import { KartuTugas } from "@/components/tugas/kartu-tugas";
 import { PesanAksi } from "@/components/shared/pesan-aksi";
 import { cn } from "@/lib/utils";
 import { kolomMenerima, periksaPindah } from "@/lib/kanban";
-import { ubahStatusTugas } from "@/app/actions/tugas";
+import { ubahCentangToDo, ubahStatusTugas } from "@/app/actions/tugas";
 import type { JejakQc } from "@/lib/data/tugas";
 import type { StatusTugas, Tugas } from "@/lib/types";
 
@@ -56,7 +56,7 @@ export const KOLOM_KANBAN: {
   {
     status: "selesai",
     judul: "Selesai",
-    keterangan: "Lolos pemeriksaan",
+    keterangan: "Lolos QC atau dicentang",
     aksen: "bg-ok",
   },
 ];
@@ -239,13 +239,14 @@ function KartuSeret({
  */
 export function PapanKanban({
   tugas,
-  namaSaya,
+  idSaya,
   bolehQcSemua,
   hariIni,
   jejakQc = {},
 }: {
   tugas: Tugas[];
-  namaSaya: string;
+  /** Id pengguna yang login — kepemilikan dibandingkan lewat id, bukan nama. */
+  idSaya: string;
   /** CEO/Manager/Leader boleh memeriksa tugas orang lain. */
   bolehQcSemua: boolean;
   hariIni: string;
@@ -284,7 +285,14 @@ export function PapanKanban({
     [tugas, pindahan],
   );
 
-  const sayaPenerima = (t: Tugas) => t.penerimaLengkap === namaSaya;
+  const sayaPenerima = (t: Tugas) => t.penerimaId === idSaya;
+  const sayaPembuat = (t: Tugas) => t.pembuatId === idSaya;
+  const bolehQc = (t: Tugas) =>
+    t.tipe !== "pribadi" && (bolehQcSemua || sayaPembuat(t));
+  // To-do pribadi boleh ditarik keluar dari Selesai (= batal centang);
+  // tiket yang selesai hanya dibuka lagi lewat QC.
+  const bisaSeret = (t: Tugas) =>
+    sayaPenerima(t) && (statusKini(t) !== "selesai" || t.tipe === "pribadi");
   const melayang = tugas.find((t) => t.id === diangkat) ?? null;
 
   // Pengumuman bawaan dnd-kit berbahasa Inggris dan menyebut id mentah
@@ -334,6 +342,7 @@ export function PapanKanban({
     kolomMenerima({
       dari: statusKini(kartu),
       ke,
+      tipe: kartu.tipe,
       sayaPenerima: sayaPenerima(kartu),
       hasilKerja: kartu.hasilKerja,
     });
@@ -345,9 +354,11 @@ export function PapanKanban({
     if (!kartu || !tujuan.startsWith("kolom:")) return;
 
     const ke = tujuan.slice("kolom:".length) as StatusTugas;
+    const dari = statusKini(kartu);
     const hasil = periksaPindah({
-      dari: statusKini(kartu),
+      dari,
       ke,
+      tipe: kartu.tipe,
       sayaPenerima: sayaPenerima(kartu),
       hasilKerja: kartu.hasilKerja,
     });
@@ -367,12 +378,23 @@ export function PapanKanban({
 
     // Kartu pindah lebih dulu supaya papan terasa langsung, lalu
     // dikembalikan bila server menolak.
-    const semula = statusKini(kartu);
-    setPindahan((s) => ({ ...s, [kartu.id]: hasil.ke }));
+    const semula = dari;
+    const tujuanAkhir = hasil.ke;
+    setPindahan((s) => ({ ...s, [kartu.id]: tujuanAkhir }));
     setPesan(null);
 
     mulai(async () => {
-      const r = await ubahStatusTugas(kartu.id, hasil.ke, kartu.hasilKerja);
+      // To-do yang diseret ke Selesai — atau ke To Do dari Selesai — sama
+      // dengan mencentang / batal centang: jalurnya `ubahCentangToDo`,
+      // bukan jalur QC (D2).
+      const bukaLagi =
+        kartu.tipe === "pribadi" && dari === "selesai" && tujuanAkhir === "todo";
+      const r =
+        tujuanAkhir === "selesai"
+          ? await ubahCentangToDo(kartu.id, true)
+          : bukaLagi
+            ? await ubahCentangToDo(kartu.id, false)
+            : await ubahStatusTugas(kartu.id, tujuanAkhir, kartu.hasilKerja);
       if (r.ok) {
         setPesan(null);
         return;
@@ -446,9 +468,7 @@ export function PapanKanban({
                         <li key={t.id}>
                           <KartuSeret
                             tugas={{ ...t, status: statusKini(t) }}
-                            bisaSeret={
-                              sayaPenerima(t) && statusKini(t) !== "selesai"
-                            }
+                            bisaSeret={bisaSeret(t)}
                             anak={
                               <KartuTugas
                                 key={
@@ -456,13 +476,8 @@ export function PapanKanban({
                                 }
                                 tugas={{ ...t, status: statusKini(t) }}
                                 sayaPenerima={sayaPenerima(t)}
-                                bolehQc={
-                                  t.tipe !== "pribadi" &&
-                                  (bolehQcSemua ||
-                                    t.pembuat.startsWith(
-                                      namaSaya.split(" ")[0],
-                                    ))
-                                }
+                                sayaPembuat={sayaPembuat(t)}
+                                bolehQc={bolehQc(t)}
                                 hariIni={hariIni}
                                 jejakQc={jejakQc[t.id]}
                                 hasilTerbukaAwal={mintaHasil === t.id}
@@ -485,6 +500,7 @@ export function PapanKanban({
               <KartuTugas
                 tugas={{ ...melayang, status: statusKini(melayang) }}
                 sayaPenerima={sayaPenerima(melayang)}
+                sayaPembuat={false}
                 bolehQc={false}
                 hariIni={hariIni}
               />

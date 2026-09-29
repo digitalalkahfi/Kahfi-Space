@@ -37,6 +37,7 @@ import { DAFTAR_PERAN, peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { catatanRitme, keputusanDariCapaian } from "@/lib/wrm";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { modeData } from "@/lib/supabase/config";
+import { hariIniWib } from "@/lib/format";
 import type { Peran } from "@/lib/types";
 
 export const metadata: Metadata = {
@@ -58,11 +59,9 @@ export default async function BerandaPage({
   if (!pengguna) redirect("/masuk");
   const peran = pengguna.role;
 
-  // Mode demo mematok "hari ini" ke tanggal data contoh supaya dasbornya berisi.
-  const tanggal =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  // Mode demo mematok "hari ini" ke tanggal data contoh supaya dasbornya
+  // berisi. Mode nyata memakai tanggal WIB (D7), bukan UTC.
+  const tanggal = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
   // Data contoh berhenti di jam sinkron terakhirnya; mode nyata memakai jam kini.
   const disinkronPada =
     modeData() === "demo"

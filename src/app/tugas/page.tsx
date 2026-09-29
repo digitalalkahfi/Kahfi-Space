@@ -11,11 +11,15 @@ import {
 import { DialogTiket } from "@/components/tugas/dialog-tiket";
 import { DialogToDo } from "@/components/tugas/dialog-todo";
 import { Reveal } from "@/components/motion/reveal";
-import { ambilSemuaTugas, jejakQcBanyak, ringkasToDo } from "@/lib/data/tugas";
-import { TANGGAL_ACUAN } from "@/lib/data/contoh";
+import {
+  ambilSemuaTugas,
+  hariIniTugas,
+  jejakQcBanyak,
+  ringkasToDo,
+} from "@/lib/data/tugas";
 import { goalAktif } from "@/lib/data/goal";
 import { anggotaBisaDitugasi, peranValid, sesiSaatIni } from "@/lib/data/sesi";
-import { modeData } from "@/lib/supabase/config";
+import { akhirPekan } from "@/lib/validasi-tugas";
 
 export const metadata: Metadata = {
   title: "Tugas — K-Space V2",
@@ -37,10 +41,9 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
   const tampilan: TampilanTugas =
     tampilanParam === "daftar" ? "daftar" : "papan";
 
-  const tanggal =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  // Hari ini menurut WIB (D7), bukan UTC: antara 00.00 dan 06.59 WIB
+  // tanggal UTC masih kemarin.
+  const tanggal = hariIniTugas();
 
   const [tugas, calonPenerima, goal, ringkas] = await Promise.all([
     ambilSemuaTugas(pengguna),
@@ -55,10 +58,6 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
     tugas.filter((t) => t.qcStatus !== "belum").map((t) => t.id),
   );
 
-  // Minggu dianggap berakhir Sabtu; dipakai sebagai tenggat bawaan komitmen.
-  const akhir = new Date(`${tanggal}T00:00:00Z`);
-  akhir.setUTCDate(akhir.getUTCDate() + (6 - akhir.getUTCDay()));
-  const akhirPekan = akhir.toISOString().slice(0, 10);
 
   return (
     <AppShell pengguna={pengguna} halaman="Tugas">
@@ -86,10 +85,12 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
             <DialogTiket
               penerima={calonPenerima}
               goal={goal}
-              tanggal={tanggal}
-              akhirPekan={akhirPekan}
+              hariIni={tanggal}
+              tanggalAwal={tanggal}
+              // Minggu dianggap berakhir Sabtu; tenggat bawaan komitmen.
+              akhirPekan={akhirPekan(tanggal)}
             />
-            <DialogToDo tanggal={tanggal} />
+            <DialogToDo hariIni={tanggal} tanggalAwal={tanggal} />
           </div>
         </div>
 
@@ -97,7 +98,7 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
           {tampilan === "papan" ? (
             <PapanKanban
               tugas={tugas}
-              namaSaya={pengguna.nama}
+              idSaya={pengguna.id}
               bolehQcSemua={PEMERIKSA.includes(pengguna.role)}
               hariIni={tanggal}
               jejakQc={jejak}
@@ -105,7 +106,7 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
           ) : (
             <DaftarTugas
               tugas={tugas}
-              namaSaya={pengguna.nama}
+              idSaya={pengguna.id}
               bolehQcSemua={PEMERIKSA.includes(pengguna.role)}
               hariIni={tanggal}
               jejakQc={jejak}

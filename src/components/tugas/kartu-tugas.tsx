@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import {
+  CalendarClock,
   CheckCircle2,
   ChevronRight,
   Clock,
@@ -12,12 +13,23 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { jamWib, tanggalRelatif } from "@/lib/format";
-import { periksaTugas, ubahStatusTugas } from "@/app/actions/tugas";
+import {
+  jamWib,
+  keJamWib,
+  keTanggalWib,
+  tanggalKalenderRelatif,
+} from "@/lib/format";
+import {
+  periksaTugas,
+  ubahCentangToDo,
+  ubahStatusTugas,
+  ubahTenggatTugas,
+} from "@/app/actions/tugas";
 import { JejakPemeriksaan } from "@/components/tugas/jejak-qc";
 import type { JejakQc } from "@/lib/data/tugas";
-import type { Prioritas, StatusTugas, Tugas } from "@/lib/types";
+import type { Prioritas, StatusTugas, TipeTugas, Tugas } from "@/lib/types";
 
 const GAYA_PRIORITAS: Record<
   Prioritas,
@@ -47,11 +59,23 @@ const LABEL_STATUS: Record<StatusTugas, string> = {
   selesai: "Selesai",
 };
 
-/** Langkah berikutnya yang wajar dari sebuah status. */
-function langkahBerikut(status: StatusTugas) {
+/** Nama jenis yang tampil di kartu; komitmen punya lencananya sendiri. */
+const NAMA_TIPE: Record<TipeTugas, string> = {
+  pribadi: "To-do",
+  tiket: "Tiket",
+  komitmen_mingguan: "Komitmen",
+};
+
+/**
+ * Langkah berikutnya yang wajar dari sebuah status.
+ *
+ * To-do pribadi tidak diajukan ke pemeriksaan (D2): dari "Sedang
+ * dikerjakan" ia cukup dicentang.
+ */
+function langkahBerikut(status: StatusTugas, tipe: TipeTugas) {
   if (status === "todo")
     return { ke: "berjalan" as const, label: "Mulai kerjakan" };
-  if (status === "berjalan")
+  if (status === "berjalan" && tipe !== "pribadi")
     return { ke: "menunggu_qc" as const, label: "Ajukan pemeriksaan" };
   return null;
 }
@@ -74,11 +98,13 @@ function langkahMundur(status: StatusTugas) {
 
 /**
  * Satu tugas dengan aksi yang sesuai perannya: penerima menggeser status,
- * pemberi tugas memutuskan hasil QC. Database menolak bila tertukar.
+ * pemberi tugas memutuskan hasil QC dan mengatur tenggatnya. Database
+ * menolak bila tertukar.
  */
 export function KartuTugas({
   tugas,
   sayaPenerima,
+  sayaPembuat,
   bolehQc,
   hariIni,
   jejakQc = [],
@@ -86,6 +112,8 @@ export function KartuTugas({
 }: {
   tugas: Tugas;
   sayaPenerima: boolean;
+  /** Pemberi tiket — satu-satunya yang boleh mengubah isinya (D1). */
+  sayaPembuat: boolean;
   /** Pemberi tugas atau atasan penerima. */
   bolehQc: boolean;
   hariIni: string;
@@ -106,15 +134,31 @@ export function KartuTugas({
   const [isiCatatan, setIsiCatatan] = useState(false);
   const [hasilKerja, setHasilKerja] = useState(tugas.hasilKerja);
   const [isiHasil, setIsiHasil] = useState(hasilTerbukaAwal);
+  const [isiTenggat, setIsiTenggat] = useState(false);
+  const [tanggalBaru, setTanggalBaru] = useState("");
+  const [jamBaru, setJamBaru] = useState("");
 
+  const todo = tugas.tipe === "pribadi";
   const gaya = GAYA_PRIORITAS[tugas.prioritas];
-  const berikut = langkahBerikut(status);
+  const berikut = langkahBerikut(status, tugas.tipe);
   const mundur = langkahMundur(status);
+
+  const tanggalTenggat = tugas.tenggat ? keTanggalWib(tugas.tenggat) : "";
   const telat =
-    tugas.tenggat &&
-    status !== "selesai" &&
-    new Date(tugas.tenggat) < new Date(`${hariIni}T23:59:59+07:00`) &&
-    tugas.tenggat.slice(0, 10) < hariIni;
+    tanggalTenggat !== "" && status !== "selesai" && tanggalTenggat < hariIni;
+  // To-do tanpa jam tersimpan 23:59 WIB; yang ditampilkan tanggalnya saja.
+  const labelTenggat = tugas.tenggat
+    ? `${tanggalKalenderRelatif(tanggalTenggat, hariIni)}${
+        tugas.tanpaJam ? "" : ` ${jamWib(tugas.tenggat)}`
+      }`
+    : "";
+
+  // Menjadwal ulang: to-do oleh pemiliknya, tiket oleh pemberinya (D1).
+  const bolehUbahTenggat =
+    (todo ? sayaPenerima : sayaPembuat) && status !== "selesai";
+  const namaTipe = NAMA_TIPE[tugas.tipe];
+  const labelKonteks =
+    tugas.label && tugas.label !== namaTipe ? tugas.label : gaya.label;
 
   const geser = (ke: "todo" | "berjalan" | "menunggu_qc") => {
     // Mengajukan pemeriksaan butuh keterangan hasil lebih dulu.
@@ -137,6 +181,15 @@ export function KartuTugas({
     });
   };
 
+  const centang = (selesai: boolean) =>
+    mulai(async () => {
+      const hasil = await ubahCentangToDo(tugas.id, selesai);
+      if (hasil.ok || hasil.kode === "demo") {
+        setStatus(selesai ? "selesai" : "todo");
+      }
+      setPesan(hasil.ok ? null : hasil.pesan);
+    });
+
   const putuskan = (hasilQc: "lolos" | "revisi") =>
     mulai(async () => {
       const r = await periksaTugas(tugas.id, hasilQc, catatanQc);
@@ -149,6 +202,34 @@ export function KartuTugas({
       setPesan(r.ok ? null : r.pesan);
     });
 
+  const bukaUbahTenggat = () => {
+    // Tenggat yang sudah lewat tidak bisa dipilih lagi; isian dimulai dari
+    // hari ini supaya langsung sah.
+    setTanggalBaru(
+      tanggalTenggat && tanggalTenggat >= hariIni ? tanggalTenggat : hariIni,
+    );
+    setJamBaru(
+      tugas.tenggat && !tugas.tanpaJam
+        ? keJamWib(tugas.tenggat)
+        : todo
+          ? ""
+          : "17:00",
+    );
+    setPesan(null);
+    setIsiTenggat(true);
+  };
+
+  const simpanTenggat = () =>
+    mulai(async () => {
+      const hasil = await ubahTenggatTugas(
+        tugas.id,
+        tanggalBaru,
+        jamBaru || null,
+      );
+      if (hasil.ok) setIsiTenggat(false);
+      setPesan(hasil.ok ? null : hasil.pesan);
+    });
+
   return (
     <Card className="kartu-interaktif rounded-2xl shadow-card ring-border-subtle">
       <div className={cn("mx-(--card-spacing) rounded-2xl p-3.5", gaya.kartu)}>
@@ -156,23 +237,38 @@ export function KartuTugas({
             barisnya sendiri alih-alih memeras judul jadi satu kata per
             baris. Di daftar yang lebar keduanya tetap sebaris. */}
         <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-1">
-          <div className="min-w-[10rem] flex-1">
-            <p
-              className={cn(
-                "text-sm leading-5 font-semibold text-pretty",
-                status === "selesai" && "text-muted-foreground line-through",
-              )}
-            >
-              {tugas.judul}
-            </p>
-            {tugas.deskripsi ? (
-              <p className="mt-1 text-[13px] leading-[18px] text-pretty text-muted-foreground">
-                {tugas.deskripsi}
-              </p>
+          <div className="flex min-w-[10rem] flex-1 items-start gap-2.5">
+            {todo && sayaPenerima ? (
+              <Checkbox
+                checked={status === "selesai"}
+                disabled={sibuk}
+                onCheckedChange={(v) => centang(v === true)}
+                aria-label={
+                  status === "selesai"
+                    ? `Buka lagi to-do ${tugas.judul}`
+                    : `Tandai selesai: ${tugas.judul}`
+                }
+                className="mt-0.5 shrink-0 rounded-full bg-card"
+              />
             ) : null}
+            <div className="min-w-0 flex-1">
+              <p
+                className={cn(
+                  "text-sm leading-5 font-semibold text-pretty",
+                  status === "selesai" && "text-muted-foreground line-through",
+                )}
+              >
+                {tugas.judul}
+              </p>
+              {tugas.deskripsi ? (
+                <p className="mt-1 text-[13px] leading-[18px] text-pretty text-muted-foreground">
+                  {tugas.deskripsi}
+                </p>
+              ) : null}
+            </div>
           </div>
 
-          {tugas.tenggat ? (
+          {labelTenggat ? (
             <span
               className={cn(
                 "tabular flex shrink-0 items-center gap-1 text-[11px] leading-[14px] font-medium",
@@ -180,19 +276,24 @@ export function KartuTugas({
               )}
             >
               <Clock className="size-3" />
-              {tanggalRelatif(tugas.tenggat, hariIni)} {jamWib(tugas.tenggat)}
+              {labelTenggat}
             </span>
           ) : null}
         </div>
 
         <div className="mt-2 flex flex-wrap items-center gap-2">
+          {tugas.tipe !== "komitmen_mingguan" ? (
+            <span className="rounded-full bg-card px-2 py-0.5 text-[11px] leading-[14px] font-semibold text-foreground ring-1 ring-border-subtle">
+              {namaTipe}
+            </span>
+          ) : null}
           <span
             className={cn(
               "rounded-full bg-card px-2 py-0.5 text-[11px] leading-[14px] font-semibold",
               gaya.teks,
             )}
           >
-            {tugas.label || gaya.label}
+            {labelKonteks}
           </span>
           <span className="rounded-full bg-card px-2 py-0.5 text-[11px] leading-[14px] font-medium text-muted-foreground">
             {LABEL_STATUS[status]}
@@ -215,12 +316,15 @@ export function KartuTugas({
               Komitmen mingguan
             </span>
           ) : null}
-          <span className="text-[11px] leading-[14px] text-muted-foreground">
-            {sayaPenerima ? `Dari ${tugas.pembuat}` : `PIC ${tugas.penerima}`}
-          </span>
+          {todo ? null : (
+            <span className="text-[11px] leading-[14px] text-muted-foreground">
+              {sayaPenerima ? `Dari ${tugas.pembuat}` : `PIC ${tugas.penerima}`}
+            </span>
+          )}
           {status === "selesai" && tugas.selesaiPada ? (
             <span className="tabular text-[11px] leading-[14px] text-ok-text">
-              Selesai {tanggalRelatif(tugas.selesaiPada, hariIni)}{" "}
+              Selesai{" "}
+              {tanggalKalenderRelatif(keTanggalWib(tugas.selesaiPada), hariIni)}{" "}
               {jamWib(tugas.selesaiPada)}
             </span>
           ) : null}
@@ -383,6 +487,70 @@ export function KartuTugas({
           <p className="rounded-xl bg-warn-fill px-3 py-2 text-[11px] leading-[14px] text-warn-text">
             Catatan pemeriksa: {tugas.qcNote}
           </p>
+        ) : null}
+
+        {bolehUbahTenggat ? (
+          isiTenggat ? (
+            <fieldset className="space-y-2 rounded-xl bg-muted/60 p-2.5">
+              <legend className="sr-only">
+                {todo ? "Pindahkan ke tanggal lain" : "Ubah tenggat"}
+              </legend>
+              <div className="grid grid-cols-2 gap-2">
+                <label className="space-y-1 text-[11px] leading-[14px] font-semibold">
+                  Tanggal
+                  <input
+                    type="date"
+                    required
+                    min={hariIni}
+                    value={tanggalBaru}
+                    onChange={(e) => setTanggalBaru(e.target.value)}
+                    className="tabular h-9 w-full rounded-lg bg-card px-2 text-[13px] font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                  />
+                </label>
+                <label className="space-y-1 text-[11px] leading-[14px] font-semibold">
+                  {todo ? "Jam (opsional)" : "Jam"}
+                  <input
+                    type="time"
+                    required={!todo}
+                    value={jamBaru}
+                    onChange={(e) => setJamBaru(e.target.value)}
+                    className="tabular h-9 w-full rounded-lg bg-card px-2 text-[13px] font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                  />
+                </label>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="outline"
+                  disabled={sibuk}
+                  onClick={() => setIsiTenggat(false)}
+                  className="tekan-halus h-8 flex-1 rounded-full text-[11px] font-semibold"
+                >
+                  Batal
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  disabled={sibuk || !tanggalBaru || (!todo && !jamBaru)}
+                  onClick={simpanTenggat}
+                  className="tekan-halus h-8 flex-1 rounded-full text-[11px] font-semibold"
+                >
+                  {sibuk ? <Loader2 className="size-3.5 animate-spin" /> : null}
+                  Simpan tanggal
+                </Button>
+              </div>
+            </fieldset>
+          ) : (
+            <button
+              type="button"
+              onClick={bukaUbahTenggat}
+              className="tekan-halus sentuh-nyaman flex w-full items-center gap-1.5 rounded-xl px-1 py-1 text-[11px] leading-[14px] font-semibold text-muted-foreground hover:text-foreground"
+            >
+              <CalendarClock className="size-3" />
+              {todo ? "Pindahkan ke tanggal lain" : "Ubah tenggat"}
+            </button>
+          )
         ) : null}
 
         <JejakPemeriksaan jejak={jejakQc} />

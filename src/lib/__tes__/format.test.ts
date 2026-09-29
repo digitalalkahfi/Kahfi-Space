@@ -3,7 +3,13 @@ import { test } from "node:test";
 import {
   bulanPanjang,
   bulanPendek,
+  hariIniWib,
   jamWib,
+  keJamWib,
+  keTanggalWib,
+  tanggalKalenderPanjang,
+  tanggalKalenderPendek,
+  tanggalKalenderRelatif,
   tanggalPanjang,
   tanggalPendek,
 } from "../format.ts";
@@ -46,4 +52,39 @@ test("jam memakai titik dua, bukan titik", () => {
 
 test("tengah malam WIB tidak berubah menjadi 24", () => {
   assert.equal(jamWib("2024-10-23T17:00:00Z"), "00:00 WIB");
+});
+
+test("hari ini dihitung di WIB, bukan UTC", () => {
+  // 17:30 UTC = 00:30 WIB keesokan harinya.
+  assert.equal(hariIniWib(new Date("2026-09-29T17:30:00Z")), "2026-09-30");
+  // Satu detik sebelum tengah malam WIB masih tanggal yang sama.
+  assert.equal(hariIniWib(new Date("2026-09-29T16:59:59Z")), "2026-09-29");
+  assert.equal(hariIniWib(new Date("2026-09-29T17:00:00Z")), "2026-09-30");
+});
+
+test("tanggal WIB sebuah tenggat: 23:59 WIB tetap di tanggal itu", () => {
+  assert.equal(keTanggalWib("2026-10-02T23:59:00+07:00"), "2026-10-02");
+  assert.equal(keTanggalWib("2026-10-02T00:00:00+07:00"), "2026-10-02");
+  assert.equal(keTanggalWib("2026-10-01T17:00:00Z"), "2026-10-02");
+  assert.equal(keTanggalWib("bukan tanggal"), "");
+});
+
+test("tanggal kalender tidak bergeser karena zona waktu", () => {
+  assert.equal(tanggalKalenderPanjang("2026-09-16"), "Rabu, 16 September 2026");
+  assert.equal(tanggalKalenderPendek("2026-10-02", "2026-09-29"), "2 Okt");
+  assert.match(tanggalKalenderPendek("2025-12-31", "2026-01-01"), /2025/);
+});
+
+test("jam WIB untuk mengisi ulang isian jam", () => {
+  assert.equal(keJamWib("2026-10-02T08:00:00Z"), "15:00");
+  assert.equal(keJamWib("2026-10-02T23:59:00+07:00"), "23:59");
+  assert.equal(keJamWib("rusak"), "");
+});
+
+test("tanggal relatif dihitung dari tanggal kalender WIB", () => {
+  assert.equal(tanggalKalenderRelatif("2026-09-29", "2026-09-29"), "Hari ini");
+  assert.equal(tanggalKalenderRelatif("2026-09-30", "2026-09-29"), "Besok");
+  assert.equal(tanggalKalenderRelatif("2026-09-28", "2026-09-29"), "Kemarin");
+  assert.equal(tanggalKalenderRelatif("2026-10-02", "2026-09-29"), "2 Okt");
+  assert.equal(tanggalKalenderRelatif("", "2026-09-29"), "");
 });

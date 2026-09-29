@@ -54,8 +54,8 @@ uji("Tugas untuk diri sendiri tidak memberi tahu siapa-siapa", async () => {
 
   await sebagaiAdmin(
     db,
-    `insert into tasks (tipe, judul, konteks, pembuat_id, penerima_id)
-     values ('pribadi', 'Catatan sendiri', '', $1, $1)`,
+    `insert into tasks (tipe, judul, konteks, pembuat_id, penerima_id, tenggat)
+     values ('pribadi', 'Catatan sendiri', '', $1, $1, now())`,
     [diri],
   );
 

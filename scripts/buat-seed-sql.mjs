@@ -272,14 +272,15 @@ bagian.push(`
 -- Tugas: to-do pribadi, tiket atasan, komitmen mingguan ----------------
 insert into tasks
   (tipe, goal_id, judul, deskripsi, konteks, pembuat_id, penerima_id,
-   tenggat, prioritas, status, qc_status)
+   tenggat, tanpa_jam, prioritas, status, qc_status)
 select v.* from (values
 ${data.tasks
   .map(
     (t) =>
       `  (${q(t.tipe)}::tipe_tugas, ${q(t.goal_unit ? idGoalUnit[t.goal_unit] : null)}::uuid, ${q(t.judul)}, ` +
       `${q(t.deskripsi)}, ${q(t.konteks)}, ${q(idUser[t.pembuat])}::uuid, ${q(idUser[t.penerima])}::uuid, ` +
-      `${q(t.tenggat)}::timestamptz, ${q(t.prioritas)}::prioritas_tugas, ${q(t.status)}::status_tugas, ${q(t.qc)}::status_qc)`,
+      `${q(t.tenggat)}::timestamptz, ${t.tanpa_jam === true}, ${q(t.prioritas)}::prioritas_tugas, ` +
+      `${q(t.status)}::status_tugas, ${q(t.qc)}::status_qc)`,
   )
   .join(",\n")}
 ) as v

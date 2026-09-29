@@ -73,8 +73,9 @@ uji("Staff boleh membuat to-do untuk dirinya sendiri", async () => {
   await sebagai(
     db,
     U.staffRian,
-    `insert into tasks (tipe, judul, pembuat_id, penerima_id)
-     values ('pribadi', 'Siapkan skrip live besok', $1, $1)`,
+    `insert into tasks (tipe, judul, pembuat_id, penerima_id, tenggat)
+     values ('pribadi', 'Siapkan skrip live besok', $1, $1,
+             now() + interval '1 day')`,
     [U.staffRian],
   );
 });
@@ -97,8 +98,9 @@ uji("Leader boleh menugasi anggota unitnya", async () => {
   await sebagai(
     db,
     U.leaderAff,
-    `insert into tasks (tipe, judul, pembuat_id, penerima_id)
-     values ('tiket', 'Audit konten pekan ini', $1, $2)`,
+    `insert into tasks (tipe, judul, pembuat_id, penerima_id, tenggat)
+     values ('tiket', 'Audit konten pekan ini', $1, $2,
+             now() + interval '2 days')`,
     [U.leaderAff, U.staffBayu],
   );
 });
@@ -310,8 +312,9 @@ uji("atasan langsung boleh menugasi walau beda unit", async () => {
   await sebagai(
     db,
     U.manager,
-    `insert into tasks (tipe, judul, pembuat_id, penerima_id)
-     values ('tiket', 'Susun rencana pekan depan', $1, $2)`,
+    `insert into tasks (tipe, judul, pembuat_id, penerima_id, tenggat)
+     values ('tiket', 'Susun rencana pekan depan', $1, $2,
+             now() + interval '7 days')`,
     [U.manager, U.leaderAff],
   );
 });

@@ -34,17 +34,24 @@ const PRIORITAS: { nilai: Prioritas; label: string }[] = [
 /**
  * Buat tiket untuk anggota tim — pengganti "tugas lewat grup WA" (PRD §1).
  * Daftar penerima hanya berisi orang yang memang boleh ditugasi.
+ *
+ * Tanggal dan jam tenggat wajib (D3). Tiket biasa bawaannya hari ini;
+ * komitmen mingguan bawaannya akhir pekan (Sabtu) — keduanya boleh diganti.
  */
 export function DialogTiket({
   penerima,
   goal,
-  tanggal,
+  hariIni,
+  tanggalAwal,
   akhirPekan,
 }: {
   penerima: Pengguna[];
   /** Goal aktif untuk menautkan komitmen mingguan. */
   goal: GoalRingkas[];
-  tanggal: string;
+  /** Hari ini (WIB) — tanggal paling awal yang boleh dipilih. */
+  hariIni: string;
+  /** Tanggal bawaan tiket biasa; tidak pernah sebelum hari ini. */
+  tanggalAwal: string;
   /** Tanggal akhir pekan berjalan — tenggat bawaan komitmen. */
   akhirPekan: string;
 }) {
@@ -54,6 +61,10 @@ export function DialogTiket({
   const [judul, setJudul] = useState("");
   const [deskripsi, setDeskripsi] = useState("");
   const [penerimaId, setPenerimaId] = useState("");
+  const [tanggal, setTanggal] = useState(tanggalAwal);
+  // Tanggal yang sudah dipilih sendiri tidak ditimpa bawaan saat jenisnya
+  // diganti.
+  const [tanggalDipilih, setTanggalDipilih] = useState(false);
   const [jam, setJam] = useState("17:00");
   const [prioritas, setPrioritas] = useState<Prioritas>("sedang");
   const [menyimpan, mulai] = useTransition();
@@ -63,7 +74,25 @@ export function DialogTiket({
   const siap =
     judul.trim().length >= 3 &&
     penerimaId !== "" &&
+    tanggal !== "" &&
+    jam !== "" &&
     (!komitmen || goalId !== "");
+
+  const bawaanTanggal = (t: typeof tipe) =>
+    t === "komitmen_mingguan" ? akhirPekan : tanggalAwal;
+
+  const pilihTipe = (t: typeof tipe) => {
+    setTipe(t);
+    if (!tanggalDipilih) setTanggal(bawaanTanggal(t));
+  };
+
+  const bukaTutup = (b: boolean) => {
+    if (b) {
+      setTanggal(bawaanTanggal(tipe));
+      setTanggalDipilih(false);
+    }
+    setBuka(b);
+  };
 
   const simpan = () => {
     if (!siap || menyimpan) return;
@@ -76,9 +105,8 @@ export function DialogTiket({
         penerimaId,
         tipe,
         goalId: komitmen ? goalId : null,
-        tenggat: jam
-          ? `${komitmen ? akhirPekan : tanggal}T${jam}:00+07:00`
-          : null,
+        tanggal,
+        jam,
         prioritas,
       });
 
@@ -97,7 +125,7 @@ export function DialogTiket({
   if (penerima.length === 0) return null;
 
   return (
-    <Dialog open={buka} onOpenChange={setBuka}>
+    <Dialog open={buka} onOpenChange={bukaTutup}>
       <DialogTrigger asChild>
         <Button
           type="button"
@@ -133,7 +161,7 @@ export function DialogTiket({
                 <button
                   key={o.nilai}
                   type="button"
-                  onClick={() => setTipe(o.nilai)}
+                  onClick={() => pilihTipe(o.nilai)}
                   aria-pressed={tipe === o.nilai}
                   disabled={
                     o.nilai === "komitmen_mingguan" && goal.length === 0
@@ -246,24 +274,52 @@ export function DialogTiket({
             />
           </div>
 
-          <div className="flex gap-3">
-            <div className="flex-1 space-y-1.5">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label
+                htmlFor="tanggal-tiket"
+                className="text-[13px] leading-[18px] font-semibold"
+              >
+                Tanggal tenggat
+              </label>
+              <input
+                id="tanggal-tiket"
+                type="date"
+                required
+                min={hariIni}
+                value={tanggal}
+                onChange={(e) => {
+                  setTanggal(e.target.value);
+                  setTanggalDipilih(true);
+                }}
+                className="tabular h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+              />
+            </div>
+            <div className="space-y-1.5">
               <label
                 htmlFor="jam-tiket"
                 className="text-[13px] leading-[18px] font-semibold"
               >
-                {komitmen ? "Tenggat akhir pekan" : "Tenggat hari ini"}
+                Jam
               </label>
               <input
                 id="jam-tiket"
                 type="time"
+                required
                 value={jam}
                 onChange={(e) => setJam(e.target.value)}
                 className="tabular h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
               />
             </div>
+          </div>
+          {komitmen && !tanggalDipilih ? (
+            <p className="-mt-1.5 text-[11px] leading-[14px] text-muted-foreground">
+              Bawaannya akhir pekan ini (Sabtu); boleh diganti.
+            </p>
+          ) : null}
 
-            <fieldset className="flex-1 space-y-1.5">
+          <div>
+            <fieldset className="space-y-1.5">
               <legend className="text-[13px] leading-[18px] font-semibold">
                 Prioritas
               </legend>
