@@ -5,7 +5,7 @@ import { FormLaporan } from "@/components/laporan-harian/form-laporan";
 import { StatusAbsen } from "@/components/laporan-harian/status-absen";
 import { RiwayatLaporan } from "@/components/laporan-harian/riwayat-laporan";
 import { Reveal } from "@/components/motion/reveal";
-import type { HariTerlewat } from "@/lib/laporan";
+import type { KalenderLaporan } from "@/lib/laporan";
 import type { LaporanHarian, SasaranLaporan } from "@/lib/types";
 
 /**
@@ -19,7 +19,7 @@ export function PanelLaporan({
   riwayat,
   hariIni,
   tanggal,
-  terlewat = [],
+  kalender,
   persona,
   jamMasuk,
   lokasi,
@@ -32,8 +32,8 @@ export function PanelLaporan({
   hariIni: string;
   /** Tanggal laporan dalam format YYYY-MM-DD: hari ini, atau susulan. */
   tanggal: string;
-  /** Hari-hari dalam batas susulan yang laporannya belum lengkap. */
-  terlewat?: HariTerlewat[];
+  /** Status merah/hijau bulan tempat `tanggal` berada. */
+  kalender: KalenderLaporan;
   /** Persona mode demo, dibawa saat berpindah tanggal. */
   persona?: string;
   jamMasuk: string;
@@ -56,7 +56,7 @@ export function PanelLaporan({
             sudahDilaporkan={sudahDilaporkan}
             tanggal={tanggal}
             hariIni={hariIni}
-            terlewat={terlewat}
+            kalender={kalender}
             persona={persona}
             absenTerbuka={sudahLapor}
             onTerkirim={
