@@ -5,11 +5,13 @@ import { FormLaporan } from "@/components/laporan-harian/form-laporan";
 import { StatusAbsen } from "@/components/laporan-harian/status-absen";
 import { RiwayatLaporan } from "@/components/laporan-harian/riwayat-laporan";
 import { Reveal } from "@/components/motion/reveal";
+import type { HariTerlewat } from "@/lib/laporan";
 import type { LaporanHarian, SasaranLaporan } from "@/lib/types";
 
 /**
  * Menyatukan form dan status absensi agar kunci Absen Pulang selalu
- * mencerminkan apakah laporan hari ini sudah terkirim (PRD §2).
+ * mencerminkan apakah laporan hari ini sudah terkirim (PRD §2). Laporan
+ * susulan untuk hari yang terlewat tidak menyentuh kunci itu.
  */
 export function PanelLaporan({
   sasaran,
@@ -17,6 +19,8 @@ export function PanelLaporan({
   riwayat,
   hariIni,
   tanggal,
+  terlewat = [],
+  persona,
   jamMasuk,
   lokasi,
   sudahLaporAwal = false,
@@ -26,12 +30,16 @@ export function PanelLaporan({
   sudahDilaporkan: string[];
   riwayat: LaporanHarian[];
   hariIni: string;
-  /** Tanggal laporan dalam format YYYY-MM-DD. */
+  /** Tanggal laporan dalam format YYYY-MM-DD: hari ini, atau susulan. */
   tanggal: string;
+  /** Hari-hari dalam batas susulan yang laporannya belum lengkap. */
+  terlewat?: HariTerlewat[];
+  /** Persona mode demo, dibawa saat berpindah tanggal. */
+  persona?: string;
   jamMasuk: string;
   lokasi: string;
   sudahLaporAwal?: boolean;
-  /** CO sampel hari ini per kunci sasaran; dihitung, bukan diketik. */
+  /** CO sampel pada tanggal laporan per kunci sasaran; dihitung, bukan diketik. */
   coSampel?: Record<string, number>;
 }) {
   const [sudahLapor, setSudahLapor] = useState(sudahLaporAwal);
@@ -40,12 +48,20 @@ export function PanelLaporan({
     <div className="grid items-start gap-4 lg:grid-cols-12 lg:gap-6">
       <div className="space-y-4 lg:col-span-7 lg:space-y-6">
         <Reveal>
+          {/* Berganti tanggal = form baru: isian dan sasaran terpilih
+              tidak boleh terbawa dari tanggal sebelumnya. */}
           <FormLaporan
+            key={tanggal}
             sasaran={sasaran}
             sudahDilaporkan={sudahDilaporkan}
             tanggal={tanggal}
+            hariIni={hariIni}
+            terlewat={terlewat}
+            persona={persona}
             absenTerbuka={sudahLapor}
-            onTerkirim={() => setSudahLapor(true)}
+            onTerkirim={
+              tanggal === hariIni ? () => setSudahLapor(true) : undefined
+            }
             coSampel={coSampel}
           />
         </Reveal>
