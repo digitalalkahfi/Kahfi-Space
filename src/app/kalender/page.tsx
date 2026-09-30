@@ -12,6 +12,7 @@ import { bulanDari } from "@/lib/kalender";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
+import { hariIniWib } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Kalender — K-Space V2",
@@ -28,8 +29,7 @@ export default async function KalenderPage({
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
-  const hariIni =
-    modeData() === "demo" ? TANGGAL_ACUAN : new Date().toISOString().slice(0, 10);
+  const hariIni = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   // Parameter bulan berasal dari URL; yang tidak berbentuk diabaikan.
   const bulanAktif =

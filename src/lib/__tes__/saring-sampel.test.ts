@@ -68,6 +68,20 @@ test("rentang tanggal menyaring inklusif di kedua ujung", () => {
   assert.equal(saringRiwayat(daftar, s).length, 2);
 });
 
+test("rentang tanggal perpindahan dibaca di WIB, bukan tanggal UTC", () => {
+  // Mode Supabase: `pada` timestamptz (+00:00); 17:00 UTC = 00:00 WIB.
+  const tepi = [
+    baris({ id: "dini-hari", pada: "2024-10-23T17:30:00+00:00" }),
+    baris({ id: "larut", pada: "2024-10-24T16:59:00+00:00" }),
+    baris({ id: "lewat", pada: "2024-10-24T17:00:00+00:00" }),
+  ];
+  const s = bacaSaringanRiwayat({ dari: "2024-10-24", sampai: "2024-10-24" });
+  assert.deepEqual(
+    saringRiwayat(tepi, s).map((b) => b.id),
+    ["dini-hari", "larut"],
+  );
+});
+
 test("tanggal yang tidak berbentuk diabaikan", () => {
   const s = bacaSaringanRiwayat({ dari: "kemarin" });
   assert.equal(s.dari, "");
@@ -140,6 +154,22 @@ test("saringan tanggal memakai hari setempat, bukan cap waktu penuh", () => {
     sampai: "2024-10-24",
   });
   assert.equal(hasil.length, 2);
+});
+
+test("pemindaian pukul 00.00–06.59 WIB masuk hari WIB-nya, bukan hari UTC", () => {
+  const hasil = saringScan(
+    [
+      // 00:00 WIB tanggal 24.
+      scan("SMP-0001", true, "2024-10-23T17:00:00+00:00"),
+      // 23:59:59 WIB tanggal 23.
+      scan("SMP-0002", true, "2024-10-23T16:59:59+00:00"),
+    ],
+    { ...bacaSaringanScan({}), dari: "2024-10-24", sampai: "2024-10-24" },
+  );
+  assert.deepEqual(
+    hasil.map((s) => s.kode),
+    ["SMP-0001"],
+  );
 });
 
 test("pencarian pemindaian mencakup kode, barang, dan pemindainya", () => {

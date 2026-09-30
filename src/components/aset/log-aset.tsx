@@ -2,7 +2,7 @@ import Link from "next/link";
 import { MapPin, ScrollText, UserRound } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { tanggalPendek } from "@/lib/format";
+import { keTanggalWib, tanggalPendek } from "@/lib/format";
 import {
   GAYA_STATUS_ASET,
   LABEL_STATUS_ASET,
@@ -80,7 +80,7 @@ export function LogAset({ daftar }: { daftar: BarisLogAset[] }) {
                     {k.lokasi}
                   </span>
                 ) : null}
-                <span>{tanggalPendek(k.pada)}</span>
+                <span>{tanggalPendek(keTanggalWib(k.pada))}</span>
                 {k.olehNama ? <span>dicatat {k.olehNama}</span> : null}
               </p>
 

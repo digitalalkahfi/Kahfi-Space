@@ -19,6 +19,7 @@ import { riwayatAnggaran, ringkasPeriode } from "@/lib/riwayat-anggaran";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
+import { hariIniWib } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Riwayat Pagu & Alokasi — K-Space V2",
@@ -68,9 +69,7 @@ export default async function RiwayatBudgetPage({
   // salah terisi diam-diam adalah kesalahan yang baru ketahuan saat
   // realisasinya tidak cocok.
   const periodeBawaan = (
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10)
+    modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib()
   ).slice(0, 7);
 
   return (

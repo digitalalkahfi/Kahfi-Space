@@ -29,6 +29,7 @@ import {
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
+import { hariIniWib } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Aset & Inventaris — K-Space V2",
@@ -43,10 +44,7 @@ export default async function AsetPage({ searchParams }: PageProps<"/aset">) {
   );
   if (!pengguna) redirect("/masuk");
 
-  const hariIni =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const hariIni = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   const bolehKelola = bolehKelolaAset(pengguna);
   const [semua, pilihan, kodeAsetBaru] = await Promise.all([

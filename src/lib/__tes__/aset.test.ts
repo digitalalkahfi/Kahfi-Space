@@ -436,6 +436,31 @@ test("log disaring menurut keadaan tujuan, unit, dan rentang tanggal", () => {
   );
 });
 
+test("rentang tanggal log dibaca di WIB, bukan tanggal UTC cap waktunya", () => {
+  // Mode Supabase: `pada` dari `riwayat_aset` bertipe timestamptz (+00:00).
+  const daftar = [
+    // 00:00 WIB tanggal 9.
+    log({ id: "dini-hari", pada: "2024-10-08T17:00:00+00:00" }),
+    // 23:59 WIB tanggal 8.
+    log({ id: "semalam", pada: "2024-10-08T16:59:00+00:00" }),
+  ];
+
+  assert.deepEqual(
+    saringLogAset(
+      daftar,
+      bacaSaringanLogAset({ dari: "2024-10-09", sampai: "2024-10-09" }),
+    ).map((b) => b.id),
+    ["dini-hari"],
+  );
+  assert.deepEqual(
+    saringLogAset(
+      daftar,
+      bacaSaringanLogAset({ dari: "2024-10-08", sampai: "2024-10-08" }),
+    ).map((b) => b.id),
+    ["semalam"],
+  );
+});
+
 test("pencarian log menemukan lewat nama pemegang maupun pencatatnya", () => {
   const daftar = [
     log({ id: "1", pemegangNama: "Yoga Saputra", olehNama: "Dimas Maulana" }),

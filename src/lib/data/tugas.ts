@@ -6,12 +6,14 @@ import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { TANGGAL_ACUAN, dataContoh } from "@/lib/data/contoh";
 import { hariIniWib, keTanggalWib } from "@/lib/format";
+import { masukKalender } from "@/lib/kalender";
 import {
   BATAS_DAFTAR,
   BATAS_PAPAN,
   masukPapan,
   masukToDoHariIni,
   rentangHariWib,
+  rentangTanggalWib,
   ringkasToDoTanggal,
 } from "@/lib/papan-tanggal";
 import type { BarisTugasTersaring } from "@/lib/supabase/types";
@@ -200,29 +202,6 @@ function tugasContoh(pengguna: Pengguna): BarisTugas[] {
           }
         : null,
     }));
-}
-
-/**
- * Semua tugas yang terlihat, 200 baris pertama.
- *
- * Kini HANYA dipakai kalender (`tenggatTugas`), yang menyaring rentang
- * tanggalnya sendiri. Halaman Tugas dan Beranda tidak memakainya lagi:
- * tanpa saringan tanggal, tugas di luar 200 baris pertama hilang tanpa
- * tanda.
- */
-async function ambilBaris(pengguna: Pengguna): Promise<BarisTugas[]> {
-  if (modeData() === "demo") return tugasContoh(pengguna);
-
-  const sb = await klienServer();
-  const { data, error } = await sb
-    .from("tasks")
-    .select(KOLOM)
-    .neq("status", "dibatalkan")
-    .order("tenggat", { ascending: true, nullsFirst: false })
-    .limit(200);
-
-  if (error) throw new Error(`Gagal memuat tugas: ${error.message}`);
-  return data as unknown as BarisTugas[];
 }
 
 /** Tugas hasil saringan basis data, lengkap dengan tanda batasnya. */
@@ -440,9 +419,52 @@ export async function ambilTugasMendesak(
   return (data as unknown as BarisTugas[]).map(keTugas);
 }
 
-/** Tenggat tugas untuk kalender; lihat catatan di `ambilBaris`. */
-export async function ambilSemuaTugas(pengguna: Pengguna): Promise<Tugas[]> {
-  const baris = await ambilBaris(pengguna);
+/** Berapa baris tenggat ditarik sekali jalan; PostgREST memotong di 1000. */
+const HALAMAN_TENGGAT = 1000;
+
+/**
+ * Tenggat yang belum tuntas pada tanggal WIB `dari`–`sampai` (inklusif),
+ * untuk kalender.
+ *
+ * Disaring per rentang di basis data dan tunduk RLS — bukan 200 baris
+ * pertama sepanjang masa yang dipilih belakangan, yang membuat tenggat di
+ * luar potongan itu hilang tanpa tanda bagi CEO/Manager. Ditarik per
+ * halaman dengan alasan yang sama. To-do pribadi hanya milik sendiri,
+ * lewat id; lihat `masukKalender`, padanannya untuk mode demo.
+ */
+export async function ambilTenggatKalender(
+  pengguna: Pengguna,
+  dari: string,
+  sampai: string,
+): Promise<Tugas[]> {
+  if (modeData() === "demo") {
+    return tugasContoh(pengguna)
+      .map(keTugas)
+      .filter((t) => masukKalender(t, pengguna.id, dari, sampai));
+  }
+
+  const sb = await klienServer();
+  const { awal, akhir } = rentangTanggalWib(dari, sampai);
+  const baris: BarisTugas[] = [];
+
+  for (let mulai = 0; ; mulai += HALAMAN_TENGGAT) {
+    const { data, error } = await sb
+      .from("tasks")
+      .select(KOLOM)
+      .not("status", "in", "(selesai,dibatalkan)")
+      .or(`tipe.neq.pribadi,penerima_id.eq.${pengguna.id}`)
+      .gte("tenggat", awal)
+      .lt("tenggat", akhir)
+      // Urutan yang unik, supaya halaman tidak saling tumpang-tindih.
+      .order("tenggat")
+      .order("id")
+      .range(mulai, mulai + HALAMAN_TENGGAT - 1);
+
+    if (error) throw new Error(`Gagal memuat tenggat tugas: ${error.message}`);
+    baris.push(...(data as unknown as BarisTugas[]));
+    if (data.length < HALAMAN_TENGGAT) break;
+  }
+
   return baris.map(keTugas);
 }
 

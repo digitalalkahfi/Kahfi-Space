@@ -8,7 +8,10 @@ import {
   closestCenter,
   useSensor,
   useSensors,
+  type Active,
+  type Announcements,
   type DragEndEvent,
+  type Over,
 } from "@dnd-kit/core";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import {
@@ -51,37 +54,50 @@ const ALASAN_INTI =
   "Beranda tujuan setiap kali orang tersesat, dan menyembunyikan halaman ini berarti tidak ada lagi jalan untuk menampilkannya kembali.";
 
 /**
+ * Nama item sebagaimana tertulis di layar.
+ *
+ * Id dnd-kit di sini adalah `kunci`, dan untuk menu kunci itu path
+ * rute: pembaca layar mengeja "/absensi" sebagai "garis miring
+ * absensi". Labelnya dititipkan `BarisSortable` lewat `data`; kuncinya
+ * hanya cadangan kalau label itu tidak ada.
+ */
+function namaItem({ id, data }: Active | Over): string {
+  const label: unknown = data.current?.label;
+  return typeof label === "string" ? label : String(id);
+}
+
+/**
  * Pengumuman untuk pembaca layar, dalam bahasa yang dipakai aplikasi.
  *
  * Bawaan dnd-kit berbahasa Inggris. Orang yang menyusun menunya lewat
  * keyboard adalah justru orang yang paling bergantung pada kalimat
  * ini; membiarkannya asing membuat fitur ini tidak bisa dipakai olehnya.
  */
-const PENGUMUMAN = {
-  onDragStart: ({ active }: { active: { id: string | number } }) =>
-    `Mengangkat ${active.id}. Pakai panah atas dan bawah untuk memindahkan, spasi untuk melepas, escape untuk membatalkan.`,
-  onDragOver: ({
-    active,
-    over,
-  }: {
-    active: { id: string | number };
-    over: { id: string | number } | null;
-  }) =>
-    over
-      ? `${active.id} berada di atas ${over.id}.`
-      : `${active.id} berada di luar daftar.`,
-  onDragEnd: ({
-    active,
-    over,
-  }: {
-    active: { id: string | number };
-    over: { id: string | number } | null;
-  }) =>
-    over
-      ? `${active.id} dilepas di posisi ${over.id}. Urutannya tersimpan.`
-      : `${active.id} dilepas di luar daftar; urutannya tidak berubah.`,
-  onDragCancel: ({ active }: { active: { id: string | number } }) =>
-    `Pemindahan ${active.id} dibatalkan.`,
+const PENGUMUMAN: Announcements = {
+  onDragStart: ({ active }) =>
+    `Mengangkat ${namaItem(active)}. Pakai panah atas dan bawah untuk memindahkan, spasi untuk melepas, escape untuk membatalkan.`,
+  onDragOver: ({ active, over }) => {
+    if (!over) return `${namaItem(active)} berada di luar daftar.`;
+    // Terjadi juga tepat setelah diangkat, sebelum ada yang digeser.
+    if (over.id === active.id) {
+      return `${namaItem(active)} berada di posisi semula.`;
+    }
+    // "Di posisi", bukan "di atas": saat digeser ke bawah, item yang
+    // disebut justru naik ke atasnya — "di atas" berarti kebalikannya.
+    return `${namaItem(active)} berada di posisi ${namaItem(over)}.`;
+  },
+  onDragEnd: ({ active, over }) => {
+    if (!over) {
+      return `${namaItem(active)} dilepas di luar daftar; urutannya tidak berubah.`;
+    }
+    // Sama dengan syarat di `geser`: dilepas di tempatnya sendiri
+    // berarti tidak ada yang disimpan.
+    if (over.id === active.id) {
+      return `${namaItem(active)} dilepas di posisi semula; urutannya tidak berubah.`;
+    }
+    return `${namaItem(active)} dilepas di posisi ${namaItem(over)}. Urutannya tersimpan.`;
+  },
+  onDragCancel: ({ active }) => `Pemindahan ${namaItem(active)} dibatalkan.`,
 };
 
 const PETUNJUK_LAYAR =
@@ -231,6 +247,12 @@ export function PilihTampilan() {
               </ul>
 
               <DndContext
+                // Id tetap: tanpa itu dnd-kit menomori `aria-describedby`
+                // dengan pencacah global yang terus bertambah di server,
+                // sehingga HTML server dan klien berselisih (galat hidrasi).
+                // Berakhiran permukaan karena konteksnya satu per kartu,
+                // dan id ini juga menjadi id teks petunjuk pembaca layarnya.
+                id={`susunan-tampilan-${permukaan}`}
                 sensors={sensor}
                 collisionDetection={closestCenter}
                 modifiers={[restrictToVerticalAxis]}

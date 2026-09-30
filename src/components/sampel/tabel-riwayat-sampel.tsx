@@ -2,7 +2,7 @@ import Link from "next/link";
 import { History } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { jamWib, tanggalPendek } from "@/lib/format";
+import { jamWib, keTanggalWib, tanggalPendek } from "@/lib/format";
 import { GAYA_STATUS_SAMPEL, LABEL_STATUS_SAMPEL } from "@/lib/sampel";
 import type { BarisRiwayat } from "@/lib/saring-sampel";
 import { KeadaanKosong } from "@/components/shared/keadaan";
@@ -58,7 +58,7 @@ export function TabelRiwayatSampel({ daftar }: { daftar: BarisRiwayat[] }) {
               </div>
 
               <p className="mt-1 text-[11px] leading-[14px] text-pretty text-muted-foreground">
-                {tanggalPendek(b.pada)} · {jamWib(b.pada)}
+                {tanggalPendek(keTanggalWib(b.pada))} · {jamWib(b.pada)}
                 {b.dari
                   ? ` · dari ${LABEL_STATUS_SAMPEL[b.dari].toLowerCase()}`
                   : ""}

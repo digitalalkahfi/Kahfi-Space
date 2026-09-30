@@ -12,6 +12,7 @@ import { izinSaya, pengajuanMenunggu } from "@/lib/data/absensi";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
+import { hariIniWib } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Izin & Sakit — K-Space V2",
@@ -28,10 +29,7 @@ export default async function IzinPage({
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
-  const acuan =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const acuan = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   // Riwayat dibatasi 60 hari ke belakang: yang berguna adalah keputusan
   // yang masih bisa ditindaklanjuti, bukan arsip tahun lalu.

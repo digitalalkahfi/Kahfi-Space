@@ -26,7 +26,7 @@ import { bolehLihatKeuangan } from "@/lib/keuangan";
 import { daftarAlokasi, daftarAnggaran } from "@/lib/data/budget";
 import { daftarTransaksi } from "@/lib/data/keuangan";
 import { pilihanOrganisasi } from "@/lib/data/organisasi";
-import { bulanPanjang } from "@/lib/format";
+import { bulanPanjang, hariIniWib } from "@/lib/format";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
@@ -64,10 +64,7 @@ export default async function BudgetPage({
     pilihanOrganisasi(),
   ]);
 
-  const hariIni =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const hariIni = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   const tersedia = periodeAnggaran(anggaran);
   const bawaan =

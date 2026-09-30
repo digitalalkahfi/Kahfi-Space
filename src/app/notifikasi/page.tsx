@@ -13,6 +13,7 @@ import { jumlahBelumDibaca } from "@/lib/notifikasi";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { modeData } from "@/lib/supabase/config";
+import { hariIniWib } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Notifikasi — K-Space V2",
@@ -34,10 +35,7 @@ export default async function NotifikasiPage({
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
-  const hariIni =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const hariIni = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   const [daftar, waGagal] = await Promise.all([
     daftarNotifikasi(pengguna),

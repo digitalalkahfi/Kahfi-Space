@@ -25,7 +25,7 @@ import { asetDipegang } from "@/lib/data/aset";
 import { scorecardTim } from "@/lib/data/kpi";
 import { petaRantai } from "@/lib/atasan";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
-import { bulanPanjang } from "@/lib/format";
+import { bulanPanjang, hariIniWib } from "@/lib/format";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
 
@@ -58,10 +58,7 @@ export default async function ProfilAnggotaPage({
   // Yang tidak terlihat oleh cakupan perannya memang tidak ada baginya.
   if (!anggota) notFound();
 
-  const tanggal =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const tanggal = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
   const bulan = `${tanggal.slice(0, 7)}-01`;
 
   // Jejak perubahan hanya berarti bagi yang berwenang mengubahnya.

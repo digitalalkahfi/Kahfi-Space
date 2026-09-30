@@ -1,7 +1,12 @@
 import { CircleDollarSign, PlusCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { rupiahPenuh, rupiahRingkas, tanggalPendek } from "@/lib/format";
+import {
+  keTanggalWib,
+  rupiahPenuh,
+  rupiahRingkas,
+  tanggalPendek,
+} from "@/lib/format";
 import { GAYA_STATUS_ALOKASI, LABEL_STATUS_ALOKASI } from "@/lib/budget";
 import {
   judulPeristiwa,
@@ -146,7 +151,7 @@ export function DeretPeristiwa({ baris }: { baris: PeristiwaAnggaran[] }) {
                   <p className="tabular text-[11px] leading-[14px] text-muted-foreground">
                     {periodePanjang(p.periode)}
                     {p.jenisPeristiwa === "alokasi"
-                      ? ` · diajukan ${tanggalPendek(p.pada.slice(0, 10))}`
+                      ? ` · diajukan ${tanggalPendek(keTanggalWib(p.pada))}`
                       : ""}
                     {p.oleh ? ` · ${p.oleh}` : ""}
                   </p>

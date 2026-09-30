@@ -125,7 +125,13 @@ export function BarisSortable(props: Isi) {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: props.item.kunci });
+  } = useSortable({
+    id: props.item.kunci,
+    // Dibaca pengumuman pembaca layar di `PilihTampilan`. Id-nya kunci,
+    // dan untuk menu kunci itu path rute ("/absensi") — bukan nama yang
+    // terlihat di layar.
+    data: { label: props.item.label },
+  });
 
   return (
     <li

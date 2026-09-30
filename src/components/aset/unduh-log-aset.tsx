@@ -2,6 +2,7 @@
 
 import { TombolUnduhExcel } from "@/components/shared/tombol-unduh-excel";
 import { namaBerkasTanggal } from "@/lib/ekspor-excel";
+import { keTanggalWib } from "@/lib/format";
 import { LABEL_STATUS_ASET, type BarisLogAset } from "@/lib/aset";
 
 /** Mengunduh log yang sedang tampil — mengikuti saringan, bukan seluruhnya. */
@@ -14,7 +15,7 @@ export function UnduhLogAset({ daftar }: { daftar: BarisLogAset[] }) {
         namaSheet="Log aset"
         label="Unduh log"
         kolom={[
-          { judul: "Tanggal", ambil: (k) => k.pada, lebar: 12 },
+          { judul: "Tanggal", ambil: (k) => keTanggalWib(k.pada), lebar: 12 },
           { judul: "Kode", ambil: (k) => k.kode, lebar: 12 },
           { judul: "Aset", ambil: (k) => k.namaAset, lebar: 32 },
           { judul: "Unit", ambil: (k) => k.unitNama, lebar: 20 },

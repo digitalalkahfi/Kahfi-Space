@@ -12,6 +12,7 @@ import {
   tanggalKalenderRelatif,
   tanggalPanjang,
   tanggalPendek,
+  tanggalRelatif,
 } from "../format.ts";
 
 test("label bulan memakai nama bulan Indonesia", () => {
@@ -87,4 +88,29 @@ test("tanggal relatif dihitung dari tanggal kalender WIB", () => {
   assert.equal(tanggalKalenderRelatif("2026-09-28", "2026-09-29"), "Kemarin");
   assert.equal(tanggalKalenderRelatif("2026-10-02", "2026-09-29"), "2 Okt");
   assert.equal(tanggalKalenderRelatif("", "2026-09-29"), "");
+});
+
+test("tanggal relatif sebuah cap waktu dihitung di WIB, bukan zona mesinnya", () => {
+  // 17:30 UTC tanggal 29 = 00:30 WIB tanggal 30. Dengan zona mesin, SSR
+  // (UTC) menulis "Kemarin" sementara peramban (WIB) menulis "Hari ini".
+  assert.equal(
+    tanggalRelatif("2026-09-29T17:30:00+00:00", "2026-09-30"),
+    "Hari ini",
+  );
+  assert.equal(
+    tanggalRelatif("2026-09-29T16:59:00+00:00", "2026-09-30"),
+    "Kemarin",
+  );
+  assert.equal(
+    tanggalRelatif("2026-09-28T16:59:00+00:00", "2026-09-30"),
+    "28 Sep 2026",
+  );
+  // Acuan berupa cap waktu: 02:00 WIB tanggal 30 vs 23:00 WIB tanggal 29.
+  assert.equal(
+    tanggalRelatif("2026-09-29T16:00:00Z", "2026-09-29T19:00:00Z"),
+    "Kemarin",
+  );
+  // Tanggal kalender tanpa jam tidak bergeser.
+  assert.equal(tanggalRelatif("2026-09-29", "2026-09-30"), "Kemarin");
+  assert.equal(tanggalRelatif("rusak", "2026-09-30"), "");
 });

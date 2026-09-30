@@ -6,6 +6,7 @@
  * aplikasi, dan kalau tidak ada tempat yang bisa dituju, peristiwanya
  * tidak layak jadi notifikasi.
  */
+import { keTanggalWib } from "@/lib/format";
 
 export const KATEGORI_NOTIFIKASI = [
   "tugas",
@@ -106,8 +107,15 @@ function selisihHari(a: string, b: string): number {
   );
 }
 
+/**
+ * Kelompok waktu sebuah notifikasi terhadap `hariIni` (YYYY-MM-DD, WIB).
+ *
+ * Tanggalnya dihitung di WIB, bukan dipotong dari teksnya: `created_at`
+ * dari PostgREST bertanda +00:00, dan sepuluh karakter pertamanya adalah
+ * tanggal UTC — sehari terlalu awal untuk yang dibuat 00.00–06.59 WIB.
+ */
 export function kelompokWaktu(dibuatPada: string, hariIni: string): Kelompok {
-  const tanggal = dibuatPada.slice(0, 10);
+  const tanggal = keTanggalWib(dibuatPada);
   const jarak = selisihHari(tanggal, hariIni);
   if (jarak <= 0) return "hari-ini";
   if (jarak === 1) return "kemarin";

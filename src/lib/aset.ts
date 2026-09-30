@@ -8,6 +8,7 @@
  * sehari-hari: barang ini nilainya tinggal berapa, dan sekarang ada pada
  * siapa.
  */
+import { keTanggalWib } from "@/lib/format";
 import { dalamLingkup, type OrangLingkup } from "@/lib/lingkup";
 import type { KodeUnit, Peran } from "@/lib/types";
 
@@ -575,7 +576,8 @@ export function saringLogAset(
     if (s.status !== "semua" && b.ke !== s.status) return false;
     if (s.unit !== "semua" && b.unitNama !== s.unit) return false;
 
-    const hari = b.pada.slice(0, 10);
+    // Di mode Supabase `pada` cap waktu (+00:00); saringannya tanggal WIB.
+    const hari = keTanggalWib(b.pada);
     if (s.dari && hari < s.dari) return false;
     if (s.sampai && hari > s.sampai) return false;
 

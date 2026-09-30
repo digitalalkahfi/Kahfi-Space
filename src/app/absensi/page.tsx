@@ -17,7 +17,7 @@ import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { sasaranUntuk, sudahDilaporkan } from "@/lib/data/laporan";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
-import { tanggalPanjang } from "@/lib/format";
+import { hariIniWib, tanggalPanjang } from "@/lib/format";
 import { KANTOR } from "@/lib/geo";
 import { wajibAbsen } from "@/lib/rekap-kehadiran";
 
@@ -34,10 +34,7 @@ export default async function AbsensiPage({
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
-  const tanggal =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const tanggal = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   const [absen, aturan, sasaran, terlapor] = await Promise.all([
     absensiHariIni(pengguna, tanggal),

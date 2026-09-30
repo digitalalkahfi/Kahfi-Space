@@ -9,6 +9,7 @@ import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { riwayatLaporan } from "@/lib/data/laporan";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
+import { hariIniWib } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Riwayat Laporan — K-Space V2",
@@ -22,10 +23,7 @@ export default async function RiwayatPage({
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
-  const tanggal =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const tanggal = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
   const riwayat = await riwayatLaporan(pengguna, tanggal, 120);
 
   return (

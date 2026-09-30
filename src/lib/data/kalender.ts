@@ -4,8 +4,8 @@ import "server-only";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { dataContoh } from "@/lib/data/contoh";
-import { ambilSemuaTugas } from "@/lib/data/tugas";
-import { bentrok } from "@/lib/kalender";
+import { ambilTenggatKalender } from "@/lib/data/tugas";
+import { bentrok, keEntriTenggat } from "@/lib/kalender";
 import type { EntriKalender, JenisAgenda } from "@/lib/kalender";
 import type { KodeUnit, Pengguna } from "@/lib/types";
 
@@ -194,39 +194,15 @@ async function agendaBulan(
   });
 }
 
-/** Tenggat tugas ditarik dari modul Tugas, bukan disalin ke agenda. */
+/**
+ * Tenggat tugas ditarik dari modul Tugas, bukan disalin ke agenda.
+ * Rentang tanggal, status, dan to-do milik siapa disaring di sana.
+ */
 async function tenggatTugas(
   pengguna: Pengguna,
   dari: string,
   sampai: string,
 ): Promise<EntriKalender[]> {
-  const tugas = await ambilSemuaTugas(pengguna);
-
-  return tugas
-    .filter((t) => {
-      if (!t.tenggat) return false;
-      const hari = t.tenggat.slice(0, 10);
-      // Tugas yang sudah tuntas atau dibatalkan bukan lagi tenggat.
-      return (
-        hari >= dari &&
-        hari <= sampai &&
-        t.statusAsli !== "selesai" &&
-        t.statusAsli !== "dibatalkan"
-      );
-    })
-    .map((t) => ({
-      id: `tugas-${t.id}`,
-      sumber: "tugas" as const,
-      judul: t.judul,
-      keterangan: t.deskripsi,
-      jenis: "tenggat" as const,
-      tanggal: t.tenggat.slice(0, 10),
-      jamMulai: t.tenggat.length > 10 ? t.tenggat.slice(11, 16) : null,
-      jamSelesai: null,
-      unitKode: null,
-      unitNama: t.penerima ?? "",
-      lokasi: "",
-      tautan: "/tugas",
-      dibuatOleh: null,
-    }));
+  const tugas = await ambilTenggatKalender(pengguna, dari, sampai);
+  return tugas.map(keEntriTenggat);
 }

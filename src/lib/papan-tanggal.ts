@@ -70,6 +70,21 @@ export function rentangHariWib(tanggal: string): {
   };
 }
 
+/**
+ * Awal tanggal `dari` dan akhir (eksklusif) tanggal `sampai`, keduanya
+ * WIB, sebagai waktu UTC — `rentangHariWib` untuk beberapa hari
+ * sekaligus, mis. satu bulan kalender.
+ */
+export function rentangTanggalWib(
+  dari: string,
+  sampai: string,
+): { awal: string; akhir: string } {
+  return {
+    awal: rentangHariWib(dari).awal,
+    akhir: rentangHariWib(sampai).akhir,
+  };
+}
+
 /** Tanggal WIB tenggat sebuah tugas; "" bila tanpa tenggat. */
 function tanggalTenggat(t: Pick<TugasPapan, "tenggat">): string {
   return t.tenggat ? keTanggalWib(t.tenggat) : "";

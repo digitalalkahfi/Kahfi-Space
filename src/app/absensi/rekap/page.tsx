@@ -13,7 +13,7 @@ import { rekapKehadiranOrang } from "@/lib/data/rekap-kehadiran";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
-import { tanggalPendek } from "@/lib/format";
+import { hariIniWib, tanggalPendek } from "@/lib/format";
 import { bacaPeriode } from "@/lib/periode";
 import { cn } from "@/lib/utils";
 
@@ -49,10 +49,7 @@ export default async function RekapAbsensiPage({
   // lokasi, dan laporannya.
   const perOrang = tampilan !== "catatan";
 
-  const acuan =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const acuan = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
   const rentang = bacaPeriode(acuan, { periode, dari, sampai });
 
   const [orang, baris] = await Promise.all([

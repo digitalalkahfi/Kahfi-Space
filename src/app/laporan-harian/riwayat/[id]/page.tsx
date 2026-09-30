@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
   bilangan,
+  hariIniWib,
   jamWib,
   persen,
   rasioCapaian,
@@ -37,10 +38,7 @@ export default async function DetailLaporanPage({
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
-  const tanggal =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const tanggal = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   const hasil = await ambilLaporan(decodeURIComponent(id), pengguna, tanggal);
   if (!hasil) notFound();

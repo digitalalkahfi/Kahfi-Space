@@ -27,7 +27,7 @@ import {
 } from "@/lib/keuangan";
 import { daftarAset } from "@/lib/data/aset";
 import { daftarTransaksi, kasAwal } from "@/lib/data/keuangan";
-import { bulanPanjang } from "@/lib/format";
+import { bulanPanjang, hariIniWib } from "@/lib/format";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
@@ -58,10 +58,7 @@ export default async function DepresiasiPage({
     );
   }
 
-  const hariIni =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const hariIni = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   const [aset, transaksi, saldoAwal] = await Promise.all([
     daftarAset(pengguna),

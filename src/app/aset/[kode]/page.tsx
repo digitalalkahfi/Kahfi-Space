@@ -17,7 +17,7 @@ import { JadwalPenyusutan } from "@/components/aset/jadwal-penyusutan";
 import { RiwayatAset } from "@/components/aset/riwayat-aset";
 import { Reveal } from "@/components/motion/reveal";
 import { cn } from "@/lib/utils";
-import { rupiahPenuh, tanggalPendek } from "@/lib/format";
+import { hariIniWib, rupiahPenuh, tanggalPendek } from "@/lib/format";
 import {
   GAYA_STATUS_ASET,
   LABEL_STATUS_ASET,
@@ -97,10 +97,7 @@ export default async function DetailAsetPage({
     .filter((a) => !aset.unitKode || a.unitId === aset.unitKode)
     .map((a) => ({ id: a.id, nama: a.nama, jabatan: a.jabatan }));
 
-  const hariIni =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+  const hariIni = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
   const gaya = GAYA_STATUS_ASET[aset.status];
   const susut = akumulasiPenyusutan(aset, hariIni);
