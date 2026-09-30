@@ -9,6 +9,7 @@ import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
 import { MIN_HASIL_KERJA, PESAN_TODO_TANPA_REVIEW } from "@/lib/kanban";
 import { keJamWib, keTanggalWib } from "@/lib/format";
 import {
+  periksaDelegasi,
   periksaTenggat,
   periksaTiketBaru,
   periksaToDoBaru,
@@ -32,6 +33,17 @@ const PESAN_TIKET_SELESAI =
 /** Yang sudah mulai dikerjakan tidak dipindah tangan (0184). */
 const PESAN_PENERIMA_TERKUNCI =
   "Penerima hanya bisa diganti selama tiket belum mulai dikerjakan.";
+
+/**
+ * Form mengirim Target? Form to-do & tiket tidak lagi menampilkan Target;
+ * target lama yang sudah tersimpan tidak boleh ikut terhapus saat edit.
+ */
+function adaTarget(input: {
+  targetAngka?: string | number | null;
+  targetSatuan?: string;
+}): boolean {
+  return input.targetAngka !== undefined || input.targetSatuan !== undefined;
+}
 
 /** Tenggat tersimpan dibaca sebagai tanggal & jam WIB untuk isian edit. */
 function tenggatLama(tenggat: string | null, tanpaJam: boolean): TenggatLama {
@@ -85,6 +97,8 @@ export async function ubahCentangToDo(
  */
 export async function tambahToDo(input: {
   judul: string;
+  /** Penjelasan to-do; boleh berparagraf. */
+  deskripsi?: string;
   konteks?: string;
   /** Tanggal WIB, YYYY-MM-DD. */
   tanggal: string;
@@ -112,6 +126,7 @@ export async function tambahToDo(input: {
   const { error } = await sb.from("tasks").insert({
     tipe: "pribadi",
     judul: cek.nilai.judul,
+    deskripsi: input.deskripsi?.trim() ?? "",
     konteks: input.konteks?.trim() ?? "",
     tenggat: cek.nilai.tenggat,
     tanpa_jam: cek.nilai.tanpaJam,
@@ -374,7 +389,7 @@ export async function ubahTenggatTugas(
   if (pemilik !== pengguna.id) {
     return gagal(
       todo
-        ? "Hanya pemilik to-do yang bisa memindahkan tanggalnya."
+        ? "Hanya pemilik to-do yang bisa mengubah deadline-nya."
         : PESAN_KUNCI_TIKET,
       "izin",
     );
@@ -395,7 +410,7 @@ export async function ubahTenggatTugas(
     }
     return gagal(
       todo
-        ? "Hanya pemilik to-do yang bisa memindahkan tanggalnya."
+        ? "Hanya pemilik to-do yang bisa mengubah deadline-nya."
         : PESAN_KUNCI_TIKET,
       "izin",
     );
@@ -411,7 +426,7 @@ export async function ubahTenggatTugas(
   revalidatePath("/beranda");
   return sukses(
     undefined,
-    todo ? "To-do dipindahkan ke tanggal lain." : "Tenggat tiket diperbarui.",
+    todo ? "Deadline to-do diperbarui." : "Deadline tiket diperbarui.",
   );
 }
 
@@ -427,11 +442,13 @@ export async function ubahToDo(
   id: string,
   input: {
     judul: string;
+    deskripsi?: string;
     konteks?: string;
     /** Tanggal WIB, YYYY-MM-DD. */
     tanggal: string;
     /** Jam WIB, HH:MM; kosong = tanpa jam. */
     jam?: string | null;
+    /** Tidak dikirim form (Target sudah tidak diisi); bila ada, ditulis. */
     targetAngka?: string | number | null;
     targetSatuan?: string;
     prioritas?: Prioritas;
@@ -468,8 +485,16 @@ export async function ubahToDo(
     .from("tasks")
     .update({
       judul: cek.nilai.judul,
-      target_angka: cek.nilai.targetAngka,
-      target_satuan: cek.nilai.targetSatuan,
+      // Target lama tetap utuh bila form tidak mengirimnya.
+      ...(adaTarget(input)
+        ? {
+            target_angka: cek.nilai.targetAngka,
+            target_satuan: cek.nilai.targetSatuan,
+          }
+        : {}),
+      ...(input.deskripsi !== undefined
+        ? { deskripsi: input.deskripsi.trim() }
+        : {}),
       ...(input.konteks !== undefined ? { konteks: input.konteks.trim() } : {}),
       ...(input.prioritas ? { prioritas: input.prioritas } : {}),
       ...(cek.nilai.tenggatBerubah
@@ -491,6 +516,103 @@ export async function ubahToDo(
   revalidatePath("/tugas");
   revalidatePath("/beranda");
   return sukses(undefined, "To-do diperbarui.");
+}
+
+/**
+ * Delegasikan to-do ke bawahan: to-do berubah menjadi tiket dari
+ * pemiliknya untuk orang yang dipilih (0186).
+ *
+ * Deadline dan deskripsinya ikut, statusnya mulai lagi dari To Do, dan
+ * penerima dikabari (notifikasi penugasan ulang, 0112). Hasilnya
+ * diperiksa pemiliknya lewat QC seperti tiket biasa. Basis data menolak
+ * bila penerimanya bukan orang yang boleh ditugasi pemilik to-do.
+ */
+export async function delegasikanToDo(
+  id: string,
+  input: {
+    penerimaId: string;
+    judul: string;
+    deskripsi?: string;
+    konteks?: string;
+    /** Tanggal WIB, YYYY-MM-DD. */
+    tanggal: string;
+    /** Jam WIB, HH:MM — wajib: tiket selalu berjam. */
+    jam: string;
+    prioritas?: Prioritas;
+  },
+): Promise<Hasil> {
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const sb = await klienServer();
+  const { data: lama, error: galatBaca } = await sb
+    .from("tasks")
+    .select("tipe, penerima_id, status")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (galatBaca) return gagal(`Gagal memuat to-do: ${galatBaca.message}`);
+  if (!lama || lama.tipe !== "pribadi" || lama.penerima_id !== pengguna.id) {
+    return gagal(PESAN_KUNCI_TODO, "izin");
+  }
+  if (lama.status === "selesai") {
+    return gagal(
+      "To-do yang sudah selesai tidak perlu didelegasikan.",
+      "validasi",
+    );
+  }
+
+  const cek = periksaDelegasi({
+    judul: input.judul,
+    penerimaId: input.penerimaId,
+    idPemilik: pengguna.id,
+    tanggal: input.tanggal,
+    jam: input.jam,
+    hariIni: hariIniTugas(),
+  });
+  if (!cek.ok) return gagal(cek.pesan, "validasi");
+
+  const { data, error } = await sb
+    .from("tasks")
+    .update({
+      tipe: "tiket",
+      penerima_id: input.penerimaId,
+      status: "todo",
+      judul: cek.nilai.judul,
+      // Deadline selalu ditulis: tiket berjam, dan tidak lampau.
+      tenggat: cek.nilai.tenggat,
+      tanpa_jam: false,
+      ...(input.deskripsi !== undefined
+        ? { deskripsi: input.deskripsi.trim() }
+        : {}),
+      ...(input.konteks !== undefined ? { konteks: input.konteks.trim() } : {}),
+      ...(input.prioritas ? { prioritas: input.prioritas } : {}),
+    })
+    .eq("id", id)
+    .select("id");
+
+  if (error) {
+    if (error.message.includes("boleh kamu tugasi")) {
+      return gagal(
+        "Kamu hanya bisa mendelegasikan ke anggota yang kamu bawahi.",
+        "izin",
+      );
+    }
+    if (error.message.includes("Pilih bawahan")) {
+      return gagal("Pilih bawahan yang akan mengerjakannya.", "validasi");
+    }
+    return error.code === "42501"
+      ? gagal(PESAN_KUNCI_TODO, "izin")
+      : gagal(`Gagal mendelegasikan: ${error.message}`);
+  }
+  if ((data ?? []).length === 0) {
+    return gagal("To-do itu tidak ada, atau bukan milikmu.", "izin");
+  }
+
+  revalidatePath("/tugas");
+  revalidatePath("/beranda");
+  return sukses(undefined, "To-do didelegasikan sebagai tiket.");
 }
 
 /**
@@ -567,8 +689,12 @@ export async function ubahTiket(
     .update({
       judul: cek.nilai.judul,
       kriteria_selesai: cek.nilai.kriteriaSelesai,
-      target_angka: cek.nilai.targetAngka,
-      target_satuan: cek.nilai.targetSatuan,
+      ...(adaTarget(input)
+        ? {
+            target_angka: cek.nilai.targetAngka,
+            target_satuan: cek.nilai.targetSatuan,
+          }
+        : {}),
       goal_id: cek.nilai.goalId,
       ...(input.deskripsi !== undefined
         ? { deskripsi: input.deskripsi.trim() }

@@ -10,7 +10,10 @@ import { masukKalender } from "@/lib/kalender";
 import {
   BATAS_DAFTAR,
   BATAS_PAPAN,
+  BATAS_SELESAI_SEMUA,
+  awalSelesaiSemua,
   masukPapan,
+  masukPapanSemua,
   masukToDoHariIni,
   rentangHariWib,
   rentangTanggalWib,
@@ -32,6 +35,18 @@ import type {
  */
 export function hariIniTugas(): string {
   return modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
+}
+
+/**
+ * "Sekarang" modul Tugas, untuk menandai deadline yang jamnya sudah
+ * lewat. Dihitung sekali di server dan dikirim ke layar, supaya HTML
+ * server dan peramban sepakat. Mode demo memakai siang hari tanggal
+ * acuannya — kalau jam dinding, semua data contoh terbaca terlambat.
+ */
+export function sekarangTugas(): string {
+  return modeData() === "demo"
+    ? new Date(`${TANGGAL_ACUAN}T12:00:00+07:00`).toISOString()
+    : new Date().toISOString();
 }
 
 const KOLOM = `
@@ -125,7 +140,9 @@ function keToDo(b: BarisTugas): ToDo {
   return {
     id: b.id,
     judul: b.judul,
-    konteks: b.konteks,
+    // To-do baru mencatat keterangannya di deskripsi (boleh berparagraf);
+    // Beranda cukup baris pertamanya.
+    konteks: b.konteks || (b.deskripsi ?? "").split("\n")[0].trim(),
     jam: b.tenggat,
     tanggal: b.tenggat ? keTanggalWib(b.tenggat) : "",
     tanpaJam: b.tanpa_jam ?? false,
@@ -291,6 +308,59 @@ export async function ambilPapanTugas(
 }
 
 /**
+ * Papan "Semua" — tampilan bawaan halaman Tugas: semua yang belum selesai
+ * dari tanggal mana pun (sama dengan tampilan Daftar, `daftar_tugas`),
+ * ditambah yang beres dalam 7 hari terakhir untuk kolom Selesai.
+ *
+ * Deadline adalah batas selesai, bukan hari mengerjakan: tiket bertenggat
+ * pekan depan sudah harus terlihat sejak hari ini. Keduanya disaring di
+ * basis data dan tunduk RLS; to-do pribadi hanya milik sendiri.
+ */
+export async function ambilPapanSemua(
+  pengguna: Pengguna,
+  hariIni: string,
+): Promise<TugasTersaring> {
+  if (modeData() === "demo") {
+    const cocok = tugasContoh(pengguna)
+      .map(keTugas)
+      .filter((t) => masukPapanSemua(t, hariIni));
+    return batasiContoh(cocok, BATAS_PAPAN + BATAS_SELESAI_SEMUA);
+  }
+
+  const sb = await klienServer();
+  const [belum, selesai] = await Promise.all([
+    sb.rpc("daftar_tugas", {
+      p_acuan: hariIni,
+      p_saringan: "semua",
+      p_batas: BATAS_PAPAN,
+    }),
+    sb
+      .from("tasks")
+      .select(KOLOM)
+      .eq("status", "selesai")
+      .or(`tipe.neq.pribadi,penerima_id.eq.${pengguna.id}`)
+      .gte("selesai_at", rentangHariWib(awalSelesaiSemua(hariIni)).awal)
+      .order("selesai_at", { ascending: false })
+      .limit(BATAS_SELESAI_SEMUA),
+  ]);
+
+  if (belum.error) {
+    throw new Error(`Gagal memuat papan tugas: ${belum.error.message}`);
+  }
+  if (selesai.error) {
+    throw new Error(`Gagal memuat tugas selesai: ${selesai.error.message}`);
+  }
+
+  const aktif = keTersaring(belum.data ?? []);
+  const beres = (selesai.data as unknown as BarisTugas[]).map(keTugas);
+  return {
+    tugas: [...aktif.tugas, ...beres],
+    total: aktif.total + beres.length,
+    terpotong: aktif.terpotong || beres.length >= BATAS_SELESAI_SEMUA,
+  };
+}
+
+/**
  * Tampilan Daftar: semua yang BELUM selesai, dikelompokkan menurut
  * tenggat di layar. Tugas selesai tidak dimuat.
  */
@@ -319,7 +389,7 @@ export async function ambilDaftarTugas(
 }
 
 const KOLOM_TODO =
-  "id, judul, konteks, tenggat, tanpa_jam, prioritas, status, selesai_at";
+  "id, judul, deskripsi, konteks, tenggat, tanpa_jam, prioritas, status, selesai_at";
 
 /**
  * "To-do hari ini" di Beranda: to-do milik pengguna (dibandingkan lewat
@@ -330,8 +400,7 @@ export async function ambilToDo(
   pengguna: Pengguna,
   hariIni: string,
 ): Promise<ToDo[]> {
-  const urut = (a: ToDo, b: ToDo) =>
-    (a.jam ?? "").localeCompare(b.jam ?? "");
+  const urut = (a: ToDo, b: ToDo) => (a.jam ?? "").localeCompare(b.jam ?? "");
 
   if (modeData() === "demo") {
     return tugasContoh(pengguna)

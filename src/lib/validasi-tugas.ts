@@ -377,3 +377,44 @@ export function periksaUbahTiket(
     nilai: { ...isi.nilai, ...nilaiTenggat, tenggatBerubah: berubah },
   };
 }
+
+/**
+ * Delegasi to-do ke bawahan: to-do berubah menjadi tiket dari pemiliknya.
+ *
+ * Deadline-nya diperiksa seperti tiket BARU: tanggal tidak boleh lampau
+ * dan jam wajib (tiket selalu berjam, 0180). Tiket yang diterima sudah
+ * terlambat tidak adil bagi penerimanya — nilainya bahkan bisa jatuh ke
+ * periode KPI yang sudah lewat. Kriteria selesai tidak diminta: delegasi
+ * dimaksudkan cepat, dan deskripsi to-do-nya ikut menjadi penjelasan tiket.
+ */
+export function periksaDelegasi(input: {
+  judul: string;
+  penerimaId: string;
+  /** Pemilik to-do — ia yang mendelegasikan, bukan penerimanya. */
+  idPemilik: string;
+  tanggal: string | null | undefined;
+  jam?: string | null;
+  hariIni: string;
+}): Periksa<{ judul: string } & Tenggat> {
+  const judul = input.judul.trim();
+  if (judul.length < MIN_JUDUL) {
+    return tolak(`Judul minimal ${MIN_JUDUL} karakter.`);
+  }
+  if (!input.penerimaId || input.penerimaId === input.idPemilik) {
+    return tolak("Pilih bawahan yang akan mengerjakannya.");
+  }
+
+  const tenggat = periksaTenggat({
+    tanggal: input.tanggal,
+    jam: input.jam,
+    jamWajib: true,
+    hariIni: input.hariIni,
+  });
+  if (!tenggat.ok) {
+    return tenggat.pesan.includes("sebelum hari ini")
+      ? tolak("Deadline untuk bawahan tidak boleh sebelum hari ini.")
+      : tenggat;
+  }
+
+  return { ok: true, nilai: { judul, ...tenggat.nilai } };
+}

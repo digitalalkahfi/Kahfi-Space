@@ -35,7 +35,7 @@ import {
 import { JejakPemeriksaan } from "@/components/tugas/jejak-qc";
 import { useAksiTugas } from "@/components/tugas/aksi-tugas";
 import type { JejakQc } from "@/lib/data/tugas";
-import type { Penanda } from "@/lib/papan-tanggal";
+import { lewatDeadline, type Penanda } from "@/lib/papan-tanggal";
 import type { Prioritas, StatusTugas, TipeTugas, Tugas } from "@/lib/types";
 
 const GAYA_PRIORITAS: Record<
@@ -114,6 +114,7 @@ export function KartuTugas({
   sayaPembuat,
   bolehQc,
   hariIni,
+  sekarang,
   jejakQc = [],
   hasilTerbukaAwal = false,
   penanda = null,
@@ -125,6 +126,11 @@ export function KartuTugas({
   /** Pemberi tugas atau atasan penerima. */
   bolehQc: boolean;
   hariIni: string;
+  /**
+   * Waktu server saat halaman disusun. Dengan ini deadline hari ini yang
+   * jamnya sudah lewat langsung terbaca terlambat, bukan menunggu besok.
+   */
+  sekarang?: string;
   /** Riwayat pemeriksaan tugas ini, bila pernah diperiksa. */
   jejakQc?: JejakQc[];
   /**
@@ -134,8 +140,8 @@ export function KartuTugas({
    */
   hasilTerbukaAwal?: boolean;
   /**
-   * Tanda di papan hari ini: tugas terlambat yang ikut naik ke hari ini,
-   * atau tiket lama tanpa tenggat.
+   * Tanda di papan hari ini dan papan Semua: tugas yang lewat deadline,
+   * atau tiket lama tanpa deadline.
    */
   penanda?: Penanda;
 }) {
@@ -150,6 +156,7 @@ export function KartuTugas({
   const [isiHasil, setIsiHasil] = useState(hasilTerbukaAwal);
   const [isiTenggat, setIsiTenggat] = useState(false);
   const [kriteriaTerbuka, setKriteriaTerbuka] = useState(false);
+  const [deskripsiTerbuka, setDeskripsiTerbuka] = useState(false);
   const [tanggalBaru, setTanggalBaru] = useState("");
   const [jamBaru, setJamBaru] = useState("");
 
@@ -159,8 +166,13 @@ export function KartuTugas({
   const mundur = langkahMundur(status);
 
   const tanggalTenggat = tugas.tenggat ? keTanggalWib(tugas.tenggat) : "";
+  // Deadline adalah batas selesai: begitu jamnya lewat, sudah terlambat.
   const telat =
-    tanggalTenggat !== "" && status !== "selesai" && tanggalTenggat < hariIni;
+    tanggalTenggat !== "" &&
+    status !== "selesai" &&
+    (sekarang
+      ? lewatDeadline(tugas.tenggat, sekarang)
+      : tanggalTenggat < hariIni);
   // To-do tanpa jam tersimpan 23:59 WIB; yang ditampilkan tanggalnya saja.
   const labelTenggat = tugas.tenggat
     ? `${tanggalKalenderRelatif(tanggalTenggat, hariIni)}${
@@ -188,6 +200,10 @@ export function KartuTugas({
   // Kriteria panjang dipotong dua baris; tombolnya hanya muncul bila
   // memang ada yang terpotong.
   const kriteriaPanjang = tugas.kriteriaSelesai.length > 90;
+  // Deskripsi boleh berparagraf (form kini menyediakan kotak besar); di
+  // kartu cukup tiga baris pertama sampai diminta selengkapnya.
+  const deskripsiPanjang =
+    tugas.deskripsi.length > 160 || tugas.deskripsi.split("\n").length > 3;
   const labelKonteks =
     tugas.label && tugas.label !== namaTipe ? tugas.label : gaya.label;
 
@@ -267,13 +283,16 @@ export function KartuTugas({
         {penanda?.jenis === "terlambat" ? (
           <p className="mb-2 inline-flex items-center gap-1 rounded-full bg-danger px-2 py-0.5 text-[11px] leading-[14px] font-semibold text-white">
             <AlarmClock className="size-3" />
-            Terlambat · {tanggalKalenderPendek(penanda.tanggal, hariIni)}
+            Terlambat ·{" "}
+            {penanda.tanggal === hariIni && tugas.tenggat && !tugas.tanpaJam
+              ? jamWib(tugas.tenggat)
+              : tanggalKalenderPendek(penanda.tanggal, hariIni)}
           </p>
         ) : null}
         {penanda?.jenis === "tanpa_tenggat" ? (
           <p className="mb-2 inline-flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-[11px] leading-[14px] font-semibold text-muted-foreground ring-1 ring-border-subtle">
             <Clock className="size-3" />
-            Tanpa tenggat
+            Tanpa deadline
           </p>
         ) : null}
         {/* Dibungkus wrap: di kolom papan yang sempit, tenggat turun ke
@@ -304,9 +323,26 @@ export function KartuTugas({
                 {tugas.judul}
               </p>
               {tugas.deskripsi ? (
-                <p className="mt-1 text-[13px] leading-[18px] text-pretty text-muted-foreground">
-                  {tugas.deskripsi}
-                </p>
+                <div className="mt-1">
+                  <p
+                    className={cn(
+                      "text-[13px] leading-[18px] text-pretty whitespace-pre-line text-muted-foreground",
+                      deskripsiPanjang && !deskripsiTerbuka && "line-clamp-3",
+                    )}
+                  >
+                    {tugas.deskripsi}
+                  </p>
+                  {deskripsiPanjang ? (
+                    <button
+                      type="button"
+                      onClick={() => setDeskripsiTerbuka(!deskripsiTerbuka)}
+                      aria-expanded={deskripsiTerbuka}
+                      className="tekan-halus mt-0.5 text-[11px] leading-[14px] font-semibold text-secondary hover:underline"
+                    >
+                      {deskripsiTerbuka ? "Ringkas" : "Selengkapnya"}
+                    </button>
+                  ) : null}
+                </div>
               ) : null}
               {/* Saat menunggu QC, kriteria tampil utuh di atas hasil
                   kerja (di bawah); di sini cukup ringkasnya. */}
@@ -344,7 +380,7 @@ export function KartuTugas({
               )}
             >
               <Clock className="size-3" />
-              {labelTenggat}
+              Deadline {labelTenggat}
             </span>
           ) : null}
         </div>
@@ -583,9 +619,7 @@ export function KartuTugas({
 
         {bolehUbahTenggat && isiTenggat ? (
           <fieldset className="space-y-2 rounded-xl bg-muted/60 p-2.5">
-            <legend className="sr-only">
-              {todo ? "Pindahkan ke tanggal lain" : "Ubah tenggat"}
-            </legend>
+            <legend className="sr-only">Ubah deadline</legend>
             <div className="grid grid-cols-2 gap-2">
               <label className="space-y-1 text-[11px] leading-[14px] font-semibold">
                 Tanggal
@@ -628,7 +662,7 @@ export function KartuTugas({
                 className="tekan-halus h-8 flex-1 rounded-full text-[11px] font-semibold"
               >
                 {sibuk ? <Loader2 className="size-3.5 animate-spin" /> : null}
-                Simpan tanggal
+                Simpan deadline
               </Button>
             </div>
           </fieldset>
@@ -641,7 +675,7 @@ export function KartuTugas({
                 className="tekan-halus sentuh-nyaman flex min-w-0 flex-1 items-center gap-1.5 rounded-xl px-1 py-1 text-[11px] leading-[14px] font-semibold text-muted-foreground hover:text-foreground"
               >
                 <CalendarClock className="size-3 shrink-0" />
-                {todo ? "Pindahkan ke tanggal lain" : "Ubah tenggat"}
+                Ubah deadline
               </button>
             ) : (
               <span className="flex-1" />

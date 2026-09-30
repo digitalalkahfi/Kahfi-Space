@@ -41,12 +41,13 @@ const TANPA_GOAL = "__tanpa_goal__";
  * Daftar penerima hanya berisi orang yang memang boleh ditugasi.
  *
  * Isiannya disusun SMART (D5):
- *   S — judul (kata kerja + objek) dan hasil akhir yang diharapkan;
- *   M — kriteria selesai (wajib) dan target angka + satuan (opsional);
+ *   S — judul (kata kerja + objek) dan deskripsi tugas sedetail perlu;
+ *   M — kriteria selesai (wajib). Target angka tidak lagi diisi di sini
+ *       (masukan tim: form terlalu panjang); target lama tetap tampil;
  *   A — info beban penerima di tanggal itu, sekadar info;
  *   R — goal terkait: wajib untuk komitmen, opsional untuk tiket (D6);
- *   T — tanggal dan jam tenggat, keduanya wajib (D3). Tiket biasa
- *       bawaannya hari ini; komitmen bawaannya akhir pekan (Sabtu).
+ *   T — deadline: tanggal dan jam batas selesai, keduanya wajib (D3).
+ *       Tiket biasa bawaannya hari ini; komitmen akhir pekan (Sabtu).
  *
  * Dengan `ubah`, isian yang sama dipakai pemberi tiket untuk mengedit
  * tiketnya: terisi nilainya sekarang, jenisnya tetap, dan penerimanya
@@ -84,10 +85,6 @@ export function DialogTiket({
   const [judul, setJudul] = useState(ubah?.judul ?? "");
   const [deskripsi, setDeskripsi] = useState(ubah?.deskripsi ?? "");
   const [kriteria, setKriteria] = useState(ubah?.kriteriaSelesai ?? "");
-  const [targetAngka, setTargetAngka] = useState(
-    ubah?.targetAngka != null ? String(ubah.targetAngka) : "",
-  );
-  const [targetSatuan, setTargetSatuan] = useState(ubah?.targetSatuan ?? "");
   const [penerimaId, setPenerimaId] = useState(ubah?.penerimaId ?? "");
   const [tanggal, setTanggal] = useState(tanggalLama || tanggalAwal);
   // Tanggal yang sudah dipilih sendiri tidak ditimpa bawaan saat jenisnya
@@ -206,8 +203,6 @@ export function DialogTiket({
         judul,
         deskripsi,
         kriteriaSelesai: kriteria,
-        targetAngka,
-        targetSatuan,
         penerimaId,
         goalId: goalId && goalId !== TANPA_GOAL ? goalId : null,
         tanggal,
@@ -228,8 +223,6 @@ export function DialogTiket({
         setJudul("");
         setDeskripsi("");
         setKriteria("");
-        setTargetAngka("");
-        setTargetSatuan("");
         setPenerimaId("");
         setBuka(false);
         if (!hasil.ok) setPesan(hasil.pesan);
@@ -352,7 +345,7 @@ export function DialogTiket({
                 <span className="font-semibold text-foreground">
                   {namaPenerima}
                 </span>{" "}
-                punya {bebanKini} tiket aktif bertenggat{" "}
+                punya {bebanKini} tiket aktif dengan deadline{" "}
                 {tanggalKalenderPendek(tanggal, hariIni)}.
               </p>
             ) : null}
@@ -375,16 +368,16 @@ export function DialogTiket({
 
           <div className="space-y-1.5">
             <label htmlFor="deskripsi-tiket" className={labelIsian}>
-              Hasil akhir yang diharapkan {opsional}
+              Deskripsi tugas {opsional}
             </label>
             <textarea
               id="deskripsi-tiket"
-              rows={2}
-              maxLength={600}
+              rows={5}
+              maxLength={5000}
               value={deskripsi}
               onChange={(e) => setDeskripsi(e.target.value)}
-              placeholder="Mis. laporan deviasi komisi per kreator, siap dipakai rekonsiliasi."
-              className="w-full resize-none rounded-xl bg-muted px-4 py-3 text-[13px] leading-[18px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
+              placeholder="Jelaskan tugasnya sedetail yang perlu: latar belakang, langkah, tautan, hasil yang diharapkan."
+              className="min-h-28 w-full resize-y rounded-xl bg-muted px-4 py-3 text-[13px] leading-[18px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
             />
           </div>
 
@@ -413,32 +406,6 @@ export function DialogTiket({
             </p>
           </div>
 
-          <fieldset className="space-y-1.5">
-            <legend className={labelIsian}>Target {opsional}</legend>
-            <div className="grid grid-cols-[6rem_1fr] gap-2">
-              <input
-                type="number"
-                inputMode="decimal"
-                min={0}
-                step="any"
-                value={targetAngka}
-                onChange={(e) => setTargetAngka(e.target.value)}
-                placeholder="5"
-                aria-label="Angka target"
-                className="tabular h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
-              />
-              <input
-                value={targetSatuan}
-                maxLength={40}
-                autoComplete="off"
-                onChange={(e) => setTargetSatuan(e.target.value)}
-                placeholder="Satuan, mis. akun"
-                aria-label="Satuan target"
-                className="h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
-              />
-            </div>
-          </fieldset>
-
           <div className="space-y-1.5">
             <label htmlFor="goal-tiket" className={labelIsian}>
               {komitmen ? "Goal yang dituju" : "Goal terkait"}{" "}
@@ -463,43 +430,52 @@ export function DialogTiket({
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <label htmlFor="tanggal-tiket" className={labelIsian}>
-                Tanggal tenggat
-              </label>
-              <input
-                id="tanggal-tiket"
-                type="date"
-                required
-                min={tanggalMin}
-                value={tanggal}
-                onChange={(e) => {
-                  gantiTanggal(e.target.value);
-                  setTanggalDipilih(true);
-                }}
-                className="tabular h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-              />
+          <fieldset className="space-y-1.5">
+            <legend className={labelIsian}>Deadline</legend>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label
+                  htmlFor="tanggal-tiket"
+                  className="text-[11px] leading-[14px] text-muted-foreground"
+                >
+                  Tanggal
+                </label>
+                <input
+                  id="tanggal-tiket"
+                  type="date"
+                  required
+                  min={tanggalMin}
+                  value={tanggal}
+                  onChange={(e) => {
+                    gantiTanggal(e.target.value);
+                    setTanggalDipilih(true);
+                  }}
+                  className="tabular h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                />
+              </div>
+              <div className="space-y-1">
+                <label
+                  htmlFor="jam-tiket"
+                  className="text-[11px] leading-[14px] text-muted-foreground"
+                >
+                  Jam
+                </label>
+                <input
+                  id="jam-tiket"
+                  type="time"
+                  required
+                  value={jam}
+                  onChange={(e) => setJam(e.target.value)}
+                  className="tabular h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                />
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <label htmlFor="jam-tiket" className={labelIsian}>
-                Jam
-              </label>
-              <input
-                id="jam-tiket"
-                type="time"
-                required
-                value={jam}
-                onChange={(e) => setJam(e.target.value)}
-                className="tabular h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-              />
-            </div>
-          </div>
-          {komitmen && !tanggalDipilih ? (
-            <p className="-mt-1.5 text-[11px] leading-[14px] text-muted-foreground">
-              Bawaannya akhir pekan ini (Sabtu); boleh diganti.
+            <p className="text-[11px] leading-[14px] text-muted-foreground">
+              {komitmen && !tanggalDipilih
+                ? "Batas tiket harus selesai. Bawaannya akhir pekan ini (Sabtu); boleh diganti."
+                : "Batas waktu tiket harus selesai."}
             </p>
-          ) : null}
+          </fieldset>
 
           <fieldset className="space-y-1.5">
             <legend className={labelIsian}>Prioritas</legend>

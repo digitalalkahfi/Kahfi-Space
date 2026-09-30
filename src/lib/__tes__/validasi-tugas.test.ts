@@ -6,6 +6,7 @@ import {
   periksaKriteria,
   periksaTarget,
   periksaTenggat,
+  periksaDelegasi,
   periksaTenggatUbah,
   periksaTiketBaru,
   periksaToDoBaru,
@@ -390,4 +391,31 @@ test("edit tiket lama tanpa kriteria: boleh tetap kosong, yang diisi harus layak
     periksaUbahTiket({ ...dasar, kriteriaLama: "Semua order terkirim" }).ok,
     false,
   );
+});
+
+test("delegasi: bawahan wajib dipilih, bukan diri sendiri, jam wajib, tidak lampau", () => {
+  const dasar = {
+    judul: "Rekap order pending",
+    penerimaId: "bawahan-1",
+    idPemilik: "pemilik",
+    tanggal: "2026-10-02",
+    jam: "17:00",
+    hariIni: HARI_INI,
+  };
+  assert.deepEqual(periksaDelegasi(dasar), {
+    ok: true,
+    nilai: {
+      judul: "Rekap order pending",
+      tenggat: "2026-10-02T17:00:00+07:00",
+      tanpaJam: false,
+    },
+  });
+  assert.equal(periksaDelegasi({ ...dasar, penerimaId: "" }).ok, false);
+  assert.equal(periksaDelegasi({ ...dasar, penerimaId: "pemilik" }).ok, false);
+  assert.equal(periksaDelegasi({ ...dasar, jam: null }).ok, false);
+  // Bawahan tidak menerima tiket yang sudah terlambat.
+  assert.deepEqual(periksaDelegasi({ ...dasar, tanggal: "2026-09-20" }), {
+    ok: false,
+    pesan: "Deadline untuk bawahan tidak boleh sebelum hari ini.",
+  });
 });

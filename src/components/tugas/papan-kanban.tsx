@@ -233,6 +233,7 @@ export function PapanKanban({
   bolehQcSemua,
   tanggal,
   hariIni,
+  sekarang,
   jejakQc = {},
 }: {
   /** Isi papan tanggal ini, sudah disaring basis data (`papan_tugas`). */
@@ -246,9 +247,11 @@ export function PapanKanban({
   bisaMemberiTiket: boolean;
   /** CEO/Manager/Leader boleh memeriksa tugas orang lain. */
   bolehQcSemua: boolean;
-  /** Tanggal yang sedang ditampilkan (WIB). */
+  /** Tanggal yang sedang ditampilkan (WIB), atau "semua". */
   tanggal: string;
   hariIni: string;
+  /** Waktu server saat halaman disusun — untuk deadline yang jamnya lewat. */
+  sekarang: string;
   /** Riwayat pemeriksaan per id tugas. */
   jejakQc?: Record<string, JejakQc[]>;
 }) {
@@ -304,9 +307,10 @@ export function PapanKanban({
           kolom.status,
           tanggal,
           hariIni,
+          sekarang,
         ),
       })),
-    [tugas, pindahan, tanggal, hariIni],
+    [tugas, pindahan, tanggal, hariIni, sekarang],
   );
 
   const sayaPenerima = (t: Tugas) => t.penerimaId === idSaya;
@@ -512,7 +516,13 @@ export function PapanKanban({
                                 sayaPembuat={sayaPembuat(t)}
                                 bolehQc={bolehQc(t)}
                                 hariIni={hariIni}
-                                penanda={penandaPapan(t, tanggal, hariIni)}
+                                sekarang={sekarang}
+                                penanda={penandaPapan(
+                                  t,
+                                  tanggal,
+                                  hariIni,
+                                  sekarang,
+                                )}
                                 jejakQc={jejakQc[t.id]}
                                 hasilTerbukaAwal={mintaHasil === t.id}
                               />
@@ -537,6 +547,7 @@ export function PapanKanban({
                 sayaPembuat={false}
                 bolehQc={false}
                 hariIni={hariIni}
+                sekarang={sekarang}
               />
             </div>
           ) : null}
