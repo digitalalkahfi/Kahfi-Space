@@ -60,7 +60,14 @@ export function rasioCapaian(capaian: number, target: number) {
   return Math.max(0, (capaian / target) * 100);
 }
 
-/** Kamis, 24 Oktober 2024 */
+/**
+ * Kamis, 24 Oktober 2024 — dibaca di WIB.
+ *
+ * Tanpa zona eksplisit, tanggalnya mengikuti mesin yang merender: UTC
+ * saat SSR di Vercel, WIB di peramban. Cap waktu 00.00–06.59 WIB lalu
+ * tertulis sehari lebih awal di server. Tanggal kalender tanpa jam
+ * ("2024-10-24") tetap tanggal yang sama: tengah malam UTC = 07.00 WIB.
+ */
 export function tanggalPanjang(tanggal: Date | string) {
   const d = typeof tanggal === "string" ? new Date(tanggal) : tanggal;
   return d.toLocaleDateString("id-ID", {
@@ -68,6 +75,7 @@ export function tanggalPanjang(tanggal: Date | string) {
     day: "numeric",
     month: "long",
     year: "numeric",
+    timeZone: "Asia/Jakarta",
   });
 }
 
@@ -153,13 +161,17 @@ export function jamWib(tanggal: Date | string) {
   return `${jam.replace(".", ":")} WIB`;
 }
 
-/** 24 Okt 2024 — bentuk pendek untuk daftar & metadata. */
+/**
+ * 24 Okt 2024 — bentuk pendek untuk daftar & metadata, dibaca di WIB
+ * (lihat `tanggalPanjang`).
+ */
 export function tanggalPendek(tanggal: Date | string) {
   const d = typeof tanggal === "string" ? new Date(tanggal) : tanggal;
   return d.toLocaleDateString("id-ID", {
     day: "numeric",
     month: "short",
     year: "numeric",
+    timeZone: "Asia/Jakarta",
   });
 }
 

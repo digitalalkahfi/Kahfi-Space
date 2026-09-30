@@ -114,3 +114,25 @@ test("tanggal relatif sebuah cap waktu dihitung di WIB, bukan zona mesinnya", ()
   assert.equal(tanggalRelatif("2026-09-29", "2026-09-30"), "Kemarin");
   assert.equal(tanggalRelatif("rusak", "2026-09-30"), "");
 });
+
+test("tanggal pendek & panjang ditulis di WIB, bukan zona mesin yang merender", () => {
+  // SSR di Vercel berjalan dalam UTC: tanpa zona eksplisit, cap waktu
+  // 00.00–06.59 WIB tertulis sehari lebih awal di server.
+  const zonaSemula = process.env.TZ;
+  process.env.TZ = "UTC";
+  try {
+    // 17:30 UTC tanggal 29 = 00:30 WIB tanggal 30.
+    assert.equal(tanggalPendek("2026-09-29T17:30:00Z"), "30 Sep 2026");
+    assert.equal(tanggalPendek("2026-09-29T16:59:00Z"), "29 Sep 2026");
+    assert.equal(
+      tanggalPanjang("2026-09-29T17:30:00Z"),
+      "Rabu, 30 September 2026",
+    );
+    // Tanggal kalender tanpa jam tidak bergeser.
+    assert.equal(tanggalPendek("2026-09-30"), "30 Sep 2026");
+    assert.equal(tanggalPanjang("2026-09-30"), "Rabu, 30 September 2026");
+  } finally {
+    if (zonaSemula === undefined) delete process.env.TZ;
+    else process.env.TZ = zonaSemula;
+  }
+});
