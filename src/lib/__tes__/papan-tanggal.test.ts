@@ -1,9 +1,14 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import {
+  SEMUA,
+  awalSelesaiSemua,
+  lewatDeadline,
   masukPapan,
+  masukPapanSemua,
   masukToDoHariIni,
   penandaPapan,
+  pilihanPapanDariParam,
   rentangHariWib,
   rentangTanggalWib,
   ringkasToDoTanggal,
@@ -28,11 +33,7 @@ const buat = (judul: string, p: Partial<Uji> = {}): Uji => ({
   ...p,
 });
 
-const judulKolom = (
-  tugas: Uji[],
-  tanggal: string,
-  hariIni = HARI_INI,
-) => {
+const judulKolom = (tugas: Uji[], tanggal: string, hariIni = HARI_INI) => {
   const kolom = susunPapan(
     tugas.filter((t) => masukPapan(t, tanggal, hariIni)),
     tanggal,
@@ -248,4 +249,97 @@ test("To-do hari ini di Beranda: hari ini + yang terlambat belum selesai", () =>
   assert.equal(cek("selesai", "2026-09-27T23:59:00+07:00"), false);
   assert.equal(cek("todo", "2026-09-30T08:00:00+07:00"), false);
   assert.equal(cek("dibatalkan", `${HARI_INI}T09:00:00+07:00`), false);
+});
+
+// ---------------------------------------------------------------------
+// Papan "Semua" & deadline yang jamnya sudah lewat
+// ---------------------------------------------------------------------
+
+test("?tanggal=: kosong/rusak = papan Semua, hari-ini = hari ini", () => {
+  assert.equal(pilihanPapanDariParam(undefined, HARI_INI), SEMUA);
+  assert.equal(pilihanPapanDariParam("", HARI_INI), SEMUA);
+  assert.equal(pilihanPapanDariParam("2026-02-30", HARI_INI), SEMUA);
+  assert.equal(pilihanPapanDariParam("semua", HARI_INI), SEMUA);
+  assert.equal(pilihanPapanDariParam("hari-ini", HARI_INI), HARI_INI);
+  assert.equal(pilihanPapanDariParam("2026-10-05", HARI_INI), "2026-10-05");
+  assert.equal(pilihanPapanDariParam(["2026-10-05"], HARI_INI), "2026-10-05");
+});
+
+test("papan Semua: semua yang belum selesai, dari tanggal mana pun", () => {
+  const lusaDepan = buat("Deadline pekan depan", {
+    tenggat: "2026-10-06T17:00:00+07:00",
+  });
+  const telat = buat("Terlambat sepekan", {
+    tenggat: "2026-09-22T17:00:00+07:00",
+  });
+  const tanpa = buat("Tiket lama tanpa deadline", { tenggat: "" });
+  const batal = buat("Dibatalkan", { statusAsli: "dibatalkan" });
+  assert.equal(masukPapanSemua(lusaDepan, HARI_INI), true);
+  assert.equal(masukPapanSemua(telat, HARI_INI), true);
+  assert.equal(masukPapanSemua(tanpa, HARI_INI), true);
+  assert.equal(masukPapanSemua(batal, HARI_INI), false);
+});
+
+test("papan Semua: kolom Selesai hanya 7 hari terakhir (WIB)", () => {
+  assert.equal(awalSelesaiSemua(HARI_INI), "2026-09-23");
+  const beres = (selesaiPada: string) =>
+    buat("Beres", { status: "selesai", statusAsli: "selesai", selesaiPada });
+  // 23 Sep 00.30 WIB masih masuk; 22 Sep 23.59 WIB tidak.
+  assert.equal(masukPapanSemua(beres("2026-09-22T17:30:00Z"), HARI_INI), true);
+  assert.equal(masukPapanSemua(beres("2026-09-22T16:59:00Z"), HARI_INI), false);
+});
+
+test("papan Semua: urut dari deadline terdekat, prioritas penentu seri", () => {
+  const daftar = [
+    buat("Pekan depan", { tenggat: "2026-10-06T17:00:00+07:00" }),
+    buat("Tanpa deadline", { tenggat: "" }),
+    buat("Besok rendah", {
+      tenggat: "2026-09-30T17:00:00+07:00",
+      prioritas: "rendah",
+    }),
+    buat("Terlambat", { tenggat: "2026-09-25T17:00:00+07:00" }),
+    buat("Besok tinggi", {
+      tenggat: "2026-09-30T17:00:00+07:00",
+      prioritas: "tinggi",
+    }),
+  ];
+  assert.deepEqual(
+    urutkanKolom(daftar, "todo", SEMUA, HARI_INI).map((t) => t.judul),
+    [
+      "Terlambat",
+      "Besok tinggi",
+      "Besok rendah",
+      "Pekan depan",
+      "Tanpa deadline",
+    ],
+  );
+});
+
+test("deadline hari ini yang jamnya sudah lewat langsung bertanda terlambat", () => {
+  const sekarang = "2026-09-29T20:39:00+07:00";
+  const pagi = buat("Deadline 05.30", { tenggat: "2026-09-29T05:30:00+07:00" });
+  const malam = buat("Deadline 23.00", {
+    tenggat: "2026-09-29T23:00:00+07:00",
+  });
+  const tanpaJam = buat("To-do tanpa jam", {
+    tipe: "pribadi",
+    tenggat: "2026-09-29T23:59:00+07:00",
+  });
+
+  assert.equal(lewatDeadline(pagi.tenggat, sekarang), true);
+  assert.deepEqual(penandaPapan(pagi, SEMUA, HARI_INI, sekarang), {
+    jenis: "terlambat",
+    tanggal: HARI_INI,
+  });
+  assert.deepEqual(penandaPapan(pagi, HARI_INI, HARI_INI, sekarang), {
+    jenis: "terlambat",
+    tanggal: HARI_INI,
+  });
+  assert.equal(penandaPapan(malam, SEMUA, HARI_INI, sekarang), null);
+  // Tanpa jam = batas akhir hari, jadi belum terlambat.
+  assert.equal(penandaPapan(tanpaJam, SEMUA, HARI_INI, sekarang), null);
+  // Tanpa `sekarang`, tetap aturan lama: per tanggal.
+  assert.equal(penandaPapan(pagi, HARI_INI, HARI_INI), null);
+  // Di papan tanggal lain tidak ada tanda.
+  assert.equal(penandaPapan(pagi, "2026-09-30", HARI_INI, sekarang), null);
 });

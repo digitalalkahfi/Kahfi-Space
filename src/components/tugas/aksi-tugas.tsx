@@ -78,6 +78,8 @@ export function PenyediaAksiTugas({
           onTutup={() => setDiubah(null)}
           hariIni={hariIni}
           tanggalAwal={hariIni}
+          // Tujuan "Delegasikan ke bawahan": orang yang boleh ditugasi.
+          penerima={penerima}
         />
       ) : null}
       {diubah && diubah.tipe !== "pribadi" ? (

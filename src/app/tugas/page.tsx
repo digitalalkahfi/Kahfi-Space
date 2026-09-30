@@ -16,15 +16,17 @@ import { PesanAksi } from "@/components/shared/pesan-aksi";
 import { Reveal } from "@/components/motion/reveal";
 import {
   ambilDaftarTugas,
+  ambilPapanSemua,
   ambilPapanTugas,
   hariIniTugas,
   jejakQcBanyak,
   ringkasToDo,
+  sekarangTugas,
 } from "@/lib/data/tugas";
 import { goalAktif } from "@/lib/data/goal";
 import { anggotaBisaDitugasi, peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { akhirPekan } from "@/lib/validasi-tugas";
-import { tanggalDariParam } from "@/lib/papan-tanggal";
+import { SEMUA, pilihanPapanDariParam } from "@/lib/papan-tanggal";
 import { bilangan } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -54,18 +56,26 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
   // Hari ini menurut WIB (D7), bukan UTC: antara 00.00 dan 06.59 WIB
   // tanggal UTC masih kemarin.
   const hariIni = hariIniTugas();
-  // Papan menampilkan satu tanggal (D4); `?tanggal=` yang rusak jatuh ke
-  // hari ini. Daftar tetap mengelompokkan semua yang belum selesai.
+  const sekarang = sekarangTugas();
+  // Papan bawaannya "Semua": semua yang belum selesai dari tanggal mana
+  // pun, urut dari deadline terdekat. `?tanggal=` memilih satu tanggal
+  // (`hari-ini` untuk hari ini). Daftar tetap mengelompokkan semua yang
+  // belum selesai.
   const tanggal =
-    tampilan === "papan" ? tanggalDariParam(tanggalParam, hariIni) : hariIni;
+    tampilan === "papan" ? pilihanPapanDariParam(tanggalParam, hariIni) : SEMUA;
+  const semua = tanggal === SEMUA;
+  // Ringkasan to-do selalu per tanggal: papan Semua memakai hari ini.
+  const tanggalRingkas = semua ? hariIni : tanggal;
 
   const [isi, calonPenerima, goal, ringkas] = await Promise.all([
-    tampilan === "papan"
-      ? ambilPapanTugas(pengguna, tanggal, hariIni)
-      : ambilDaftarTugas(pengguna, hariIni),
+    tampilan === "daftar"
+      ? ambilDaftarTugas(pengguna, hariIni)
+      : semua
+        ? ambilPapanSemua(pengguna, hariIni)
+        : ambilPapanTugas(pengguna, tanggal, hariIni),
     anggotaBisaDitugasi(pengguna),
     goalAktif(pengguna),
-    ringkasToDo(pengguna, tanggal),
+    ringkasToDo(pengguna, tanggalRingkas),
   ]);
   const { tugas } = isi;
 
@@ -76,8 +86,8 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
   );
 
   // Tugas baru selalu untuk hari ini atau sesudahnya — juga saat papan
-  // sedang menampilkan tanggal lampau.
-  const tanggalBaru = tanggal > hariIni ? tanggal : hariIni;
+  // sedang menampilkan tanggal lampau atau papan Semua.
+  const tanggalBaru = !semua && tanggal > hariIni ? tanggal : hariIni;
   // Minggu dianggap berakhir Sabtu; tenggat bawaan komitmen.
   const sabtu = akhirPekan(hariIni);
 
@@ -88,6 +98,7 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
     punyaAtasan: Boolean(pengguna.atasanId),
     bisaMemberiTiket: calonPenerima.length > 0,
     bolehQcSemua: PEMERIKSA.includes(pengguna.role),
+    sekarang,
   };
 
   return (
@@ -107,7 +118,7 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
             <p className="text-[13px] leading-[18px] text-muted-foreground">
               To-do pribadi dan tiket dari atasan berkumpul di satu tempat.
               {ringkas.total > 0
-                ? ` To-do kamu: ${ringkas.selesai} dari ${ringkas.total} beres.`
+                ? ` To-do ${tanggalRingkas === hariIni ? "hari ini" : "tanggal ini"}: ${ringkas.selesai} dari ${ringkas.total} beres.`
                 : ""}
             </p>
           </div>
@@ -133,8 +144,8 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
           <PesanAksi nada="netral" ukuran="sedang">
             Menampilkan {bilangan(tugas.length)} tugas pertama dari{" "}
             {bilangan(isi.total)}
-            {tampilan === "papan" ? " untuk tanggal ini" : ""}. Yang lainnya
-            tidak dimuat.
+            {tampilan === "papan" && !semua ? " untuk tanggal ini" : ""}. Yang
+            lainnya tidak dimuat.
           </PesanAksi>
         ) : null}
 

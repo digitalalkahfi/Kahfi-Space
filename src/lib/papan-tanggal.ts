@@ -12,8 +12,14 @@
  *     tenggatnya (WIB) sama dengan tanggal terpilih;
  *   · khusus hari ini — yang belum selesai dan tenggatnya sudah lewat
  *     ikut tampil paling atas bertanda "Terlambat", begitu pula tiket
- *     lama tanpa tenggat ("Tanpa tenggat");
+ *     lama tanpa tenggat ("Tanpa deadline");
  *   · Selesai — yang diselesaikan (`selesai_at`, WIB) pada tanggal itu.
+ *
+ * Papan "Semua" (bawaan halaman): SEMUA yang belum selesai dari tanggal
+ * mana pun, urut dari deadline terdekat — tenggat adalah batas selesai,
+ * bukan hari mengerjakan, jadi pekerjaan bertenggat pekan depan sudah
+ * harus terlihat hari ini. Kolom Selesai berisi yang beres 7 hari
+ * terakhir.
  */
 import { keTanggalWib } from "@/lib/format";
 import { geserTanggal, tanggalSah } from "@/lib/validasi-tugas";
@@ -24,6 +30,18 @@ export const BATAS_PAPAN = 300;
 
 /** Batas aman daftar bertenggat; sama dengan bawaan `daftar_tugas` (0182). */
 export const BATAS_DAFTAR = 300;
+
+/** Pilihan papan untuk semua tanggal sekaligus. */
+export const SEMUA = "semua";
+
+/** Nilai `?tanggal=` untuk hari ini — tautannya tetap berarti "hari ini" besok. */
+export const PARAM_HARI_INI = "hari-ini";
+
+/** Kolom Selesai papan Semua: yang beres selama sekian hari terakhir (WIB). */
+export const HARI_SELESAI_SEMUA = 7;
+
+/** Batas aman kartu Selesai di papan Semua. */
+export const BATAS_SELESAI_SEMUA = 100;
 
 /** Bagian tugas yang dibutuhkan untuk menyusun papan. */
 export type TugasPapan = {
@@ -38,9 +56,7 @@ export type TugasPapan = {
 };
 
 export type Penanda =
-  | { jenis: "terlambat"; tanggal: string }
-  | { jenis: "tanpa_tenggat" }
-  | null;
+  { jenis: "terlambat"; tanggal: string } | { jenis: "tanpa_tenggat" } | null;
 
 /**
  * Tanggal dari `?tanggal=`. Kosong, rusak, atau bukan tanggal sungguhan
@@ -53,6 +69,35 @@ export function tanggalDariParam(
 ): string {
   const teks = Array.isArray(nilai) ? nilai[0] : nilai;
   return teks && tanggalSah(teks) ? teks : hariIni;
+}
+
+/**
+ * Pilihan papan dari `?tanggal=`: satu tanggal, hari ini (`hari-ini`),
+ * atau — bila kosong/rusak — papan Semua, tampilan bawaan halaman Tugas.
+ */
+export function pilihanPapanDariParam(
+  nilai: string | string[] | undefined,
+  hariIni: string,
+): string {
+  const teks = Array.isArray(nilai) ? nilai[0] : nilai;
+  if (teks === PARAM_HARI_INI) return hariIni;
+  return teks && tanggalSah(teks) ? teks : SEMUA;
+}
+
+/** Tanggal (WIB) paling awal kolom Selesai papan Semua, inklusif. */
+export function awalSelesaiSemua(hariIni: string): string {
+  return geserTanggal(hariIni, -(HARI_SELESAI_SEMUA - 1));
+}
+
+/**
+ * Deadline-nya sudah lewat pada waktu `sekarang`? Tenggat tanpa jam
+ * tersimpan 23.59 WIB, jadi to-do bertanggal hari ini baru terlambat
+ * setelah hari itu habis.
+ */
+export function lewatDeadline(tenggat: string, sekarang: string): boolean {
+  const t = Date.parse(tenggat);
+  const n = Date.parse(sekarang);
+  return !Number.isNaN(t) && !Number.isNaN(n) && t < n;
 }
 
 /**
@@ -113,6 +158,22 @@ export function masukPapan(
 }
 
 /**
+ * Masuk papan Semua? Yang belum selesai dari tanggal mana pun, ditambah
+ * yang beres dalam `HARI_SELESAI_SEMUA` hari terakhir. Padanan kueri
+ * `ambilPapanSemua` — dipakai mode demo.
+ */
+export function masukPapanSemua(t: TugasPapan, hariIni: string): boolean {
+  if (t.statusAsli === "dibatalkan") return false;
+  if (t.status === "selesai") {
+    return (
+      t.selesaiPada !== null &&
+      keTanggalWib(t.selesaiPada) >= awalSelesaiSemua(hariIni)
+    );
+  }
+  return true;
+}
+
+/**
  * "To-do hari ini" di Beranda: bertenggat hari ini (apa pun statusnya,
  * supaya yang sudah dicentang tetap terhitung), atau terlambat dan belum
  * selesai. Padanan dua saringan di `ambilToDo`.
@@ -127,16 +188,29 @@ export function masukToDoHariIni(
   return hari !== "" && hari < hariIni && t.status !== "selesai";
 }
 
-/** Tanda merah di kartu: terlambat sejak tanggal berapa, atau tanpa tenggat. */
+/**
+ * Tanda di kartu: terlambat sejak tanggal berapa, atau tanpa deadline.
+ *
+ * Hanya di papan hari ini dan papan Semua — di tanggal lain, yang tampil
+ * memang bertenggat tanggal itu. Dengan `sekarang`, deadline hari ini yang
+ * jamnya sudah lewat ikut terlambat, bukan menunggu besok.
+ */
 export function penandaPapan(
   t: TugasPapan,
   tanggal: string,
   hariIni: string,
+  sekarang?: string,
 ): Penanda {
-  if (tanggal !== hariIni || t.status === "selesai") return null;
+  if ((tanggal !== hariIni && tanggal !== SEMUA) || t.status === "selesai") {
+    return null;
+  }
   const hari = tanggalTenggat(t);
   if (hari === "") return { jenis: "tanpa_tenggat" };
-  return hari < hariIni ? { jenis: "terlambat", tanggal: hari } : null;
+  if (hari < hariIni) return { jenis: "terlambat", tanggal: hari };
+  if (hari === hariIni && sekarang && lewatDeadline(t.tenggat, sekarang)) {
+    return { jenis: "terlambat", tanggal: hari };
+  }
+  return null;
 }
 
 const BOBOT: Record<Prioritas, number> = { tinggi: 0, sedang: 1, rendah: 2 };
@@ -150,15 +224,18 @@ const waktu = (iso: string | null) => {
 /**
  * Urutan di dalam satu kolom.
  *
- * Seperti sebelumnya: prioritas dulu, lalu tenggat terdekat. Yang
+ * Papan satu tanggal: prioritas dulu, lalu tenggat terdekat; yang
  * terlambat naik paling atas — itu yang paling menuntut perhatian hari
- * ini. Kolom Selesai kebalikannya: yang baru saja beres paling atas.
+ * ini. Papan Semua: deadline terdekat dulu (yang terlambat otomatis di
+ * atas), prioritas sebagai penentu bila deadline-nya sama. Kolom Selesai
+ * kebalikannya: yang baru saja beres paling atas.
  */
 export function urutkanKolom<T extends TugasPapan>(
   daftar: T[],
   status: StatusTugas,
   tanggal: string,
   hariIni: string,
+  sekarang?: string,
 ): T[] {
   const salinan = [...daftar];
 
@@ -169,8 +246,16 @@ export function urutkanKolom<T extends TugasPapan>(
     );
   }
 
+  if (tanggal === SEMUA) {
+    return salinan.sort((a, b) => {
+      const w = waktu(a.tenggat) - waktu(b.tenggat);
+      if (w !== 0) return w;
+      return BOBOT[a.prioritas] - BOBOT[b.prioritas];
+    });
+  }
+
   const telat = (t: T) =>
-    penandaPapan(t, tanggal, hariIni)?.jenis === "terlambat" ? 0 : 1;
+    penandaPapan(t, tanggal, hariIni, sekarang)?.jenis === "terlambat" ? 0 : 1;
 
   return salinan.sort((a, b) => {
     const t = telat(a) - telat(b);
@@ -186,6 +271,7 @@ export function susunPapan<T extends TugasPapan>(
   tugas: T[],
   tanggal: string,
   hariIni: string,
+  sekarang?: string,
 ): Record<StatusTugas, T[]> {
   const kolom: Record<StatusTugas, T[]> = {
     todo: [],
@@ -196,7 +282,13 @@ export function susunPapan<T extends TugasPapan>(
   for (const t of tugas) kolom[t.status].push(t);
 
   for (const status of Object.keys(kolom) as StatusTugas[]) {
-    kolom[status] = urutkanKolom(kolom[status], status, tanggal, hariIni);
+    kolom[status] = urutkanKolom(
+      kolom[status],
+      status,
+      tanggal,
+      hariIni,
+      sekarang,
+    );
   }
   return kolom;
 }

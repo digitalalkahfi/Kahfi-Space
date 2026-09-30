@@ -23,11 +23,11 @@ const BOBOT = { tinggi: 0, sedang: 1, rendah: 2 } as const;
 type Kelompok = "terlambat" | "hari-ini" | "besok" | "nanti" | "tanpa-tenggat";
 
 const JUDUL_KELOMPOK: Record<Kelompok, string> = {
-  terlambat: "Lewat tenggat",
-  "hari-ini": "Hari ini",
-  besok: "Besok",
-  nanti: "Nanti",
-  "tanpa-tenggat": "Tanpa tenggat",
+  terlambat: "Lewat deadline",
+  "hari-ini": "Deadline hari ini",
+  besok: "Deadline besok",
+  nanti: "Deadline nanti",
+  "tanpa-tenggat": "Tanpa deadline",
 };
 
 const URUTAN: Kelompok[] = [
@@ -67,6 +67,7 @@ export function DaftarTugas({
   bisaMemberiTiket,
   bolehQcSemua,
   hariIni,
+  sekarang,
   jejakQc = {},
 }: {
   tugas: Tugas[];
@@ -80,6 +81,8 @@ export function DaftarTugas({
   /** CEO/Manager/Leader boleh memeriksa tugas orang lain. */
   bolehQcSemua: boolean;
   hariIni: string;
+  /** Waktu server saat halaman disusun — untuk deadline yang jamnya lewat. */
+  sekarang: string;
   /** Riwayat pemeriksaan per id tugas. */
   jejakQc?: Record<string, JejakQc[]>;
 }) {
@@ -134,7 +137,7 @@ export function DaftarTugas({
       {terlambat > 0 ? (
         <p className="flex items-center gap-2 rounded-2xl bg-danger-fill px-4 py-2.5 text-[13px] leading-[18px] font-semibold text-danger-text">
           <AlarmClock className="size-4 shrink-0" />
-          {terlambat} tugas sudah lewat tenggat
+          {terlambat} tugas sudah lewat deadline
         </p>
       ) : null}
 
@@ -170,6 +173,7 @@ export function DaftarTugas({
                         (bolehQcSemua || t.pembuatId === idSaya)
                       }
                       hariIni={hariIni}
+                      sekarang={sekarang}
                       jejakQc={jejakQc[t.id]}
                     />
                   </li>
