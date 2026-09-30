@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   DndContext,
   DragOverlay,
@@ -17,13 +18,20 @@ import {
 } from "@dnd-kit/core";
 import { GripVertical } from "lucide-react";
 import { KartuTugas } from "@/components/tugas/kartu-tugas";
+import { SaringSumber } from "@/components/tugas/saring-sumber";
 import { PesanAksi } from "@/components/shared/pesan-aksi";
 import { cn } from "@/lib/utils";
 import { kolomMenerima, periksaPindah } from "@/lib/kanban";
 import { penandaPapan, urutkanKolom } from "@/lib/papan-tanggal";
+import {
+  cocokLihat,
+  hitungLihat,
+  lihatDariParam,
+  pilihanLihat,
+} from "@/lib/sumber-tugas";
 import { ubahCentangToDo, ubahStatusTugas } from "@/app/actions/tugas";
 import type { JejakQc } from "@/lib/data/tugas";
-import type { StatusTugas, Tugas } from "@/lib/types";
+import type { Peran, StatusTugas, Tugas } from "@/lib/types";
 
 /**
  * Empat kolom papan, dipetakan langsung ke status tugas yang sudah ada
@@ -212,10 +220,16 @@ function KartuSeret({
  *
  * Di mobile kolomnya digulir mendatar dengan snap — memampatkan empat
  * kolom ke layar selebar 375px hanya membuat kartunya tidak terbaca.
+ *
+ * Di atas kolom ada saringan asal tugas (to-do pribadi, dari atasan,
+ * untuk bawahan, tim lain); hitungannya dari isi papan tanggal ini.
  */
 export function PapanKanban({
-  tugas,
+  tugas: semuaTugas,
   idSaya,
+  peran,
+  punyaAtasan,
+  bisaMemberiTiket,
   bolehQcSemua,
   tanggal,
   hariIni,
@@ -225,6 +239,11 @@ export function PapanKanban({
   tugas: Tugas[];
   /** Id pengguna yang login — kepemilikan dibandingkan lewat id, bukan nama. */
   idSaya: string;
+  peran: Peran;
+  /** Punya atasan langsung — pilihan "Dari atasan" relevan. */
+  punyaAtasan: boolean;
+  /** Ada anggota yang boleh ia tugasi — pilihan "Untuk bawahan" relevan. */
+  bisaMemberiTiket: boolean;
   /** CEO/Manager/Leader boleh memeriksa tugas orang lain. */
   bolehQcSemua: boolean;
   /** Tanggal yang sedang ditampilkan (WIB). */
@@ -243,6 +262,24 @@ export function PapanKanban({
   // supaya kartunya dipasang ulang dengan kolom itu terbuka.
   const [mintaHasil, setMintaHasil] = useState<string | null>(null);
   const [diangkat, setDiangkat] = useState<string | null>(null);
+
+  const params = useSearchParams();
+  const jumlah = useMemo(
+    () => hitungLihat(semuaTugas, idSaya),
+    [semuaTugas, idSaya],
+  );
+  const pilihan = pilihanLihat({
+    peran,
+    punyaAtasan,
+    bisaMemberiTiket,
+    jumlah,
+    denganQc: false,
+  });
+  const lihat = lihatDariParam(params.get("lihat"), pilihan);
+  const tugas = useMemo(
+    () => semuaTugas.filter((t) => cocokLihat(t, lihat, idSaya)),
+    [semuaTugas, lihat, idSaya],
+  );
 
   const sensor = useSensors(
     // Jarak aktivasi 6px: tanpa itu, ketukan biasa di ponsel sering
@@ -375,7 +412,9 @@ export function PapanKanban({
       // dengan mencentang / batal centang: jalurnya `ubahCentangToDo`,
       // bukan jalur QC (D2).
       const bukaLagi =
-        kartu.tipe === "pribadi" && dari === "selesai" && tujuanAkhir === "todo";
+        kartu.tipe === "pribadi" &&
+        dari === "selesai" &&
+        tujuanAkhir === "todo";
       const r =
         tujuanAkhir === "selesai"
           ? await ubahCentangToDo(kartu.id, true)
@@ -398,6 +437,8 @@ export function PapanKanban({
 
   return (
     <div className="space-y-2">
+      <SaringSumber pilihan={pilihan} aktif={lihat} jumlah={jumlah} />
+
       {pesan ? (
         <PesanAksi nada={pesan.ok ? "berhasil" : "gagal"} ukuran="sedang">
           {pesan.teks}

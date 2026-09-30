@@ -1,29 +1,22 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { AlarmClock, ListChecks } from "lucide-react";
 import { KartuTugas } from "@/components/tugas/kartu-tugas";
+import { SaringSumber } from "@/components/tugas/saring-sumber";
 import { cn } from "@/lib/utils";
 import { keTanggalWib } from "@/lib/format";
 import { geserTanggal } from "@/lib/validasi-tugas";
+import {
+  cocokLihat,
+  hitungLihat,
+  lihatDariParam,
+  pilihanLihat,
+} from "@/lib/sumber-tugas";
 import type { JejakQc } from "@/lib/data/tugas";
-import type { Tugas } from "@/lib/types";
+import type { Peran, Tugas } from "@/lib/types";
 import { KeadaanKosong } from "@/components/shared/keadaan";
-
-/**
- * Saringan daftar. Tidak ada "Selesai": daftar ini hanya memuat yang
- * belum selesai (tugas selesai sepanjang masa tidak lagi ditarik ke
- * layar); yang sudah beres ada di kolom Selesai papan, per tanggal.
- */
-type Saringan = "semua" | "saya" | "tiket" | "komitmen" | "qc";
-
-const PILIHAN: { kunci: Saringan; label: string }[] = [
-  { kunci: "semua", label: "Semua" },
-  { kunci: "saya", label: "To-do saya" },
-  { kunci: "tiket", label: "Tiket" },
-  { kunci: "komitmen", label: "Komitmen" },
-  { kunci: "qc", label: "Perlu QC" },
-];
 
 const BOBOT = { tinggi: 0, sedang: 1, rendah: 2 } as const;
 
@@ -60,10 +53,18 @@ function kelompokTenggat(tenggat: string, hariIni: string): Kelompok {
 /**
  * Daftar tugas dengan saringan. Urutannya mengikuti yang paling menuntut
  * perhatian: belum selesai dulu, lalu prioritas, lalu tenggat terdekat.
+ *
+ * Saringannya sama dengan papan (asal tugas: to-do pribadi, dari atasan,
+ * untuk bawahan, tim lain), ditambah "Perlu QC". Tidak ada "Selesai":
+ * daftar ini hanya memuat yang belum selesai; yang sudah beres ada di
+ * kolom Selesai papan, per tanggal.
  */
 export function DaftarTugas({
   tugas,
   idSaya,
+  peran,
+  punyaAtasan,
+  bisaMemberiTiket,
   bolehQcSemua,
   hariIni,
   jejakQc = {},
@@ -71,51 +72,41 @@ export function DaftarTugas({
   tugas: Tugas[];
   /** Id pengguna yang login — kepemilikan dibandingkan lewat id, bukan nama. */
   idSaya: string;
+  peran: Peran;
+  /** Punya atasan langsung — pilihan "Dari atasan" relevan. */
+  punyaAtasan: boolean;
+  /** Ada anggota yang boleh ia tugasi — pilihan "Untuk bawahan" relevan. */
+  bisaMemberiTiket: boolean;
   /** CEO/Manager/Leader boleh memeriksa tugas orang lain. */
   bolehQcSemua: boolean;
   hariIni: string;
   /** Riwayat pemeriksaan per id tugas. */
   jejakQc?: Record<string, JejakQc[]>;
 }) {
-  const [saringan, setSaringan] = useState<Saringan>("semua");
-
-  const jumlah = useMemo(
-    () => ({
-      semua: tugas.filter((t) => t.status !== "selesai").length,
-      saya: tugas.filter((t) => t.tipe === "pribadi" && t.status !== "selesai")
-        .length,
-      tiket: tugas.filter((t) => t.tipe === "tiket" && t.status !== "selesai")
-        .length,
-      komitmen: tugas.filter(
-        (t) => t.tipe === "komitmen_mingguan" && t.status !== "selesai",
-      ).length,
-      qc: tugas.filter((t) => t.status === "menunggu_qc").length,
-    }),
+  const params = useSearchParams();
+  const belum = useMemo(
+    () => tugas.filter((t) => t.status !== "selesai"),
     [tugas],
   );
+  const jumlah = useMemo(() => hitungLihat(belum, idSaya), [belum, idSaya]);
+  const pilihan = pilihanLihat({
+    peran,
+    punyaAtasan,
+    bisaMemberiTiket,
+    jumlah,
+    denganQc: true,
+  });
+  const saringan = lihatDariParam(params.get("lihat"), pilihan);
 
   const daftar = useMemo(() => {
-    const cocok = tugas.filter((t) => {
-      switch (saringan) {
-        case "saya":
-          return t.tipe === "pribadi" && t.status !== "selesai";
-        case "tiket":
-          return t.tipe === "tiket" && t.status !== "selesai";
-        case "komitmen":
-          return t.tipe === "komitmen_mingguan" && t.status !== "selesai";
-        case "qc":
-          return t.status === "menunggu_qc";
-        default:
-          return t.status !== "selesai";
-      }
-    });
+    const cocok = belum.filter((t) => cocokLihat(t, saringan, idSaya));
 
     return cocok.sort((a, b) => {
       const p = BOBOT[a.prioritas] - BOBOT[b.prioritas];
       if (p !== 0) return p;
       return (a.tenggat || "9999").localeCompare(b.tenggat || "9999");
     });
-  }, [tugas, saringan]);
+  }, [belum, saringan, idSaya]);
 
   // Dikelompokkan per tenggat supaya yang mendesak tidak tenggelam.
   const berkelompok = useMemo(() => {
@@ -127,46 +118,18 @@ export function DaftarTugas({
     return hasil;
   }, [daftar, hariIni]);
 
+  // Dihitung dari yang sedang disaring: angkanya harus cocok dengan
+  // kelompok "Lewat tenggat" di bawahnya.
   const terlambat = useMemo(
     () =>
-      tugas.filter(
-        (t) =>
-          t.status !== "selesai" &&
-          kelompokTenggat(t.tenggat, hariIni) === "terlambat",
-      ).length,
-    [tugas, hariIni],
+      daftar.filter((t) => kelompokTenggat(t.tenggat, hariIni) === "terlambat")
+        .length,
+    [daftar, hariIni],
   );
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-1.5">
-        {PILIHAN.map((p) => (
-          <button
-            key={p.kunci}
-            type="button"
-            onClick={() => setSaringan(p.kunci)}
-            aria-pressed={p.kunci === saringan}
-            className={cn(
-              "tekan-halus sentuh-nyaman flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] leading-[14px] font-semibold",
-              p.kunci === saringan
-                ? "bg-primary text-primary-foreground"
-                : "bg-card text-muted-foreground ring-1 ring-border-subtle hover:text-foreground",
-            )}
-          >
-            {p.label}
-            <span
-              className={cn(
-                "tabular rounded-full px-1.5 text-[10px] leading-[14px]",
-                p.kunci === saringan
-                  ? "bg-primary-foreground/20"
-                  : "bg-muted text-muted-foreground",
-              )}
-            >
-              {jumlah[p.kunci]}
-            </span>
-          </button>
-        ))}
-      </div>
+      <SaringSumber pilihan={pilihan} aktif={saringan} jumlah={jumlah} />
 
       {terlambat > 0 ? (
         <p className="flex items-center gap-2 rounded-2xl bg-danger-fill px-4 py-2.5 text-[13px] leading-[18px] font-semibold text-danger-text">

@@ -98,6 +98,50 @@ export function periksaTenggat(input: {
   return { ok: true, nilai: susunTenggat(tanggal, jam) };
 }
 
+/** Tenggat yang tersimpan, dibaca sebagai tanggal & jam WIB. */
+export type TenggatLama = {
+  /** YYYY-MM-DD; kosong bila tugas lama belum bertenggat. */
+  tanggal: string;
+  /** HH:MM; null untuk to-do tanpa jam. */
+  jam: string | null;
+};
+
+/**
+ * Tenggat pada isian EDIT.
+ *
+ * Tanggal & jam yang tidak disentuh boleh tetap di masa lalu — mengganti
+ * judul to-do yang terlambat tidak boleh memaksa orang memindahkan
+ * tanggalnya. Begitu disentuh, aturannya sama dengan tenggat baru.
+ * `berubah` memberi tahu pemanggil perlu tidaknya menulis tenggat: nilai
+ * yang sama tidak ditulis ulang, supaya pengingat tenggatnya tidak ikut
+ * di-reset.
+ */
+export function periksaTenggatUbah(input: {
+  tanggal: string | null | undefined;
+  jam?: string | null;
+  jamWajib: boolean;
+  hariIni: string;
+  lama: TenggatLama;
+}): Periksa<Tenggat & { berubah: boolean }> {
+  const tanggal = input.tanggal?.trim() ?? "";
+  const jam = input.jam?.trim() || null;
+
+  if (
+    input.lama.tanggal !== "" &&
+    tanggal === input.lama.tanggal &&
+    jam === input.lama.jam &&
+    (jam !== null || !input.jamWajib)
+  ) {
+    return {
+      ok: true,
+      nilai: { ...susunTenggat(tanggal, jam), berubah: false },
+    };
+  }
+
+  const baru = periksaTenggat({ ...input, tanggal, jam });
+  return baru.ok ? { ok: true, nilai: { ...baru.nilai, berubah: true } } : baru;
+}
+
 export type Target = {
   targetAngka: number | null;
   targetSatuan: string;
@@ -147,18 +191,36 @@ export function periksaKriteria(
     : { ok: true, nilai: teks };
 }
 
-/**
- * To-do baru: judul dan tanggal wajib, jam opsional (D3); target
- * opsional — versi ringan SMART (D5).
- */
-export function periksaToDoBaru(input: {
+type IsianToDo = {
   judul: string;
   tanggal: string | null | undefined;
   jam?: string | null;
   targetAngka?: string | number | null;
   targetSatuan?: string | null;
   hariIni: string;
-}): Periksa<{ judul: string } & Tenggat & Target> {
+};
+
+type IsianTiket = {
+  judul: string;
+  penerimaId: string;
+  tipe: "tiket" | "komitmen_mingguan";
+  goalId?: string | null;
+  kriteriaSelesai: string | null | undefined;
+  targetAngka?: string | number | null;
+  targetSatuan?: string | null;
+  tanggal: string | null | undefined;
+  jam?: string | null;
+  hariIni: string;
+};
+
+type IsiTiket = {
+  judul: string;
+  goalId: string | null;
+  kriteriaSelesai: string;
+};
+
+/** Isi to-do selain tenggat: judul dan target. */
+function periksaIsiToDo(input: IsianToDo): Periksa<{ judul: string } & Target> {
   const judul = input.judul.trim();
   if (judul.length < MIN_JUDUL) {
     return tolak(`Judul to-do minimal ${MIN_JUDUL} karakter.`);
@@ -170,38 +232,20 @@ export function periksaToDoBaru(input: {
   });
   if (!target.ok) return target;
 
-  const tenggat = periksaTenggat({
-    tanggal: input.tanggal,
-    jam: input.jam,
-    jamWajib: false,
-    hariIni: input.hariIni,
-  });
-  if (!tenggat.ok) return tenggat;
-
-  return { ok: true, nilai: { judul, ...tenggat.nilai, ...target.nilai } };
+  return { ok: true, nilai: { judul, ...target.nilai } };
 }
 
 /**
- * Tiket & komitmen baru, disusun SMART (D5):
- *   S — judul (kata kerja + objek), M — kriteria selesai wajib dan target
- *   opsional, R — goal (wajib untuk komitmen, opsional untuk tiket, D6),
- *   T — tanggal DAN jam wajib (D3).
+ * Isi tiket selain tenggat: judul, penerima, goal, kriteria, target.
+ *
+ * `kriteriaBolehKosong` hanya untuk mengedit tiket lama yang memang belum
+ * berkriteria (sebelum 0183): tiket lama tidak dipaksa, sama seperti di
+ * basis data — tetapi kriteria yang diisi tetap harus layak.
  */
-export function periksaTiketBaru(input: {
-  judul: string;
-  penerimaId: string;
-  tipe: "tiket" | "komitmen_mingguan";
-  goalId?: string | null;
-  kriteriaSelesai: string | null | undefined;
-  targetAngka?: string | number | null;
-  targetSatuan?: string | null;
-  tanggal: string | null | undefined;
-  jam?: string | null;
-  hariIni: string;
-}): Periksa<
-  { judul: string; goalId: string | null; kriteriaSelesai: string } & Tenggat &
-    Target
-> {
+function periksaIsiTiket(
+  input: IsianTiket,
+  kriteriaBolehKosong = false,
+): Periksa<IsiTiket & Target> {
   const judul = input.judul.trim();
   if (judul.length < MIN_JUDUL) {
     return tolak(`Judul tiket minimal ${MIN_JUDUL} karakter.`);
@@ -213,7 +257,11 @@ export function periksaTiketBaru(input: {
     return tolak("Komitmen mingguan harus terhubung ke sebuah goal.");
   }
 
-  const kriteria = periksaKriteria(input.kriteriaSelesai);
+  const kosong = (input.kriteriaSelesai?.trim() ?? "") === "";
+  const kriteria: Periksa<string> =
+    kriteriaBolehKosong && kosong
+      ? { ok: true, nilai: "" }
+      : periksaKriteria(input.kriteriaSelesai);
   if (!kriteria.ok) return kriteria;
 
   const target = periksaTarget({
@@ -221,6 +269,71 @@ export function periksaTiketBaru(input: {
     satuan: input.targetSatuan,
   });
   if (!target.ok) return target;
+
+  return {
+    ok: true,
+    nilai: { judul, goalId, kriteriaSelesai: kriteria.nilai, ...target.nilai },
+  };
+}
+
+/**
+ * To-do baru: judul dan tanggal wajib, jam opsional (D3); target
+ * opsional — versi ringan SMART (D5).
+ */
+export function periksaToDoBaru(
+  input: IsianToDo,
+): Periksa<{ judul: string } & Tenggat & Target> {
+  const isi = periksaIsiToDo(input);
+  if (!isi.ok) return isi;
+
+  const tenggat = periksaTenggat({
+    tanggal: input.tanggal,
+    jam: input.jam,
+    jamWajib: false,
+    hariIni: input.hariIni,
+  });
+  if (!tenggat.ok) return tenggat;
+
+  return { ok: true, nilai: { ...isi.nilai, ...tenggat.nilai } };
+}
+
+/**
+ * Edit to-do: aturannya sama dengan to-do baru, kecuali tanggal & jam
+ * yang tidak disentuh boleh tetap lampau (`periksaTenggatUbah`).
+ */
+export function periksaUbahToDo(
+  input: IsianToDo & { lama: TenggatLama },
+): Periksa<{ judul: string } & Tenggat & Target & { tenggatBerubah: boolean }> {
+  const isi = periksaIsiToDo(input);
+  if (!isi.ok) return isi;
+
+  const tenggat = periksaTenggatUbah({
+    tanggal: input.tanggal,
+    jam: input.jam,
+    jamWajib: false,
+    hariIni: input.hariIni,
+    lama: input.lama,
+  });
+  if (!tenggat.ok) return tenggat;
+
+  const { berubah, ...nilaiTenggat } = tenggat.nilai;
+  return {
+    ok: true,
+    nilai: { ...isi.nilai, ...nilaiTenggat, tenggatBerubah: berubah },
+  };
+}
+
+/**
+ * Tiket & komitmen baru, disusun SMART (D5):
+ *   S — judul (kata kerja + objek), M — kriteria selesai wajib dan target
+ *   opsional, R — goal (wajib untuk komitmen, opsional untuk tiket, D6),
+ *   T — tanggal DAN jam wajib (D3).
+ */
+export function periksaTiketBaru(
+  input: IsianTiket,
+): Periksa<IsiTiket & Tenggat & Target> {
+  const isi = periksaIsiTiket(input);
+  if (!isi.ok) return isi;
 
   const tenggat = periksaTenggat({
     tanggal: input.tanggal,
@@ -230,14 +343,37 @@ export function periksaTiketBaru(input: {
   });
   if (!tenggat.ok) return tenggat;
 
+  return { ok: true, nilai: { ...isi.nilai, ...tenggat.nilai } };
+}
+
+/**
+ * Edit tiket & komitmen: aturan SMART yang sama dengan tiket baru,
+ * kecuali tanggal & jam yang tidak disentuh (`periksaTenggatUbah`) dan
+ * tiket lama yang memang belum berkriteria (`kriteriaLama` kosong).
+ * Jenisnya (tiket/komitmen) tidak diubah lewat edit.
+ */
+export function periksaUbahTiket(
+  input: IsianTiket & {
+    lama: TenggatLama;
+    /** Kriteria yang tersimpan; kosong = tiket lama sebelum 0183. */
+    kriteriaLama: string;
+  },
+): Periksa<IsiTiket & Tenggat & Target & { tenggatBerubah: boolean }> {
+  const isi = periksaIsiTiket(input, input.kriteriaLama.trim() === "");
+  if (!isi.ok) return isi;
+
+  const tenggat = periksaTenggatUbah({
+    tanggal: input.tanggal,
+    jam: input.jam,
+    jamWajib: true,
+    hariIni: input.hariIni,
+    lama: input.lama,
+  });
+  if (!tenggat.ok) return tenggat;
+
+  const { berubah, ...nilaiTenggat } = tenggat.nilai;
   return {
     ok: true,
-    nilai: {
-      judul,
-      goalId,
-      kriteriaSelesai: kriteria.nilai,
-      ...tenggat.nilai,
-      ...target.nilai,
-    },
+    nilai: { ...isi.nilai, ...nilaiTenggat, tenggatBerubah: berubah },
   };
 }

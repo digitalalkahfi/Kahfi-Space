@@ -258,7 +258,7 @@ uji("papan & daftar membawa kriteria dan target", async () => {
   harusSama(d[0]?.kriteria_selesai, "12 video lolos SOP dan terjadwal");
 });
 
-uji("seluruh migrasi 0179–0183 aman dijalankan ulang dua kali", async () => {
+uji("seluruh migrasi 0179–0184 aman dijalankan ulang dua kali", async () => {
   const dir = path.join(process.cwd(), "supabase", "migrations");
   const berkas = [
     "0179_todo_tanpa_review.sql",
@@ -266,6 +266,7 @@ uji("seluruh migrasi 0179–0183 aman dijalankan ulang dua kali", async () => {
     "0181_kunci_isi_tiket.sql",
     "0182_papan_tugas_per_tanggal.sql",
     "0183_smart_tugas.sql",
+    "0184_edit_hapus_tugas.sql",
   ];
   for (let putaran = 0; putaran < 2; putaran++) {
     for (const f of berkas) {

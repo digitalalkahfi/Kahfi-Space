@@ -21,10 +21,10 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { tanggalKalenderPendek } from "@/lib/format";
+import { keJamWib, keTanggalWib, tanggalKalenderPendek } from "@/lib/format";
 import { MIN_KRITERIA } from "@/lib/validasi-tugas";
-import { buatTiket, hitungBebanPenerima } from "@/app/actions/tugas";
-import type { Pengguna, Prioritas } from "@/lib/types";
+import { buatTiket, hitungBebanPenerima, ubahTiket } from "@/app/actions/tugas";
+import type { Pengguna, Prioritas, Tugas } from "@/lib/types";
 import type { GoalRingkas } from "@/lib/data/goal";
 
 const PRIORITAS: { nilai: Prioritas; label: string }[] = [
@@ -47,6 +47,10 @@ const TANPA_GOAL = "__tanpa_goal__";
  *   R — goal terkait: wajib untuk komitmen, opsional untuk tiket (D6);
  *   T — tanggal dan jam tenggat, keduanya wajib (D3). Tiket biasa
  *       bawaannya hari ini; komitmen bawaannya akhir pekan (Sabtu).
+ *
+ * Dengan `ubah`, isian yang sama dipakai pemberi tiket untuk mengedit
+ * tiketnya: terisi nilainya sekarang, jenisnya tetap, dan penerimanya
+ * hanya bisa diganti selama tiket belum mulai dikerjakan (0184).
  */
 export function DialogTiket({
   penerima,
@@ -54,6 +58,8 @@ export function DialogTiket({
   hariIni,
   tanggalAwal,
   akhirPekan,
+  ubah,
+  onTutup,
 }: {
   penerima: Pengguna[];
   /** Goal aktif untuk menautkan komitmen mingguan atau tiket. */
@@ -64,22 +70,35 @@ export function DialogTiket({
   tanggalAwal: string;
   /** Tanggal akhir pekan berjalan — tenggat bawaan komitmen. */
   akhirPekan: string;
+  /** Tiket yang diedit; tanpa ini dialognya membuat tiket baru. */
+  ubah?: Tugas;
+  /** Mode edit: dipanggil saat dialog ditutup. */
+  onTutup?: () => void;
 }) {
-  const [buka, setBuka] = useState(false);
-  const [tipe, setTipe] = useState<"tiket" | "komitmen_mingguan">("tiket");
-  const [goalId, setGoalId] = useState("");
-  const [judul, setJudul] = useState("");
-  const [deskripsi, setDeskripsi] = useState("");
-  const [kriteria, setKriteria] = useState("");
-  const [targetAngka, setTargetAngka] = useState("");
-  const [targetSatuan, setTargetSatuan] = useState("");
-  const [penerimaId, setPenerimaId] = useState("");
-  const [tanggal, setTanggal] = useState(tanggalAwal);
+  const tanggalLama = ubah?.tenggat ? keTanggalWib(ubah.tenggat) : "";
+  const [buka, setBuka] = useState(ubah !== undefined);
+  const [tipe, setTipe] = useState<"tiket" | "komitmen_mingguan">(
+    ubah?.tipe === "komitmen_mingguan" ? "komitmen_mingguan" : "tiket",
+  );
+  const [goalId, setGoalId] = useState(ubah?.goalId ?? "");
+  const [judul, setJudul] = useState(ubah?.judul ?? "");
+  const [deskripsi, setDeskripsi] = useState(ubah?.deskripsi ?? "");
+  const [kriteria, setKriteria] = useState(ubah?.kriteriaSelesai ?? "");
+  const [targetAngka, setTargetAngka] = useState(
+    ubah?.targetAngka != null ? String(ubah.targetAngka) : "",
+  );
+  const [targetSatuan, setTargetSatuan] = useState(ubah?.targetSatuan ?? "");
+  const [penerimaId, setPenerimaId] = useState(ubah?.penerimaId ?? "");
+  const [tanggal, setTanggal] = useState(tanggalLama || tanggalAwal);
   // Tanggal yang sudah dipilih sendiri tidak ditimpa bawaan saat jenisnya
   // diganti.
-  const [tanggalDipilih, setTanggalDipilih] = useState(false);
-  const [jam, setJam] = useState("17:00");
-  const [prioritas, setPrioritas] = useState<Prioritas>("sedang");
+  const [tanggalDipilih, setTanggalDipilih] = useState(ubah !== undefined);
+  const [jam, setJam] = useState(
+    ubah?.tenggat && !ubah.tanpaJam ? keJamWib(ubah.tenggat) : "17:00",
+  );
+  const [prioritas, setPrioritas] = useState<Prioritas>(
+    ubah?.prioritas ?? "sedang",
+  );
   const [menyimpan, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
   // Beban penerima per "penerima|tanggal": jawaban yang datang terlambat
@@ -88,15 +107,49 @@ export function DialogTiket({
   const [, mulaiBeban] = useTransition();
 
   const komitmen = tipe === "komitmen_mingguan";
+  // Yang sudah mulai dikerjakan tidak dipindah tangan (0184).
+  const penerimaTerkunci = ubah !== undefined && ubah.statusAsli !== "todo";
+  // Tiket terlambat yang diedit: tanggal lamanya tetap boleh terpilih.
+  const tanggalMin =
+    tanggalLama && tanggalLama < hariIni ? tanggalLama : hariIni;
+
+  // Penerima & goal tiket yang diedit selalu ada di pilihan, walau sudah
+  // tidak lagi termasuk daftar bawaan (mis. goal-nya tidak aktif lagi).
+  const opsiPenerima =
+    ubah && !penerima.some((p) => p.id === ubah.penerimaId)
+      ? [
+          { id: ubah.penerimaId, nama: ubah.penerimaLengkap, jabatan: "" },
+          ...penerima,
+        ]
+      : penerima;
+  const opsiGoal =
+    ubah?.goalId && !goal.some((g) => g.id === ubah.goalId)
+      ? [
+          {
+            id: ubah.goalId,
+            judul: ubah.goalJudul ?? "Goal saat ini",
+            periode: ubah.goalPeriode ?? "",
+          },
+          ...goal,
+        ]
+      : goal;
+
+  // Tiket lama yang belum berkriteria (sebelum 0183) tidak dipaksa saat
+  // diedit — sama seperti basis data; yang diisi tetap harus layak.
+  const kriteriaLamaKosong = ubah !== undefined && !ubah.kriteriaSelesai.trim();
+  const kriteriaSah =
+    kriteria.trim().length >= MIN_KRITERIA ||
+    (kriteriaLamaKosong && kriteria.trim() === "");
+
   const siap =
     judul.trim().length >= 3 &&
     penerimaId !== "" &&
-    kriteria.trim().length >= MIN_KRITERIA &&
+    kriteriaSah &&
     tanggal !== "" &&
     jam !== "" &&
     (!komitmen || goalId !== "");
 
-  const namaPenerima = penerima.find((p) => p.id === penerimaId)?.nama;
+  const namaPenerima = opsiPenerima.find((p) => p.id === penerimaId)?.nama;
   const bebanKini = beban[`${penerimaId}|${tanggal}`];
 
   const muatBeban = (pid: string, tgl: string) => {
@@ -130,6 +183,11 @@ export function DialogTiket({
   };
 
   const bukaTutup = (b: boolean) => {
+    if (ubah) {
+      setBuka(b);
+      if (!b) onTutup?.();
+      return;
+    }
     if (b) {
       const t = bawaanTanggal(tipe);
       setTanggal(t);
@@ -144,19 +202,27 @@ export function DialogTiket({
     setPesan(null);
 
     mulai(async () => {
-      const hasil = await buatTiket({
+      const isian = {
         judul,
         deskripsi,
         kriteriaSelesai: kriteria,
         targetAngka,
         targetSatuan,
         penerimaId,
-        tipe,
         goalId: goalId && goalId !== TANPA_GOAL ? goalId : null,
         tanggal,
         jam,
         prioritas,
-      });
+      };
+
+      if (ubah) {
+        const hasil = await ubahTiket(ubah.id, isian);
+        if (hasil.ok) bukaTutup(false);
+        else setPesan(hasil.pesan);
+        return;
+      }
+
+      const hasil = await buatTiket({ ...isian, tipe });
 
       if (hasil.ok || hasil.kode === "demo") {
         setJudul("");
@@ -173,7 +239,7 @@ export function DialogTiket({
     });
   };
 
-  if (penerima.length === 0) return null;
+  if (!ubah && penerima.length === 0) return null;
 
   const labelIsian = "text-[13px] leading-[18px] font-semibold";
   const opsional = (
@@ -182,68 +248,81 @@ export function DialogTiket({
 
   return (
     <Dialog open={buka} onOpenChange={bukaTutup}>
-      <DialogTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          className="tekan-halus sentuh-nyaman h-9 rounded-full px-4 text-[11px] font-semibold"
-        >
-          <TicketPlus className="size-3.5" />
-          Buat tiket
-        </Button>
-      </DialogTrigger>
+      {ubah ? null : (
+        <DialogTrigger asChild>
+          <Button
+            type="button"
+            variant="outline"
+            className="tekan-halus sentuh-nyaman h-9 rounded-full px-4 text-[11px] font-semibold"
+          >
+            <TicketPlus className="size-3.5" />
+            Buat tiket
+          </Button>
+        </DialogTrigger>
+      )}
 
       <DialogContent className="max-h-[90dvh] overflow-y-auto rounded-3xl sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Buat tiket</DialogTitle>
+          <DialogTitle>
+            {ubah ? (komitmen ? "Edit komitmen" : "Edit tiket") : "Buat tiket"}
+          </DialogTitle>
           <DialogDescription>
-            Tiket masuk ke daftar tugas penerima, lengkap dengan alur
-            pemeriksaan (QC) saat ia menyelesaikannya.
+            {ubah
+              ? "Penerima diberi tahu apa saja yang berubah."
+              : "Tiket masuk ke daftar tugas penerima, lengkap dengan alur pemeriksaan (QC) saat ia menyelesaikannya."}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
-          <fieldset className="space-y-1.5">
-            <legend className={labelIsian}>Jenis</legend>
-            <div className="flex gap-2">
-              {(
-                [
-                  { nilai: "tiket", label: "Tiket biasa" },
-                  { nilai: "komitmen_mingguan", label: "Komitmen mingguan" },
-                ] as const
-              ).map((o) => (
-                <button
-                  key={o.nilai}
-                  type="button"
-                  onClick={() => pilihTipe(o.nilai)}
-                  aria-pressed={tipe === o.nilai}
-                  disabled={
-                    o.nilai === "komitmen_mingguan" && goal.length === 0
-                  }
-                  className={cn(
-                    "tekan-halus h-11 flex-1 rounded-xl text-[11px] font-semibold disabled:opacity-50",
-                    tipe === o.nilai
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted text-muted-foreground hover:text-foreground",
-                  )}
-                >
-                  {o.label}
-                </button>
-              ))}
-            </div>
-            {komitmen ? (
-              <p className="text-[11px] leading-[14px] text-muted-foreground">
-                Komitmen mingguan menempel pada sebuah goal dan dinilai di
-                laporan mingguan GRD.
-              </p>
-            ) : null}
-          </fieldset>
+          {/* Jenisnya tidak diubah lewat edit: komitmen menempel pada goal
+              dan laporan mingguannya. */}
+          {ubah ? null : (
+            <fieldset className="space-y-1.5">
+              <legend className={labelIsian}>Jenis</legend>
+              <div className="flex gap-2">
+                {(
+                  [
+                    { nilai: "tiket", label: "Tiket biasa" },
+                    { nilai: "komitmen_mingguan", label: "Komitmen mingguan" },
+                  ] as const
+                ).map((o) => (
+                  <button
+                    key={o.nilai}
+                    type="button"
+                    onClick={() => pilihTipe(o.nilai)}
+                    aria-pressed={tipe === o.nilai}
+                    disabled={
+                      o.nilai === "komitmen_mingguan" && goal.length === 0
+                    }
+                    className={cn(
+                      "tekan-halus h-11 flex-1 rounded-xl text-[11px] font-semibold disabled:opacity-50",
+                      tipe === o.nilai
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-muted text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+              {komitmen ? (
+                <p className="text-[11px] leading-[14px] text-muted-foreground">
+                  Komitmen mingguan menempel pada sebuah goal dan dinilai di
+                  laporan mingguan GRD.
+                </p>
+              ) : null}
+            </fieldset>
+          )}
 
           <div className="space-y-1.5">
             <label htmlFor="penerima-tiket" className={labelIsian}>
               Penerima
             </label>
-            <Select value={penerimaId} onValueChange={pilihPenerima}>
+            <Select
+              value={penerimaId}
+              onValueChange={pilihPenerima}
+              disabled={penerimaTerkunci}
+            >
               <SelectTrigger
                 id="penerima-tiket"
                 className="h-12 w-full rounded-xl"
@@ -251,13 +330,19 @@ export function DialogTiket({
                 <SelectValue placeholder="Pilih anggota tim" />
               </SelectTrigger>
               <SelectContent>
-                {penerima.map((p) => (
+                {opsiPenerima.map((p) => (
                   <SelectItem key={p.id} value={p.id}>
-                    {p.nama} · {p.jabatan}
+                    {p.jabatan ? `${p.nama} · ${p.jabatan}` : p.nama}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            {penerimaTerkunci ? (
+              <p className="text-[11px] leading-[14px] text-muted-foreground">
+                Penerima tidak bisa diganti karena tiket ini sudah mulai
+                dikerjakan.
+              </p>
+            ) : null}
             {/* A — dapat dicapai: sekadar info, tidak memblokir. */}
             {namaPenerima && tanggal && bebanKini !== undefined ? (
               <p
@@ -311,7 +396,7 @@ export function DialogTiket({
               id="kriteria-tiket"
               rows={2}
               maxLength={600}
-              required
+              required={!kriteriaLamaKosong}
               value={kriteria}
               onChange={(e) => setKriteria(e.target.value)}
               placeholder="Tiket dianggap selesai bila …"
@@ -322,7 +407,9 @@ export function DialogTiket({
               id="kriteria-tiket-bantuan"
               className="text-[11px] leading-[14px] text-muted-foreground"
             >
-              Pemeriksa menilai hasil kerja terhadap kriteria ini saat QC.
+              {kriteriaLamaKosong
+                ? "Tiket lama ini belum punya kriteria selesai. Sebaiknya diisi supaya pemeriksa punya ukuran saat QC."
+                : "Pemeriksa menilai hasil kerja terhadap kriteria ini saat QC."}
             </p>
           </div>
 
@@ -367,9 +454,9 @@ export function DialogTiket({
                 {komitmen ? null : (
                   <SelectItem value={TANPA_GOAL}>Tanpa goal</SelectItem>
                 )}
-                {goal.map((g) => (
+                {opsiGoal.map((g) => (
                   <SelectItem key={g.id} value={g.id}>
-                    {g.judul} · {g.periode}
+                    {g.periode ? `${g.judul} · ${g.periode}` : g.judul}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -385,7 +472,7 @@ export function DialogTiket({
                 id="tanggal-tiket"
                 type="date"
                 required
-                min={hariIni}
+                min={tanggalMin}
                 value={tanggal}
                 onChange={(e) => {
                   gantiTanggal(e.target.value);
@@ -464,10 +551,14 @@ export function DialogTiket({
           >
             {menyimpan ? <Loader2 className="size-4 animate-spin" /> : null}
             {menyimpan
-              ? "Mengirim…"
-              : komitmen
-                ? "Kirim komitmen"
-                : "Kirim tiket"}
+              ? ubah
+                ? "Menyimpan…"
+                : "Mengirim…"
+              : ubah
+                ? "Simpan perubahan"
+                : komitmen
+                  ? "Kirim komitmen"
+                  : "Kirim tiket"}
           </Button>
         </DialogFooter>
       </DialogContent>

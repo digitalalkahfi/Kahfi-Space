@@ -9,8 +9,10 @@ import {
   Clock,
   Gauge,
   Loader2,
+  Pencil,
   ShieldCheck,
   Target,
+  Trash2,
   Undo2,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -31,6 +33,7 @@ import {
   ubahTenggatTugas,
 } from "@/app/actions/tugas";
 import { JejakPemeriksaan } from "@/components/tugas/jejak-qc";
+import { useAksiTugas } from "@/components/tugas/aksi-tugas";
 import type { JejakQc } from "@/lib/data/tugas";
 import type { Penanda } from "@/lib/papan-tanggal";
 import type { Prioritas, StatusTugas, TipeTugas, Tugas } from "@/lib/types";
@@ -137,6 +140,7 @@ export function KartuTugas({
   penanda?: Penanda;
 }) {
   const [sibuk, mulai] = useTransition();
+  const aksi = useAksiTugas();
   const [pesan, setPesan] = useState<string | null>(null);
   const [status, setStatus] = useState<StatusTugas>(tugas.status);
   const [qc, setQc] = useState(tugas.qcStatus);
@@ -167,6 +171,13 @@ export function KartuTugas({
   // Menjadwal ulang: to-do oleh pemiliknya, tiket oleh pemberinya (D1).
   const bolehUbahTenggat =
     (todo ? sayaPenerima : sayaPembuat) && status !== "selesai";
+  // Edit & hapus: to-do oleh pemiliknya kapan pun; tiket oleh pemberinya
+  // selama belum selesai — yang lolos QC sudah jadi nilai KPI (0184).
+  const bolehKelola =
+    aksi !== null &&
+    (todo
+      ? sayaPenerima
+      : sayaPembuat && status !== "selesai" && tugas.statusAsli !== "selesai");
   const namaTipe = NAMA_TIPE[tugas.tipe];
   const labelTarget =
     tugas.targetAngka !== null
@@ -381,7 +392,11 @@ export function KartuTugas({
           ) : null}
           {todo ? null : (
             <span className="text-[11px] leading-[14px] text-muted-foreground">
-              {sayaPenerima ? `Dari ${tugas.pembuat}` : `PIC ${tugas.penerima}`}
+              {sayaPenerima
+                ? `Dari ${tugas.pembuat}`
+                : sayaPembuat
+                  ? `Untuk ${tugas.penerima}`
+                  : `${tugas.pembuat} → ${tugas.penerima}`}
             </span>
           )}
           {status === "selesai" && tugas.selesaiPada ? (
@@ -566,68 +581,94 @@ export function KartuTugas({
           </p>
         ) : null}
 
-        {bolehUbahTenggat ? (
-          isiTenggat ? (
-            <fieldset className="space-y-2 rounded-xl bg-muted/60 p-2.5">
-              <legend className="sr-only">
-                {todo ? "Pindahkan ke tanggal lain" : "Ubah tenggat"}
-              </legend>
-              <div className="grid grid-cols-2 gap-2">
-                <label className="space-y-1 text-[11px] leading-[14px] font-semibold">
-                  Tanggal
-                  <input
-                    type="date"
-                    required
-                    min={hariIni}
-                    value={tanggalBaru}
-                    onChange={(e) => setTanggalBaru(e.target.value)}
-                    className="tabular h-9 w-full rounded-lg bg-card px-2 text-[13px] font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-                  />
-                </label>
-                <label className="space-y-1 text-[11px] leading-[14px] font-semibold">
-                  {todo ? "Jam (opsional)" : "Jam"}
-                  <input
-                    type="time"
-                    required={!todo}
-                    value={jamBaru}
-                    onChange={(e) => setJamBaru(e.target.value)}
-                    className="tabular h-9 w-full rounded-lg bg-card px-2 text-[13px] font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
-                  />
-                </label>
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant="outline"
-                  disabled={sibuk}
-                  onClick={() => setIsiTenggat(false)}
-                  className="tekan-halus h-8 flex-1 rounded-full text-[11px] font-semibold"
-                >
-                  Batal
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  disabled={sibuk || !tanggalBaru || (!todo && !jamBaru)}
-                  onClick={simpanTenggat}
-                  className="tekan-halus h-8 flex-1 rounded-full text-[11px] font-semibold"
-                >
-                  {sibuk ? <Loader2 className="size-3.5 animate-spin" /> : null}
-                  Simpan tanggal
-                </Button>
-              </div>
-            </fieldset>
-          ) : (
-            <button
-              type="button"
-              onClick={bukaUbahTenggat}
-              className="tekan-halus sentuh-nyaman flex w-full items-center gap-1.5 rounded-xl px-1 py-1 text-[11px] leading-[14px] font-semibold text-muted-foreground hover:text-foreground"
-            >
-              <CalendarClock className="size-3" />
+        {bolehUbahTenggat && isiTenggat ? (
+          <fieldset className="space-y-2 rounded-xl bg-muted/60 p-2.5">
+            <legend className="sr-only">
               {todo ? "Pindahkan ke tanggal lain" : "Ubah tenggat"}
-            </button>
-          )
+            </legend>
+            <div className="grid grid-cols-2 gap-2">
+              <label className="space-y-1 text-[11px] leading-[14px] font-semibold">
+                Tanggal
+                <input
+                  type="date"
+                  required
+                  min={hariIni}
+                  value={tanggalBaru}
+                  onChange={(e) => setTanggalBaru(e.target.value)}
+                  className="tabular h-9 w-full rounded-lg bg-card px-2 text-[13px] font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                />
+              </label>
+              <label className="space-y-1 text-[11px] leading-[14px] font-semibold">
+                {todo ? "Jam (opsional)" : "Jam"}
+                <input
+                  type="time"
+                  required={!todo}
+                  value={jamBaru}
+                  onChange={(e) => setJamBaru(e.target.value)}
+                  className="tabular h-9 w-full rounded-lg bg-card px-2 text-[13px] font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+                />
+              </label>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={sibuk}
+                onClick={() => setIsiTenggat(false)}
+                className="tekan-halus h-8 flex-1 rounded-full text-[11px] font-semibold"
+              >
+                Batal
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                disabled={sibuk || !tanggalBaru || (!todo && !jamBaru)}
+                onClick={simpanTenggat}
+                className="tekan-halus h-8 flex-1 rounded-full text-[11px] font-semibold"
+              >
+                {sibuk ? <Loader2 className="size-3.5 animate-spin" /> : null}
+                Simpan tanggal
+              </Button>
+            </div>
+          </fieldset>
+        ) : bolehUbahTenggat || bolehKelola ? (
+          <div className="flex items-center gap-1">
+            {bolehUbahTenggat ? (
+              <button
+                type="button"
+                onClick={bukaUbahTenggat}
+                className="tekan-halus sentuh-nyaman flex min-w-0 flex-1 items-center gap-1.5 rounded-xl px-1 py-1 text-[11px] leading-[14px] font-semibold text-muted-foreground hover:text-foreground"
+              >
+                <CalendarClock className="size-3 shrink-0" />
+                {todo ? "Pindahkan ke tanggal lain" : "Ubah tenggat"}
+              </button>
+            ) : (
+              <span className="flex-1" />
+            )}
+            {bolehKelola && aksi ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => aksi.ubah(tugas)}
+                  aria-label={`Edit ${namaTipe.toLowerCase()}: ${tugas.judul}`}
+                  title="Edit"
+                  className="tekan-halus sentuh-nyaman flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+                >
+                  <Pencil className="size-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => aksi.hapus(tugas)}
+                  aria-label={`Hapus ${namaTipe.toLowerCase()}: ${tugas.judul}`}
+                  title="Hapus"
+                  className="tekan-halus sentuh-nyaman flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-danger-fill hover:text-danger-text"
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+              </>
+            ) : null}
+          </div>
         ) : null}
 
         <JejakPemeriksaan jejak={jejakQc} />
