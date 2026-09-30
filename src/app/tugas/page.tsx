@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { PenyediaAksiTugas } from "@/components/tugas/aksi-tugas";
 import { DaftarTugas } from "@/components/tugas/daftar-tugas";
 import { PapanKanban } from "@/components/tugas/papan-kanban";
 import {
@@ -77,6 +78,17 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
   // Tugas baru selalu untuk hari ini atau sesudahnya — juga saat papan
   // sedang menampilkan tanggal lampau.
   const tanggalBaru = tanggal > hariIni ? tanggal : hariIni;
+  // Minggu dianggap berakhir Sabtu; tenggat bawaan komitmen.
+  const sabtu = akhirPekan(hariIni);
+
+  // Pilihan saringan asal tugas yang relevan untuk orang ini.
+  const lingkup = {
+    idSaya: pengguna.id,
+    peran: pengguna.role,
+    punyaAtasan: Boolean(pengguna.atasanId),
+    bisaMemberiTiket: calonPenerima.length > 0,
+    bolehQcSemua: PEMERIKSA.includes(pengguna.role),
+  };
 
   return (
     <AppShell pengguna={pengguna} halaman="Tugas">
@@ -106,8 +118,7 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
               goal={goal}
               hariIni={hariIni}
               tanggalAwal={tanggalBaru}
-              // Minggu dianggap berakhir Sabtu; tenggat bawaan komitmen.
-              akhirPekan={akhirPekan(hariIni)}
+              akhirPekan={sabtu}
             />
             <DialogToDo hariIni={hariIni} tanggalAwal={tanggalBaru} />
           </div>
@@ -128,24 +139,31 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
         ) : null}
 
         <Reveal>
-          {tampilan === "papan" ? (
-            <PapanKanban
-              tugas={tugas}
-              idSaya={pengguna.id}
-              bolehQcSemua={PEMERIKSA.includes(pengguna.role)}
-              tanggal={tanggal}
-              hariIni={hariIni}
-              jejakQc={jejak}
-            />
-          ) : (
-            <DaftarTugas
-              tugas={tugas}
-              idSaya={pengguna.id}
-              bolehQcSemua={PEMERIKSA.includes(pengguna.role)}
-              hariIni={hariIni}
-              jejakQc={jejak}
-            />
-          )}
+          {/* Edit & hapus dari kartu memakai dialog yang sama dengan tombol
+              di atas, dengan daftar penerima & goal yang sama. */}
+          <PenyediaAksiTugas
+            penerima={calonPenerima}
+            goal={goal}
+            hariIni={hariIni}
+            akhirPekan={sabtu}
+          >
+            {tampilan === "papan" ? (
+              <PapanKanban
+                tugas={tugas}
+                {...lingkup}
+                tanggal={tanggal}
+                hariIni={hariIni}
+                jejakQc={jejak}
+              />
+            ) : (
+              <DaftarTugas
+                tugas={tugas}
+                {...lingkup}
+                hariIni={hariIni}
+                jejakQc={jejak}
+              />
+            )}
+          </PenyediaAksiTugas>
         </Reveal>
       </div>
     </AppShell>

@@ -45,6 +45,7 @@ type BarisTugas = {
   id: string;
   penerima_id?: string;
   pembuat_id?: string;
+  goal_id?: string | null;
   qc_note?: string;
   hasil_kerja?: string;
   selesai_at?: string | null;
@@ -103,6 +104,8 @@ function keTugas(b: BarisTugas): Tugas {
     qcStatus: b.qc_status,
     qcNote: b.qc_note ?? "",
     hasilKerja: b.hasil_kerja ?? "",
+    konteks: b.konteks ?? "",
+    goalId: b.goal_id ?? null,
     goalJudul: b.goal?.judul ?? null,
     goalPeriode: b.goal?.periode ?? null,
     selesaiPada: b.selesai_at ?? null,
@@ -182,6 +185,11 @@ function tugasContoh(pengguna: Pengguna): BarisTugas[] {
       qc_status: t.qc as BarisTugas["qc_status"],
       penerima: { nama: t.penerima },
       pembuat: { nama: t.pembuat },
+      goal_id: t.goal_unit
+        ? (dataContoh.goals.find(
+            (g) => g.unit === t.goal_unit && g.level === "leader",
+          )?.id ?? null)
+        : null,
       goal: t.goal_unit
         ? {
             judul:
@@ -232,6 +240,7 @@ function dariTersaring(r: BarisTugasTersaring): BarisTugas {
     id: r.id,
     penerima_id: r.penerima_id,
     pembuat_id: r.pembuat_id,
+    goal_id: r.goal_id,
     qc_note: r.qc_note,
     hasil_kerja: r.hasil_kerja,
     selesai_at: r.selesai_at,

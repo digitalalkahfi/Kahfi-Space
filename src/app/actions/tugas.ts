@@ -7,16 +7,40 @@ import { sesiSaatIni } from "@/lib/data/sesi";
 import { bebanPenerima, hariIniTugas } from "@/lib/data/tugas";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
 import { MIN_HASIL_KERJA, PESAN_TODO_TANPA_REVIEW } from "@/lib/kanban";
+import { keJamWib, keTanggalWib } from "@/lib/format";
 import {
   periksaTenggat,
   periksaTiketBaru,
   periksaToDoBaru,
+  periksaUbahTiket,
+  periksaUbahToDo,
   tanggalSah,
+  type TenggatLama,
 } from "@/lib/validasi-tugas";
 import type { Prioritas } from "@/lib/types";
 
 /** Pesan baku saat isi tiket diubah selain oleh pemberinya (D1, 0181). */
 const PESAN_KUNCI_TIKET = "Isi tiket hanya bisa diubah oleh pemberi tiket.";
+
+/** Pesan baku saat to-do diubah selain oleh pemiliknya (D1, 0181). */
+const PESAN_KUNCI_TODO = "Hanya pemilik to-do yang bisa mengubahnya.";
+
+/** Tiket yang lolos QC sudah jadi bagian nilai KPI penerimanya (0184). */
+const PESAN_TIKET_SELESAI =
+  "Tiket yang sudah selesai tidak bisa diubah atau dihapus lagi — nilainya sudah masuk KPI penerima.";
+
+/** Yang sudah mulai dikerjakan tidak dipindah tangan (0184). */
+const PESAN_PENERIMA_TERKUNCI =
+  "Penerima hanya bisa diganti selama tiket belum mulai dikerjakan.";
+
+/** Tenggat tersimpan dibaca sebagai tanggal & jam WIB untuk isian edit. */
+function tenggatLama(tenggat: string | null, tanpaJam: boolean): TenggatLama {
+  if (!tenggat) return { tanggal: "", jam: null };
+  return {
+    tanggal: keTanggalWib(tenggat),
+    jam: tanpaJam ? null : keJamWib(tenggat),
+  };
+}
 
 /** Centang / batal centang satu to-do pribadi. */
 export async function ubahCentangToDo(
@@ -389,6 +413,274 @@ export async function ubahTenggatTugas(
     undefined,
     todo ? "To-do dipindahkan ke tanggal lain." : "Tenggat tiket diperbarui.",
   );
+}
+
+/**
+ * Edit to-do pribadi — hanya pemiliknya (D1).
+ *
+ * Tanggal yang tidak disentuh boleh tetap lampau (mengganti judul to-do
+ * yang terlambat tidak memaksa memindahkan tanggalnya); yang diubah tidak
+ * boleh sebelum hari ini. Tenggat yang sama tidak ditulis ulang supaya
+ * pengingatnya tidak ikut di-reset.
+ */
+export async function ubahToDo(
+  id: string,
+  input: {
+    judul: string;
+    konteks?: string;
+    /** Tanggal WIB, YYYY-MM-DD. */
+    tanggal: string;
+    /** Jam WIB, HH:MM; kosong = tanpa jam. */
+    jam?: string | null;
+    targetAngka?: string | number | null;
+    targetSatuan?: string;
+    prioritas?: Prioritas;
+  },
+): Promise<Hasil> {
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const sb = await klienServer();
+  const { data: lama, error: galatBaca } = await sb
+    .from("tasks")
+    .select("tipe, penerima_id, tenggat, tanpa_jam")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (galatBaca) return gagal(`Gagal memuat to-do: ${galatBaca.message}`);
+  if (!lama || lama.tipe !== "pribadi" || lama.penerima_id !== pengguna.id) {
+    return gagal(PESAN_KUNCI_TODO, "izin");
+  }
+
+  const cek = periksaUbahToDo({
+    judul: input.judul,
+    tanggal: input.tanggal,
+    jam: input.jam,
+    targetAngka: input.targetAngka,
+    targetSatuan: input.targetSatuan,
+    hariIni: hariIniTugas(),
+    lama: tenggatLama(lama.tenggat, lama.tanpa_jam),
+  });
+  if (!cek.ok) return gagal(cek.pesan, "validasi");
+
+  const { data, error } = await sb
+    .from("tasks")
+    .update({
+      judul: cek.nilai.judul,
+      target_angka: cek.nilai.targetAngka,
+      target_satuan: cek.nilai.targetSatuan,
+      ...(input.konteks !== undefined ? { konteks: input.konteks.trim() } : {}),
+      ...(input.prioritas ? { prioritas: input.prioritas } : {}),
+      ...(cek.nilai.tenggatBerubah
+        ? { tenggat: cek.nilai.tenggat, tanpa_jam: cek.nilai.tanpaJam }
+        : {}),
+    })
+    .eq("id", id)
+    .select("id");
+
+  if (error) {
+    return error.code === "42501"
+      ? gagal(PESAN_KUNCI_TODO, "izin")
+      : gagal(`Gagal menyimpan: ${error.message}`);
+  }
+  if ((data ?? []).length === 0) {
+    return gagal("To-do itu tidak ada, atau bukan milikmu.", "izin");
+  }
+
+  revalidatePath("/tugas");
+  revalidatePath("/beranda");
+  return sukses(undefined, "To-do diperbarui.");
+}
+
+/**
+ * Edit tiket & komitmen — hanya pemberinya, selama belum selesai (0184).
+ *
+ * Isiannya SMART seperti tiket baru; jenisnya (tiket/komitmen) tetap.
+ * Penerima boleh diganti selama tiket masih To Do dan penerima barunya
+ * boleh ditugasi — basis data menjaga keduanya lagi, dan mengabari
+ * penerima lama maupun baru.
+ */
+export async function ubahTiket(
+  id: string,
+  input: {
+    judul: string;
+    deskripsi?: string;
+    kriteriaSelesai: string;
+    targetAngka?: string | number | null;
+    targetSatuan?: string;
+    penerimaId: string;
+    /** Tanggal WIB, YYYY-MM-DD. */
+    tanggal: string;
+    /** Jam WIB, HH:MM — wajib untuk tiket. */
+    jam: string;
+    prioritas?: Prioritas;
+    goalId?: string | null;
+  },
+): Promise<Hasil> {
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const sb = await klienServer();
+  const { data: lama, error: galatBaca } = await sb
+    .from("tasks")
+    .select(
+      "tipe, pembuat_id, penerima_id, status, tenggat, tanpa_jam, kriteria_selesai",
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (galatBaca) return gagal(`Gagal memuat tiket: ${galatBaca.message}`);
+  if (!lama) {
+    return gagal("Tiket itu tidak ada, atau tidak terlihat olehmu.", "izin");
+  }
+  if (lama.tipe === "pribadi") {
+    return gagal("Ini to-do pribadi, bukan tiket.", "validasi");
+  }
+  if (lama.pembuat_id !== pengguna.id) return gagal(PESAN_KUNCI_TIKET, "izin");
+  if (lama.status === "selesai") return gagal(PESAN_TIKET_SELESAI, "validasi");
+
+  const gantiPenerima = input.penerimaId !== lama.penerima_id;
+  if (gantiPenerima && lama.status !== "todo") {
+    return gagal(PESAN_PENERIMA_TERKUNCI, "validasi");
+  }
+
+  const cek = periksaUbahTiket({
+    judul: input.judul,
+    penerimaId: input.penerimaId,
+    tipe: lama.tipe,
+    goalId: input.goalId,
+    kriteriaSelesai: input.kriteriaSelesai,
+    targetAngka: input.targetAngka,
+    targetSatuan: input.targetSatuan,
+    tanggal: input.tanggal,
+    jam: input.jam,
+    hariIni: hariIniTugas(),
+    lama: tenggatLama(lama.tenggat, lama.tanpa_jam),
+    kriteriaLama: lama.kriteria_selesai,
+  });
+  if (!cek.ok) return gagal(cek.pesan, "validasi");
+
+  const { data, error } = await sb
+    .from("tasks")
+    .update({
+      judul: cek.nilai.judul,
+      kriteria_selesai: cek.nilai.kriteriaSelesai,
+      target_angka: cek.nilai.targetAngka,
+      target_satuan: cek.nilai.targetSatuan,
+      goal_id: cek.nilai.goalId,
+      ...(input.deskripsi !== undefined
+        ? { deskripsi: input.deskripsi.trim() }
+        : {}),
+      ...(input.prioritas ? { prioritas: input.prioritas } : {}),
+      ...(gantiPenerima ? { penerima_id: input.penerimaId } : {}),
+      ...(cek.nilai.tenggatBerubah
+        ? { tenggat: cek.nilai.tenggat, tanpa_jam: cek.nilai.tanpaJam }
+        : {}),
+    })
+    .eq("id", id)
+    .select("id");
+
+  if (error) {
+    if (error.message.includes("sudah selesai")) {
+      return gagal(PESAN_TIKET_SELESAI, "validasi");
+    }
+    if (error.message.includes("belum mulai dikerjakan")) {
+      return gagal(PESAN_PENERIMA_TERKUNCI, "validasi");
+    }
+    if (error.message.includes("boleh kamu tugasi")) {
+      return gagal(
+        "Penerima baru harus anggota yang boleh kamu tugasi.",
+        "izin",
+      );
+    }
+    if (error.message.includes("tasks_komitmen_punya_goal")) {
+      return gagal(
+        "Komitmen mingguan harus terhubung ke sebuah goal.",
+        "validasi",
+      );
+    }
+    return error.code === "42501"
+      ? gagal(PESAN_KUNCI_TIKET, "izin")
+      : gagal(`Gagal menyimpan: ${error.message}`);
+  }
+  if ((data ?? []).length === 0) {
+    return gagal(
+      "Tiket itu tidak ada, atau bukan tiket yang boleh kamu ubah.",
+      "izin",
+    );
+  }
+
+  revalidatePath("/tugas");
+  revalidatePath("/beranda");
+  return sukses(
+    undefined,
+    gantiPenerima ? "Tiket dialihkan ke penerima baru." : "Tiket diperbarui.",
+  );
+}
+
+/**
+ * Hapus to-do (oleh pemiliknya) atau tiket (oleh pemberinya).
+ *
+ * Tiket yang sudah selesai tidak bisa dihapus — nilai KPI dan riwayat
+ * kerja penerimanya bergantung padanya (0184). Penerima tiket dikabari
+ * basis data; to-do tidak mengabari siapa pun.
+ */
+export async function hapusTugas(id: string): Promise<Hasil> {
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const sb = await klienServer();
+  const { data: lama, error: galatBaca } = await sb
+    .from("tasks")
+    .select("tipe, pembuat_id, penerima_id, status")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (galatBaca) return gagal(`Gagal memuat tugas: ${galatBaca.message}`);
+  if (!lama) {
+    return gagal("Tugas itu tidak ada, atau tidak terlihat olehmu.", "izin");
+  }
+
+  const todo = lama.tipe === "pribadi";
+  const pemilik = todo ? lama.penerima_id : lama.pembuat_id;
+  if (pemilik !== pengguna.id) {
+    return gagal(
+      todo
+        ? "Hanya pemilik to-do yang bisa menghapusnya."
+        : "Hanya pemberi tiket yang bisa menghapusnya.",
+      "izin",
+    );
+  }
+  if (!todo && lama.status === "selesai") {
+    return gagal(PESAN_TIKET_SELESAI, "validasi");
+  }
+
+  // Sama seperti update: RLS menolak dengan tidak mencocokkan baris, jadi
+  // yang menentukan adalah baris yang benar-benar terhapus.
+  const { data, error } = await sb
+    .from("tasks")
+    .delete()
+    .eq("id", id)
+    .select("id");
+
+  if (error) {
+    return error.message.includes("sudah selesai")
+      ? gagal(PESAN_TIKET_SELESAI, "validasi")
+      : gagal(`Gagal menghapus: ${error.message}`);
+  }
+  if ((data ?? []).length === 0) {
+    return gagal(
+      "Tugas itu tidak ada, atau bukan tugas yang boleh kamu hapus.",
+      "izin",
+    );
+  }
+
+  revalidatePath("/tugas");
+  revalidatePath("/beranda");
+  return sukses(undefined, todo ? "To-do dihapus." : "Tiket dihapus.");
 }
 
 /**

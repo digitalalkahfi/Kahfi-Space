@@ -14,8 +14,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { tambahToDo } from "@/app/actions/tugas";
-import type { Prioritas } from "@/lib/types";
+import { keJamWib, keTanggalWib } from "@/lib/format";
+import { tambahToDo, ubahToDo } from "@/app/actions/tugas";
+import type { Prioritas, Tugas } from "@/lib/types";
 
 const PRIORITAS: { nilai: Prioritas; label: string }[] = [
   { nilai: "tinggi", label: "Tinggi" },
@@ -30,30 +31,55 @@ const PRIORITAS: { nilai: Prioritas; label: string }[] = [
  * Tanggal wajib (D3) supaya to-do selalu masuk papan tanggal tertentu;
  * tanpa jam, ia berlaku sampai akhir hari itu. Target (mis. 14 sesi)
  * opsional — versi ringan SMART untuk to-do (D5).
+ *
+ * Dengan `ubah`, isian yang sama dipakai untuk mengedit to-do itu: terisi
+ * nilainya sekarang, dibuka-tutup dari luar (tombol Edit di kartu), dan
+ * tanggal lampau yang tidak disentuh tetap sah.
  */
 export function DialogToDo({
   hariIni,
   tanggalAwal,
+  ubah,
+  onTutup,
 }: {
   /** Hari ini (WIB) — tanggal paling awal yang boleh dipilih. */
   hariIni: string;
   /** Tanggal bawaan isian; tidak pernah sebelum hari ini. */
   tanggalAwal: string;
+  /** To-do yang diedit; tanpa ini dialognya menambah to-do baru. */
+  ubah?: Tugas;
+  /** Mode edit: dipanggil saat dialog ditutup. */
+  onTutup?: () => void;
 }) {
-  const [buka, setBuka] = useState(false);
-  const [judul, setJudul] = useState("");
-  const [konteks, setKonteks] = useState("");
-  const [tanggal, setTanggal] = useState(tanggalAwal);
-  const [jam, setJam] = useState("");
-  const [targetAngka, setTargetAngka] = useState("");
-  const [targetSatuan, setTargetSatuan] = useState("");
-  const [prioritas, setPrioritas] = useState<Prioritas>("sedang");
+  const tanggalLama = ubah?.tenggat ? keTanggalWib(ubah.tenggat) : "";
+  const [buka, setBuka] = useState(ubah !== undefined);
+  const [judul, setJudul] = useState(ubah?.judul ?? "");
+  const [konteks, setKonteks] = useState(ubah?.konteks ?? "");
+  const [tanggal, setTanggal] = useState(tanggalLama || tanggalAwal);
+  const [jam, setJam] = useState(
+    ubah?.tenggat && !ubah.tanpaJam ? keJamWib(ubah.tenggat) : "",
+  );
+  const [targetAngka, setTargetAngka] = useState(
+    ubah?.targetAngka != null ? String(ubah.targetAngka) : "",
+  );
+  const [targetSatuan, setTargetSatuan] = useState(ubah?.targetSatuan ?? "");
+  const [prioritas, setPrioritas] = useState<Prioritas>(
+    ubah?.prioritas ?? "sedang",
+  );
   const [menyimpan, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
 
   const siap = judul.trim().length >= 3 && tanggal !== "";
+  // To-do terlambat yang diedit: tanggal lamanya tetap boleh terpilih.
+  const tanggalMin =
+    tanggalLama && tanggalLama < hariIni ? tanggalLama : hariIni;
 
   const bukaTutup = (b: boolean) => {
+    if (ubah) {
+      setBuka(b);
+      if (!b) onTutup?.();
+      return;
+    }
     // Setiap kali dibuka, tanggal kembali ke bawaan halaman — bisa saja
     // tanggal papan sudah berganti sejak isian terakhir.
     if (b) setTanggal(tanggalAwal);
@@ -65,7 +91,7 @@ export function DialogToDo({
     setPesan(null);
 
     mulai(async () => {
-      const hasil = await tambahToDo({
+      const isian = {
         judul,
         konteks,
         tanggal,
@@ -73,7 +99,16 @@ export function DialogToDo({
         targetAngka,
         targetSatuan,
         prioritas,
-      });
+      };
+
+      if (ubah) {
+        const hasil = await ubahToDo(ubah.id, isian);
+        if (hasil.ok) bukaTutup(false);
+        else setPesan(hasil.pesan);
+        return;
+      }
+
+      const hasil = await tambahToDo(isian);
 
       if (hasil.ok || hasil.kode === "demo") {
         setJudul("");
@@ -91,21 +126,27 @@ export function DialogToDo({
 
   return (
     <Dialog open={buka} onOpenChange={bukaTutup}>
-      <DialogTrigger asChild>
-        <Button
-          type="button"
-          className="tekan-halus sentuh-nyaman h-9 rounded-full px-4 text-[11px] font-semibold"
-        >
-          <Plus className="size-3.5" />
-          Tambah to-do
-        </Button>
-      </DialogTrigger>
+      {ubah ? null : (
+        <DialogTrigger asChild>
+          <Button
+            type="button"
+            className="tekan-halus sentuh-nyaman h-9 rounded-full px-4 text-[11px] font-semibold"
+          >
+            <Plus className="size-3.5" />
+            Tambah to-do
+          </Button>
+        </DialogTrigger>
+      )}
 
       <DialogContent className="max-h-[90dvh] overflow-y-auto rounded-3xl sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Tambah to-do pribadi</DialogTitle>
+          <DialogTitle>
+            {ubah ? "Edit to-do" : "Tambah to-do pribadi"}
+          </DialogTitle>
           <DialogDescription>
-            Hanya kamu yang melihatnya. Untuk menugasi orang lain, buat tiket.
+            {ubah
+              ? "Hanya kamu yang melihat to-do ini, jadi perubahannya tidak dikabarkan ke siapa pun."
+              : "Hanya kamu yang melihatnya. Untuk menugasi orang lain, buat tiket."}
           </DialogDescription>
         </DialogHeader>
 
@@ -161,7 +202,7 @@ export function DialogToDo({
                 id="tanggal-todo"
                 type="date"
                 required
-                min={hariIni}
+                min={tanggalMin}
                 value={tanggal}
                 onChange={(e) => setTanggal(e.target.value)}
                 className="tabular h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
@@ -274,7 +315,11 @@ export function DialogToDo({
             className="tekan-halus rounded-full"
           >
             {menyimpan ? <Loader2 className="size-4 animate-spin" /> : null}
-            {menyimpan ? "Menyimpan…" : "Simpan to-do"}
+            {menyimpan
+              ? "Menyimpan…"
+              : ubah
+                ? "Simpan perubahan"
+                : "Simpan to-do"}
           </Button>
         </DialogFooter>
       </DialogContent>

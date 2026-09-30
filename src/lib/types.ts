@@ -70,6 +70,10 @@ export type Tugas = {
   qcNote: string;
   /** Ringkasan hasil dari penerima tugas, dibaca pemeriksa. */
   hasilKerja: string;
+  /** Konteks singkat apa adanya (mis. "Affiliator · sore"); boleh kosong. */
+  konteks: string;
+  /** Goal terkait — dipakai isian edit; null bila tidak bergoal. */
+  goalId: string | null;
   /** Goal induk untuk komitmen mingguan; null untuk tugas biasa. */
   goalJudul: string | null;
   goalPeriode: string | null;

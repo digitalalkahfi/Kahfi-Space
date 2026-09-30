@@ -6,8 +6,11 @@ import {
   periksaKriteria,
   periksaTarget,
   periksaTenggat,
+  periksaTenggatUbah,
   periksaTiketBaru,
   periksaToDoBaru,
+  periksaUbahTiket,
+  periksaUbahToDo,
   susunTenggat,
   tanggalSah,
 } from "@/lib/validasi-tugas";
@@ -231,4 +234,160 @@ test("to-do tidak wajib punya kriteria maupun target", () => {
     hariIni: HARI_INI,
   });
   assert.equal(hasil.ok, true);
+});
+
+// ---------------------------------------------------------------------
+// Edit (0184)
+// ---------------------------------------------------------------------
+
+const LAMA_TELAT = { tanggal: "2026-09-20", jam: "17:00" };
+
+test("edit: tenggat lampau yang tidak disentuh tetap sah dan tidak ditulis ulang", () => {
+  const hasil = periksaTenggatUbah({
+    tanggal: "2026-09-20",
+    jam: "17:00",
+    jamWajib: true,
+    hariIni: HARI_INI,
+    lama: LAMA_TELAT,
+  });
+  assert.deepEqual(hasil, {
+    ok: true,
+    nilai: {
+      tenggat: "2026-09-20T17:00:00+07:00",
+      tanpaJam: false,
+      berubah: false,
+    },
+  });
+});
+
+test("edit: tenggat yang diubah diperiksa seperti tenggat baru", () => {
+  // Digeser ke tanggal lampau lain — ditolak.
+  const lampau = periksaTenggatUbah({
+    tanggal: "2026-09-21",
+    jam: "17:00",
+    jamWajib: true,
+    hariIni: HARI_INI,
+    lama: LAMA_TELAT,
+  });
+  assert.equal(lampau.ok, false);
+  // Hanya jamnya yang diganti pada tanggal lampau — tetap dianggap diubah.
+  const jamSaja = periksaTenggatUbah({
+    tanggal: "2026-09-20",
+    jam: "18:00",
+    jamWajib: true,
+    hariIni: HARI_INI,
+    lama: LAMA_TELAT,
+  });
+  assert.equal(jamSaja.ok, false);
+  // Dipindah ke masa depan — sah dan ditandai berubah.
+  const maju = periksaTenggatUbah({
+    tanggal: "2026-10-01",
+    jam: "09:00",
+    jamWajib: true,
+    hariIni: HARI_INI,
+    lama: LAMA_TELAT,
+  });
+  assert.equal(maju.ok && maju.nilai.berubah, true);
+});
+
+test("edit: tiket lama tanpa tenggat wajib diberi tanggal & jam", () => {
+  const tanpa = { tanggal: "", jam: null };
+  const kosong = periksaTenggatUbah({
+    tanggal: "",
+    jam: null,
+    jamWajib: true,
+    hariIni: HARI_INI,
+    lama: tanpa,
+  });
+  assert.equal(kosong.ok, false);
+  const diisi = periksaTenggatUbah({
+    tanggal: HARI_INI,
+    jam: "17:00",
+    jamWajib: true,
+    hariIni: HARI_INI,
+    lama: tanpa,
+  });
+  assert.equal(diisi.ok && diisi.nilai.berubah, true);
+});
+
+test("edit to-do: judul terlambat bisa diganti tanpa memindah tanggalnya", () => {
+  const hasil = periksaUbahToDo({
+    judul: "  Cek 14 sesi live sore  ",
+    tanggal: "2026-09-14",
+    jam: null,
+    hariIni: HARI_INI,
+    lama: { tanggal: "2026-09-14", jam: null },
+  });
+  assert.deepEqual(hasil, {
+    ok: true,
+    nilai: {
+      judul: "Cek 14 sesi live sore",
+      targetAngka: null,
+      targetSatuan: "",
+      tenggat: "2026-09-14T23:59:00+07:00",
+      tanpaJam: true,
+      tenggatBerubah: false,
+    },
+  });
+  // Aturan isian lainnya tetap berlaku.
+  const pendek = periksaUbahToDo({
+    judul: "ab",
+    tanggal: "2026-09-14",
+    hariIni: HARI_INI,
+    lama: { tanggal: "2026-09-14", jam: null },
+  });
+  assert.equal(pendek.ok, false);
+});
+
+test("edit tiket: aturan SMART sama dengan tiket baru", () => {
+  const dasar = {
+    judul: "Audit GMV 5 akun beauty",
+    penerimaId: "penerima-1",
+    tipe: "tiket" as const,
+    kriteriaSelesai: "Deviasi komisi 5 akun terkoreksi",
+    tanggal: "2026-09-20",
+    jam: "17:00",
+    hariIni: HARI_INI,
+    lama: LAMA_TELAT,
+    kriteriaLama: "Deviasi komisi 5 akun terkoreksi",
+  };
+  const hasil = periksaUbahTiket(dasar);
+  assert.equal(hasil.ok && hasil.nilai.tenggatBerubah, false);
+
+  assert.equal(periksaUbahTiket({ ...dasar, kriteriaSelesai: "ok" }).ok, false);
+  assert.equal(periksaUbahTiket({ ...dasar, penerimaId: "" }).ok, false);
+  assert.equal(
+    periksaUbahTiket({ ...dasar, tipe: "komitmen_mingguan", goalId: null }).ok,
+    false,
+  );
+  assert.equal(
+    periksaUbahTiket({ ...dasar, targetAngka: "5", targetSatuan: "" }).ok,
+    false,
+  );
+});
+
+test("edit tiket lama tanpa kriteria: boleh tetap kosong, yang diisi harus layak", () => {
+  const dasar = {
+    judul: "Tindak lanjut order pending",
+    penerimaId: "penerima-1",
+    tipe: "tiket" as const,
+    kriteriaSelesai: "",
+    tanggal: "2026-10-01",
+    jam: "17:00",
+    hariIni: HARI_INI,
+    lama: { tanggal: "2026-10-01", jam: "17:00" },
+  };
+  // Tiket lama (sebelum 0183) tidak dipaksa berkriteria saat diedit.
+  const lama = periksaUbahTiket({ ...dasar, kriteriaLama: "" });
+  assert.equal(lama.ok && lama.nilai.kriteriaSelesai, "");
+  // Tetapi kriteria yang diisi tetap harus layak.
+  assert.equal(
+    periksaUbahTiket({ ...dasar, kriteriaSelesai: "ok", kriteriaLama: "" }).ok,
+    false,
+  );
+  // Tiket yang sudah berkriteria tidak boleh dikosongkan.
+  assert.equal(
+    periksaUbahTiket({ ...dasar, kriteriaLama: "Semua order terkirim" }).ok,
+    false,
+  );
 });
