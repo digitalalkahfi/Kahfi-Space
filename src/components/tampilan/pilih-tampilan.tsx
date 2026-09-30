@@ -231,6 +231,12 @@ export function PilihTampilan() {
               </ul>
 
               <DndContext
+                // Id tetap: tanpa itu dnd-kit menomori `aria-describedby`
+                // dengan pencacah global yang terus bertambah di server,
+                // sehingga HTML server dan klien berselisih (galat hidrasi).
+                // Berakhiran permukaan karena konteksnya satu per kartu,
+                // dan id ini juga menjadi id teks petunjuk pembaca layarnya.
+                id={`susunan-tampilan-${permukaan}`}
                 sensors={sensor}
                 collisionDetection={closestCenter}
                 modifiers={[restrictToVerticalAxis]}
