@@ -4,6 +4,7 @@ import "server-only";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { dataContoh, namaTerlihatContoh } from "@/lib/data/contoh";
+import { keTanggalWib } from "@/lib/format";
 import type { Pengguna } from "@/lib/types";
 import {
   predikatDariSkor,
@@ -328,8 +329,8 @@ function scorecardDemo(
     if (sumber === "tiket") {
       const milik = tasks.filter((t) => {
         if (t.penerima !== u.nama || t.tipe === "pribadi") return false;
-        const hari = t.tenggat?.slice(0, 10);
-        return hari !== undefined && hari >= bulan && hari <= sampai;
+        const hari = t.tenggat ? keTanggalWib(t.tenggat) : "";
+        return hari !== "" && hari >= bulan && hari <= sampai;
       });
       return milik.length > 0
         ? (milik.filter((t) => t.status === "selesai").length / milik.length) *

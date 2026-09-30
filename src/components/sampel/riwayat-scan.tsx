@@ -1,7 +1,7 @@
 import { QrCode, ScanLine, TriangleAlert } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { jamWib, tanggalPendek } from "@/lib/format";
+import { jamWib, keTanggalWib, tanggalPendek } from "@/lib/format";
 import { SaringScan } from "@/components/sampel/saring-scan";
 import type { KodeAsing, PemindaianTerakhir } from "@/lib/data/sampel";
 import type { SaringanScan } from "@/lib/saring-sampel";
@@ -104,7 +104,7 @@ export function RiwayatScan({
               </div>
 
               <span className="shrink-0 text-right text-[11px] leading-[14px] text-muted-foreground">
-                {tanggalPendek(s.pada.slice(0, 10))}
+                {tanggalPendek(keTanggalWib(s.pada))}
                 <span className="block">{jamWib(s.pada)}</span>
               </span>
             </li>

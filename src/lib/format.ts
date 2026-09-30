@@ -163,21 +163,27 @@ export function tanggalPendek(tanggal: Date | string) {
   });
 }
 
-/** "Hari ini", "Kemarin", atau tanggal pendek — relatif terhadap `acuan`. */
+/**
+ * "Hari ini", "Kemarin", atau tanggal pendek — relatif terhadap `acuan`,
+ * keduanya dibaca sebagai tanggal kalender WIB.
+ *
+ * Bukan zona waktu mesin yang merender: saat SSR itu UTC, di peramban
+ * WIB, sehingga cap waktu 00.00–06.59 WIB berlabel "Kemarin" di server
+ * tetapi "Hari ini" di peramban.
+ */
 export function tanggalRelatif(tanggal: Date | string, acuan: Date | string) {
-  const d = typeof tanggal === "string" ? new Date(tanggal) : tanggal;
-  const a = typeof acuan === "string" ? new Date(acuan) : acuan;
+  const hari = keTanggalWib(tanggal);
+  if (!hari) return "";
 
-  const hari = (x: Date) =>
-    Math.floor(
-      new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime() /
-        86_400_000,
-    );
-  const selisih = hari(a) - hari(d);
+  const selisih = Math.round(
+    (Date.parse(`${keTanggalWib(acuan)}T00:00:00Z`) -
+      Date.parse(`${hari}T00:00:00Z`)) /
+      86_400_000,
+  );
 
   if (selisih === 0) return "Hari ini";
   if (selisih === 1) return "Kemarin";
-  return tanggalPendek(d);
+  return tanggalKalenderPendek(hari);
 }
 
 /**

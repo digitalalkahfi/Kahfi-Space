@@ -5,6 +5,9 @@ import { normalkanKode } from "@/lib/sampel";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { TANGGAL_ACUAN, dataContoh } from "@/lib/data/contoh";
+import { keTanggalWib } from "@/lib/format";
+import { rentangHariWib } from "@/lib/papan-tanggal";
+import { tanggalSah } from "@/lib/validasi-tugas";
 import type { KejadianSampel, Sampel, StatusSampel } from "@/lib/sampel";
 import type { BarisRiwayat } from "@/lib/saring-sampel";
 import type { KodeUnit, Pengguna } from "@/lib/types";
@@ -425,7 +428,7 @@ export async function riwayatScan(
       .filter((s) => {
         if (jenis === "dikenali" && !s.dikenali) return false;
         if (jenis === "asing" && s.dikenali) return false;
-        const hari = s.pada.slice(0, 10);
+        const hari = keTanggalWib(s.pada);
         if (dari && hari < dari) return false;
         if (sampai && hari > sampai) return false;
         return true;
@@ -441,8 +444,13 @@ export async function riwayatScan(
   );
 
   if (jenis !== "semua") kueri = kueri.eq("dikenali", jenis === "dikenali");
-  if (dari) kueri = kueri.gte("pada", `${dari}T00:00:00Z`);
-  if (sampai) kueri = kueri.lte("pada", `${sampai}T23:59:59Z`);
+  // Batas hari WIB, bukan UTC: pemindaian pukul 00.00–06.59 WIB tercatat
+  // pada hari UTC sebelumnya. Tanggal mustahil (2024-13-45) lolos pola
+  // saringan tetapi tidak punya batas hari, jadi dilewati.
+  if (tanggalSah(dari)) kueri = kueri.gte("pada", rentangHariWib(dari).awal);
+  if (tanggalSah(sampai)) {
+    kueri = kueri.lt("pada", rentangHariWib(sampai).akhir);
+  }
 
   const { data, error } = await kueri
     .order("pada", { ascending: false })

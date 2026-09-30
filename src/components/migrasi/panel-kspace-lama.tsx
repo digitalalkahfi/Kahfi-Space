@@ -13,7 +13,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { jamWib, tanggalPanjang, tanggalPendek } from "@/lib/format";
+import {
+  jamWib,
+  keTanggalWib,
+  tanggalPanjang,
+  tanggalPendek,
+} from "@/lib/format";
 import { ubahStatusKspaceLama } from "@/app/actions/migrasi";
 import type { KejadianLama, StatusLama } from "@/lib/data/migrasi";
 
@@ -134,7 +139,7 @@ export function PanelKspaceLama({
                   {k.olehNama ? ` oleh ${k.olehNama}` : ""}
                 </span>
                 <span className="text-muted-foreground">
-                  {tanggalPendek(k.pada.slice(0, 10))} · {jamWib(k.pada)}
+                  {tanggalPendek(keTanggalWib(k.pada))} · {jamWib(k.pada)}
                 </span>
               </li>
             ))}

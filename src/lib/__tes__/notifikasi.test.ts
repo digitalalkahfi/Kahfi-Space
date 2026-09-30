@@ -78,6 +78,42 @@ test("notifikasi dari masa depan tetap masuk 'hari ini', bukan kelompok asing", 
   );
 });
 
+test("created_at bertanda +00:00 dikelompokkan menurut tanggal WIB", () => {
+  // Mode Supabase: `created_at` dari PostgREST berzona +00:00, jadi
+  // sepuluh karakter pertamanya tanggal UTC. Batas hari WIB = 17:00 UTC.
+  const hariIni = "2026-09-30";
+  assert.equal(kelompokWaktu("2026-09-29T17:00:00+00:00", hariIni), "hari-ini");
+  assert.equal(
+    kelompokWaktu("2026-09-29T23:59:59.123456+00:00", hariIni),
+    "hari-ini",
+  );
+  assert.equal(kelompokWaktu("2026-09-29T16:59:59+00:00", hariIni), "kemarin");
+  assert.equal(kelompokWaktu("2026-09-28T17:00:00+00:00", hariIni), "kemarin");
+  assert.equal(
+    kelompokWaktu("2026-09-28T16:59:59+00:00", hariIni),
+    "pekan-ini",
+  );
+});
+
+test("notifikasi pukul 00.00–06.59 WIB masuk 'Hari ini', bukan 'Kemarin'", () => {
+  const hasil = kelompokkanNotifikasi(
+    [
+      // 01:30 WIB tanggal 30.
+      n("dini-hari", "2026-09-29T18:30:00+00:00"),
+      // 22:00 WIB tanggal 29.
+      n("semalam", "2026-09-29T15:00:00+00:00"),
+    ],
+    "2026-09-30",
+  );
+  assert.deepEqual(
+    hasil.map((k) => [k.kelompok, k.isi.map((x) => x.id)]),
+    [
+      ["hari-ini", ["dini-hari"]],
+      ["kemarin", ["semalam"]],
+    ],
+  );
+});
+
 test("kelompok kosong tidak ikut muncul", () => {
   const hasil = kelompokkanNotifikasi(
     [n("a", "2024-10-24T08:00:00+07:00"), n("b", "2024-10-01T08:00:00+07:00")],

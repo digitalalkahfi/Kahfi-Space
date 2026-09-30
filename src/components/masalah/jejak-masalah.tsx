@@ -1,6 +1,6 @@
 import { History } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { jamWib, tanggalPendek } from "@/lib/format";
+import { jamWib, keTanggalWib, tanggalPendek } from "@/lib/format";
 import { LABEL_STATUS_MASALAH } from "@/lib/masalah";
 import type { JejakMasalah } from "@/lib/data/masalah";
 
@@ -33,7 +33,7 @@ export function JejakMasalahKartu({ jejak }: { jejak: JejakMasalah[] }) {
                 {j.olehNama ? ` · ${j.olehNama}` : ""}
               </span>
               <span className="text-[11px] leading-[14px] text-muted-foreground">
-                {tanggalPendek(j.pada.slice(0, 10))} · {jamWib(j.pada)}
+                {tanggalPendek(keTanggalWib(j.pada))} · {jamWib(j.pada)}
               </span>
             </div>
             {j.catatan ? (

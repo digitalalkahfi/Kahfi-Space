@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ChevronDown, Gauge } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { bilangan, persen, tanggalPendek } from "@/lib/format";
+import { bilangan, keTanggalWib, persen, tanggalPendek } from "@/lib/format";
 import { GAYA_MINIMUM } from "@/lib/batas-minimum";
 import { DialogLevelAkun } from "@/components/grd/dialog-level-akun";
 import type { AkunKelola } from "@/lib/data/akun";
@@ -138,7 +138,7 @@ export function PanelLevelAkun({
                     {j.dari === null ? "Ditetapkan" : `${j.dari} → ${j.ke}`}
                   </span>
                   {j.dari === null ? ` level ${j.ke}` : ""} ·{" "}
-                  {tanggalPendek(j.pada.slice(0, 10))}
+                  {tanggalPendek(keTanggalWib(j.pada))}
                   {j.olehNama ? ` · oleh ${j.olehNama}` : ""}
                   {j.alasan ? ` · ${j.alasan}` : ""}
                 </li>

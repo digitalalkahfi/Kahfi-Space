@@ -8,6 +8,8 @@
  * Modulnya diimpor dinamis supaya tidak ikut bundel awal; halaman ini dibuka
  * dari HP dan ekspor hanya dipakai sesekali.
  */
+import { keTanggalWib } from "@/lib/format";
+
 export type KolomEkspor<T> = {
   judul: string;
   ambil: (baris: T) => string | number;
@@ -99,8 +101,10 @@ export async function unduhExcelBeberapaLembar({
   XLSX.writeFile(buku, `${namaBerkas}.xlsx`);
 }
 
-/** k-space-laporan-harian-2024-10-24 */
+/**
+ * k-space-laporan-harian-2024-10-24 — tanggalnya tanggal WIB: berkas yang
+ * diunduh pukul 00.00–06.59 WIB tidak lagi bertanggal kemarin.
+ */
 export function namaBerkasTanggal(awalan: string, tanggal = new Date()) {
-  const iso = tanggal.toISOString().slice(0, 10);
-  return `${awalan}-${iso}`;
+  return `${awalan}-${keTanggalWib(tanggal)}`;
 }

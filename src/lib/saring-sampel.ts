@@ -1,6 +1,11 @@
 /**
  * Penyaringan riwayat perpindahan sampel — modul murni.
+ *
+ * Saringan tanggal adalah tanggal kalender WIB, sedangkan `pada` cap
+ * waktu (timestamptz): tanggalnya dibaca lewat `keTanggalWib`, bukan
+ * sepuluh karakter pertamanya, yang di mode Supabase bertanggal UTC.
  */
+import { keTanggalWib } from "@/lib/format";
 import type { StatusSampel } from "@/lib/sampel";
 
 export type BarisRiwayat = {
@@ -90,7 +95,7 @@ export function saringRiwayat(
     if (s.status !== "semua" && b.ke !== s.status) return false;
     if (s.unit !== "semua" && b.unitNama !== s.unit) return false;
 
-    const hari = b.pada.slice(0, 10);
+    const hari = keTanggalWib(b.pada);
     if (s.dari && hari < s.dari) return false;
     if (s.sampai && hari > s.sampai) return false;
 
@@ -169,7 +174,7 @@ export function saringScan(daftar: BarisScan[], s: SaringanScan): BarisScan[] {
     if (s.jenis === "dikenali" && !b.dikenali) return false;
     if (s.jenis === "asing" && b.dikenali) return false;
 
-    const hari = b.pada.slice(0, 10);
+    const hari = keTanggalWib(b.pada);
     if (s.dari && hari < s.dari) return false;
     if (s.sampai && hari > s.sampai) return false;
 
