@@ -6,19 +6,25 @@
  * ditolak Server Action — dan pengguna melihat kartunya melompat balik
  * tanpa penjelasan.
  */
-import type { StatusTugas } from "@/lib/types";
+import type { StatusTugas, TipeTugas } from "@/lib/types";
 
 /** Status yang bisa dituju lewat `ubahStatusTugas`. */
 export type StatusDapatDigeser = "todo" | "berjalan" | "menunggu_qc";
 
 export type HasilPindah =
   | { boleh: true; ke: StatusDapatDigeser }
+  /** To-do pribadi dicentang selesai lewat seretan (`ubahCentangToDo`). */
+  | { boleh: true; ke: "selesai" }
   /** Perlu keterangan hasil kerja dulu; bukan penolakan. */
   | { boleh: false; mintaHasilKerja: true }
   | { boleh: false; mintaHasilKerja: false; pesan: string };
 
 /** Panjang minimal ringkasan hasil kerja; sama dengan Server Action. */
 export const MIN_HASIL_KERJA = 5;
+
+/** Pesan baku saat to-do pribadi diarahkan ke Review (D2). */
+export const PESAN_TODO_TANPA_REVIEW =
+  "To-do pribadi tidak perlu diperiksa. Centang jika sudah selesai.";
 
 export function dapatDigeser(
   status: StatusTugas,
@@ -29,18 +35,23 @@ export function dapatDigeser(
 /**
  * Boleh atau tidak sebuah kartu dipindahkan ke kolom tujuan.
  *
- * Kolom "Selesai" sengaja bukan tujuan yang bisa diseret: status itu
- * lahir dari keputusan QC (`periksaTugas`), bukan dari penerima tugas
- * yang menyatakan dirinya selesai.
+ * Untuk tiket, kolom "Selesai" sengaja bukan tujuan yang bisa diseret:
+ * status itu lahir dari keputusan QC (`periksaTugas`), bukan dari
+ * penerima tugas yang menyatakan dirinya selesai.
+ *
+ * To-do pribadi tidak punya pemeriksa (D2): alurnya To Do → Sedang
+ * Dikerjakan → Selesai, dan Selesai boleh diseret — sama dengan
+ * mencentang. Menariknya keluar dari Selesai sama dengan batal centang.
  */
 export function periksaPindah(input: {
   dari: StatusTugas;
   ke: StatusTugas;
+  tipe: TipeTugas;
   /** Hanya penerima tugas yang boleh menggeser statusnya. */
   sayaPenerima: boolean;
   hasilKerja: string;
 }): HasilPindah {
-  const { dari, ke, sayaPenerima, hasilKerja } = input;
+  const { dari, ke, tipe, sayaPenerima, hasilKerja } = input;
 
   if (dari === ke) {
     return { boleh: false, mintaHasilKerja: false, pesan: "" };
@@ -50,8 +61,24 @@ export function periksaPindah(input: {
     return {
       boleh: false,
       mintaHasilKerja: false,
-      pesan: "Hanya penerima tugas yang bisa memindahkan kartunya.",
+      pesan:
+        tipe === "pribadi"
+          ? "Hanya pemilik to-do yang bisa memindahkan kartunya."
+          : "Hanya penerima tugas yang bisa memindahkan kartunya.",
     };
+  }
+
+  if (tipe === "pribadi") {
+    if (ke === "menunggu_qc") {
+      return {
+        boleh: false,
+        mintaHasilKerja: false,
+        pesan: PESAN_TODO_TANPA_REVIEW,
+      };
+    }
+    return ke === "selesai"
+      ? { boleh: true, ke: "selesai" }
+      : { boleh: true, ke };
   }
 
   if (dari === "selesai") {
@@ -78,7 +105,7 @@ export function periksaPindah(input: {
     return { boleh: false, mintaHasilKerja: true };
   }
 
-  return { boleh: true, ke: ke as StatusDapatDigeser };
+  return { boleh: true, ke };
 }
 
 /**
@@ -96,6 +123,7 @@ export function periksaPindah(input: {
 export function kolomMenerima(input: {
   dari: StatusTugas;
   ke: StatusTugas;
+  tipe: TipeTugas;
   sayaPenerima: boolean;
   hasilKerja: string;
 }): boolean | null {

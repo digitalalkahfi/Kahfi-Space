@@ -71,6 +71,76 @@ export function tanggalPanjang(tanggal: Date | string) {
   });
 }
 
+/** Selisih WIB terhadap UTC. WIB tidak mengenal musim panas. */
+const SELISIH_WIB_MS = 7 * 3_600_000;
+
+/**
+ * Tanggal (YYYY-MM-DD) sebuah waktu menurut WIB; "" bila waktunya rusak.
+ *
+ * `toISOString().slice(0, 10)` memberi tanggal UTC, yang tertinggal
+ * sehari antara 00.00 dan 06.59 WIB.
+ */
+export function keTanggalWib(waktu: Date | string): string {
+  const d = typeof waktu === "string" ? new Date(waktu) : waktu;
+  if (Number.isNaN(d.getTime())) return "";
+  return new Date(d.getTime() + SELISIH_WIB_MS).toISOString().slice(0, 10);
+}
+
+/** Tanggal hari ini (YYYY-MM-DD) di zona Asia/Jakarta. */
+export function hariIniWib(sekarang: Date = new Date()): string {
+  return keTanggalWib(sekarang);
+}
+
+/** Jam (HH:MM) sebuah waktu menurut WIB — untuk mengisi ulang `<input type="time">`. */
+export function keJamWib(waktu: Date | string): string {
+  const d = typeof waktu === "string" ? new Date(waktu) : waktu;
+  if (Number.isNaN(d.getTime())) return "";
+  return new Date(d.getTime() + SELISIH_WIB_MS).toISOString().slice(11, 16);
+}
+
+/**
+ * "Hari ini", "Besok", "Kemarin", atau "2 Okt" — tanggal kalender
+ * relatif terhadap `hariIni` (keduanya YYYY-MM-DD, WIB).
+ */
+export function tanggalKalenderRelatif(tanggal: string, hariIni: string) {
+  if (!tanggal) return "";
+  const selisih = Math.round(
+    (Date.parse(`${tanggal}T00:00:00Z`) - Date.parse(`${hariIni}T00:00:00Z`)) /
+      86_400_000,
+  );
+  if (selisih === 0) return "Hari ini";
+  if (selisih === 1) return "Besok";
+  if (selisih === -1) return "Kemarin";
+  return tanggalKalenderPendek(tanggal, hariIni);
+}
+
+/**
+ * "Rabu, 16 September 2026" untuk tanggal kalender (YYYY-MM-DD).
+ *
+ * Dibaca sebagai UTC, sama seperti `bulanPanjang`: tanggal tanpa jam
+ * yang diurai di zona barat Greenwich mundur sehari.
+ */
+export function tanggalKalenderPanjang(tanggal: string) {
+  return new Date(`${tanggal}T00:00:00Z`).toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
+/** "16 Sep" / "16 Sep 2025" untuk tanggal kalender; tahun hanya bila beda. */
+export function tanggalKalenderPendek(tanggal: string, acuan?: string) {
+  const tahunSama = acuan ? acuan.slice(0, 4) === tanggal.slice(0, 4) : false;
+  return new Date(`${tanggal}T00:00:00Z`).toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    ...(tahunSama ? {} : { year: "numeric" }),
+    timeZone: "UTC",
+  });
+}
+
 /** 14:20 WIB */
 export function jamWib(tanggal: Date | string) {
   const d = typeof tanggal === "string" ? new Date(tanggal) : tanggal;

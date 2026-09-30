@@ -332,6 +332,10 @@ export type BarisTask = {
   pembuat_id: string;
   penerima_id: string;
   tenggat: string | null;
+  tanpa_jam: boolean;
+  kriteria_selesai: string;
+  target_angka: number | null;
+  target_satuan: string;
   prioritas: PrioritasTugasDb;
   status: StatusTugasDb;
   qc_status: StatusQcDb;
@@ -342,6 +346,40 @@ export type BarisTask = {
   selesai_at: string | null;
   created_at: string;
   updated_at: string;
+};
+
+/**
+ * Satu baris keluaran `papan_tugas` / `daftar_tugas` (0182): kolom tugas
+ * plus nama penerima & pemberi, goal, kelompok tenggat, dan `total`
+ * (jumlah yang cocok sebelum dibatasi).
+ */
+export type BarisTugasTersaring = {
+  id: string;
+  tipe: TipeTugasDb;
+  judul: string;
+  deskripsi: string;
+  konteks: string;
+  kriteria_selesai: string;
+  target_angka: number | null;
+  target_satuan: string;
+  tenggat: string | null;
+  tanpa_jam: boolean;
+  kelompok: KelompokTenggatDb;
+  prioritas: PrioritasTugasDb;
+  status: StatusTugasDb;
+  qc_status: StatusQcDb;
+  qc_note: string;
+  hasil_kerja: string;
+  penerima_id: string;
+  pembuat_id: string;
+  penerima: string | null;
+  pembuat: string | null;
+  goal_id: string | null;
+  goal_judul: string | null;
+  goal_periode: string | null;
+  selesai_at: string | null;
+  created_at: string;
+  total: number;
 };
 
 /** @tabel pengaturan */
@@ -2333,6 +2371,16 @@ export type Database = {
           nama: string;
           gmv: number;
         }[];
+      };
+      /** Isi papan Kanban satu tanggal WIB; to-do hanya milik sendiri (0182). */
+      papan_tugas: {
+        Args: { p_tanggal: string; p_hari_ini: string; p_batas?: number };
+        Returns: BarisTugasTersaring[];
+      };
+      /** Daftar tugas bertenggat yang tersaring & terurut (0020, 0182). */
+      daftar_tugas: {
+        Args: { p_acuan: string; p_saringan?: string; p_batas?: number };
+        Returns: BarisTugasTersaring[];
       };
     };
     Enums: {

@@ -21,7 +21,9 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { buatTiket } from "@/app/actions/tugas";
+import { tanggalKalenderPendek } from "@/lib/format";
+import { MIN_KRITERIA } from "@/lib/validasi-tugas";
+import { buatTiket, hitungBebanPenerima } from "@/app/actions/tugas";
 import type { Pengguna, Prioritas } from "@/lib/types";
 import type { GoalRingkas } from "@/lib/data/goal";
 
@@ -31,20 +33,35 @@ const PRIORITAS: { nilai: Prioritas; label: string }[] = [
   { nilai: "rendah", label: "Rendah" },
 ];
 
+/** Nilai pilihan "tanpa goal"; Select tidak menerima nilai kosong. */
+const TANPA_GOAL = "__tanpa_goal__";
+
 /**
  * Buat tiket untuk anggota tim — pengganti "tugas lewat grup WA" (PRD §1).
  * Daftar penerima hanya berisi orang yang memang boleh ditugasi.
+ *
+ * Isiannya disusun SMART (D5):
+ *   S — judul (kata kerja + objek) dan hasil akhir yang diharapkan;
+ *   M — kriteria selesai (wajib) dan target angka + satuan (opsional);
+ *   A — info beban penerima di tanggal itu, sekadar info;
+ *   R — goal terkait: wajib untuk komitmen, opsional untuk tiket (D6);
+ *   T — tanggal dan jam tenggat, keduanya wajib (D3). Tiket biasa
+ *       bawaannya hari ini; komitmen bawaannya akhir pekan (Sabtu).
  */
 export function DialogTiket({
   penerima,
   goal,
-  tanggal,
+  hariIni,
+  tanggalAwal,
   akhirPekan,
 }: {
   penerima: Pengguna[];
-  /** Goal aktif untuk menautkan komitmen mingguan. */
+  /** Goal aktif untuk menautkan komitmen mingguan atau tiket. */
   goal: GoalRingkas[];
-  tanggal: string;
+  /** Hari ini (WIB) — tanggal paling awal yang boleh dipilih. */
+  hariIni: string;
+  /** Tanggal bawaan tiket biasa; tidak pernah sebelum hari ini. */
+  tanggalAwal: string;
   /** Tanggal akhir pekan berjalan — tenggat bawaan komitmen. */
   akhirPekan: string;
 }) {
@@ -53,17 +70,74 @@ export function DialogTiket({
   const [goalId, setGoalId] = useState("");
   const [judul, setJudul] = useState("");
   const [deskripsi, setDeskripsi] = useState("");
+  const [kriteria, setKriteria] = useState("");
+  const [targetAngka, setTargetAngka] = useState("");
+  const [targetSatuan, setTargetSatuan] = useState("");
   const [penerimaId, setPenerimaId] = useState("");
+  const [tanggal, setTanggal] = useState(tanggalAwal);
+  // Tanggal yang sudah dipilih sendiri tidak ditimpa bawaan saat jenisnya
+  // diganti.
+  const [tanggalDipilih, setTanggalDipilih] = useState(false);
   const [jam, setJam] = useState("17:00");
   const [prioritas, setPrioritas] = useState<Prioritas>("sedang");
   const [menyimpan, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
+  // Beban penerima per "penerima|tanggal": jawaban yang datang terlambat
+  // untuk pilihan lama tidak menimpa jawaban pilihan yang sekarang.
+  const [beban, setBeban] = useState<Record<string, number>>({});
+  const [, mulaiBeban] = useTransition();
 
   const komitmen = tipe === "komitmen_mingguan";
   const siap =
     judul.trim().length >= 3 &&
     penerimaId !== "" &&
+    kriteria.trim().length >= MIN_KRITERIA &&
+    tanggal !== "" &&
+    jam !== "" &&
     (!komitmen || goalId !== "");
+
+  const namaPenerima = penerima.find((p) => p.id === penerimaId)?.nama;
+  const bebanKini = beban[`${penerimaId}|${tanggal}`];
+
+  const muatBeban = (pid: string, tgl: string) => {
+    if (!pid || !tgl) return;
+    const kunci = `${pid}|${tgl}`;
+    mulaiBeban(async () => {
+      const r = await hitungBebanPenerima(pid, tgl);
+      if (r.ok) setBeban((b) => ({ ...b, [kunci]: r.data }));
+    });
+  };
+
+  const bawaanTanggal = (t: typeof tipe) =>
+    t === "komitmen_mingguan" ? akhirPekan : tanggalAwal;
+
+  const gantiTanggal = (t: string) => {
+    setTanggal(t);
+    muatBeban(penerimaId, t);
+  };
+
+  const pilihTipe = (t: typeof tipe) => {
+    setTipe(t);
+    // Komitmen wajib bergoal; pilihan "tanpa goal" milik tiket biasa tidak
+    // boleh terbawa.
+    if (t === "komitmen_mingguan" && goalId === TANPA_GOAL) setGoalId("");
+    if (!tanggalDipilih) gantiTanggal(bawaanTanggal(t));
+  };
+
+  const pilihPenerima = (id: string) => {
+    setPenerimaId(id);
+    muatBeban(id, tanggal);
+  };
+
+  const bukaTutup = (b: boolean) => {
+    if (b) {
+      const t = bawaanTanggal(tipe);
+      setTanggal(t);
+      setTanggalDipilih(false);
+      muatBeban(penerimaId, t);
+    }
+    setBuka(b);
+  };
 
   const simpan = () => {
     if (!siap || menyimpan) return;
@@ -73,18 +147,23 @@ export function DialogTiket({
       const hasil = await buatTiket({
         judul,
         deskripsi,
+        kriteriaSelesai: kriteria,
+        targetAngka,
+        targetSatuan,
         penerimaId,
         tipe,
-        goalId: komitmen ? goalId : null,
-        tenggat: jam
-          ? `${komitmen ? akhirPekan : tanggal}T${jam}:00+07:00`
-          : null,
+        goalId: goalId && goalId !== TANPA_GOAL ? goalId : null,
+        tanggal,
+        jam,
         prioritas,
       });
 
       if (hasil.ok || hasil.kode === "demo") {
         setJudul("");
         setDeskripsi("");
+        setKriteria("");
+        setTargetAngka("");
+        setTargetSatuan("");
         setPenerimaId("");
         setBuka(false);
         if (!hasil.ok) setPesan(hasil.pesan);
@@ -96,8 +175,13 @@ export function DialogTiket({
 
   if (penerima.length === 0) return null;
 
+  const labelIsian = "text-[13px] leading-[18px] font-semibold";
+  const opsional = (
+    <span className="font-normal text-muted-foreground">(opsional)</span>
+  );
+
   return (
-    <Dialog open={buka} onOpenChange={setBuka}>
+    <Dialog open={buka} onOpenChange={bukaTutup}>
       <DialogTrigger asChild>
         <Button
           type="button"
@@ -120,9 +204,7 @@ export function DialogTiket({
 
         <div className="space-y-3">
           <fieldset className="space-y-1.5">
-            <legend className="text-[13px] leading-[18px] font-semibold">
-              Jenis
-            </legend>
+            <legend className={labelIsian}>Jenis</legend>
             <div className="flex gap-2">
               {(
                 [
@@ -133,7 +215,7 @@ export function DialogTiket({
                 <button
                   key={o.nilai}
                   type="button"
-                  onClick={() => setTipe(o.nilai)}
+                  onClick={() => pilihTipe(o.nilai)}
                   aria-pressed={tipe === o.nilai}
                   disabled={
                     o.nilai === "komitmen_mingguan" && goal.length === 0
@@ -157,40 +239,11 @@ export function DialogTiket({
             ) : null}
           </fieldset>
 
-          {komitmen ? (
-            <div className="space-y-1.5">
-              <label
-                htmlFor="goal-tiket"
-                className="text-[13px] leading-[18px] font-semibold"
-              >
-                Goal yang dituju
-              </label>
-              <Select value={goalId} onValueChange={setGoalId}>
-                <SelectTrigger
-                  id="goal-tiket"
-                  className="h-12 w-full rounded-xl"
-                >
-                  <SelectValue placeholder="Pilih goal" />
-                </SelectTrigger>
-                <SelectContent>
-                  {goal.map((g) => (
-                    <SelectItem key={g.id} value={g.id}>
-                      {g.judul} · {g.periode}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ) : null}
-
           <div className="space-y-1.5">
-            <label
-              htmlFor="penerima-tiket"
-              className="text-[13px] leading-[18px] font-semibold"
-            >
+            <label htmlFor="penerima-tiket" className={labelIsian}>
               Penerima
             </label>
-            <Select value={penerimaId} onValueChange={setPenerimaId}>
+            <Select value={penerimaId} onValueChange={pilihPenerima}>
               <SelectTrigger
                 id="penerima-tiket"
                 className="h-12 w-full rounded-xl"
@@ -205,13 +258,23 @@ export function DialogTiket({
                 ))}
               </SelectContent>
             </Select>
+            {/* A — dapat dicapai: sekadar info, tidak memblokir. */}
+            {namaPenerima && tanggal && bebanKini !== undefined ? (
+              <p
+                role="status"
+                className="text-[11px] leading-[14px] text-muted-foreground"
+              >
+                <span className="font-semibold text-foreground">
+                  {namaPenerima}
+                </span>{" "}
+                punya {bebanKini} tiket aktif bertenggat{" "}
+                {tanggalKalenderPendek(tanggal, hariIni)}.
+              </p>
+            ) : null}
           </div>
 
           <div className="space-y-1.5">
-            <label
-              htmlFor="judul-tiket"
-              className="text-[13px] leading-[18px] font-semibold"
-            >
+            <label htmlFor="judul-tiket" className={labelIsian}>
               Judul tiket
             </label>
             <input
@@ -220,73 +283,158 @@ export function DialogTiket({
               maxLength={200}
               autoComplete="off"
               onChange={(e) => setJudul(e.target.value)}
-              placeholder="Mis. audit GMV akun beauty"
+              placeholder="Kata kerja + objek, mis. Audit GMV 5 akun beauty"
               className="h-12 w-full rounded-xl bg-muted px-4 text-[15px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
             />
           </div>
 
           <div className="space-y-1.5">
-            <label
-              htmlFor="deskripsi-tiket"
-              className="text-[13px] leading-[18px] font-semibold"
-            >
-              Rincian{" "}
-              <span className="font-normal text-muted-foreground">
-                (opsional)
-              </span>
+            <label htmlFor="deskripsi-tiket" className={labelIsian}>
+              Hasil akhir yang diharapkan {opsional}
             </label>
             <textarea
               id="deskripsi-tiket"
-              rows={3}
+              rows={2}
               maxLength={600}
               value={deskripsi}
               onChange={(e) => setDeskripsi(e.target.value)}
-              placeholder="Jelaskan hasil yang diharapkan agar QC-nya jelas."
+              placeholder="Mis. laporan deviasi komisi per kreator, siap dipakai rekonsiliasi."
               className="w-full resize-none rounded-xl bg-muted px-4 py-3 text-[13px] leading-[18px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
             />
           </div>
 
-          <div className="flex gap-3">
-            <div className="flex-1 space-y-1.5">
-              <label
-                htmlFor="jam-tiket"
-                className="text-[13px] leading-[18px] font-semibold"
-              >
-                {komitmen ? "Tenggat akhir pekan" : "Tenggat hari ini"}
+          <div className="space-y-1.5">
+            <label htmlFor="kriteria-tiket" className={labelIsian}>
+              Kriteria selesai
+            </label>
+            <textarea
+              id="kriteria-tiket"
+              rows={2}
+              maxLength={600}
+              required
+              value={kriteria}
+              onChange={(e) => setKriteria(e.target.value)}
+              placeholder="Tiket dianggap selesai bila …"
+              aria-describedby="kriteria-tiket-bantuan"
+              className="w-full resize-none rounded-xl bg-muted px-4 py-3 text-[13px] leading-[18px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
+            />
+            <p
+              id="kriteria-tiket-bantuan"
+              className="text-[11px] leading-[14px] text-muted-foreground"
+            >
+              Pemeriksa menilai hasil kerja terhadap kriteria ini saat QC.
+            </p>
+          </div>
+
+          <fieldset className="space-y-1.5">
+            <legend className={labelIsian}>Target {opsional}</legend>
+            <div className="grid grid-cols-[6rem_1fr] gap-2">
+              <input
+                type="number"
+                inputMode="decimal"
+                min={0}
+                step="any"
+                value={targetAngka}
+                onChange={(e) => setTargetAngka(e.target.value)}
+                placeholder="5"
+                aria-label="Angka target"
+                className="tabular h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
+              />
+              <input
+                value={targetSatuan}
+                maxLength={40}
+                autoComplete="off"
+                onChange={(e) => setTargetSatuan(e.target.value)}
+                placeholder="Satuan, mis. akun"
+                aria-label="Satuan target"
+                className="h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
+              />
+            </div>
+          </fieldset>
+
+          <div className="space-y-1.5">
+            <label htmlFor="goal-tiket" className={labelIsian}>
+              {komitmen ? "Goal yang dituju" : "Goal terkait"}{" "}
+              {komitmen ? null : opsional}
+            </label>
+            <Select value={goalId} onValueChange={setGoalId}>
+              <SelectTrigger id="goal-tiket" className="h-12 w-full rounded-xl">
+                <SelectValue
+                  placeholder={komitmen ? "Pilih goal" : "Tanpa goal"}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                {komitmen ? null : (
+                  <SelectItem value={TANPA_GOAL}>Tanpa goal</SelectItem>
+                )}
+                {goal.map((g) => (
+                  <SelectItem key={g.id} value={g.id}>
+                    {g.judul} · {g.periode}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <label htmlFor="tanggal-tiket" className={labelIsian}>
+                Tanggal tenggat
+              </label>
+              <input
+                id="tanggal-tiket"
+                type="date"
+                required
+                min={hariIni}
+                value={tanggal}
+                onChange={(e) => {
+                  gantiTanggal(e.target.value);
+                  setTanggalDipilih(true);
+                }}
+                className="tabular h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label htmlFor="jam-tiket" className={labelIsian}>
+                Jam
               </label>
               <input
                 id="jam-tiket"
                 type="time"
+                required
                 value={jam}
                 onChange={(e) => setJam(e.target.value)}
                 className="tabular h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
               />
             </div>
-
-            <fieldset className="flex-1 space-y-1.5">
-              <legend className="text-[13px] leading-[18px] font-semibold">
-                Prioritas
-              </legend>
-              <div className="flex gap-1">
-                {PRIORITAS.map((p) => (
-                  <button
-                    key={p.nilai}
-                    type="button"
-                    onClick={() => setPrioritas(p.nilai)}
-                    aria-pressed={p.nilai === prioritas}
-                    className={cn(
-                      "tekan-halus h-11 flex-1 rounded-xl text-[11px] font-semibold",
-                      p.nilai === prioritas
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-              </div>
-            </fieldset>
           </div>
+          {komitmen && !tanggalDipilih ? (
+            <p className="-mt-1.5 text-[11px] leading-[14px] text-muted-foreground">
+              Bawaannya akhir pekan ini (Sabtu); boleh diganti.
+            </p>
+          ) : null}
+
+          <fieldset className="space-y-1.5">
+            <legend className={labelIsian}>Prioritas</legend>
+            <div className="flex gap-1">
+              {PRIORITAS.map((p) => (
+                <button
+                  key={p.nilai}
+                  type="button"
+                  onClick={() => setPrioritas(p.nilai)}
+                  aria-pressed={p.nilai === prioritas}
+                  className={cn(
+                    "tekan-halus h-11 flex-1 rounded-xl text-[11px] font-semibold",
+                    p.nilai === prioritas
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </fieldset>
 
           {pesan ? (
             <p

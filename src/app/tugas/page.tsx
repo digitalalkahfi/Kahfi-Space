@@ -10,12 +10,21 @@ import {
 } from "@/components/tugas/pilih-tampilan";
 import { DialogTiket } from "@/components/tugas/dialog-tiket";
 import { DialogToDo } from "@/components/tugas/dialog-todo";
+import { StripTanggal } from "@/components/tugas/strip-tanggal";
+import { PesanAksi } from "@/components/shared/pesan-aksi";
 import { Reveal } from "@/components/motion/reveal";
-import { ambilSemuaTugas, jejakQcBanyak, ringkasToDo } from "@/lib/data/tugas";
-import { TANGGAL_ACUAN } from "@/lib/data/contoh";
+import {
+  ambilDaftarTugas,
+  ambilPapanTugas,
+  hariIniTugas,
+  jejakQcBanyak,
+  ringkasToDo,
+} from "@/lib/data/tugas";
 import { goalAktif } from "@/lib/data/goal";
 import { anggotaBisaDitugasi, peranValid, sesiSaatIni } from "@/lib/data/sesi";
-import { modeData } from "@/lib/supabase/config";
+import { akhirPekan } from "@/lib/validasi-tugas";
+import { tanggalDariParam } from "@/lib/papan-tanggal";
+import { bilangan } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Tugas — K-Space V2",
@@ -27,7 +36,11 @@ export const metadata: Metadata = {
 const PEMERIKSA = ["CEO", "Manager", "Leader", "Co-Leader"];
 
 export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
-  const { persona, tampilan: tampilanParam } = await searchParams;
+  const {
+    persona,
+    tampilan: tampilanParam,
+    tanggal: tanggalParam,
+  } = await searchParams;
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
@@ -37,17 +50,23 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
   const tampilan: TampilanTugas =
     tampilanParam === "daftar" ? "daftar" : "papan";
 
+  // Hari ini menurut WIB (D7), bukan UTC: antara 00.00 dan 06.59 WIB
+  // tanggal UTC masih kemarin.
+  const hariIni = hariIniTugas();
+  // Papan menampilkan satu tanggal (D4); `?tanggal=` yang rusak jatuh ke
+  // hari ini. Daftar tetap mengelompokkan semua yang belum selesai.
   const tanggal =
-    modeData() === "demo"
-      ? TANGGAL_ACUAN
-      : new Date().toISOString().slice(0, 10);
+    tampilan === "papan" ? tanggalDariParam(tanggalParam, hariIni) : hariIni;
 
-  const [tugas, calonPenerima, goal, ringkas] = await Promise.all([
-    ambilSemuaTugas(pengguna),
+  const [isi, calonPenerima, goal, ringkas] = await Promise.all([
+    tampilan === "papan"
+      ? ambilPapanTugas(pengguna, tanggal, hariIni)
+      : ambilDaftarTugas(pengguna, hariIni),
     anggotaBisaDitugasi(pengguna),
     goalAktif(pengguna),
-    ringkasToDo(pengguna),
+    ringkasToDo(pengguna, tanggal),
   ]);
+  const { tugas } = isi;
 
   // Riwayat QC hanya diambil untuk tugas yang memang pernah diperiksa —
   // satu kueri untuk seluruh papan, bukan satu per kartu.
@@ -55,10 +74,9 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
     tugas.filter((t) => t.qcStatus !== "belum").map((t) => t.id),
   );
 
-  // Minggu dianggap berakhir Sabtu; dipakai sebagai tenggat bawaan komitmen.
-  const akhir = new Date(`${tanggal}T00:00:00Z`);
-  akhir.setUTCDate(akhir.getUTCDate() + (6 - akhir.getUTCDay()));
-  const akhirPekan = akhir.toISOString().slice(0, 10);
+  // Tugas baru selalu untuk hari ini atau sesudahnya — juga saat papan
+  // sedang menampilkan tanggal lampau.
+  const tanggalBaru = tanggal > hariIni ? tanggal : hariIni;
 
   return (
     <AppShell pengguna={pengguna} halaman="Tugas">
@@ -86,28 +104,45 @@ export default async function TugasPage({ searchParams }: PageProps<"/tugas">) {
             <DialogTiket
               penerima={calonPenerima}
               goal={goal}
-              tanggal={tanggal}
-              akhirPekan={akhirPekan}
+              hariIni={hariIni}
+              tanggalAwal={tanggalBaru}
+              // Minggu dianggap berakhir Sabtu; tenggat bawaan komitmen.
+              akhirPekan={akhirPekan(hariIni)}
             />
-            <DialogToDo tanggal={tanggal} />
+            <DialogToDo hariIni={hariIni} tanggalAwal={tanggalBaru} />
           </div>
         </div>
+
+        {tampilan === "papan" ? (
+          <StripTanggal tanggal={tanggal} hariIni={hariIni} />
+        ) : null}
+
+        {/* Batas aman tercapai: dikatakan, bukan dipotong diam-diam. */}
+        {isi.terpotong ? (
+          <PesanAksi nada="netral" ukuran="sedang">
+            Menampilkan {bilangan(tugas.length)} tugas pertama dari{" "}
+            {bilangan(isi.total)}
+            {tampilan === "papan" ? " untuk tanggal ini" : ""}. Yang lainnya
+            tidak dimuat.
+          </PesanAksi>
+        ) : null}
 
         <Reveal>
           {tampilan === "papan" ? (
             <PapanKanban
               tugas={tugas}
-              namaSaya={pengguna.nama}
+              idSaya={pengguna.id}
               bolehQcSemua={PEMERIKSA.includes(pengguna.role)}
-              hariIni={tanggal}
+              tanggal={tanggal}
+              hariIni={hariIni}
               jejakQc={jejak}
             />
           ) : (
             <DaftarTugas
               tugas={tugas}
-              namaSaya={pengguna.nama}
+              idSaya={pengguna.id}
               bolehQcSemua={PEMERIKSA.includes(pengguna.role)}
-              hariIni={tanggal}
+              hariIni={hariIni}
               jejakQc={jejak}
             />
           )}
