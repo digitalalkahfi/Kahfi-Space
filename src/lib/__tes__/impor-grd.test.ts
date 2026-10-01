@@ -705,6 +705,44 @@ test("GRD Cascade: rencana, goal yang dilayani, dan lead measure", () => {
   assert.ok(!lead["1.1.0.1"]);
 });
 
+test("GRD Cascade: blok sel, label, dan judul goal persis kalimat sheet", () => {
+  const wb = workbookDenganCascade();
+  // Label di bawah sel goal Leader, seperti "GOAL LEADER AFFILIATOR (Siti)".
+  const ws = wb.Sheets["GRD Cascade"] as Record<
+    string,
+    { v: unknown; t: string }
+  >;
+  ws.F5 = { v: "GOAL LEADER AFFILIATOR (Siti)", t: "s" };
+  const r = bacaRencanaGrd(wb);
+  const blok = r.cascade.map((b) => [b.kolom, b.kode, b.goal, b.label]);
+  assert.deepEqual(blok, [
+    ["judul", "", null, ""],
+    ["perusahaan", "1", "1", ""],
+    ["manager", "1.1", "1.1", ""],
+    ["leader", "1.1.0", null, ""],
+    ["leader", "1.1.3", "1.1.3", "GOAL LEADER AFFILIATOR (Siti)"],
+    ["perusahaan", "M", null, ""],
+    ["manager", "—", null, ""],
+    ["leader", "—", null, ""],
+  ]);
+  // Judul goal mengikuti kalimat GRD Cascade.
+  assert.equal(
+    r.goals.find((g) => g.kode === "1.1.3")!.judul,
+    "GMV akun utama",
+  );
+  const rencana = Object.fromEntries(r.rencanaOp.map((x) => [x.kode, x]));
+  assert.deepEqual(rencana["1.1.3.8"].blok, {
+    perusahaan: 1,
+    manager: 2,
+    leader: 4,
+  });
+  assert.deepEqual(rencana["M.1"].blok, {
+    perusahaan: 5,
+    manager: 6,
+    leader: 7,
+  });
+});
+
 test("pemetaan: PIC dari kolom SIAPA dan sumber otomatis KPI", () => {
   const mentah = bacaRencanaGrd(workbookDenganCascade());
   const { rencana, laporan } = susunRencana(
