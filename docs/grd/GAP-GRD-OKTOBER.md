@@ -685,3 +685,39 @@ Indikator yang tetap diisi penilai:
     itu KPI Oktober sebaiknya **dikunci setelah 4 November**.
 21. **Najib belum terdaftar.** Tonggak 1.2.4.x dan 1.2.5.x untuk sementara hanya bisa dicentang
     CEO/Manager.
+
+---
+
+## 11. Tahap 4 — Leaderboard (migrasi 0196)
+
+### Halaman
+
+Halaman baru **GRD → Leaderboard**, dengan pemilih bulan yang sama seperti scorecard. Isinya:
+
+- **Peringkat NILAI KPI per level.** Ada tiga papan, masing-masing diperingkat sendiri (keputusan
+  §9 no. 11):
+  - Leader;
+  - Co-Leader;
+  - Staf & Partner, termasuk staf pendukung dan Finance.
+
+  CEO dan Manager tidak diperingkat. Semua yang sudah masuk melihat nama, NILAI, dan predikat.
+  Rincian indikator tetap hanya di scorecard menurut hierarki. Orang yang belum diisi sama sekali
+  tampil "Belum diisi" dengan nilai 0 (keputusan §9 no. 3). Nilai sama berbagi peringkat.
+- **Papan akun.** Isinya % capaian target GMV tiap akun yang punya target akun GRD, tertinggi di
+  atas. Akun yang dikecualikan disebut lewat **id akun** dari berkas pemetaan
+  (`papan_akun_kecuali`), bukan nama:
+  - azkadwianshory_ dikecualikan sejak impor;
+  - kholidfath_ menyusul begitu akunnya terdaftar dan impor diulang.
+
+  Rupiah realisasi dan target hanya tampil bagi yang boleh melihat angka lintas unit. Yang lain
+  melihat persen dan peringkatnya saja.
+
+### Satu sumber angka
+
+- Rumus satu baris scorecard dipindah ke `skor_kpi_bulan`: snapshot bila terkunci, selain itu
+  `nilai_kpi_grd`. `scorecard_tim` dan `papan_kpi` sama-sama membacanya. Leaderboard hanya
+  mengelompokkan dan mengurutkan.
+- Persen papan akun memakai `persen_ukuran`, rumus yang sama dengan indikator KPI "GMV akun vs
+  target". Persen akun seseorang sama persis dengan indikator GMV di lembar KPI pemegangnya.
+- Tes `papan-peringkat` membandingkan **setiap baris** leaderboard dengan baris scorecard orang yang
+  sama, termasuk setelah bulan dikunci.
