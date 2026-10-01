@@ -1160,6 +1160,10 @@ export type BarisGrdRencana = {
   urutan: number;
   asal: string;
   created_at: string;
+  /** Blok sheet GRD Cascade tempat rencana ini berada (0197). */
+  blok_perusahaan: string | null;
+  blok_manager: string | null;
+  blok_leader: string | null;
 };
 
 /** @tabel grd_tonggak */
@@ -1178,6 +1182,18 @@ export type BarisGrdTonggak = {
 };
 
 export type StatusTonggak = "belum" | "progress" | "selesai";
+
+/** @tabel grd_cascade_blok */
+export type BarisGrdCascadeBlok = {
+  id: string;
+  grd_periode: string;
+  kolom: "perusahaan" | "manager" | "leader" | "judul" | "catatan";
+  kode: string;
+  teks: string;
+  label: string;
+  goal_id: string | null;
+  urutan: number;
+};
 
 /** @tabel grd_akun_dikecualikan */
 export type BarisGrdAkunDikecualikan = {
@@ -1719,6 +1735,10 @@ export type Database = {
           Relasi<"grd_ukuran_isian_diisi_oleh_fkey", "diisi_oleh", "users">,
         ]
       >;
+      grd_cascade_blok: Tabel<
+        BarisGrdCascadeBlok,
+        [Relasi<"grd_cascade_blok_goal_id_fkey", "goal_id", "goals">]
+      >;
       grd_akun_dikecualikan: Tabel<
         BarisGrdAkunDikecualikan,
         [
@@ -1731,7 +1751,24 @@ export type Database = {
       >;
       grd_rencana: Tabel<
         BarisGrdRencana,
-        [Relasi<"grd_rencana_goal_id_fkey", "goal_id", "goals">]
+        [
+          Relasi<"grd_rencana_goal_id_fkey", "goal_id", "goals">,
+          Relasi<
+            "grd_rencana_blok_perusahaan_fkey",
+            "blok_perusahaan",
+            "grd_cascade_blok"
+          >,
+          Relasi<
+            "grd_rencana_blok_manager_fkey",
+            "blok_manager",
+            "grd_cascade_blok"
+          >,
+          Relasi<
+            "grd_rencana_blok_leader_fkey",
+            "blok_leader",
+            "grd_cascade_blok"
+          >,
+        ]
       >;
       grd_tonggak: Tabel<
         BarisGrdTonggak,
@@ -2128,6 +2165,32 @@ export type Database = {
           target: number | null;
           persen: number | null;
           peringkat: number;
+        }[];
+      };
+      /** Baris Tabel GRD Cascade beserta blok tiap kolom (0197). */
+      tabel_grd: {
+        Args: { p_periode: string };
+        Returns: {
+          rencana_id: string;
+          urutan: number;
+          kode: string;
+          judul: string;
+          jenis: BarisGrdRencana["jenis"];
+          pic_teks: string;
+          jadwal_teks: string;
+          tonggak: unknown;
+          p_id: string | null;
+          p_kode: string | null;
+          p_teks: string | null;
+          p_label: string | null;
+          m_id: string | null;
+          m_kode: string | null;
+          m_teks: string | null;
+          m_label: string | null;
+          l_id: string | null;
+          l_kode: string | null;
+          l_teks: string | null;
+          l_label: string | null;
         }[];
       };
       /** Rencana operasional GRD beserta tonggaknya (0192). */

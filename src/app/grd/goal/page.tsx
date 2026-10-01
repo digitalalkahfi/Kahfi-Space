@@ -2,12 +2,15 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ListTree, Table2 } from "lucide-react";
 import { AppShell } from "@/components/layout/app-shell";
 import { PohonGoal } from "@/components/grd/pohon-goal";
 import { TanggaBulanan } from "@/components/grd/tangga-bulanan";
 import { Reveal } from "@/components/motion/reveal";
 import { DialogTambahGoal } from "@/components/grd/dialog-tambah-goal";
+import { TabelGrd } from "@/components/grd/tabel-grd";
+import { tabelGrd } from "@/lib/data/tabel-grd";
+import { cn } from "@/lib/utils";
 import {
   anakTanggaBulanan,
   bolehKelolaGoal,
@@ -28,23 +31,51 @@ export const metadata: Metadata = {
 export default async function GoalPage({
   searchParams,
 }: PageProps<"/grd/goal">) {
-  const { persona } = await searchParams;
+  const { persona, tampilan } = await searchParams;
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
   const tanggal = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
+  const modeTabel = tampilan === "tabel";
 
-  const pohon = await pohonGoal(pengguna, tanggal);
   const kelola = bolehKelolaGoal(pengguna);
   const pilihan = kelola ? await pilihanGoal() : null;
+
+  // Kedua tampilan membaca data yang sama (goals, grd_rencana); hanya
+  // yang ditampilkan saja yang dimuat.
+  const pohon = modeTabel ? [] : await pohonGoal(pengguna, tanggal);
+  const tabel = modeTabel
+    ? await tabelGrd(pengguna, `${tanggal.slice(0, 7)}-01`)
+    : null;
 
   // Anak tangga ditampilkan untuk goal teratas yang terlihat pengguna ini.
   const utama = pohon[0];
   const bulan = utama ? await anakTanggaBulanan(utama.id, tanggal) : [];
 
+  const alamat = (t: "hierarki" | "tabel") => {
+    const q = new URLSearchParams();
+    if (t === "tabel") q.set("tampilan", "tabel");
+    if (typeof persona === "string") q.set("persona", persona);
+    const s = q.toString();
+    return s ? `/grd/goal?${s}` : "/grd/goal";
+  };
+  const PILIHAN_TAMPILAN = [
+    {
+      kunci: "hierarki" as const,
+      label: "Hierarki / Roll-down",
+      Ikon: ListTree,
+    },
+    { kunci: "tabel" as const, label: "Tabel GRD", Ikon: Table2 },
+  ];
+
   return (
     <AppShell pengguna={pengguna} halaman="GRD">
-      <div className="mx-auto w-full max-w-4xl space-y-4">
+      <div
+        className={cn(
+          "mx-auto w-full space-y-4",
+          modeTabel ? "max-w-[1440px]" : "max-w-4xl",
+        )}
+      >
         <Link
           href="/grd"
           className="tekan-halus sentuh-nyaman inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-[13px] leading-[18px] font-semibold ring-1 ring-border-subtle"
@@ -68,15 +99,48 @@ export default async function GoalPage({
           ) : null}
         </div>
 
-        {utama ? (
-          <Reveal>
-            <TanggaBulanan judul={utama.judul} bulan={bulan} />
-          </Reveal>
-        ) : null}
+        <nav
+          aria-label="Pilih tampilan goal"
+          className="inline-flex rounded-full bg-muted p-1"
+        >
+          {PILIHAN_TAMPILAN.map(({ kunci, label, Ikon }) => {
+            const aktif = (kunci === "tabel") === modeTabel;
+            return (
+              <Link
+                key={kunci}
+                href={alamat(kunci)}
+                aria-current={aktif ? "page" : undefined}
+                className={cn(
+                  "tekan-halus inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-[13px] leading-[18px] font-semibold",
+                  aktif
+                    ? "bg-card text-foreground shadow-card ring-1 ring-border-subtle"
+                    : "text-muted-foreground",
+                )}
+              >
+                <Ikon className="size-3.5" aria-hidden />
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
 
-        <Reveal>
-          <PohonGoal pohon={pohon} acuan={tanggal} pilihan={pilihan} />
-        </Reveal>
+        {tabel ? (
+          <Reveal>
+            <TabelGrd tabel={tabel} hariIni={tanggal} />
+          </Reveal>
+        ) : (
+          <>
+            {utama ? (
+              <Reveal>
+                <TanggaBulanan judul={utama.judul} bulan={bulan} />
+              </Reveal>
+            ) : null}
+
+            <Reveal>
+              <PohonGoal pohon={pohon} acuan={tanggal} pilihan={pilihan} />
+            </Reveal>
+          </>
+        )}
       </div>
     </AppShell>
   );

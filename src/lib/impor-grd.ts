@@ -96,6 +96,27 @@ export type RencanaOpMentah = {
   urutan: number;
   asal: string;
   tonggak: TonggakMentah[];
+  /** Indeks blok GRD Cascade tempat baris ini berada, per kolom. */
+  blok: {
+    perusahaan: number | null;
+    manager: number | null;
+    leader: number | null;
+  };
+};
+
+/**
+ * Satu blok sel sheet GRD Cascade: sel kode + teks di kolom Perusahaan
+ * (A/B), Manager (C/D), atau Leader (E/F), beserta label di bawahnya
+ * (mis. "GOAL LEADER AFFILIATOR (Siti)"); juga judul dan catatan sheet.
+ * Teks disimpan persis seperti file.
+ */
+export type BlokCascadeMentah = {
+  kolom: "perusahaan" | "manager" | "leader" | "judul" | "catatan";
+  kode: string;
+  teks: string;
+  label: string;
+  /** Kode goal bila blok ini sebuah goal. */
+  goal: string | null;
 };
 
 /** Lead measure dari baris HARIAN "minimal N … setiap hari" (0193). */
@@ -120,6 +141,7 @@ export type RencanaMentah = {
   ukuran: UkuranMentah[];
   lembar: LembarMentah[];
   rencanaOp: RencanaOpMentah[];
+  cascade: BlokCascadeMentah[];
   lead: LeadMentah[];
   /** Hal yang dilewati pembaca beserta alasannya. */
   catatan: string[];
@@ -1083,20 +1105,74 @@ function goalTerdekat(kode: string, goalKode: Set<string>): string | null {
   return null;
 }
 
+const KOLOM_CASCADE = [
+  ["A", "B", "perusahaan"],
+  ["C", "D", "manager"],
+  ["E", "F", "leader"],
+] as const;
+
+/** Sel kode GRD Cascade: "1", "1.1.0", "M", "S.2.1", atau "—". */
+const POLA_KODE_CASCADE = /^(?:[0-9A-Z]+(?:\.[0-9]+)*|—)$/;
+
 function bacaCascade(
   ws: LembarXlsx,
   periode: string,
   goalKode: Set<string>,
   catatan: string[],
-): RencanaOpMentah[] {
+): { rencana: RencanaOpMentah[]; blok: BlokCascadeMentah[] } {
   const akhir = barisTerakhir(ws);
   const hasil: RencanaOpMentah[] = [];
+  const blok: BlokCascadeMentah[] = [];
+  const kini: Record<"perusahaan" | "manager" | "leader", number | null> = {
+    perusahaan: null,
+    manager: null,
+    leader: null,
+  };
+  const judulSheet = teks(ws, "A1");
+  if (judulSheet) {
+    blok.push({
+      kolom: "judul",
+      kode: "",
+      teks: judulSheet,
+      label: "",
+      goal: null,
+    });
+  }
   let induk = "";
   for (let r = 3; r <= akhir; r += 1) {
     const a = teks(ws, `A${r}`);
     const e = teks(ws, `E${r}`);
     if (/^[0-9S][0-9S.]*$/.test(e)) induk = e;
     else if (/^[A-Z]$/.test(a)) induk = a;
+
+    // Blok sel: sel kode terisi = blok baru; teks tanpa kode = label blok
+    // yang sedang berjalan (mis. "GOAL MANAGER — KHOLID").
+    for (const [kk, kt, kolom] of KOLOM_CASCADE) {
+      const kode = teks(ws, `${kk}${r}`);
+      const isi = teks(ws, `${kt}${r}`);
+      if (kode && POLA_KODE_CASCADE.test(kode)) {
+        blok.push({
+          kolom,
+          kode,
+          teks: isi,
+          label: "",
+          goal: goalKode.has(kode) ? kode : null,
+        });
+        kini[kolom] = blok.length - 1;
+      } else if (kode && kolom === "perusahaan" && !teks(ws, `G${r}`)) {
+        // Catatan "Cara baca: …" di kaki sheet.
+        blok.push({
+          kolom: "catatan",
+          kode: "",
+          teks: kode,
+          label: "",
+          goal: null,
+        });
+      } else if (isi && kini[kolom] !== null) {
+        const b = blok[kini[kolom] as number];
+        b.label = b.label ? `${b.label} · ${isi}` : isi;
+      }
+    }
 
     const kode = teks(ws, `G${r}`);
     const judul = teks(ws, `H${r}`);
@@ -1128,9 +1204,10 @@ function bacaCascade(
       urutan: hasil.length + 1,
       asal: `GRD Cascade!G${r}`,
       tonggak,
+      blok: { ...kini },
     });
   }
-  return hasil;
+  return { rencana: hasil, blok };
 }
 
 /**
@@ -1194,6 +1271,28 @@ export function bacaRencanaGrd(workbook: {
 
   const targetAkun = bacaTargetAkun(kurvaWs, periode, goalPerKode, catatan);
   const semuaGoal = [...goals, ...targetAkun.goals];
+
+  // GRD Cascade dibaca lebih dulu: kalimat goal di sheet itu yang dipakai
+  // sebagai judul goal, supaya tampilan hierarki dan Tabel GRD membaca
+  // satu teks yang sama persis dengan file.
+  const cascadeWs = workbook.Sheets["GRD Cascade"];
+  const { rencana: rencanaOp, blok: cascade } = cascadeWs
+    ? bacaCascade(
+        cascadeWs,
+        periode,
+        new Set(semuaGoal.map((g) => g.kode)),
+        catatan,
+      )
+    : { rencana: [], blok: [] };
+  if (!cascadeWs) {
+    catatan.push(
+      'Sheet "GRD Cascade" tidak ada; rencana operasional dilewati.',
+    );
+  }
+  for (const b of cascade) {
+    const g = b.goal ? semuaGoal.find((x) => x.kode === b.goal) : undefined;
+    if (g && b.teks && g.judul !== b.teks) g.judul = b.teks;
+  }
 
   // Ukuran: baris kurva lebih dulu (membawa titik), lalu setiap goal yang
   // belum punya ukuran.
@@ -1275,19 +1374,6 @@ export function bacaRencanaGrd(workbook: {
 
   const lembar = bacaKpi(workbook, catatan);
 
-  const cascadeWs = workbook.Sheets["GRD Cascade"];
-  const rencanaOp = cascadeWs
-    ? bacaCascade(
-        cascadeWs,
-        periode,
-        new Set(semuaGoal.map((g) => g.kode)),
-        catatan,
-      )
-    : [];
-  if (!cascadeWs)
-    catatan.push(
-      'Sheet "GRD Cascade" tidak ada; rencana operasional dilewati.',
-    );
   const lead = bacaLead(rencanaOp, ukuran, periode);
 
   return {
@@ -1297,6 +1383,7 @@ export function bacaRencanaGrd(workbook: {
     ukuran,
     lembar,
     rencanaOp,
+    cascade,
     lead,
     catatan,
   };
@@ -1382,6 +1469,7 @@ export type RencanaImpor = {
   rencana: Record<string, unknown>[];
   lead: Record<string, unknown>[];
   papan_kecuali?: { account_id: string; alasan: string }[];
+  cascade?: Record<string, unknown>[];
 };
 
 export type LaporanSusun = {
@@ -1599,6 +1687,7 @@ export function susunRencana(
       urutan: r.urutan,
       asal: r.asal,
       tonggak: r.tonggak,
+      blok: r.blok,
     };
   });
 
@@ -1889,6 +1978,11 @@ export function susunRencana(
       rencana,
       lead,
       ...(papan_kecuali ? { papan_kecuali } : {}),
+      // Goal yang dilewati (akun belum terdaftar) tidak bisa jadi blok goal.
+      cascade: mentah.cascade.map((b) => ({
+        ...b,
+        goal: b.goal && kodeGoal.has(b.goal) ? b.goal : null,
+      })),
     },
     laporan,
   };
