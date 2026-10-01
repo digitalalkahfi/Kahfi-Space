@@ -57,8 +57,19 @@ export type RincianGrd = {
   arah: ArahTangga;
   /** Ambang kolom 1–10; kolom 4 = BASE, 8 = GOAL, 9–10 = STRETCH. */
   tangga: number[];
-  /** null = belum diisi penilai; bernilai 0. */
+  /**
+   * PENCAPAIAN yang dinilai: isian penilai bila ada, selain itu angka
+   * otomatis. null = belum ada keduanya; bernilai 0.
+   */
   pencapaian: number | null;
+  /** "manual" atau sumber otomatisnya (0194). */
+  sumber: string;
+  /** Penjelasan sumber otomatis, mis. "Otomatis: tonggak tepat waktu (…)". */
+  keteranganSumber: string;
+  /** Isian penilai; menang atas angka otomatis. */
+  manual: number | null;
+  /** Angka otomatis dari data aplikasi; null bila belum ada data. */
+  otomatis: number | null;
   /** VALUE 0–10. */
   nilai: number;
   /** VALUE × bobot. */

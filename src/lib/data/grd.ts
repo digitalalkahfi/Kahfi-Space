@@ -8,6 +8,7 @@ import { klienServer } from "@/lib/supabase/server";
 import { dataContoh } from "@/lib/data/contoh";
 import { keputusanWrm } from "@/lib/wrm";
 import type { KeputusanWrm, KodeUnit, Pengguna } from "@/lib/types";
+import type { BarisLeadMeasure } from "@/lib/supabase/types";
 
 export type GoalKorporasi = {
   judul: string;
@@ -42,7 +43,7 @@ export type PapanLead = {
    * Kolom laporan harian yang menjadi sumber angka ini (migrasi 0130);
    * null berarti masih diisi manual di papan.
    */
-  sumberLaporan: "gmv" | "komisi" | "jumlah_upload" | null;
+  sumberLaporan: BarisLeadMeasure["sumber_laporan"];
 };
 
 export type AnakTangga = {

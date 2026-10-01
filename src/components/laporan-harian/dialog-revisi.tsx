@@ -15,10 +15,17 @@ import {
 import { Button } from "@/components/ui/button";
 import { InputGmv } from "@/components/laporan-harian/input-gmv";
 import { cn } from "@/lib/utils";
-import { jamWib, rupiahPenuh, tanggalPendek } from "@/lib/format";
+import {
+  angka,
+  bacaAngka,
+  jamWib,
+  rupiahPenuh,
+  tanggalPendek,
+} from "@/lib/format";
 import { RincianRevisi } from "@/components/laporan-harian/rincian-revisi";
 import {
   bersihkanIsi,
+  MAKS_GMV,
   MAKS_KOMISI,
   MAKS_UPLOAD,
   periksaIsiLaporan,
@@ -50,22 +57,35 @@ export function DialogRevisi({
   const [gmvBaru, setGmvBaru] = useState(laporan.gmv);
   const [komisiBaru, setKomisiBaru] = useState(laporan.komisi ?? 0);
   const [uploadBaru, setUploadBaru] = useState(laporan.jumlahUpload ?? 0);
+  const [liveBaru, setLiveBaru] = useState(laporan.gmvLive ?? 0);
+  const [jamBaru, setJamBaru] = useState(
+    laporan.jamLive === null ? "" : angka(laporan.jamLive),
+  );
   const [alasan, setAlasan] = useState("");
   const [menyimpan, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
 
+  // LIVE: kosong tetap berarti "tidak diubah" (0191), jadi angka LIVE
+  // yang sudah ada tidak hilang hanya karena kotaknya tidak disentuh.
+  const jamDibaca = bacaAngka(jamBaru);
   const isiBaru = bersihkanIsi(unit, {
     gmv: gmvBaru,
     komisi: komisiBaru,
     jumlahUpload: uploadBaru,
+    gmvLive: laporan.gmvLive === null && liveBaru === 0 ? null : liveBaru,
+    jamLive: jamDibaca,
     catatan: laporan.catatan,
   });
   // Perbaikan boleh menyentuh angka mana pun; yang wajib hanya ada yang
   // benar-benar berubah, dan alasannya.
+  const ubahLive = (isiBaru.gmvLive ?? null) !== laporan.gmvLive;
+  const ubahJam = (isiBaru.jamLive ?? null) !== laporan.jamLive;
   const berubah =
     isiBaru.gmv !== laporan.gmv ||
     isiBaru.komisi !== (laporan.komisi ?? null) ||
-    isiBaru.jumlahUpload !== (laporan.jumlahUpload ?? null);
+    isiBaru.jumlahUpload !== (laporan.jumlahUpload ?? null) ||
+    ubahLive ||
+    ubahJam;
   const salah = periksaIsiLaporan(unit, isiBaru);
   const alasanCukup = alasan.trim().length >= MIN_ALASAN;
   const bisaSimpan = berubah && !salah && alasanCukup;
@@ -81,6 +101,8 @@ export function DialogRevisi({
         gmv: isiBaru.gmv,
         komisi: isiBaru.komisi,
         jumlahUpload: isiBaru.jumlahUpload,
+        gmvLive: ubahLive ? (isiBaru.gmvLive ?? null) : null,
+        jamLive: ubahJam ? (isiBaru.jamLive ?? null) : null,
         alasan: alasan.trim(),
       });
 
@@ -102,6 +124,10 @@ export function DialogRevisi({
         komisiBaru: ubahKomisi ? isiBaru.komisi : null,
         uploadLama: ubahUpload ? (laporan.jumlahUpload ?? 0) : null,
         uploadBaru: ubahUpload ? isiBaru.jumlahUpload : null,
+        liveLama: ubahLive ? (laporan.gmvLive ?? 0) : null,
+        liveBaru: ubahLive ? (isiBaru.gmvLive ?? null) : null,
+        jamLama: ubahJam ? (laporan.jamLive ?? 0) : null,
+        jamBaru: ubahJam ? (isiBaru.jamLive ?? null) : null,
         alasan: alasan.trim(),
         diubahOleh: olehNama,
         createdAt: new Date().toISOString(),
@@ -120,6 +146,8 @@ export function DialogRevisi({
           setGmvBaru(laporan.gmv);
           setKomisiBaru(laporan.komisi ?? 0);
           setUploadBaru(laporan.jumlahUpload ?? 0);
+          setLiveBaru(laporan.gmvLive ?? 0);
+          setJamBaru(laporan.jamLive === null ? "" : angka(laporan.jamLive));
           setAlasan("");
         }
       }}
@@ -231,6 +259,44 @@ export function DialogRevisi({
                   />
                 </div>
               ) : null}
+            </div>
+          ) : null}
+
+          {punyaKolom(unit, "gmvLive") ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="live-revisi"
+                  className="text-[13px] leading-[18px] font-semibold"
+                >
+                  GMV dari LIVE
+                </label>
+                <InputGmv
+                  id="live-revisi"
+                  ringkas
+                  label="GMV LIVE"
+                  maks={MAKS_GMV}
+                  nilai={liveBaru}
+                  onUbah={setLiveBaru}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label
+                  htmlFor="jam-revisi"
+                  className="text-[13px] leading-[18px] font-semibold"
+                >
+                  Lama LIVE (jam)
+                </label>
+                <input
+                  id="jam-revisi"
+                  inputMode="decimal"
+                  autoComplete="off"
+                  value={jamBaru}
+                  onChange={(e) => setJamBaru(e.target.value)}
+                  placeholder="tidak LIVE"
+                  className="tabular h-10 w-full rounded-xl bg-muted px-3 text-[13px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
+                />
+              </div>
             </div>
           ) : null}
 

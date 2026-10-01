@@ -264,7 +264,9 @@ export function KpiAnggota({
                   </span>
                   <span className="block text-[11px] leading-[14px] text-muted-foreground">
                     {r.pencapaian === null
-                      ? "belum diisi"
+                      ? r.sumber === "manual"
+                        ? "belum diisi"
+                        : "belum ada data"
                       : tampilAngkaKpi(r.pencapaian, r.satuan)}
                   </span>
                 </span>

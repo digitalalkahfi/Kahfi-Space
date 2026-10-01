@@ -95,6 +95,18 @@ function RincianLembar({ r }: { r: RincianGrd }) {
             bobot {r.bobot} · goal {tampilAngkaKpi(r.tangga[7], r.satuan)}
             {r.arah === "turun" ? " · makin kecil makin baik" : ""}
           </span>
+          {r.sumber !== "manual" ? (
+            <span className="mt-0.5 block text-[11px] leading-[14px] text-info-text">
+              {r.keteranganSumber || "Otomatis dari data aplikasi"}
+              {r.manual !== null
+                ? ` · diganti penilai (otomatis ${
+                    r.otomatis === null
+                      ? "belum ada data"
+                      : tampilAngkaKpi(r.otomatis, r.satuan)
+                  })`
+                : ""}
+            </span>
+          ) : null}
         </span>
         <span className="tabular shrink-0 text-right">
           <span className="block text-[13px] leading-[18px] font-semibold">
@@ -102,7 +114,9 @@ function RincianLembar({ r }: { r: RincianGrd }) {
           </span>
           <span className="block text-[11px] leading-[14px] text-muted-foreground">
             {r.pencapaian === null
-              ? "belum diisi"
+              ? r.sumber === "manual"
+                ? "belum diisi"
+                : "belum ada data"
               : tampilAngkaKpi(r.pencapaian, r.satuan)}
           </span>
         </span>

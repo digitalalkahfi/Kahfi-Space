@@ -176,9 +176,17 @@ type RincianGrdDb = {
   arah: ArahTangga;
   tangga: number[];
   pencapaian: number | null;
+  /** Sejak 0194; snapshot sebelum itu tidak memuatnya. */
+  sumber?: string;
+  keterangan_sumber?: string;
+  manual?: number | null;
+  otomatis?: number | null;
   nilai: number;
   total: number;
 };
+
+const angkaAtauNull = (v: number | null | undefined) =>
+  v === null || v === undefined ? null : Number(v);
 
 function keRincianGrd(detail: unknown): RincianGrd[] {
   return ((detail as RincianGrdDb[] | null) ?? []).map((r) => ({
@@ -189,7 +197,15 @@ function keRincianGrd(detail: unknown): RincianGrd[] {
     bobot: Number(r.bobot),
     arah: r.arah,
     tangga: r.tangga.map(Number),
-    pencapaian: r.pencapaian === null ? null : Number(r.pencapaian),
+    pencapaian: angkaAtauNull(r.pencapaian),
+    sumber: r.sumber ?? "manual",
+    keteranganSumber: r.keterangan_sumber ?? "",
+    // Snapshot lama: semua pencapaian adalah isian penilai.
+    manual:
+      r.manual === undefined
+        ? angkaAtauNull(r.pencapaian)
+        : angkaAtauNull(r.manual),
+    otomatis: angkaAtauNull(r.otomatis),
     nilai: Number(r.nilai),
     total: Number(r.total),
   }));
@@ -300,6 +316,10 @@ function scorecardGrdDemo(
           arah,
           tangga: i.tangga,
           pencapaian,
+          sumber: "manual",
+          keteranganSumber: "",
+          manual: pencapaian,
+          otomatis: null,
           nilai,
           total: nilai * i.bobot,
         };

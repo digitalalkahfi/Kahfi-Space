@@ -6,10 +6,13 @@ import {
   bacaRupiahTeks,
   bacaTenggat,
   indukKode,
+  jadwalTonggak,
   pisahKode,
+  rentangHari,
   satuanAplikasi,
   satuanIndikator,
   susunRencana,
+  tanggalDisebut,
   type LembarXlsx,
 } from "../impor-grd.ts";
 
@@ -435,5 +438,356 @@ test("pemetaan: nama yang belum tercantum menghentikan, null dilaporkan dan dile
   assert.deepEqual(
     rencana.lembar.map((l) => l.user_id),
     ["u-agnes"],
+  );
+});
+
+// ---------------------------------------------------------------------
+// Rencana operasional (sheet GRD Cascade)
+// ---------------------------------------------------------------------
+const P = "2026-10-01";
+const tenggat = (r: ReturnType<typeof jadwalTonggak>) =>
+  r.tonggak.map((t) => t.tenggat);
+
+test("tanggal yang disebut kolom KAPAN", () => {
+  assert.deepEqual(tanggalDisebut("Sabtu 3 Okt", P), ["2026-10-03"]);
+  assert.deepEqual(tanggalDisebut("1 Okt · 10 Okt", P), [
+    "2026-10-01",
+    "2026-10-10",
+  ]);
+  assert.deepEqual(tanggalDisebut("Senin 5 · 12 · 19 · 26 Okt", P), [
+    "2026-10-05",
+    "2026-10-12",
+    "2026-10-19",
+    "2026-10-26",
+  ]);
+  assert.deepEqual(tanggalDisebut("Rabu 4 Nov", P), ["2026-11-04"]);
+  assert.deepEqual(tanggalDisebut("Setiap hari", P), []);
+  assert.deepEqual(rentangHari("8–17 Okt", P), {
+    mulai: "2026-10-08",
+    selesai: "2026-10-17",
+  });
+  assert.equal(rentangHari("Sabtu 3 Okt", P), null);
+});
+
+test("SEKALI: satu tonggak, beberapa serahan, tahap bertanggal, rentang acara", () => {
+  assert.deepEqual(
+    tenggat(jadwalTonggak("sekali", "Sabtu 3 Okt", "Host LIVE didapat", P)),
+    ["2026-10-03"],
+  );
+  const sop = jadwalTonggak(
+    "sekali",
+    "1 Okt · 10 Okt",
+    "Dokumen SOP yang diminta Manager ditulis: SOP Potongan Komisi (1 Okt), SOP Pemakaian Studio (10 Okt)",
+    P,
+  );
+  assert.deepEqual(
+    sop.tonggak.map((t) => [t.judul, t.tenggat]),
+    [
+      ["SOP Potongan Komisi", "2026-10-01"],
+      ["SOP Pemakaian Studio", "2026-10-10"],
+    ],
+  );
+  const tahap = jadwalTonggak(
+    "sekali",
+    "Sesuai tanggal",
+    "Pendaftaran karyawan baru: 1–15 pendaftaran dibuka · 16–17 interview · 20 pengumuman · 22 konfirmasi · 25 MOU bermeterai",
+    P,
+  );
+  assert.deepEqual(tenggat(tahap), [
+    "2026-10-15",
+    "2026-10-17",
+    "2026-10-20",
+    "2026-10-22",
+    "2026-10-25",
+  ]);
+  assert.deepEqual(
+    tenggat(
+      jadwalTonggak(
+        "sekali",
+        "Setiap acara; MMC 40: 31 Okt – 1 Nov",
+        "Hadir",
+        P,
+      ),
+    ),
+    ["2026-11-01"],
+  );
+  const tanpa = jadwalTonggak("sekali", "Segera", "Sesuatu", P);
+  assert.deepEqual(tenggat(tanpa), [null]);
+  assert.ok(tanpa.catatan);
+});
+
+test("PEKANAN: satu tonggak per kejadian jadwal", () => {
+  assert.deepEqual(
+    tenggat(jadwalTonggak("pekanan", "Setiap Senin", "Daftar produk", P)),
+    ["2026-10-05", "2026-10-12", "2026-10-19", "2026-10-26"],
+  );
+  // Sen/Rab/Sab dari rumusan, mulai 7 Okt: 11 kiriman (sesuai KPI Ami #4).
+  const viral = jadwalTonggak(
+    "pekanan",
+    "Mulai Rabu 7 Okt",
+    "Kiriman produk viral ke creator MCN setiap Senin, Rabu, Sabtu (data dari Rifal)",
+    P,
+  );
+  assert.equal(viral.tonggak.length, 11);
+  assert.equal(viral.tonggak[0].tenggat, "2026-10-07");
+  assert.equal(viral.tonggak[0].judul, "Rabu, 7 Okt");
+  assert.deepEqual(
+    tenggat(
+      jadwalTonggak(
+        "pekanan",
+        "Setiap Senin (pertama 5 Okt)",
+        "Terima daftar",
+        P,
+      ),
+    ),
+    ["2026-10-05", "2026-10-12", "2026-10-19", "2026-10-26"],
+  );
+  assert.deepEqual(
+    tenggat(
+      jadwalTonggak("pekanan", "Jumat 9 · 16 · 23 · 30 Okt", "Soal NPS", P),
+    ),
+    ["2026-10-09", "2026-10-16", "2026-10-23", "2026-10-30"],
+  );
+  // "Setiap pekan" = tiap Sabtu (WRM); "Setelah 10 Okt" = Sabtu sesudahnya.
+  assert.equal(
+    jadwalTonggak("pekanan", "Setiap pekan", "1-on-1", P).tonggak.length,
+    5,
+  );
+  assert.deepEqual(
+    tenggat(jadwalTonggak("pekanan", "Setelah 10 Okt", "Ajak creator", P)),
+    ["2026-10-17", "2026-10-24", "2026-10-31"],
+  );
+  // Rentang hari: tiap hari satu pengingat (7 pengingat RAB).
+  assert.equal(
+    jadwalTonggak("pekanan", "19–25 Okt (tiap bulan)", "Pengingat RAB", P)
+      .tonggak.length,
+    7,
+  );
+  // Pengingat WRM tiap Jumat + MRM tanpa tanggal = 6 (13 bersama RAB).
+  const wrm = jadwalTonggak("pekanan", "Setiap Jumat; MRM H-1", "Pengingat", P);
+  assert.equal(wrm.tonggak.length, 6);
+  assert.equal(wrm.tonggak.at(-1)!.tenggat, null);
+  // Tanpa jadwal tetap: tidak ada tonggak, dilaporkan.
+  const tidakTetap = jadwalTonggak(
+    "pekanan",
+    "Setiap ada kerja sama",
+    "Catat",
+    P,
+  );
+  assert.equal(tidakTetap.tonggak.length, 0);
+  assert.ok(tidakTetap.catatan);
+  assert.equal(
+    jadwalTonggak("harian", "Setiap hari", "Upload", P).tonggak.length,
+    0,
+  );
+});
+
+function workbookDenganCascade() {
+  const wb = workbook();
+  wb.Sheets["GRD Cascade"] = lembar([
+    ["GOALS ROLL DOWN"],
+    [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      "OPERATIONAL PLAN",
+      null,
+      "JENIS",
+      "SIAPA",
+      "KAPAN",
+    ],
+    [
+      1,
+      "Perusahaan",
+      "1.1",
+      "Internal",
+      "1.1.0",
+      "UMUM",
+      "1.1.0.1",
+      "Mengisi laporan harian",
+      "HARIAN",
+      "Seluruh tim",
+      "Setiap hari ≤ 21.00",
+    ],
+    [
+      null,
+      null,
+      null,
+      null,
+      "1.1.3",
+      "GMV akun utama",
+      "1.1.3.1",
+      "Tim riset mulai bekerja",
+      "SEKALI",
+      "Siti / Agnes",
+      "Senin 5 Okt",
+    ],
+    [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      "1.1.3.6",
+      "Meriset minimal 10 produk setiap hari",
+      "HARIAN",
+      "Siti",
+      "Setiap hari mulai 5 Okt",
+    ],
+    [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      "1.1.3.11",
+      "Upload minimal 135 video setiap hari di akun utama",
+      "HARIAN",
+      "Pemegang akun",
+      "Setiap hari",
+    ],
+    [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      "1.1.3.8",
+      "Membagikan daftar produk",
+      "PEKANAN",
+      "Host LIVE",
+      "Setiap Senin",
+    ],
+    [
+      "M",
+      "TONGGAK MANAGER",
+      "—",
+      "",
+      "—",
+      "",
+      "M.1",
+      "Rancangan studio disetor",
+      "SEKALI",
+      "Kholid",
+      "Kamis 1 Okt",
+    ],
+  ]);
+  return wb;
+}
+
+test("GRD Cascade: rencana, goal yang dilayani, dan lead measure", () => {
+  const r = bacaRencanaGrd(workbookDenganCascade());
+  const rencana = Object.fromEntries(r.rencanaOp.map((x) => [x.kode, x]));
+  assert.equal(rencana["1.1.0.1"].goal, "1.1");
+  assert.equal(rencana["1.1.0.1"].tonggak.length, 0);
+  assert.equal(rencana["1.1.3.1"].goal, "1.1.3");
+  assert.equal(rencana["1.1.3.8"].tonggak.length, 4);
+  assert.equal(rencana["M.1"].goal, null);
+  assert.equal(rencana["M.1"].indukKode, "M");
+
+  const lead = Object.fromEntries(r.lead.map((x) => [x.kode, x]));
+  assert.deepEqual(
+    [
+      lead["1.1.3.6"].perHari,
+      lead["1.1.3.6"].sumberLaporan,
+      lead["1.1.3.6"].mulai,
+    ],
+    [10, null, "2026-10-05"],
+  );
+  assert.equal(lead["1.1.3.11"].sumberLaporan, "jumlah_upload");
+  assert.deepEqual(lead["1.1.3.11"].akun, ["alkahfihome_", "taokspill"]);
+  assert.ok(!lead["1.1.0.1"]);
+});
+
+test("pemetaan: PIC dari kolom SIAPA dan sumber otomatis KPI", () => {
+  const mentah = bacaRencanaGrd(workbookDenganCascade());
+  const { rencana, laporan } = susunRencana(
+    mentah,
+    {
+      orang: {
+        Azka: null,
+        Kholid: "Kholid F",
+        Siti: "Siti Sa'adah",
+        Agnes: "agneskrimh",
+        Fajar: null,
+        Alma: null,
+        Raka: "Raka R",
+      },
+      akun: {
+        alkahfihome_: "alkahfihome_",
+        taokspill: "taokspill_",
+        sinirakaspill_: "sinirakaspill_",
+      },
+      kpi_otomatis: {
+        Agnes: {
+          "1": { sumber: "ukuran_persen", ukuran: ["1.1.3"] },
+          "2": { sumber: "tonggak", rencana: ["1.1.3.1", "X.9"] },
+        },
+        "@KPI TIM KONTEN": {
+          "1": { sumber: "ukuran_persen", ukuran: ["*:{akun}"] },
+          "2": {
+            sumber: "hari_standar",
+            akun: [{ akun: "{akun}", min: "{min}" }],
+          },
+          "3": { sumber: "laporan_tepat", batas: "21:00" },
+        },
+      },
+    },
+    {
+      users: [
+        { id: "u-kholid", nama: "Kholid F", status: "aktif" },
+        { id: "u-siti", nama: "Siti Sa'adah", status: "aktif" },
+        { id: "u-agnes", nama: "agneskrimh", status: "aktif" },
+        { id: "u-raka", nama: "Raka R", status: "aktif" },
+      ],
+      accounts: [
+        { id: "a-home", username: "alkahfihome_" },
+        { id: "a-tao", username: "taokspill_" },
+        { id: "a-raka", username: "sinirakaspill_" },
+      ],
+      units: [
+        { id: "unit-aff", kode: "affiliator" },
+        { id: "unit-tap", kode: "tap" },
+      ],
+      goalLama: [],
+    },
+  );
+
+  const r = Object.fromEntries(rencana.rencana.map((x) => [x.kode, x]));
+  // "Siti / Agnes": keduanya PIC, Siti utama.
+  assert.deepEqual(r["1.1.3.1"].pic_ids, ["u-siti", "u-agnes"]);
+  // Peran tanpa nama ("Host LIVE") jatuh ke pemilik goal-nya.
+  assert.deepEqual(r["1.1.3.8"].pic_ids, ["u-siti"]);
+  assert.deepEqual(r["M.1"].pic_ids, ["u-kholid"]);
+  assert.equal((r["1.1.3.8"].tonggak as unknown[]).length, 4);
+
+  const lead = Object.fromEntries(rencana.lead.map((x) => [x.kode, x]));
+  assert.equal(lead["1.1.3.11"].target_mingguan, 945);
+  assert.deepEqual(lead["1.1.3.11"].akun, ["a-home", "a-tao"]);
+
+  type Ind = { urutan: number; sumber: string; sumber_ref?: unknown };
+  const agnes = rencana.lembar.find((l) => l.user_id === "u-agnes")!
+    .indikator as Ind[];
+  assert.equal(agnes[0].sumber, "ukuran_persen");
+  assert.deepEqual(agnes[0].sumber_ref, { ukuran: ["1.1.3"] });
+  // Rencana yang tidak ada dilaporkan; yang ada tetap dipakai.
+  assert.deepEqual(agnes[1].sumber_ref, { rencana: ["1.1.3.1"] });
+  assert.ok(laporan.dilewati.some((d) => d.includes("X.9")));
+
+  // Templat: ukuran per akun Raka tidak ada di file contoh ini, jadi
+  // indikatornya tetap diisi penilai — dan itu dilaporkan.
+  const raka = rencana.lembar.find((l) => l.user_id === "u-raka")!
+    .indikator as Ind[];
+  assert.equal(raka[0].sumber, "manual");
+  assert.ok(
+    laporan.dilewati.some((d) =>
+      d.startsWith("KPI Raka #1 tetap diisi penilai"),
+    ),
   );
 });

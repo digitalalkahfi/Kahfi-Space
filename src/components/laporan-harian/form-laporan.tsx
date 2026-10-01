@@ -7,6 +7,7 @@ import {
   Coins,
   Loader2,
   PackageCheck,
+  Radio,
   Send,
   Store,
   Upload,
@@ -37,6 +38,7 @@ import {
 import {
   bersihkanIsi,
   kapanLaporan,
+  MAKS_GMV,
   MAKS_KOMISI,
   MAKS_UPLOAD,
   periksaIsiLaporan,
@@ -49,6 +51,7 @@ import {
   type KalenderLaporan,
 } from "@/lib/laporan";
 import {
+  bacaAngka,
   bilangan,
   persen,
   rasioCapaian,
@@ -146,6 +149,11 @@ export function FormLaporan({
   const [nilai, setNilai] = useState(0);
   const [komisi, setKomisi] = useState(0);
   const [upload, setUpload] = useState(0);
+  // LIVE hanya diisi bila hari itu memang LIVE; tanpa centang, kedua
+  // angkanya tidak ikut terkirim (null, bukan 0).
+  const [adaLive, setAdaLive] = useState(false);
+  const [gmvLive, setGmvLive] = useState(0);
+  const [jamLive, setJamLive] = useState("");
   const [catatan, setCatatan] = useState("");
   const [mengirim, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
@@ -167,10 +175,13 @@ export function FormLaporan({
   const selisih = nilai - target;
   const co = coSampel[dipilih] ?? 0;
 
+  const jamLiveAngka = bacaAngka(jamLive);
   const isi: IsiLaporan = {
     gmv: nilai,
     komisi,
     jumlahUpload: upload,
+    gmvLive: adaLive ? gmvLive : null,
+    jamLive: adaLive ? jamLiveAngka : null,
     catatan,
   };
   // `bersihkanIsi` yang memutuskan kolom mana ikut terkirim: angka komisi
@@ -201,6 +212,9 @@ export function FormLaporan({
     setNilai(0);
     setKomisi(0);
     setUpload(0);
+    setAdaLive(false);
+    setGmvLive(0);
+    setJamLive("");
     setCatatan("");
     const berikut = sasaranBelumDilapor(sasaran, baru)[0];
     if (berikut) setDipilih(kunciSasaran(berikut));
@@ -328,6 +342,8 @@ export function FormLaporan({
               gmv: bersih.gmv,
               komisi: bersih.komisi,
               jumlahUpload: bersih.jumlahUpload,
+              gmvLive: bersih.gmvLive,
+              jamLive: bersih.jamLive,
               catatan: bersih.catatan,
               tanggal,
             });
@@ -520,6 +536,66 @@ export function FormLaporan({
                         ? `Konten yang tayang ${kapan}. Standar level ${level} adalah ${bilangan(minimum)} video per hari kerja.`
                         : `Konten yang tayang ${kapan}, maksimal ${MAKS_UPLOAD}.`}
                 </p>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        {punyaKolom(unit, "gmvLive") ? (
+          <div className="space-y-3 rounded-2xl bg-muted/50 p-3">
+            <label className="flex cursor-pointer items-center justify-between gap-3 text-[13px] leading-[18px] font-semibold">
+              <span className="flex items-center gap-1.5">
+                <Radio className="size-3.5 text-muted-foreground" />
+                Ada LIVE {kapan}?
+              </span>
+              <input
+                type="checkbox"
+                checked={adaLive}
+                onChange={(e) => setAdaLive(e.target.checked)}
+                className="size-4 accent-primary"
+              />
+            </label>
+            {adaLive ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="gmv-live"
+                    className="text-[13px] leading-[18px] font-semibold"
+                  >
+                    GMV dari LIVE
+                  </label>
+                  <InputGmv
+                    id="gmv-live"
+                    ringkas
+                    maks={MAKS_GMV}
+                    label="GMV LIVE"
+                    nilai={gmvLive}
+                    onUbah={setGmvLive}
+                  />
+                  <p className="text-[11px] leading-[14px] text-muted-foreground">
+                    Bagian dari GMV di atas yang berasal dari LIVE.
+                  </p>
+                </div>
+                <div className="space-y-1.5">
+                  <label
+                    htmlFor="jam-live"
+                    className="text-[13px] leading-[18px] font-semibold"
+                  >
+                    Lama LIVE (jam)
+                  </label>
+                  <input
+                    id="jam-live"
+                    inputMode="decimal"
+                    autoComplete="off"
+                    value={jamLive}
+                    onChange={(e) => setJamLive(e.target.value)}
+                    placeholder="4"
+                    className="tabular h-12 w-full rounded-xl bg-card px-4 text-[15px] ring-1 ring-border-subtle outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
+                  />
+                  <p className="text-[11px] leading-[14px] text-muted-foreground">
+                    Contoh 4 atau 2,5. Standar GRD: 4 jam per akun per hari.
+                  </p>
+                </div>
               </div>
             ) : null}
           </div>

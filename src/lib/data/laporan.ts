@@ -252,6 +252,8 @@ type BarisLaporan = {
   gmv: number;
   komisi: number | null;
   jumlah_upload: number | null;
+  gmv_live: number | null;
+  jam_live: number | null;
   catatan: string;
   status: "terkirim" | "revisi";
   submitted_at: string;
@@ -323,6 +325,8 @@ export async function riwayatLaporan(
           gmv: l.gmv,
           komisi: l.komisi ?? null,
           jumlahUpload: l.jumlah_upload ?? null,
+          gmvLive: null,
+          jamLive: null,
           minimumUpload: batasMinimum(
             (akun as { level?: number } | null | undefined)?.level ?? null,
           ),
@@ -388,6 +392,8 @@ function bentukLaporan(
     gmv: Number(b.gmv),
     komisi: b.komisi === null ? null : Number(b.komisi),
     jumlahUpload: b.jumlah_upload,
+    gmvLive: b.gmv_live === null ? null : Number(b.gmv_live),
+    jamLive: b.jam_live === null ? null : Number(b.jam_live),
     minimumUpload: b.minimum_unggahan,
     coSampel: null,
     // Laporan tingkat unit dicocokkan lewat kode unit, bukan account_id.
@@ -600,7 +606,8 @@ export async function jejakRevisi(reportId: string): Promise<RevisiLaporan[]> {
     .from("daily_report_revisions")
     .select(
       `id, report_id, gmv_lama, gmv_baru, komisi_lama, komisi_baru,
-       upload_lama, upload_baru, alasan, created_at, users:diubah_oleh (nama)`,
+       upload_lama, upload_baru, live_lama, live_baru, jam_lama, jam_baru,
+       alasan, created_at, users:diubah_oleh (nama)`,
     )
     .eq("report_id", reportId)
     .order("created_at");
@@ -614,6 +621,10 @@ export async function jejakRevisi(reportId: string): Promise<RevisiLaporan[]> {
     komisiBaru: r.komisi_baru === null ? null : Number(r.komisi_baru),
     uploadLama: r.upload_lama,
     uploadBaru: r.upload_baru,
+    liveLama: r.live_lama === null ? null : Number(r.live_lama),
+    liveBaru: r.live_baru === null ? null : Number(r.live_baru),
+    jamLama: r.jam_lama === null ? null : Number(r.jam_lama),
+    jamBaru: r.jam_baru === null ? null : Number(r.jam_baru),
     alasan: r.alasan,
     diubahOleh: (r.users as unknown as { nama: string } | null)?.nama ?? "—",
     createdAt: r.created_at,

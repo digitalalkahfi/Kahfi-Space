@@ -752,6 +752,38 @@ join kpi_lembar l
 join kpi_indikator i on i.lembar_id = l.id and i.urutan = v.urutan
 on conflict (indikator_id) do nothing;
 
+-- Rencana operasional GRD (data contoh, 0192) ------------------------------
+insert into grd_rencana
+  (grd_periode, kode, goal_id, induk_kode, judul, jenis, pic_ids, pic_teks,
+   jadwal_teks, urutan, asal) values
+  ('2024-10-01', '1.1.0.1', (select id from goals where judul = 'GMV bulanan unit AFFILIATOR'), '1.1.0', 'Mengisi laporan harian di K-Space: jumlah video, GMV LIVE, dan jam LIVE', 'harian', '{e2391748-8e38-5009-b5d6-758e232c6381}'::uuid[], 'Seluruh tim', 'Setiap hari ≤ 21.00', 1, 'data contoh'),
+  ('2024-10-01', '1.1.1.1', (select id from goals where judul = 'GMV bulanan unit AFFILIATOR'), '1.1.1', 'Host LIVE akun utama sudah didapat', 'sekali', '{e2391748-8e38-5009-b5d6-758e232c6381}'::uuid[], 'Dewi', 'Sabtu 5 Okt', 2, 'data contoh'),
+  ('2024-10-01', '1.1.1.2', (select id from goals where judul = 'GMV bulanan unit AFFILIATOR'), '1.1.1', 'Jadwal LIVE tetap: jam, studio, dan host untuk akun utama', 'sekali', '{484a9a6a-149f-56d0-a15a-9215cf7403a3}'::uuid[], 'Rian', 'Senin 7 Okt', 3, 'data contoh'),
+  ('2024-10-01', '1.1.3.8', (select id from goals where judul = 'GMV bulanan unit AFFILIATOR'), '1.1.3', 'Membagikan Daftar Produk Laris ke semua akun; setiap produk ditentukan untuk akun mana', 'pekanan', '{484a9a6a-149f-56d0-a15a-9215cf7403a3}'::uuid[], 'Rian', 'Setiap Senin', 4, 'data contoh'),
+  ('2024-10-01', '1.1.5.1', (select id from goals where judul = 'GMV bulanan unit TAP'), '1.1.5', 'Menghubungi minimal 10 seller baru, dicatat di Pipeline sebelum dibalas', 'pekanan', '{c5631790-4df7-5d06-b9db-ee468783017f}'::uuid[], 'Dimas', 'Setiap pekan', 5, 'data contoh'),
+  ('2024-10-01', '1.2.2.1', (select id from goals where judul = 'GMV bulanan unit MCN'), '1.2.2', 'Daftar 50 creator teratas beserta target Oktober tiap creator', 'sekali', '{32de9d7a-0ac4-5c56-a57f-aeb9f7099b97}'::uuid[], 'Galih + Maya', 'Sabtu 12 Okt', 6, 'data contoh'),
+  ('2024-10-01', 'M.1', null, 'M', 'Rancangan sistem pemakaian studio disetor ke CEO', 'sekali', '{7019770e-faea-5467-98ad-3c4a088d602e}'::uuid[], 'Farhan', 'Selasa 1 Okt', 7, 'data contoh')
+on conflict (grd_periode, kode) do nothing;
+
+insert into grd_tonggak (rencana_id, kunci, judul, tenggat, status, selesai_pada, urutan)
+select r.id, v.kunci, v.judul, v.tenggat::date, v.status, v.selesai_pada::timestamptz, v.urutan
+from (values
+  ('2024-10-01', '1.1.1.1', '', 'Host LIVE akun utama sudah didapat', '2024-10-05', 'selesai', '2024-10-04T15:00:00+07:00', 1),
+  ('2024-10-01', '1.1.1.2', '', 'Jadwal LIVE tetap: jam, studio, dan host untuk akun utama', '2024-10-07', 'selesai', '2024-10-08T10:00:00+07:00', 1),
+  ('2024-10-01', '1.1.3.8', '2024-10-07', 'Senin, 7 Okt', '2024-10-07', 'selesai', '2024-10-07T09:30:00+07:00', 1),
+  ('2024-10-01', '1.1.3.8', '2024-10-14', 'Senin, 14 Okt', '2024-10-14', 'selesai', '2024-10-14T11:00:00+07:00', 2),
+  ('2024-10-01', '1.1.3.8', '2024-10-21', 'Senin, 21 Okt', '2024-10-21', 'progress', null, 3),
+  ('2024-10-01', '1.1.3.8', '2024-10-28', 'Senin, 28 Okt', '2024-10-28', 'belum', null, 4),
+  ('2024-10-01', '1.1.5.1', '2024-10-05', 'Sabtu, 5 Okt', '2024-10-05', 'selesai', '2024-10-05T16:00:00+07:00', 1),
+  ('2024-10-01', '1.1.5.1', '2024-10-12', 'Sabtu, 12 Okt', '2024-10-12', 'selesai', '2024-10-12T17:30:00+07:00', 2),
+  ('2024-10-01', '1.1.5.1', '2024-10-19', 'Sabtu, 19 Okt', '2024-10-19', 'belum', null, 3),
+  ('2024-10-01', '1.1.5.1', '2024-10-26', 'Sabtu, 26 Okt', '2024-10-26', 'belum', null, 4),
+  ('2024-10-01', '1.2.2.1', '', 'Daftar 50 creator teratas beserta target Oktober tiap creator', '2024-10-12', 'progress', null, 1),
+  ('2024-10-01', 'M.1', '', 'Rancangan sistem pemakaian studio disetor ke CEO', '2024-10-01', 'selesai', '2024-10-01T13:00:00+07:00', 1)
+) v (periode, kode, kunci, judul, tenggat, status, selesai_pada, urutan)
+join grd_rencana r on r.grd_periode = v.periode::date and r.kode = v.kode
+on conflict (rencana_id, kunci) do nothing;
+
 commit;
 
 -- Sampel produk ---------------------------------------------------------
