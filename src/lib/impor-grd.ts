@@ -1330,6 +1330,11 @@ export type PemetaanGrd = {
    * yang tidak disebut tetap diisi penilai.
    */
   kpi_otomatis?: Record<string, Record<string, AturanSumberKpi>>;
+  /**
+   * Akun (nama di file) yang tidak ikut papan akun leaderboard, mis. akun
+   * CEO dan Manager (0196). Tanpa kunci ini daftar di database dibiarkan.
+   */
+  papan_akun_kecuali?: string[];
 };
 
 export type SumberKpiOtomatis =
@@ -1376,6 +1381,7 @@ export type RencanaImpor = {
   lembar: Record<string, unknown>[];
   rencana: Record<string, unknown>[];
   lead: Record<string, unknown>[];
+  papan_kecuali?: { account_id: string; alasan: string }[];
 };
 
 export type LaporanSusun = {
@@ -1854,6 +1860,20 @@ export function susunRencana(
     return [baris];
   });
 
+  // Akun yang belum terdaftar tidak bisa dikecualikan; ikut terlapor lewat
+  // akunId dan dikecualikan begitu terdaftar lalu impor diulang.
+  const papan_kecuali = pemetaan.papan_akun_kecuali?.flatMap((nama) => {
+    const account_id = akunId(nama);
+    return account_id
+      ? [
+          {
+            account_id,
+            alasan: "Dikecualikan dari papan akun menurut file GRD",
+          },
+        ]
+      : [];
+  });
+
   const periodeHapus = new Set(pemetaan.hapus_goal_periode ?? []);
   const hapus = data.goalLama.filter((g) => periodeHapus.has(g.periode));
   laporan.goalLamaDihapus = hapus.map((g) => `${g.judul} (${g.periode})`);
@@ -1868,6 +1888,7 @@ export function susunRencana(
       lembar,
       rencana,
       lead,
+      ...(papan_kecuali ? { papan_kecuali } : {}),
     },
     laporan,
   };

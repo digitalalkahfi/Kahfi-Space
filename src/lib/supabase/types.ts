@@ -1179,6 +1179,13 @@ export type BarisGrdTonggak = {
 
 export type StatusTonggak = "belum" | "progress" | "selesai";
 
+/** @tabel grd_akun_dikecualikan */
+export type BarisGrdAkunDikecualikan = {
+  grd_periode: string;
+  account_id: string;
+  alasan: string;
+};
+
 /** @tabel kpi_pencapaian */
 export type BarisKpiPencapaian = {
   id: string;
@@ -1712,6 +1719,16 @@ export type Database = {
           Relasi<"grd_ukuran_isian_diisi_oleh_fkey", "diisi_oleh", "users">,
         ]
       >;
+      grd_akun_dikecualikan: Tabel<
+        BarisGrdAkunDikecualikan,
+        [
+          Relasi<
+            "grd_akun_dikecualikan_account_id_fkey",
+            "account_id",
+            "accounts"
+          >,
+        ]
+      >;
       grd_rencana: Tabel<
         BarisGrdRencana,
         [Relasi<"grd_rencana_goal_id_fkey", "goal_id", "goals">]
@@ -2081,6 +2098,37 @@ export type Database = {
           p_catatan?: string | null;
         };
         Returns: BarisGrdTonggak;
+      };
+      /** Leaderboard NILAI KPI per level; angkanya baris scorecard (0196). */
+      papan_kpi: {
+        Args: { p_bulan: string; p_sampai?: string };
+        Returns: {
+          user_id: string;
+          nama: string;
+          inisial: string;
+          jabatan: string;
+          unit: string;
+          kelompok: "leader" | "co_leader" | "staf";
+          skor: number;
+          predikat: PredikatKpiDb | null;
+          cakupan: number;
+          terkunci: boolean;
+          peringkat: number;
+        }[];
+      };
+      /** Papan akun GRD: % capaian target GMV; rupiah hanya lintas_angka (0196). */
+      papan_akun_grd: {
+        Args: { p_periode: string; p_sampai?: string };
+        Returns: {
+          account_id: string;
+          username: string;
+          pemegang: string | null;
+          unit: string;
+          realisasi: number | null;
+          target: number | null;
+          persen: number | null;
+          peringkat: number;
+        }[];
       };
       /** Rencana operasional GRD beserta tonggaknya (0192). */
       rencana_grd: {

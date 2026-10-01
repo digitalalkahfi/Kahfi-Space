@@ -9,6 +9,7 @@ import {
   ListChecks,
   Store,
   Target,
+  Trophy,
   Users,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -56,6 +57,13 @@ const MENU = [
     ringkas: "Skor dan predikat tiap orang bulan berjalan.",
     Ikon: Users,
     gaya: "bg-ok-fill text-ok-text",
+  },
+  {
+    href: "/grd/leaderboard" as const,
+    judul: "Leaderboard",
+    ringkas: "Peringkat NILAI KPI per level dan papan akun bulan ini.",
+    Ikon: Trophy,
+    gaya: "bg-warn-fill text-warn-text",
   },
   {
     href: "/grd/akun" as const,

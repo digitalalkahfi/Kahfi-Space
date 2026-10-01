@@ -169,6 +169,11 @@ console.log(
   `  ${rencana.rencana.length} rencana operasional · ${nTonggak} tonggak · ` +
     `${rencana.lead.length} lead measure · ${nOtomatis} dari ${nIndikator} indikator KPI otomatis`,
 );
+if (rencana.papan_kecuali) {
+  console.log(
+    `  ${rencana.papan_kecuali.length} akun dikecualikan dari papan akun leaderboard`,
+  );
+}
 if (laporan.goalLamaDihapus.length) {
   console.log(`\nGoal lama yang dihapus (${laporan.goalLamaDihapus.length}):`);
   for (const g of laporan.goalLamaDihapus) console.log(`  - ${g}`);

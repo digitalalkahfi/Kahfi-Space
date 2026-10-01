@@ -15,11 +15,14 @@ export function PilihBulanKpi({
   bulanIni,
   persona,
   jumlah = 6,
+  alamat = "/grd/scorecard",
 }: {
   bulanAktif: string;
   bulanIni: string;
   persona?: string;
   jumlah?: number;
+  /** Halaman tujuan tautan bulan; scorecard atau leaderboard. */
+  alamat?: "/grd/scorecard" | "/grd/leaderboard";
 }) {
   const daftar = Array.from({ length: jumlah }, (_, i) =>
     geserBulan(bulanIni, -i),
@@ -27,7 +30,7 @@ export function PilihBulanKpi({
 
   return (
     <nav
-      aria-label="Pilih bulan scorecard"
+      aria-label="Pilih bulan"
       className="flex flex-wrap gap-1 overflow-x-auto"
     >
       {daftar.map((b) => {
@@ -36,7 +39,7 @@ export function PilihBulanKpi({
         return (
           <Link
             key={b}
-            href={`/grd/scorecard?${parameter.toString()}`}
+            href={`${alamat}?${parameter.toString()}`}
             aria-current={b === bulanAktif ? "page" : undefined}
             className={cn(
               "tekan-halus sentuh-nyaman rounded-full px-3 py-1.5 text-[11px] leading-[14px] font-semibold whitespace-nowrap",
