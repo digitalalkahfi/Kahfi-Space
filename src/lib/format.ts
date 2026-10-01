@@ -224,3 +224,23 @@ export function bulanPendek(bulan: string) {
 export function bilangan(nilai: number) {
   return Math.round(nilai).toLocaleString("id-ID");
 }
+
+/**
+ * Angka yang diketik cara Indonesia: titik pemisah ribuan, koma desimal —
+ * "103,25", "1.500", "92,5%". Kosong → null; bentuk lain → NaN.
+ *
+ * "92.5" sengaja ditolak, bukan dibaca 925: titik di sini selalu pemisah
+ * ribuan, dan menebak maksudnya diam-diam bisa menyimpan angka sepuluh
+ * kali lipat. Layar yang memakainya menampilkan hasil bacaannya.
+ */
+export function bacaAngka(teks: string): number | null {
+  const bersih = teks.replace(/\s/g, "").replace(/%$/, "");
+  if (bersih === "") return null;
+  if (!/^(\d{1,3}(\.\d{3})+|\d+)(,\d+)?$/.test(bersih)) return Number.NaN;
+  return Number(bersih.replace(/\./g, "").replace(",", "."));
+}
+
+/** 103,25 — angka dengan desimal secukupnya, gaya Indonesia. */
+export function angka(nilai: number, digit = 2) {
+  return nilai.toLocaleString("id-ID", { maximumFractionDigits: digit });
+}

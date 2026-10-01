@@ -74,8 +74,9 @@ export default async function ScorecardPage({
             Scorecard KPI
           </h1>
           <p className="text-[13px] leading-[18px] text-muted-foreground">
-            Dihitung otomatis dari GMV, lead measure, absensi, dan tugas — bukan
-            dinilai manual.
+            {daftar.some((b) => b.metode === "grd")
+              ? "Lembar KPI GRD: tiap indikator dinilai dengan tangga 10 kolom, pencapaiannya diisi penilai."
+              : "Dihitung otomatis dari GMV, lead measure, absensi, dan tugas — bukan dinilai manual."}
           </p>
         </div>
 
@@ -96,7 +97,7 @@ export default async function ScorecardPage({
         ) : null}
 
         <Reveal>
-          <Scorecard daftar={daftar} bulanLabel={bulanLabel} />
+          <Scorecard daftar={daftar} bulan={bulan} bulanLabel={bulanLabel} />
         </Reveal>
       </div>
     </AppShell>

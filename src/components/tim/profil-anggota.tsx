@@ -10,11 +10,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { persen, rupiahRingkas } from "@/lib/format";
-import { gayaPredikatKpi } from "@/lib/unit";
+import { gayaPredikat } from "@/lib/unit";
 import { LencanaPredikat } from "@/components/grd/lencana-predikat";
 import { LencanaStatus } from "@/components/tim/lencana-status";
 import { TombolStatusAnggota } from "@/components/tim/tombol-status-anggota";
-import { LABEL_SUMBER } from "@/lib/kpi";
+import { LABEL_SUMBER, tampilAngkaKpi } from "@/lib/kpi";
 import type { BarisScorecard } from "@/lib/kpi";
 import type { AkunKelola } from "@/lib/data/akun";
 import type { AnggotaTim, MataRantai } from "@/lib/types";
@@ -201,7 +201,18 @@ export function KpiAnggota({
 }) {
   if (!baris) return null;
 
-  const gaya = gayaPredikatKpi[baris.predikat];
+  const gaya = gayaPredikat(baris.predikat);
+  const belumAdaLembar = baris.metode === "grd" && baris.rincian.length === 0;
+
+  let keterangan = "";
+  if (baris.metode === "grd") {
+    if (belumAdaLembar) keterangan = " · belum ada lembar";
+    else if (baris.predikat === null) keterangan = " · belum diisi";
+    else if (baris.cakupan < 100)
+      keterangan = ` · terisi ${persen(baris.cakupan, 0)}`;
+  } else if (baris.cakupan < 100) {
+    keterangan = ` · ${persen(baris.cakupan, 0)} bobot terukur`;
+  }
 
   return (
     <Card className="kartu-interaktif rounded-3xl shadow-card ring-border-subtle">
@@ -212,10 +223,9 @@ export function KpiAnggota({
           </h2>
           <p className="text-[13px] leading-[18px] text-muted-foreground">
             skala 1.000
+            {baris.metode === "grd" ? " · tangga GRD" : ""}
             {baris.terkunci ? " · sudah dikunci" : ""}
-            {baris.cakupan < 100
-              ? ` · ${persen(baris.cakupan, 0)} bobot terukur`
-              : ""}
+            {keterangan}
           </p>
         </div>
         <span className="shrink-0 text-right">
@@ -225,43 +235,73 @@ export function KpiAnggota({
               gaya.teks,
             )}
           >
-            {Math.round(baris.skor)}
+            {belumAdaLembar ? "—" : Math.round(baris.skor)}
           </span>
-          <LencanaPredikat predikat={baris.predikat} ukuran="kecil" />
+          {belumAdaLembar ? null : (
+            <LencanaPredikat predikat={baris.predikat} ukuran="kecil" />
+          )}
         </span>
       </div>
 
       <ul className="space-y-1.5 px-5">
-        {baris.rincian.map((r) => (
-          <li
-            key={r.nama}
-            className="flex items-center gap-3 rounded-xl bg-muted/50 px-3 py-2"
-          >
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-[13px] leading-[18px] font-medium">
-                {r.nama}
-              </span>
-              <span className="block truncate text-[11px] leading-[14px] text-muted-foreground">
-                {LABEL_SUMBER[r.sumber]} · bobot {persen(r.bobot, 0)}
-              </span>
-            </span>
-            <span className="tabular shrink-0 text-right">
-              <span
-                className={cn(
-                  "block text-[13px] leading-[18px] font-semibold",
-                  !r.berlaku && "text-muted-foreground",
-                )}
+        {baris.metode === "grd"
+          ? baris.rincian.map((r) => (
+              <li
+                key={r.indikatorId}
+                className="flex items-center gap-3 rounded-xl bg-muted/50 px-3 py-2"
               >
-                {r.berlaku && r.skor !== null ? Math.round(r.skor) : "—"}
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-[13px] leading-[18px] font-medium">
+                    {r.nama}
+                  </span>
+                  <span className="block truncate text-[11px] leading-[14px] text-muted-foreground">
+                    bobot {r.bobot} · VALUE {r.nilai}
+                  </span>
+                </span>
+                <span className="tabular shrink-0 text-right">
+                  <span className="block text-[13px] leading-[18px] font-semibold">
+                    {r.total}
+                  </span>
+                  <span className="block text-[11px] leading-[14px] text-muted-foreground">
+                    {r.pencapaian === null
+                      ? "belum diisi"
+                      : tampilAngkaKpi(r.pencapaian, r.satuan)}
+                  </span>
+                </span>
+              </li>
+            ))
+          : null}
+        {baris.metode === "jabatan" &&
+          baris.rincian.map((r) => (
+            <li
+              key={r.nama}
+              className="flex items-center gap-3 rounded-xl bg-muted/50 px-3 py-2"
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[13px] leading-[18px] font-medium">
+                  {r.nama}
+                </span>
+                <span className="block truncate text-[11px] leading-[14px] text-muted-foreground">
+                  {LABEL_SUMBER[r.sumber]} · bobot {persen(r.bobot, 0)}
+                </span>
               </span>
-              <span className="block text-[11px] leading-[14px] text-muted-foreground">
-                {r.berlaku && r.realisasi !== null
-                  ? persen(r.realisasi)
-                  : "tidak berlaku"}
+              <span className="tabular shrink-0 text-right">
+                <span
+                  className={cn(
+                    "block text-[13px] leading-[18px] font-semibold",
+                    !r.berlaku && "text-muted-foreground",
+                  )}
+                >
+                  {r.berlaku && r.skor !== null ? Math.round(r.skor) : "—"}
+                </span>
+                <span className="block text-[11px] leading-[14px] text-muted-foreground">
+                  {r.berlaku && r.realisasi !== null
+                    ? persen(r.realisasi)
+                    : "tidak berlaku"}
+                </span>
               </span>
-            </span>
-          </li>
-        ))}
+            </li>
+          ))}
       </ul>
     </Card>
   );

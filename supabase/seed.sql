@@ -676,6 +676,82 @@ on conflict (jabatan, nama_kpi) do update
       target_goal = excluded.target_goal,
       target_stretch = excluded.target_stretch;
 
+-- Lembar KPI GRD per orang (data contoh, 0187) ---------------------------
+insert into kpi_lembar (user_id, periode_bulan, judul, status, asal) values
+  ('7019770e-faea-5467-98ad-3c4a088d602e', '2024-08-01', 'KPI Manager — contoh', 'draft', 'data contoh'),
+  ('e2391748-8e38-5009-b5d6-758e232c6381', '2024-08-01', 'KPI Leader Affiliator — contoh', 'draft', 'data contoh'),
+  ('32de9d7a-0ac4-5c56-a57f-aeb9f7099b97', '2024-08-01', 'KPI Leader MCN — contoh', 'draft', 'data contoh'),
+  ('581aa0ce-6f9c-5d52-8922-c102e64aa12c', '2024-08-01', 'KPI Co-Leader MCN — contoh', 'draft', 'data contoh'),
+  ('ad72efba-7708-5742-9bea-3e70ead115f2', '2024-08-01', 'KPI Tim Konten — contoh', 'draft', 'data contoh'),
+  ('dd0b0a40-8d0f-5534-bbcf-3aae10cdbee9', '2024-08-01', 'KPI Tim Konten — contoh', 'draft', 'data contoh'),
+  ('484a9a6a-149f-56d0-a15a-9215cf7403a3', '2024-08-01', 'KPI Tim Konten — usulan', 'draft', 'data contoh')
+on conflict (user_id, periode_bulan) do nothing;
+
+insert into kpi_indikator (lembar_id, urutan, nama, satuan, bobot, arah, tangga)
+select l.id, v.urutan, v.nama, v.satuan, v.bobot, v.arah, v.tangga::numeric[]
+from (values
+  ('7019770e-faea-5467-98ad-3c4a088d602e', '2024-08-01', 1, 'GMV blok internal vs target — % realisasi', '%', 40, 'naik', '{70,75,80,85,90,95,98,100,105,110}'),
+  ('7019770e-faea-5467-98ad-3c4a088d602e', '2024-08-01', 2, 'GMV blok eksternal vs target — % realisasi', '%', 40, 'naik', '{70,75,80,85,90,95,98,100,105,110}'),
+  ('7019770e-faea-5467-98ad-3c4a088d602e', '2024-08-01', 3, 'Tonggak Manager selesai tepat waktu — %', '%', 20, 'naik', '{40,50,60,80,85,90,95,100,100,100}'),
+  ('e2391748-8e38-5009-b5d6-758e232c6381', '2024-08-01', 1, 'GMV akun departemen vs target — % realisasi', '%', 45, 'naik', '{70,75,80,85,90,95,98,100,105,110}'),
+  ('e2391748-8e38-5009-b5d6-758e232c6381', '2024-08-01', 2, 'GMV akun utama di luar LIVE vs target — % realisasi', '%', 15, 'naik', '{70,75,80,85,90,95,98,100,105,110}'),
+  ('e2391748-8e38-5009-b5d6-758e232c6381', '2024-08-01', 3, 'Rata-rata video terupload per hari di akun utama', 'video/hari', 20, 'naik', '{94.75,97.5,100.25,103,105.75,108.5,111.25,114,119.5,125}'),
+  ('e2391748-8e38-5009-b5d6-758e232c6381', '2024-08-01', 4, 'Tonggak departemen selesai tepat waktu — %', '%', 20, 'naik', '{40,50,60,80,85,90,95,100,100,100}'),
+  ('32de9d7a-0ac4-5c56-a57f-aeb9f7099b97', '2024-08-01', 1, 'GMV creator existing vs target — % realisasi', '%', 40, 'naik', '{70,75,80,85,90,95,98,100,105,110}'),
+  ('32de9d7a-0ac4-5c56-a57f-aeb9f7099b97', '2024-08-01', 2, 'Creator baru yang binding — jumlah creator', 'creator', 30, 'naik', '{3.5,4,4.5,5,5.5,6,6.5,7,8,9}'),
+  ('32de9d7a-0ac4-5c56-a57f-aeb9f7099b97', '2024-08-01', 3, 'Tiket pelanggaran selesai paling lambat 2 hari — %', '%', 30, 'naik', '{55,65,75,85,90,95,98,100,100,100}'),
+  ('581aa0ce-6f9c-5d52-8922-c102e64aa12c', '2024-08-01', 1, 'GMV akun tim vs target — % realisasi', '%', 50, 'naik', '{70,75,80,85,90,95,98,100,105,110}'),
+  ('581aa0ce-6f9c-5d52-8922-c102e64aa12c', '2024-08-01', 2, 'Hari memenuhi standar video — % hari', '%', 30, 'naik', '{40,50,60,80,85,90,95,100,100,100}'),
+  ('581aa0ce-6f9c-5d52-8922-c102e64aa12c', '2024-08-01', 3, 'Komplain creator — jumlah temuan (makin kecil makin baik)', 'temuan', 20, 'turun', '{9,8,7,6,5,4,3,2,1,0}'),
+  ('ad72efba-7708-5742-9bea-3e70ead115f2', '2024-08-01', 1, 'GMV akun sendiri vs target akun — % realisasi', '%', 40, 'naik', '{70,75,80,85,90,95,98,100,105,110}'),
+  ('ad72efba-7708-5742-9bea-3e70ead115f2', '2024-08-01', 2, 'Hari memenuhi standar video akun — % hari', '%', 40, 'naik', '{40,50,60,80,85,90,95,100,100,100}'),
+  ('ad72efba-7708-5742-9bea-3e70ead115f2', '2024-08-01', 3, 'Laporan harian terisi paling lambat 21.00 — % hari', '%', 20, 'naik', '{55,65,75,85,90,95,98,100,100,100}'),
+  ('dd0b0a40-8d0f-5534-bbcf-3aae10cdbee9', '2024-08-01', 1, 'GMV akun sendiri vs target akun — % realisasi', '%', 40, 'naik', '{70,75,80,85,90,95,98,100,105,110}'),
+  ('dd0b0a40-8d0f-5534-bbcf-3aae10cdbee9', '2024-08-01', 2, 'Hari memenuhi standar video akun — % hari', '%', 40, 'naik', '{40,50,60,80,85,90,95,100,100,100}'),
+  ('dd0b0a40-8d0f-5534-bbcf-3aae10cdbee9', '2024-08-01', 3, 'Laporan harian terisi paling lambat 21.00 — % hari', '%', 20, 'naik', '{55,65,75,85,90,95,98,100,100,100}'),
+  ('484a9a6a-149f-56d0-a15a-9215cf7403a3', '2024-08-01', 1, 'GMV akun sendiri vs target akun — % realisasi', '%', 60, 'naik', '{70,75,80,85,90,95,98,100,105,110}'),
+  ('484a9a6a-149f-56d0-a15a-9215cf7403a3', '2024-08-01', 2, 'Hari memenuhi standar video akun — % hari', '%', 40, 'naik', '{40,50,60,80,85,90,95,100,100,100}')
+) v (user_id, bulan, urutan, nama, satuan, bobot, arah, tangga)
+join kpi_lembar l
+  on l.user_id = v.user_id::uuid and l.periode_bulan = v.bulan::date
+where l.status = 'draft'
+on conflict (lembar_id, urutan) do nothing;
+
+update kpi_lembar set status = 'aktif'
+where status = 'draft'
+  and (user_id, periode_bulan) in (
+    ('7019770e-faea-5467-98ad-3c4a088d602e'::uuid, '2024-08-01'::date),
+    ('e2391748-8e38-5009-b5d6-758e232c6381'::uuid, '2024-08-01'::date),
+    ('32de9d7a-0ac4-5c56-a57f-aeb9f7099b97'::uuid, '2024-08-01'::date),
+    ('581aa0ce-6f9c-5d52-8922-c102e64aa12c'::uuid, '2024-08-01'::date),
+    ('ad72efba-7708-5742-9bea-3e70ead115f2'::uuid, '2024-08-01'::date),
+    ('dd0b0a40-8d0f-5534-bbcf-3aae10cdbee9'::uuid, '2024-08-01'::date)
+  );
+
+insert into kpi_pencapaian (indikator_id, nilai)
+select i.id, v.nilai
+from (values
+  ('7019770e-faea-5467-98ad-3c4a088d602e', '2024-08-01', 1, 92),
+  ('7019770e-faea-5467-98ad-3c4a088d602e', '2024-08-01', 2, 96),
+  ('7019770e-faea-5467-98ad-3c4a088d602e', '2024-08-01', 3, 77.8),
+  ('e2391748-8e38-5009-b5d6-758e232c6381', '2024-08-01', 1, 98),
+  ('e2391748-8e38-5009-b5d6-758e232c6381', '2024-08-01', 2, 101),
+  ('e2391748-8e38-5009-b5d6-758e232c6381', '2024-08-01', 3, 111.25),
+  ('e2391748-8e38-5009-b5d6-758e232c6381', '2024-08-01', 4, 100),
+  ('581aa0ce-6f9c-5d52-8922-c102e64aa12c', '2024-08-01', 1, 105),
+  ('581aa0ce-6f9c-5d52-8922-c102e64aa12c', '2024-08-01', 3, 2),
+  ('ad72efba-7708-5742-9bea-3e70ead115f2', '2024-08-01', 1, 112),
+  ('ad72efba-7708-5742-9bea-3e70ead115f2', '2024-08-01', 2, 100),
+  ('ad72efba-7708-5742-9bea-3e70ead115f2', '2024-08-01', 3, 96),
+  ('dd0b0a40-8d0f-5534-bbcf-3aae10cdbee9', '2024-08-01', 1, 80),
+  ('dd0b0a40-8d0f-5534-bbcf-3aae10cdbee9', '2024-08-01', 2, 60),
+  ('dd0b0a40-8d0f-5534-bbcf-3aae10cdbee9', '2024-08-01', 3, 70)
+) v (user_id, bulan, urutan, nilai)
+join kpi_lembar l
+  on l.user_id = v.user_id::uuid and l.periode_bulan = v.bulan::date
+join kpi_indikator i on i.lembar_id = l.id and i.urutan = v.urutan
+on conflict (indikator_id) do nothing;
+
 commit;
 
 -- Sampel produk ---------------------------------------------------------

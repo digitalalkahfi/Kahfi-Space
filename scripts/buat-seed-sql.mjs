@@ -387,6 +387,64 @@ on conflict (jabatan, nama_kpi) do update
       target_goal = excluded.target_goal,
       target_stretch = excluded.target_stretch;`);
 
+// --- Lembar KPI GRD (0187) ----------------------------------------------
+// Ditempuh lewat jalur yang sama dengan aplikasinya: lembar dibuat draft,
+// indikatornya disusun, baru diaktifkan (database menolak lembar aktif yang
+// bobotnya belum genap 100), lalu pencapaian diisi. Setiap langkah
+// idempoten: indikator hanya masuk ke lembar yang masih draft.
+const lembarAktif = data.kpi_lembar.filter((l) => l.status === "aktif");
+const kunciLembar = (l) => `${q(idUser[l.user])}, ${q(l.bulan)}`;
+const barisIndikator = data.kpi_lembar.flatMap((l) =>
+  l.indikator.map((i, n) => ({ l, i, urutan: n + 1 })),
+);
+
+bagian.push(`
+-- Lembar KPI GRD per orang (data contoh, 0187) ---------------------------
+insert into kpi_lembar (user_id, periode_bulan, judul, status, asal) values
+${data.kpi_lembar
+  .map((l) => `  (${kunciLembar(l)}, ${q(l.judul)}, 'draft', 'data contoh')`)
+  .join(",\n")}
+on conflict (user_id, periode_bulan) do nothing;
+
+insert into kpi_indikator (lembar_id, urutan, nama, satuan, bobot, arah, tangga)
+select l.id, v.urutan, v.nama, v.satuan, v.bobot, v.arah, v.tangga::numeric[]
+from (values
+${barisIndikator
+  .map(
+    ({ l, i, urutan }) =>
+      `  (${kunciLembar(l)}, ${urutan}, ${q(i.nama)}, ${q(i.satuan)}, ` +
+      `${i.bobot}, ${q(i.arah)}, ${q(`{${i.tangga.join(",")}}`)})`,
+  )
+  .join(",\n")}
+) v (user_id, bulan, urutan, nama, satuan, bobot, arah, tangga)
+join kpi_lembar l
+  on l.user_id = v.user_id::uuid and l.periode_bulan = v.bulan::date
+where l.status = 'draft'
+on conflict (lembar_id, urutan) do nothing;
+
+update kpi_lembar set status = 'aktif'
+where status = 'draft'
+  and (user_id, periode_bulan) in (
+${lembarAktif
+  .map((l) => `    (${q(idUser[l.user])}::uuid, ${q(l.bulan)}::date)`)
+  .join(",\n")}
+  );
+
+insert into kpi_pencapaian (indikator_id, nilai)
+select i.id, v.nilai
+from (values
+${barisIndikator
+  .filter(({ l, i }) => l.status === "aktif" && i.pencapaian !== null)
+  .map(
+    ({ l, i, urutan }) => `  (${kunciLembar(l)}, ${urutan}, ${i.pencapaian})`,
+  )
+  .join(",\n")}
+) v (user_id, bulan, urutan, nilai)
+join kpi_lembar l
+  on l.user_id = v.user_id::uuid and l.periode_bulan = v.bulan::date
+join kpi_indikator i on i.lembar_id = l.id and i.urutan = v.urutan
+on conflict (indikator_id) do nothing;`);
+
 bagian.push(`
 commit;`);
 
@@ -838,6 +896,7 @@ console.log(
     `${data.announcements.length} pengumuman · ${data.goals.length} goal · ` +
     `${data.tasks.length} tugas · ${data.attendance.length} absensi · ` +
     `${data.lead_measures.length} lead measure · ${data.kpi_definitions.length} KPI · ` +
+    `${data.kpi_lembar.length} lembar KPI GRD · ` +
     `${data.daily_reports.length} laporan harian · ` +
     `${data.transaksi.length} transaksi · ${data.aset.length} aset`,
 );
