@@ -97,7 +97,12 @@ export default async function ScorecardPage({
         ) : null}
 
         <Reveal>
-          <Scorecard daftar={daftar} bulan={bulan} bulanLabel={bulanLabel} />
+          <Scorecard
+            daftar={daftar}
+            bulan={bulan}
+            bulanLabel={bulanLabel}
+            pembaca={{ id: pengguna.id, role: pengguna.role }}
+          />
         </Reveal>
       </div>
     </AppShell>

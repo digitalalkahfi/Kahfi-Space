@@ -21,6 +21,7 @@ import {
   TandaPredikat,
 } from "@/components/grd/lencana-predikat";
 import { DialogIsiPencapaian } from "@/components/grd/dialog-isi-pencapaian";
+import { TombolSahkanLembar } from "@/components/grd/tombol-sahkan-lembar";
 
 const ANGKA = new Intl.NumberFormat("id-ID", { maximumFractionDigits: 0 });
 
@@ -120,7 +121,8 @@ function RincianLembar({ r }: { r: RincianGrd }) {
 function TandaKelengkapan({ baris }: { baris: BarisScorecard }) {
   let teks: string | null = null;
   if (baris.metode === "grd") {
-    if (baris.rincian.length === 0) teks = "belum ada lembar";
+    if (baris.rincian.length === 0)
+      teks = baris.lembarUsulan ? "usulan" : "belum ada lembar";
     else if (baris.predikat !== null && baris.cakupan < 100)
       teks = `terisi ${persen(baris.cakupan, 0)}`;
   } else if (baris.cakupan < 100) {
@@ -136,14 +138,19 @@ function TandaKelengkapan({ baris }: { baris: BarisScorecard }) {
 }
 
 /** Satu baris scorecard, bisa dibuka untuk melihat rincian indikatornya. */
+/** Siapa yang membaca scorecard — penentu tombol sahkan lembar. */
+export type PembacaScorecard = { id: string; role: string };
+
 function BarisOrang({
   baris,
   bulan,
   bulanLabel,
+  pembaca,
 }: {
   baris: BarisScorecard;
   bulan: string;
   bulanLabel: string;
+  pembaca: PembacaScorecard;
 }) {
   const [buka, setBuka] = useState(false);
   const belumAdaLembar = baris.metode === "grd" && baris.rincian.length === 0;
@@ -205,9 +212,24 @@ function BarisOrang({
           {baris.rincian.length === 0 ? (
             <p className="text-[11px] leading-[14px] text-muted-foreground">
               {baris.metode === "grd"
-                ? "Belum ada lembar KPI aktif untuk orang ini pada bulan ini."
+                ? baris.lembarUsulan
+                  ? `Lembar usulan "${baris.lembarUsulan.judul}" menunggu disahkan.`
+                  : "Belum ada lembar KPI aktif untuk orang ini pada bulan ini."
                 : "Belum ada indikator KPI untuk jabatan ini."}
             </p>
+          ) : null}
+          {/* Lembar KPI Manager disahkan CEO (file GRD): tidak ada yang
+              mengesahkan lembarnya sendiri. */}
+          {baris.metode === "grd" &&
+          baris.lembarUsulan &&
+          baris.userId !== pembaca.id &&
+          (pembaca.role === "CEO" || pembaca.role === "Manager") ? (
+            <div className="flex justify-end">
+              <TombolSahkanLembar
+                lembarId={baris.lembarUsulan.id}
+                judul={baris.lembarUsulan.judul}
+              />
+            </div>
           ) : null}
           {baris.metode === "grd" && baris.bolehMenilai ? (
             <div className="flex justify-end">
@@ -231,10 +253,12 @@ export function Scorecard({
   daftar,
   bulan,
   bulanLabel,
+  pembaca,
 }: {
   daftar: BarisScorecard[];
   bulan: string;
   bulanLabel: string;
+  pembaca: PembacaScorecard;
 }) {
   const ringkas = ringkasScorecard(daftar);
   const rata = ringkas.rataRata;
@@ -295,6 +319,7 @@ export function Scorecard({
               baris={b}
               bulan={bulan}
               bulanLabel={bulanLabel}
+              pembaca={pembaca}
             />
           ))}
         </ul>

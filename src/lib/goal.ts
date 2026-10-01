@@ -437,7 +437,7 @@ export type KelompokKurva = "internal" | "eksternal" | "perusahaan" | "lain";
  * eksternal = Blok Eksternal, total perusahaan sendiri.
  */
 export function kelompokKurva(kode: string): KelompokKurva {
-  if (kode === "T.PERUSAHAAN") return "perusahaan";
+  if (kode === "1" || kode === "T.PERUSAHAAN") return "perusahaan";
   if (kode === "T.INTERNAL" || kode.startsWith("1.1")) return "internal";
   if (kode === "T.EKSTERNAL" || kode.startsWith("1.2")) return "eksternal";
   return "lain";
