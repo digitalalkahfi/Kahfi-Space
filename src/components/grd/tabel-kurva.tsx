@@ -88,12 +88,14 @@ function Sel({
  * Sabtu oleh PIC atau atasannya.
  */
 export function TabelKurva({
-  daftar,
+  daftar: semua,
   acuan,
 }: {
   daftar: BarisKurva[];
   acuan: string;
 }) {
+  // Ukuran tanpa titik (mis. goal per akun) bukan baris kurva.
+  const daftar = semua.filter((b) => b.titik.length > 0);
   const tanggal = [
     ...new Set(daftar.flatMap((b) => b.titik.map((t) => t.tanggal))),
   ].sort();

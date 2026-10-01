@@ -308,5 +308,9 @@ test("baris kurva dikelompokkan per blok seperti sheet Target & Kurva WRM", () =
   assert.equal(kelompokKurva("1.2.1-gmv"), "eksternal");
   assert.equal(kelompokKurva("T.EKSTERNAL"), "eksternal");
   assert.equal(kelompokKurva("T.PERUSAHAAN"), "perusahaan");
+  // Total kurva di file = ukuran goal 1, 1.1, dan 1.2 sendiri.
+  assert.equal(kelompokKurva("1"), "perusahaan");
+  assert.equal(kelompokKurva("1.1"), "internal");
+  assert.equal(kelompokKurva("1.2"), "eksternal");
   assert.equal(kelompokKurva("S.1.1"), "lain");
 });

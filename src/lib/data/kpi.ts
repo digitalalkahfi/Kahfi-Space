@@ -127,6 +127,16 @@ export async function scorecardTim(
 
   if (error) throw new Error(`Gagal memuat scorecard: ${error.message}`);
 
+  // Lembar usulan yang belum disahkan — RLS membatasi ke yang boleh dilihat.
+  const { data: usulan } = await sb
+    .from("kpi_lembar")
+    .select("id, user_id, judul")
+    .eq("periode_bulan", bulan)
+    .eq("status", "draft");
+  const usulanPerOrang = new Map(
+    (usulan ?? []).map((l) => [l.user_id, { id: l.id, judul: l.judul }]),
+  );
+
   return (data ?? []).map((b): BarisScorecard => {
     const dasar = {
       userId: b.user_id,
@@ -145,6 +155,7 @@ export async function scorecardTim(
           predikat: b.predikat,
           rincian: keRincianGrd(b.detail),
           bolehMenilai: b.boleh_menilai,
+          lembarUsulan: usulanPerOrang.get(b.user_id) ?? null,
         }
       : {
           ...dasar,
@@ -314,6 +325,15 @@ function scorecardGrdDemo(
           rincian.length > 0 &&
           u.id !== pengguna.id &&
           (terlihat === null || terlihat.has(u.nama)),
+        lembarUsulan: (() => {
+          const draft = dataContoh.kpi_lembar.find(
+            (l) =>
+              l.bulan === bulan && l.user === u.nama && l.status === "draft",
+          );
+          return lembar || !draft
+            ? null
+            : { id: `contoh-${u.id}`, judul: draft.judul };
+        })(),
       };
     })
     .sort(

@@ -327,3 +327,50 @@ export async function ubahAktifIndikatorKpi(
       : `"${data.nama_kpi}" tidak lagi dihitung mulai bulan berjalan; bulan yang sudah dikunci tidak berubah.${catatanBobot(data.jabatan, total)}`,
   );
 }
+
+/**
+ * Mengesahkan lembar KPI usulan (draft) menjadi aktif. File GRD menandai
+ * lembar KPI Manager "disahkan CEO": karena itu Manager tidak bisa
+ * mengesahkan lembarnya sendiri. Bobot genap 100 ditegakkan database.
+ */
+export async function sahkanLembarKpi(lembarId: string): Promise<Hasil> {
+  if (!lembarId) return gagal("Lembar tidak dikenali.", "validasi");
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (!bolehKelola(pengguna.role)) {
+    return gagal(
+      "Hanya CEO atau Manager yang boleh mengesahkan lembar KPI.",
+      "izin",
+    );
+  }
+
+  const sb = await klienServer();
+  const { data: lembar } = await sb
+    .from("kpi_lembar")
+    .select("user_id")
+    .eq("id", lembarId)
+    .maybeSingle();
+  if (!lembar) return gagal("Lembar tidak ditemukan.", "validasi");
+  if (lembar.user_id === pengguna.id) {
+    return gagal(
+      "Lembar KPI-mu sendiri disahkan atasanmu, bukan olehmu.",
+      "izin",
+    );
+  }
+
+  const { data, error } = await sb
+    .from("kpi_lembar")
+    .update({ status: "aktif" })
+    .eq("id", lembarId)
+    .eq("status", "draft")
+    .select("id");
+  if (error) return gagal(error.message, "validasi");
+  if (!data || data.length === 0) {
+    return gagal("Lembar ini sudah aktif atau tidak ditemukan.", "validasi");
+  }
+
+  segarkanKpi();
+  return sukses(undefined, "Lembar KPI disahkan dan mulai dinilai.");
+}

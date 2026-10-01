@@ -55,3 +55,5 @@ supabase/.temp/
 # berkasnya hanya disimpan lokal sebagai sumber impor. docs/grd/GAP-*.md
 # dan berkas acuan tes berbentuk JSON tetap dikomit.
 docs/grd/*.xlsx
+# Pemetaan nama/akun untuk impor GRD — berisi nama anggota tim.
+docs/grd/pemetaan-*.json

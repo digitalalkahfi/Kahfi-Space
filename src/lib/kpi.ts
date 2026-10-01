@@ -90,6 +90,8 @@ export type BarisScorecard =
       rincian: RincianGrd[];
       /** Pembaca adalah penilai orang ini dan bulannya belum terkunci. */
       bolehMenilai: boolean;
+      /** Lembar usulan (draft) yang menunggu disahkan, bila belum ada yang aktif. */
+      lembarUsulan: { id: string; judul: string } | null;
     });
 
 export type RingkasScorecard = {

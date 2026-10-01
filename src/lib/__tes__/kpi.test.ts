@@ -193,6 +193,7 @@ function barisGrd(skor: number, terisi: boolean): BarisScorecard {
     rincian: [],
     terkunci: false,
     bolehMenilai: false,
+    lembarUsulan: null,
   };
 }
 
