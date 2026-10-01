@@ -74,12 +74,53 @@ export type LembarMentah = {
   indikator: IndikatorMentah[];
 };
 
+export type TonggakMentah = {
+  /** "" untuk tonggak tunggal, tanggal ISO untuk kejadian berjadwal. */
+  kunci: string;
+  judul: string;
+  /** Null bila tanggalnya belum ditetapkan file (mis. "MRM H-1"). */
+  tenggat: string | null;
+  urutan: number;
+};
+
+export type RencanaOpMentah = {
+  kode: string;
+  /** Goal yang dilayani; kode di kolom TACTICAL, atau induknya. */
+  goal: string | null;
+  /** Kode kolom TACTICAL apa adanya: "1.1.0", "M", "S.2.3". */
+  indukKode: string;
+  judul: string;
+  jenis: "sekali" | "harian" | "pekanan";
+  siapa: string;
+  kapan: string;
+  urutan: number;
+  asal: string;
+  tonggak: TonggakMentah[];
+};
+
+/** Lead measure dari baris HARIAN "minimal N … setiap hari" (0193). */
+export type LeadMentah = {
+  kode: string;
+  goal: string;
+  judul: string;
+  satuan: string;
+  perHari: number;
+  /** jumlah_upload: dihitung dari laporan harian atas `akun`. */
+  sumberLaporan: "jumlah_upload" | null;
+  /** Nama akun seperti di file (lingkup ukuran goal-nya). */
+  akun: string[];
+  mulai: string | null;
+  selesai: string | null;
+};
+
 export type RencanaMentah = {
   periode: string;
   periodeLabel: string;
   goals: GoalMentah[];
   ukuran: UkuranMentah[];
   lembar: LembarMentah[];
+  rencanaOp: RencanaOpMentah[];
+  lead: LeadMentah[];
   /** Hal yang dilewati pembaca beserta alasannya. */
   catatan: string[];
 };
@@ -787,6 +828,356 @@ function bacaKpi(
 }
 
 // ---------------------------------------------------------------------
+// Sheet GRD Cascade — rencana operasional dan tonggaknya
+// ---------------------------------------------------------------------
+
+/** Nama hari menurut `getUTCDay()`. */
+const HARI = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+const POLA_HARI = /\b(minggu|senin|selasa|rabu|kamis|jumat|sabtu)\b/gi;
+const POLA_BULAN = "(jan|feb|mar|apr|mei|jun|jul|agu|sep|okt|nov|des)[a-z]*";
+
+function hariKe(iso: string): number {
+  return new Date(`${iso}T00:00:00Z`).getUTCDay();
+}
+
+function tambahHari(iso: string, n: number): string {
+  const d = new Date(`${iso}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+/** "Senin, 5 Okt" untuk judul kejadian berjadwal. */
+export function labelHari(iso: string): string {
+  const [, b, h] = iso.split("-").map(Number);
+  const bln = Object.keys(BULAN).find(
+    (k) => k.length === 3 && BULAN[k] === b,
+  ) as string;
+  return `${HARI[hariKe(iso)]}, ${h} ${bln[0].toUpperCase()}${bln.slice(1)}`;
+}
+
+/** Tahun untuk bulan yang disebut tanpa tahun: Januari setelah Desember. */
+function tahunUntuk(bulan: number, periode: string): number {
+  const [t, b] = periode.split("-").map(Number);
+  return bulan < b - 6 ? t + 1 : t;
+}
+
+/**
+ * Semua tanggal yang disebut sebuah teks: "Sabtu 3 Okt", "1 Okt · 10 Okt",
+ * dan daftar seperti "Senin 5 · 12 · 19 · 26 Okt" (bulan disebut sekali).
+ */
+export function tanggalDisebut(teksJadwal: string, periode: string): string[] {
+  const pola = new RegExp(
+    `(\\d{1,2})((?:\\s*[·,]\\s*\\d{1,2})*)\\s+${POLA_BULAN}\\b`,
+    "gi",
+  );
+  const hasil: string[] = [];
+  for (const m of teksJadwal.matchAll(pola)) {
+    const bulan = BULAN[m[3].toLowerCase()];
+    if (!bulan) continue;
+    const hari = [m[1], ...(m[2].match(/\d{1,2}/g) ?? [])].map(Number);
+    for (const h of hari) {
+      hasil.push(tanggal(tahunUntuk(bulan, periode), bulan, h));
+    }
+  }
+  return hasil;
+}
+
+/** "8–17 Okt" → rentang; null bila teksnya bukan rentang hari. */
+export function rentangHari(
+  teksJadwal: string,
+  periode: string,
+): { mulai: string; selesai: string } | null {
+  const m = new RegExp(
+    `(\\d{1,2})\\s*[–-]\\s*(\\d{1,2})\\s+${POLA_BULAN}\\b`,
+    "i",
+  ).exec(teksJadwal);
+  if (!m || !BULAN[m[3].toLowerCase()]) return null;
+  const bulan = BULAN[m[3].toLowerCase()];
+  const tahun = tahunUntuk(bulan, periode);
+  return {
+    mulai: tanggal(tahun, bulan, Number(m[1])),
+    selesai: tanggal(tahun, bulan, Number(m[2])),
+  };
+}
+
+/** Hari-hari yang disebut, sebagai indeks `getUTCDay()`. */
+function hariDisebut(t: string): number[] {
+  return [
+    ...new Set(
+      [...t.matchAll(POLA_HARI)].map((m) =>
+        HARI.findIndex((h) => h.toLowerCase() === m[1].toLowerCase()),
+      ),
+    ),
+  ];
+}
+
+/**
+ * Kejadian tonggak satu baris rencana menurut JENIS dan KAPAN-nya.
+ *
+ *   HARIAN  → tanpa tonggak (dicek di DRM, diukur dari laporan).
+ *   SEKALI  → satu tonggak; beberapa bila KAPAN menyebut beberapa tanggal
+ *             ("1 Okt · 10 Okt") atau "Sesuai tanggal" dengan tahap
+ *             bertanggal di rumusannya. Rentang acara ("31 Okt – 1 Nov")
+ *             tetap satu tonggak, bertenggat hari terakhirnya.
+ *   PEKANAN → satu tonggak per kejadian: daftar tanggal, rentang hari
+ *             ("19–25 Okt"), atau hari yang disebut ("Setiap Senin, Rabu,
+ *             Sabtu", "Mulai Rabu 7 Okt" + hari di rumusannya). "Setiap
+ *             pekan" dan "Setelah …" = tiap Sabtu, hari WRM menurut
+ *             legenda file. "MRM H-1" menjadi tonggak tanpa tanggal.
+ */
+export function jadwalTonggak(
+  jenis: RencanaOpMentah["jenis"],
+  kapan: string,
+  judul: string,
+  periode: string,
+): { tonggak: TonggakMentah[]; catatan: string | null } {
+  const akhir = akhirBulanIso(periode);
+  const tunggal = (tenggat: string | null): TonggakMentah[] => [
+    { kunci: "", judul, tenggat, urutan: 1 },
+  ];
+
+  if (jenis === "harian") return { tonggak: [], catatan: null };
+
+  if (jenis === "sekali") {
+    if (/^\s*sesuai tanggal/i.test(kapan)) {
+      const isi = judul.includes(":")
+        ? judul.slice(judul.indexOf(":") + 1)
+        : "";
+      const tahap = isi
+        .split("·")
+        .map((x) => x.trim())
+        .map((x) => /^(\d{1,2})(?:\s*[–-]\s*(\d{1,2}))?\s+(.+)$/.exec(x))
+        .filter((m): m is RegExpExecArray => m !== null);
+      if (tahap.length === 0) {
+        return {
+          tonggak: tunggal(null),
+          catatan: "tanggalnya tidak tertulis; tenggat menunggu ditetapkan",
+        };
+      }
+      const [t, b] = periode.split("-").map(Number);
+      return {
+        tonggak: tahap.map((m, i) => {
+          const tenggat = tanggal(t, b, Number(m[2] ?? m[1]));
+          return {
+            kunci: tenggat,
+            judul: m[0].trim(),
+            tenggat,
+            urutan: i + 1,
+          };
+        }),
+        catatan: null,
+      };
+    }
+
+    const tgl = tanggalDisebut(kapan, periode);
+    if (tgl.length === 0) {
+      return {
+        tonggak: tunggal(null),
+        catatan: "tanggalnya tidak tertulis; tenggat menunggu ditetapkan",
+      };
+    }
+    const rentangAcara = new RegExp(
+      `\\d{1,2}\\s+${POLA_BULAN}\\s*[–-]\\s*\\d{1,2}\\s+${POLA_BULAN}`,
+      "i",
+    ).test(kapan);
+    if (tgl.length === 1 || rentangAcara) {
+      return { tonggak: tunggal(tgl.at(-1) as string), catatan: null };
+    }
+    // Beberapa serahan: namanya diambil dari rumusan "… (1 Okt)".
+    return {
+      tonggak: tgl.map((tenggat, i) => {
+        const [, , h] = tenggat.split("-").map(Number);
+        const butir = new RegExp(
+          `([^:,·(]+?)\\s*\\(${h}\\s+${POLA_BULAN}\\)`,
+          "i",
+        ).exec(judul);
+        return {
+          kunci: tenggat,
+          judul: butir ? butir[1].trim() : `${judul} (${labelHari(tenggat)})`,
+          tenggat,
+          urutan: i + 1,
+        };
+      }),
+      catatan: null,
+    };
+  }
+
+  // PEKANAN
+  const kejadian = (daftar: string[]): TonggakMentah[] =>
+    daftar.map((tenggat, i) => ({
+      kunci: tenggat,
+      judul: labelHari(tenggat),
+      tenggat,
+      urutan: i + 1,
+    }));
+
+  const rentang = rentangHari(kapan, periode);
+  if (rentang) {
+    const hari: string[] = [];
+    for (let d = rentang.mulai; d <= rentang.selesai; d = tambahHari(d, 1)) {
+      hari.push(d);
+    }
+    return { tonggak: kejadian(hari), catatan: null };
+  }
+
+  const tgl = tanggalDisebut(kapan, periode);
+  if (tgl.length > 1 && !/\b(setiap|mulai|pertama|setelah)\b/i.test(kapan)) {
+    return { tonggak: kejadian(tgl), catatan: null };
+  }
+
+  // Hari yang disebut, sejak tanggal mulainya.
+  let sisa = kapan;
+  let mulai = periode;
+  const pembuka = new RegExp(
+    `\\b(mulai|pertama|setelah)\\s+(?:(?:minggu|senin|selasa|rabu|kamis|jumat|sabtu)\\s+)?(\\d{1,2})\\s+${POLA_BULAN}\\b`,
+    "i",
+  ).exec(kapan);
+  if (pembuka) {
+    const bulan = BULAN[pembuka[3].toLowerCase()];
+    const awal = tanggal(tahunUntuk(bulan, periode), bulan, Number(pembuka[2]));
+    mulai = pembuka[1].toLowerCase() === "setelah" ? tambahHari(awal, 1) : awal;
+    sisa = kapan.replace(pembuka[0], " ");
+  }
+  let hari = hariDisebut(sisa);
+  if (hari.length === 0) {
+    const dariJudul =
+      /setiap\s+((?:(?:minggu|senin|selasa|rabu|kamis|jumat|sabtu)(?:\s*,\s*|\s+dan\s+|\s*\/\s*|\s*)?)+)/i.exec(
+        judul,
+      );
+    if (dariJudul) hari = hariDisebut(dariJudul[1]);
+  }
+  if (hari.length === 0) {
+    if (/setiap pekan|setelah/i.test(kapan) || pembuka) {
+      hari = [6];
+    } else {
+      return {
+        tonggak: [],
+        catatan: `jadwalnya "${kapan}" tidak tetap; tidak dibuatkan tonggak`,
+      };
+    }
+  }
+
+  const tanggalKejadian: string[] = [];
+  for (let d = mulai; d <= akhir; d = tambahHari(d, 1)) {
+    if (hari.includes(hariKe(d))) tanggalKejadian.push(d);
+  }
+  const tonggak = kejadian(tanggalKejadian);
+  let catatan: string | null = null;
+  if (/\bMRM\b/.test(kapan)) {
+    tonggak.push({
+      kunci: "mrm",
+      judul: "Pengingat MRM (H-1)",
+      tenggat: null,
+      urutan: tonggak.length + 1,
+    });
+    catatan = "tanggal MRM tidak tertulis; tenggatnya menunggu ditetapkan";
+  }
+  return { tonggak, catatan };
+}
+
+/** Goal yang dilayani: kode TACTICAL bila goal, atau induk terdekatnya. */
+function goalTerdekat(kode: string, goalKode: Set<string>): string | null {
+  for (let k: string | null = kode; k; k = indukKode(k)) {
+    if (goalKode.has(k)) return k;
+  }
+  return null;
+}
+
+function bacaCascade(
+  ws: LembarXlsx,
+  periode: string,
+  goalKode: Set<string>,
+  catatan: string[],
+): RencanaOpMentah[] {
+  const akhir = barisTerakhir(ws);
+  const hasil: RencanaOpMentah[] = [];
+  let induk = "";
+  for (let r = 3; r <= akhir; r += 1) {
+    const a = teks(ws, `A${r}`);
+    const e = teks(ws, `E${r}`);
+    if (/^[0-9S][0-9S.]*$/.test(e)) induk = e;
+    else if (/^[A-Z]$/.test(a)) induk = a;
+
+    const kode = teks(ws, `G${r}`);
+    const judul = teks(ws, `H${r}`);
+    const jenisTeks = teks(ws, `I${r}`).toLowerCase();
+    if (!kode || !judul) continue;
+    if (!["sekali", "harian", "pekanan"].includes(jenisTeks)) {
+      catatan.push(
+        `Rencana ${kode}: JENIS "${teks(ws, `I${r}`)}" tidak dikenal, dilewati.`,
+      );
+      continue;
+    }
+    const jenis = jenisTeks as RencanaOpMentah["jenis"];
+    const kapan = teks(ws, `K${r}`);
+    const { tonggak, catatan: ket } = jadwalTonggak(
+      jenis,
+      kapan,
+      judul,
+      periode,
+    );
+    if (ket) catatan.push(`Rencana ${kode}: ${ket}.`);
+    hasil.push({
+      kode,
+      goal: goalTerdekat(induk, goalKode),
+      indukKode: induk,
+      judul,
+      jenis,
+      siapa: teks(ws, `J${r}`),
+      kapan,
+      urutan: hasil.length + 1,
+      asal: `GRD Cascade!G${r}`,
+      tonggak,
+    });
+  }
+  return hasil;
+}
+
+/**
+ * Baris HARIAN yang berupa jumlah ("minimal 10 produk setiap hari") menjadi
+ * lead measure. Upload video dihitung dari laporan harian atas akun goal-
+ * nya; selainnya diisi orangnya di papan lead measure.
+ */
+function bacaLead(
+  rencana: RencanaOpMentah[],
+  ukuran: UkuranMentah[],
+  periode: string,
+): LeadMentah[] {
+  const hasil: LeadMentah[] = [];
+  for (const r of rencana) {
+    if (r.jenis !== "harian" || !r.goal) continue;
+    const m =
+      /minimal\s+(\d+)\s+([A-Za-z]+)[^.;]*?(?:setiap hari|per hari|\/hari)/i.exec(
+        r.judul,
+      );
+    if (!m) continue;
+    const upload = /upload|video/i.test(m[0]) || /upload|video/i.test(r.judul);
+    const ukuranGoal = ukuran.find((u) => u.goal === r.goal);
+    const akun = upload
+      ? (ukuranGoal?.lingkup ?? []).flatMap((l) =>
+          "akun" in l ? [l.akun] : [],
+        )
+      : [];
+    const rentang = rentangHari(r.kapan, periode);
+    const mulaiTeks = /\bmulai\b/i.test(r.kapan)
+      ? tanggalDisebut(r.kapan, periode)[0]
+      : undefined;
+    hasil.push({
+      kode: r.kode,
+      goal: r.goal,
+      judul: r.judul,
+      satuan: m[2].toLowerCase(),
+      perHari: Number(m[1]),
+      sumberLaporan: upload ? "jumlah_upload" : null,
+      akun,
+      mulai: rentang?.mulai ?? mulaiTeks ?? null,
+      selesai: rentang?.selesai ?? null,
+    });
+  }
+  return hasil;
+}
+
+// ---------------------------------------------------------------------
 // Rencana lengkap
 // ---------------------------------------------------------------------
 export function bacaRencanaGrd(workbook: {
@@ -884,7 +1275,31 @@ export function bacaRencanaGrd(workbook: {
 
   const lembar = bacaKpi(workbook, catatan);
 
-  return { periode, periodeLabel, goals: semuaGoal, ukuran, lembar, catatan };
+  const cascadeWs = workbook.Sheets["GRD Cascade"];
+  const rencanaOp = cascadeWs
+    ? bacaCascade(
+        cascadeWs,
+        periode,
+        new Set(semuaGoal.map((g) => g.kode)),
+        catatan,
+      )
+    : [];
+  if (!cascadeWs)
+    catatan.push(
+      'Sheet "GRD Cascade" tidak ada; rencana operasional dilewati.',
+    );
+  const lead = bacaLead(rencanaOp, ukuran, periode);
+
+  return {
+    periode,
+    periodeLabel,
+    goals: semuaGoal,
+    ukuran,
+    lembar,
+    rencanaOp,
+    lead,
+    catatan,
+  };
 }
 
 // ---------------------------------------------------------------------
@@ -906,6 +1321,42 @@ export type PemetaanGrd = {
     jabatan?: string;
   }[];
   hapus_goal_periode?: string[];
+  /**
+   * Sumber otomatis indikator KPI (0194), per lembar lalu per urutan
+   * indikator. Kunci lembar = nama orang seperti di file, atau "@<awal
+   * judul>" untuk templat (mis. "@KPI TIM KONTEN"). Di templat, "{akun}"
+   * diganti akun orang itu (dari "GMV akun … vs target") dan "{min}"
+   * dengan standar "(N video/hari)" di rumusan indikatornya. Indikator
+   * yang tidak disebut tetap diisi penilai.
+   */
+  kpi_otomatis?: Record<string, Record<string, AturanSumberKpi>>;
+};
+
+export type SumberKpiOtomatis =
+  | "ukuran_persen"
+  | "ukuran_nilai"
+  | "tonggak"
+  | "upload_rata"
+  | "hari_standar"
+  | "hari_live"
+  | "laporan_tepat"
+  | "lead_rata"
+  | "lead_jumlah";
+
+export type AturanSumberKpi = {
+  sumber: SumberKpiOtomatis;
+  /** Kode ukuran; "*:{akun}" = ukuran per akun milik orang itu. */
+  ukuran?: string | string[];
+  /** Kode baris rencana operasional yang tonggaknya dihitung. */
+  rencana?: string[];
+  /** Akun (nama di file); untuk hari_standar boleh {akun, min}. */
+  akun?: (string | { akun: string; min: number | string })[];
+  min?: number | string;
+  jam?: number;
+  mulai?: string;
+  /** "21:00" = laporan paling lambat jam itu (WIB); null = asal terisi. */
+  batas?: string | null;
+  lead?: string[];
 };
 
 export type DataDb = {
@@ -923,6 +1374,8 @@ export type RencanaImpor = {
   goals: Record<string, unknown>[];
   ukuran: Record<string, unknown>[];
   lembar: Record<string, unknown>[];
+  rencana: Record<string, unknown>[];
+  lead: Record<string, unknown>[];
 };
 
 export type LaporanSusun = {
@@ -1091,6 +1544,278 @@ export function susunRencana(
       titik: u.titik,
     }));
 
+  // Nama di kolom SIAPA: hanya yang tercantum di pemetaan orang yang
+  // dipakai; peran ("Finance", "Admin MCN", "Seluruh tim") dilewati tanpa
+  // menghentikan impor.
+  const orangLunak = (nama: string): string | null => {
+    const tujuan = pemetaan.orang[nama];
+    return tujuan ? (userPerNama.get(tujuan)?.id ?? null) : null;
+  };
+  const goalPemilik = new Map(
+    goals.map((g) => [g.kode as string, g.pemilik_id as string | null]),
+  );
+  const kodeGoal = new Set(goals.map((g) => g.kode as string));
+
+  const rencana = mentah.rencanaOp.map((r) => {
+    const nama = r.siapa
+      .replace(/\([^)]*\)/g, " ")
+      .split(/\s*(?:\+|→|&|\/|,|\bdan\b)\s*/)
+      .map((x) => x.trim())
+      .filter(Boolean);
+    let pic_ids = [
+      ...new Set(nama.map(orangLunak).filter(Boolean)),
+    ] as string[];
+    const goal = r.goal && kodeGoal.has(r.goal) ? r.goal : null;
+    if (pic_ids.length === 0) {
+      // Peran tanpa nama ("Host LIVE", "Santri"): dicentang pemilik goal
+      // yang dilayaninya, atau Manager untuk tonggak Manager.
+      const cadangan =
+        (goal ? goalPemilik.get(goal) : null) ??
+        (r.indukKode === "M" ? orangLunak("Kholid") : null);
+      if (cadangan) pic_ids = [cadangan];
+      if (r.tonggak.length > 0) {
+        laporan.dilewati.push(
+          `Rencana ${r.kode}: "${r.siapa}" belum terdaftar; tonggaknya dicentang ${
+            cadangan ? "pemilik goal-nya" : "CEO/Manager"
+          }.`,
+        );
+      }
+    }
+    return {
+      kode: r.kode,
+      goal,
+      induk_kode: r.indukKode,
+      judul: r.judul,
+      jenis: r.jenis,
+      pic_ids,
+      pic_teks: r.siapa,
+      jadwal_teks: r.kapan,
+      urutan: r.urutan,
+      asal: r.asal,
+      tonggak: r.tonggak,
+    };
+  });
+
+  const lead = mentah.lead.flatMap((m) => {
+    if (!kodeGoal.has(m.goal)) return [];
+    const akun = m.akun.map(akunId).filter(Boolean) as string[];
+    if (m.sumberLaporan && akun.length === 0) {
+      laporan.dilewati.push(
+        `Lead measure ${m.kode} dilewati: belum ada akunnya di K-Space.`,
+      );
+      return [];
+    }
+    return [
+      {
+        kode: m.kode,
+        goal: m.goal,
+        judul: m.judul,
+        satuan: m.satuan,
+        target_mingguan: m.perHari * 7,
+        sumber_laporan: m.sumberLaporan,
+        mulai: m.mulai,
+        selesai: m.selesai,
+        akun,
+      },
+    ];
+  });
+
+  const kodeUkuran = new Set(ukuran.map((u) => u.kode));
+  const kodeRencana = new Set(rencana.map((r) => r.kode));
+  const kodeLead = new Set(lead.map((m) => m.kode));
+  const targetUkuran = new Map(
+    mentah.goals.map((g) => [g.kode, g.target] as const),
+  );
+  const akunUkuran = (kode: string): string[] =>
+    (mentah.ukuran.find((u) => u.kode === kode)?.lingkup ?? []).flatMap((l) =>
+      "akun" in l ? [l.akun] : [],
+    );
+
+  /** Satu indikator → sumber otomatis, atau null bila tetap manual. */
+  const sumberIndikator = (
+    l: LembarMentah,
+    i: IndikatorMentah,
+    aturan: AturanSumberKpi,
+  ): Record<string, unknown> | null => {
+    const label = `KPI ${l.orang} #${i.urutan}`;
+    const akunOrang = l.indikator
+      .map((x) => /GMV akun (.+?) vs target/i.exec(x.nama)?.[1])
+      .find(Boolean);
+    const minTeks = /\((\d+) video\/hari\)/.exec(i.nama)?.[1];
+    const isi = (t: string) =>
+      t
+        .replace("{akun}", akunOrang ?? "{akun}")
+        .replace("{min}", minTeks ?? "");
+    const ukuranKode = (k: string): string | null => {
+      const kode = isi(k);
+      const cocok = kode.startsWith("*:")
+        ? mentah.ukuran.find((u) => u.kode.endsWith(kode.slice(1)))?.kode
+        : kode;
+      return cocok && kodeUkuran.has(cocok) ? cocok : null;
+    };
+    // Akun dari nama file; nama pemegang akun ("Bilqis") lewat ukurannya.
+    const akunDari = (nama: string): string[] => {
+      const n = isi(nama);
+      if (n in pemetaan.akun) {
+        const id = akunId(n);
+        return id ? [id] : [];
+      }
+      const u = mentah.ukuran.find((x) => x.kode.endsWith(`:${n}`));
+      return u
+        ? (akunUkuran(u.kode).map(akunId).filter(Boolean) as string[])
+        : [];
+    };
+    const manual = (alasan: string) => {
+      laporan.dilewati.push(`${label} tetap diisi penilai: ${alasan}.`);
+      return null;
+    };
+
+    switch (aturan.sumber) {
+      case "ukuran_persen": {
+        const daftar = ([] as string[]).concat(aturan.ukuran ?? []);
+        const kode = daftar.map(ukuranKode).filter(Boolean) as string[];
+        if (kode.length === 0) return manual("ukurannya belum ada di K-Space");
+        if (kode.length < daftar.length) {
+          laporan.dilewati.push(
+            `${label}: sebagian ukuran belum ada (${daftar.length - kode.length} dari ${daftar.length}).`,
+          );
+        }
+        // Pemeriksa silang: Σ target goal ukurannya = "Rp …" di rumusan.
+        const tertulis = /target (Rp [\d.,]+\s*(?:M|jt))/i.exec(i.nama)?.[1];
+        const jumlah = kode.reduce((t, k) => t + (targetUkuran.get(k) ?? 0), 0);
+        const angkaTertulis = tertulis
+          ? bacaRupiahTeks(tertulis.replace(/^Rp\s*/, ""))
+          : null;
+        if (angkaTertulis !== null && Math.abs(angkaTertulis - jumlah) > 0.5) {
+          laporan.dilewati.push(
+            `${label}: Σ target ukuran ${jumlah.toLocaleString("id-ID")} ≠ ${tertulis} di rumusan.`,
+          );
+        }
+        return {
+          sumber: "ukuran_persen",
+          sumber_ref: { ukuran: kode },
+          keterangan_sumber: `Otomatis: realisasi ${kode.join(" + ")} ÷ target`,
+        };
+      }
+      case "ukuran_nilai": {
+        const kode = ukuranKode(String(aturan.ukuran ?? ""));
+        if (!kode) return manual("ukurannya belum ada di K-Space");
+        return {
+          sumber: "ukuran_nilai",
+          sumber_ref: { ukuran: kode },
+          keterangan_sumber: `Otomatis: capaian ${kode}`,
+        };
+      }
+      case "tonggak": {
+        const kode = (aturan.rencana ?? []).filter((k) => kodeRencana.has(k));
+        const hilang = (aturan.rencana ?? []).filter(
+          (k) => !kodeRencana.has(k),
+        );
+        if (hilang.length) {
+          laporan.dilewati.push(
+            `${label}: rencana ${hilang.join(", ")} tidak ada di file.`,
+          );
+        }
+        if (kode.length === 0) return manual("tonggaknya tidak ada");
+        return {
+          sumber: "tonggak",
+          sumber_ref: { rencana: kode },
+          keterangan_sumber: `Otomatis: tonggak tepat waktu (${kode.join(", ")})`,
+        };
+      }
+      case "upload_rata": {
+        const akun = [
+          ...new Set(
+            (aturan.akun ?? []).flatMap((a) =>
+              akunDari(typeof a === "string" ? a : a.akun),
+            ),
+          ),
+        ];
+        if (akun.length === 0) return manual("akunnya belum ada di K-Space");
+        return {
+          sumber: "upload_rata",
+          sumber_ref: {
+            akun,
+            ...(aturan.mulai ? { mulai: aturan.mulai } : {}),
+          },
+          keterangan_sumber: `Otomatis: rata-rata video/hari dari laporan harian (${akun.length} akun)`,
+        };
+      }
+      case "hari_standar": {
+        const akun = (aturan.akun ?? []).flatMap((a) => {
+          const nama = typeof a === "string" ? a : a.akun;
+          const min = Number(
+            isi(String(typeof a === "string" ? (aturan.min ?? "") : a.min)),
+          );
+          return akunDari(nama).map((id) => ({ id, min }));
+        });
+        if (akun.length === 0) return manual("akunnya belum ada di K-Space");
+        if (akun.some((a) => !Number.isFinite(a.min) || a.min <= 0)) {
+          return manual("standar videonya tidak terbaca");
+        }
+        return {
+          sumber: "hari_standar",
+          sumber_ref: {
+            akun,
+            ...(aturan.mulai ? { mulai: aturan.mulai } : {}),
+          },
+          keterangan_sumber: `Otomatis: % hari ${
+            akun.length > 1 ? `semua ${akun.length} akun` : "akun"
+          } memenuhi standar video (laporan harian)`,
+        };
+      }
+      case "hari_live": {
+        const akun = [
+          ...new Set(
+            (aturan.akun ?? []).flatMap((a) =>
+              akunDari(typeof a === "string" ? a : a.akun),
+            ),
+          ),
+        ];
+        if (akun.length === 0) return manual("akunnya belum ada di K-Space");
+        return {
+          sumber: "hari_live",
+          sumber_ref: {
+            akun,
+            jam: aturan.jam ?? 0,
+            ...(aturan.mulai ? { mulai: aturan.mulai } : {}),
+          },
+          keterangan_sumber: `Otomatis: % hari LIVE ≥ ${aturan.jam ?? 0} jam (laporan harian)`,
+        };
+      }
+      case "laporan_tepat":
+        return {
+          sumber: "laporan_tepat",
+          sumber_ref: aturan.batas ? { batas: aturan.batas } : {},
+          keterangan_sumber: aturan.batas
+            ? `Otomatis: % hari laporan harian terkirim ≤ ${aturan.batas.replace(":", ".")} WIB`
+            : "Otomatis: % hari laporan harian terisi",
+        };
+      case "lead_rata":
+      case "lead_jumlah": {
+        const kode = (aturan.lead ?? []).filter((k) => kodeLead.has(k));
+        if (kode.length === 0) return manual("lead measure-nya tidak ada");
+        return {
+          sumber: aturan.sumber,
+          sumber_ref: { lead: kode },
+          keterangan_sumber:
+            aturan.sumber === "lead_rata"
+              ? `Otomatis: rata-rata per hari lead measure ${kode.join(" + ")}`
+              : `Otomatis: jumlah lead measure ${kode.join(" + ")}`,
+        };
+      }
+    }
+  };
+
+  const aturanLembar = (l: LembarMentah) => {
+    const semua = pemetaan.kpi_otomatis ?? {};
+    if (semua[l.orang]) return semua[l.orang];
+    const templat = Object.keys(semua).find(
+      (k) => k.startsWith("@") && l.judul.startsWith(k.slice(1)),
+    );
+    return templat ? semua[templat] : {};
+  };
+
   const lembar = mentah.lembar.flatMap((l) => {
     const user_id = orangId(l.orang);
     if (!user_id) {
@@ -1099,13 +1824,18 @@ export function susunRencana(
       );
       return [];
     }
+    const aturan = aturanLembar(l);
     return [
       {
         user_id,
         judul: l.judul,
         status: l.status,
         asal: l.asal,
-        indikator: l.indikator,
+        indikator: l.indikator.map((i) => {
+          const a = aturan[String(i.urutan)];
+          const otomatis = a ? sumberIndikator(l, i, a) : null;
+          return otomatis ? { ...i, ...otomatis } : { ...i, sumber: "manual" };
+        }),
       },
     ];
   });
@@ -1136,6 +1866,8 @@ export function susunRencana(
       goals,
       ukuran,
       lembar,
+      rencana,
+      lead,
     },
     laporan,
   };

@@ -3,6 +3,7 @@ import {
   Activity,
   ArrowRight,
   CalendarCheck2,
+  Flag,
   Gauge,
   LineChart,
   ListChecks,
@@ -26,6 +27,14 @@ const MENU = [
     ringkas: "Target kumulatif tiap Sabtu, aktual, dan status HIJAU/MERAH.",
     Ikon: LineChart,
     gaya: "bg-ok-fill text-ok-text",
+  },
+  {
+    href: "/grd/rencana" as const,
+    judul: "Rencana operasional",
+    ringkas:
+      "Siapa mengerjakan apa, kapan, dan tonggak yang selesai tepat waktu.",
+    Ikon: Flag,
+    gaya: "bg-warn-fill text-warn-text",
   },
   {
     href: "/grd/lead-measure" as const,

@@ -7,8 +7,13 @@
  *   2. Nama orang dan akun dipetakan lewat berkas pemetaan yang disetujui
  *      pemilik — tidak ada tebakan otomatis. Nama yang belum tercantum
  *      menghentikan impor; yang sengaja null dilaporkan dan dilewati.
- *   3. Rencana ber-id dikirim ke `impor_grd` (migrasi 0190): seluruhnya
- *      dalam satu transaksi.
+ *   3. Rencana ber-id dikirim ke `impor_grd` (migrasi 0190, 0195):
+ *      seluruhnya dalam satu transaksi — goal, ukuran & kurva, lembar
+ *      KPI, rencana operasional & tonggak, lead measure.
+ *
+ * Berkas pemetaan juga memuat `kpi_otomatis`: indikator KPI mana yang
+ * dihitung otomatis dan dari mana (ukuran, tonggak, laporan harian, lead
+ * measure). Formatnya dijelaskan di tipe `PemetaanGrd` (src/lib/impor-grd.ts).
  *
  * Tanpa --terapkan, impor dijalankan sebagai UJI COBA: database
  * memeriksa seluruh rencana dengan aturan yang sama lalu membatalkannya.
@@ -153,6 +158,16 @@ console.log(
 console.log(
   `  ${rencana.goals.length} goal · ${rencana.ukuran.length} ukuran · ` +
     `${rencana.lembar.length} lembar KPI · ${rencana.struktur.length} penyesuaian struktur`,
+);
+const nTonggak = rencana.rencana.reduce((t, r) => t + r.tonggak.length, 0);
+const nOtomatis = rencana.lembar.reduce(
+  (t, l) => t + l.indikator.filter((i) => i.sumber !== "manual").length,
+  0,
+);
+const nIndikator = rencana.lembar.reduce((t, l) => t + l.indikator.length, 0);
+console.log(
+  `  ${rencana.rencana.length} rencana operasional · ${nTonggak} tonggak · ` +
+    `${rencana.lead.length} lead measure · ${nOtomatis} dari ${nIndikator} indikator KPI otomatis`,
 );
 if (laporan.goalLamaDihapus.length) {
   console.log(`\nGoal lama yang dihapus (${laporan.goalLamaDihapus.length}):`);

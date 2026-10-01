@@ -73,6 +73,8 @@ export async function kirimLaporanHarian(input: {
   gmv: number;
   komisi?: number | null;
   jumlahUpload?: number | null;
+  gmvLive?: number | null;
+  jamLive?: number | null;
   catatan?: string;
   tanggal: string;
 }): Promise<Hasil<{ id: string }>> {
@@ -92,6 +94,8 @@ export async function kirimLaporanHarian(input: {
     gmv: input.gmv,
     komisi: input.komisi ?? null,
     jumlahUpload: input.jumlahUpload ?? null,
+    gmvLive: input.gmvLive ?? null,
+    jamLive: input.jamLive ?? null,
     catatan: input.catatan?.trim() ?? "",
   };
   const unit = await unitSasaranLaporan(input.sasaran);
@@ -126,6 +130,8 @@ export async function kirimLaporanHarian(input: {
       gmv: isi.gmv,
       komisi: isi.komisi,
       jumlah_upload: isi.jumlahUpload,
+      gmv_live: isi.gmvLive ?? null,
+      jam_live: isi.jamLive ?? null,
       catatan: isi.catatan,
     })
     .select("id")
@@ -158,6 +164,9 @@ export async function perbaikiLaporan(input: {
   gmv: number;
   komisi?: number | null;
   jumlahUpload?: number | null;
+  /** null = tidak diubah (0191). */
+  gmvLive?: number | null;
+  jamLive?: number | null;
   alasan: string;
   catatan?: string;
 }): Promise<Hasil> {
@@ -172,6 +181,8 @@ export async function perbaikiLaporan(input: {
     gmv: input.gmv,
     komisi: input.komisi ?? null,
     jumlahUpload: input.jumlahUpload ?? null,
+    gmvLive: input.gmvLive ?? null,
+    jamLive: input.jamLive ?? null,
     catatan: input.catatan?.trim() ?? "",
   });
   if (salah) return gagal(salah, "validasi");
@@ -190,6 +201,8 @@ export async function perbaikiLaporan(input: {
     p_gmv: input.gmv,
     p_komisi: input.komisi ?? null,
     p_jumlah_upload: input.jumlahUpload ?? null,
+    p_gmv_live: input.gmvLive ?? null,
+    p_jam_live: input.jamLive ?? null,
     p_alasan: input.alasan.trim(),
     p_catatan: input.catatan?.trim() ?? null,
   });

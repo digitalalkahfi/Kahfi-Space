@@ -577,3 +577,111 @@ keputusan berikut mengikuti isi file GRD bila file menyebutnya:
 | 10 | Lembar KPI Oktober Rifal = **Tim Riset** (penilai Kholid). Akun santri "Rifal Cakep" tetap ikut goal 1.1.4. | Satu orang satu lembar per bulan. |
 | 12 | Matriks WRM disamakan dengan DECISION-021 di Tahap 2A (migrasi 0189), termasuk HIJAU = aktual ≥ target dan UBAH CARA setelah dua pekan merah. | Sheet kurva baris 93. |
 | 13 | Angka janggal di §5 **tidak diubah**; semua angka masuk persis seperti di file. | Aturan kerja: jangan mengubah angka, bobot, atau target dari file. |
+
+---
+
+## 10. Tahap 3 — yang diterapkan (migrasi 0191–0195)
+
+### Laporan harian
+
+- Affiliator kini mengisi **GMV LIVE** dan **jam LIVE** (centang "Ada LIVE?"). Keduanya bisa
+  diperbaiki lewat riwayat laporan dan berjejak di revisi, sama seperti GMV, komisi, dan upload.
+- **Produk diriset** tidak menjadi kolom laporan harian. Tim Riset tidak melapor per akun, jadi
+  angkanya diisi harian di papan lead measure **1.1.3.6** ("minimal 10 produk setiap hari").
+  KPI Rifal #1 membaca rata-ratanya.
+
+### Rencana operasional & tonggak
+
+Seluruh 85 baris OPERATIONAL PLAN masuk lengkap dengan goal yang dilayani, SIAPA, dan KAPAN. Aturan
+tonggak mengikuti legenda file:
+
+- **SEKALI** menjadi satu tonggak. Bila KAPAN menyebut beberapa tanggal, jadinya beberapa tonggak:
+  S.1.1.5 menjadi 2 dokumen, dan S.2.3.3 menjadi 5 tahap bertanggal.
+- **PEKANAN** menjadi satu tonggak per kejadian. "Setiap pekan" dihitung tiap Sabtu, sesuai legenda
+  "dicek di WRM Sabtu".
+- **HARIAN** tidak menjadi tonggak. Pekerjaan ini diukur dari laporan harian dan lead measure.
+
+Hasilnya 157 tonggak. Jumlahnya cocok dengan penyebut di KPI file:
+
+| KPI | Penyebut di file | Hasil di aplikasi |
+| --- | --- | --- |
+| Ami #4 | 11 kiriman | 11 kejadian 1.2.2.2 (Sen/Rab/Sab, mulai 7 Okt) |
+| Alma #2 | 13 pengingat | 5 WRM + 1 MRM + 7 RAB |
+| Wildan #2 | 8 jadwal | 4 Senin + 4 Jumat |
+| Alma #4 | 5 tahap | 5 tahap |
+| Kholid #3 | 9 tonggak | M.1–M.9 |
+
+Status tonggak (BELUM / PROGRESS / SELESAI) diubah di halaman **GRD → Rencana operasional** oleh
+orang-orang ini:
+- yang disebut di kolom SIAPA;
+- atasan mereka;
+- CEO/Manager.
+
+Bila SIAPA berupa peran yang belum terdaftar ("Host LIVE", "Santri"), pemilik goal-nya yang
+mencentang. Waktu selesai dicatat database saat dicentang. Tenggat hanya bisa diubah CEO/Manager,
+dan setiap perubahan tercatat di audit. Setelah KPI sebulan dikunci, tonggaknya ikut beku.
+
+### Lead measure
+
+| Kode | Sumber | Target | Berlaku |
+| --- | --- | --- | --- |
+| 1.1.3.11 | jumlah upload laporan 7 akun utama | 135/hari | sepanjang bulan |
+| 1.1.3.6 | isian | 10 produk/hari | mulai 5 Okt |
+| 1.2.1.3 | isian | 5 calon/hari | 8–17 Okt |
+| 1.2.1.5 | isian | 3 calon/hari | 18–31 Okt |
+
+Target pekan yang hanya sebagian masuk rentang dipotong menurut jumlah harinya. 1.1.4.6 (45 video
+santri/hari) baru dibuat setelah akun santri terdaftar.
+
+### Sumber otomatis indikator KPI
+
+Dari 88 indikator yang masuk, 62 dihitung otomatis:
+
+| Sumber | Dipakai untuk |
+| --- | --- |
+| % realisasi ukuran | indikator GMV vs target. Σ target ukuran diperiksa sama dengan angka "Rp …" di rumusan indikator |
+| angka ukuran isian | seller, produk, creator, SOP, % kelengkapan |
+| tonggak tepat waktu | rumus §4d |
+| rata-rata video per hari | dari laporan harian |
+| % hari semua akun memenuhi standar video | dari laporan harian |
+| % hari LIVE ≥ 4 jam | dari laporan harian |
+| % hari laporan terkirim ≤ 21.00 WIB | santri: asal terisi |
+| rata-rata atau jumlah lead measure | lead measure di atas |
+
+Pemetaan per indikator tersimpan di berkas pemetaan lokal (`kpi_otomatis`), bersama pemetaan nama.
+
+Aturan yang dipakai:
+- **Isian penilai selalu menang.** Angka otomatis tetap ditampilkan sebagai pembanding. Kosongkan
+  isian untuk kembali ke angka otomatis.
+- **Bulan berjalan:** target GMV diprorata menurut hari yang sudah lewat, sama seperti 0029. Hitungan
+  harian berhenti di kemarin (WIB). Tonggak bertenggat hari ini belum dihitung terlambat.
+- **Bulan selesai:** angkanya sama dengan rumus file.
+- **Satu rumus untuk semua.** Scorecard, penguncian, dan leaderboard memanggil `nilai_kpi_grd` yang
+  sama. Angkanya sama siapa pun yang melihat.
+
+Indikator yang tetap diisi penilai:
+- **Memang tidak ada datanya di aplikasi:**
+  - Agung #3 dan #4;
+  - Fajar #3 dan #4;
+  - Ardi #5;
+  - Ami #3;
+  - sesi LIVE santri.
+- **Orang atau akunnya belum terdaftar** (otomatis setelah didaftarkan dan impor diulang):
+  - Agnes #1 dan #3 (3 akun 20K);
+  - Agung #2 (akun santri);
+  - GMV dan standar video Bilqis serta santri.
+
+### Hal janggal baru — dilaporkan, tidak diubah
+
+16. **1.1.3.10** (hasil riset ke MCN, Sen/Rab/Sab) tidak menyebut tanggal mulai. Karena itu kejadian
+    Sabtu 3 Okt ikut terhitung (13 kejadian), padahal Rifal baru mulai 5 Okt. Bila tidak dimaksudkan,
+    ubah KAPAN di file menjadi "Setiap Senin, Rabu, Sabtu mulai 5 Okt" lalu impor ulang.
+17. **Tanggal MRM** (S.2.2.1 "MRM H-1") tidak tertulis. Tonggaknya masuk tanpa tenggat dan belum
+    dihitung sampai CEO/Manager menetapkan tanggalnya.
+18. **1.1.5.2** ("Setiap ada kerja sama") tidak berjadwal, jadi tidak menjadi tonggak.
+19. **KPI Rifal #2** menyebut "checkout produk lolos" (1.1.3.7, per produk). Butir ini tidak
+    berjadwal, jadi yang dihitung hanya kiriman 1.1.3.8, 1.1.3.9, dan 1.1.3.10.
+20. **Indikator "dinilai 4 Nov"** (Ardi #3, Ami #2) membaca angka pada tenggat goal 1.2.3. Karena
+    itu KPI Oktober sebaiknya **dikunci setelah 4 November**.
+21. **Najib belum terdaftar.** Tonggak 1.2.4.x dan 1.2.5.x untuk sementara hanya bisa dicentang
+    CEO/Manager.

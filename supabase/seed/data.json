@@ -7316,5 +7316,195 @@
       ],
       "dibuat_oleh": "Hafidz Alkahfi"
     }
+  ],
+  "grd_rencana": [
+    {
+      "periode": "2024-10-01",
+      "kode": "1.1.0.1",
+      "goal": "GMV bulanan unit AFFILIATOR",
+      "induk_kode": "1.1.0",
+      "judul": "Mengisi laporan harian di K-Space: jumlah video, GMV LIVE, dan jam LIVE",
+      "jenis": "harian",
+      "pic": [
+        "Dewi Lestari"
+      ],
+      "pic_teks": "Seluruh tim",
+      "jadwal_teks": "Setiap hari ≤ 21.00",
+      "tonggak": []
+    },
+    {
+      "periode": "2024-10-01",
+      "kode": "1.1.1.1",
+      "goal": "GMV bulanan unit AFFILIATOR",
+      "induk_kode": "1.1.1",
+      "judul": "Host LIVE akun utama sudah didapat",
+      "jenis": "sekali",
+      "pic": [
+        "Dewi Lestari"
+      ],
+      "pic_teks": "Dewi",
+      "jadwal_teks": "Sabtu 5 Okt",
+      "tonggak": [
+        {
+          "kunci": "",
+          "tenggat": "2024-10-05",
+          "status": "selesai",
+          "selesai_pada": "2024-10-04T15:00:00+07:00",
+          "judul": "Host LIVE akun utama sudah didapat"
+        }
+      ]
+    },
+    {
+      "periode": "2024-10-01",
+      "kode": "1.1.1.2",
+      "goal": "GMV bulanan unit AFFILIATOR",
+      "induk_kode": "1.1.1",
+      "judul": "Jadwal LIVE tetap: jam, studio, dan host untuk akun utama",
+      "jenis": "sekali",
+      "pic": [
+        "Rian Hidayat"
+      ],
+      "pic_teks": "Rian",
+      "jadwal_teks": "Senin 7 Okt",
+      "tonggak": [
+        {
+          "kunci": "",
+          "tenggat": "2024-10-07",
+          "status": "selesai",
+          "selesai_pada": "2024-10-08T10:00:00+07:00",
+          "judul": "Jadwal LIVE tetap: jam, studio, dan host untuk akun utama"
+        }
+      ]
+    },
+    {
+      "periode": "2024-10-01",
+      "kode": "1.1.3.8",
+      "goal": "GMV bulanan unit AFFILIATOR",
+      "induk_kode": "1.1.3",
+      "judul": "Membagikan Daftar Produk Laris ke semua akun; setiap produk ditentukan untuk akun mana",
+      "jenis": "pekanan",
+      "pic": [
+        "Rian Hidayat"
+      ],
+      "pic_teks": "Rian",
+      "jadwal_teks": "Setiap Senin",
+      "tonggak": [
+        {
+          "kunci": "2024-10-07",
+          "tenggat": "2024-10-07",
+          "status": "selesai",
+          "selesai_pada": "2024-10-07T09:30:00+07:00",
+          "judul": "Senin, 7 Okt"
+        },
+        {
+          "kunci": "2024-10-14",
+          "tenggat": "2024-10-14",
+          "status": "selesai",
+          "selesai_pada": "2024-10-14T11:00:00+07:00",
+          "judul": "Senin, 14 Okt"
+        },
+        {
+          "kunci": "2024-10-21",
+          "tenggat": "2024-10-21",
+          "status": "progress",
+          "selesai_pada": null,
+          "judul": "Senin, 21 Okt"
+        },
+        {
+          "kunci": "2024-10-28",
+          "tenggat": "2024-10-28",
+          "status": "belum",
+          "selesai_pada": null,
+          "judul": "Senin, 28 Okt"
+        }
+      ]
+    },
+    {
+      "periode": "2024-10-01",
+      "kode": "1.1.5.1",
+      "goal": "GMV bulanan unit TAP",
+      "induk_kode": "1.1.5",
+      "judul": "Menghubungi minimal 10 seller baru, dicatat di Pipeline sebelum dibalas",
+      "jenis": "pekanan",
+      "pic": [
+        "Dimas Maulana"
+      ],
+      "pic_teks": "Dimas",
+      "jadwal_teks": "Setiap pekan",
+      "tonggak": [
+        {
+          "kunci": "2024-10-05",
+          "tenggat": "2024-10-05",
+          "status": "selesai",
+          "selesai_pada": "2024-10-05T16:00:00+07:00",
+          "judul": "Sabtu, 5 Okt"
+        },
+        {
+          "kunci": "2024-10-12",
+          "tenggat": "2024-10-12",
+          "status": "selesai",
+          "selesai_pada": "2024-10-12T17:30:00+07:00",
+          "judul": "Sabtu, 12 Okt"
+        },
+        {
+          "kunci": "2024-10-19",
+          "tenggat": "2024-10-19",
+          "status": "belum",
+          "selesai_pada": null,
+          "judul": "Sabtu, 19 Okt"
+        },
+        {
+          "kunci": "2024-10-26",
+          "tenggat": "2024-10-26",
+          "status": "belum",
+          "selesai_pada": null,
+          "judul": "Sabtu, 26 Okt"
+        }
+      ]
+    },
+    {
+      "periode": "2024-10-01",
+      "kode": "1.2.2.1",
+      "goal": "GMV bulanan unit MCN",
+      "induk_kode": "1.2.2",
+      "judul": "Daftar 50 creator teratas beserta target Oktober tiap creator",
+      "jenis": "sekali",
+      "pic": [
+        "Galih Prakoso"
+      ],
+      "pic_teks": "Galih + Maya",
+      "jadwal_teks": "Sabtu 12 Okt",
+      "tonggak": [
+        {
+          "kunci": "",
+          "tenggat": "2024-10-12",
+          "status": "progress",
+          "selesai_pada": null,
+          "judul": "Daftar 50 creator teratas beserta target Oktober tiap creator"
+        }
+      ]
+    },
+    {
+      "periode": "2024-10-01",
+      "kode": "M.1",
+      "goal": null,
+      "induk_kode": "M",
+      "judul": "Rancangan sistem pemakaian studio disetor ke CEO",
+      "jenis": "sekali",
+      "pic": [
+        "Farhan Pratama"
+      ],
+      "pic_teks": "Farhan",
+      "jadwal_teks": "Selasa 1 Okt",
+      "tonggak": [
+        {
+          "kunci": "",
+          "tenggat": "2024-10-01",
+          "status": "selesai",
+          "selesai_pada": "2024-10-01T13:00:00+07:00",
+          "judul": "Rancangan sistem pemakaian studio disetor ke CEO"
+        }
+      ]
+    }
   ]
 }

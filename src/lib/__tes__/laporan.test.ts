@@ -27,11 +27,13 @@ const isi = (p: Partial<IsiLaporan> = {}): IsiLaporan => ({
   ...p,
 });
 
-test("Affiliator melapor lima kolom, MCN & TAP hanya dua", () => {
+test("Affiliator melapor tujuh kolom (termasuk LIVE), MCN & TAP hanya dua", () => {
   assert.deepEqual(kolomLaporan("affiliator"), [
     "gmv",
     "komisi",
     "jumlahUpload",
+    "gmvLive",
+    "jamLive",
     "coSampel",
     "catatan",
   ]);
@@ -423,4 +425,26 @@ test("label tanggal laporan dibaca orang", () => {
   assert.equal(kapanLaporan("2026-09-28", hariIni), "hari ini");
   assert.equal(kapanLaporan("2026-09-26", hariIni), "pada Sab, 26 Sep");
   assert.equal(tanggalLaporanPanjang("2026-09-26"), "Sabtu, 26 September 2026");
+});
+
+test("GMV LIVE bagian dari GMV, jam LIVE 0–24, hanya untuk Affiliator", () => {
+  assert.equal(
+    periksaIsiLaporan("affiliator", isi({ gmvLive: 400_000, jamLive: 4 })),
+    null,
+  );
+  assert.match(
+    String(periksaIsiLaporan("affiliator", isi({ gmvLive: 1_000_001 }))),
+    /tidak mungkin lebih besar/,
+  );
+  assert.match(
+    String(periksaIsiLaporan("affiliator", isi({ jamLive: 24.5 }))),
+    /antara 0 dan 24/,
+  );
+  assert.match(
+    String(periksaIsiLaporan("mcn", isi({ gmvLive: 1 }))),
+    /tidak diisi untuk departemen ini/,
+  );
+  // MCN: kolom LIVE dibuang sebelum dikirim.
+  const bersih = bersihkanIsi("mcn", isi({ gmvLive: 5, jamLive: 2 }));
+  assert.deepEqual([bersih.gmvLive, bersih.jamLive], [null, null]);
 });

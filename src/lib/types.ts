@@ -239,6 +239,9 @@ export type LaporanHarian = {
   /** Kolom departemen Affiliator; null bagi departemen yang tak memakainya. */
   komisi: number | null;
   jumlahUpload: number | null;
+  /** Bagian GMV dari LIVE dan lama LIVE (jam); null bila tidak LIVE. */
+  gmvLive: number | null;
+  jamLive: number | null;
   /**
    * Batas minimum unggahan akun ini pada saat dibaca, dari levelnya.
    *
@@ -268,6 +271,10 @@ export type RevisiLaporan = {
   komisiBaru: number | null;
   uploadLama: number | null;
   uploadBaru: number | null;
+  liveLama?: number | null;
+  liveBaru?: number | null;
+  jamLama?: number | null;
+  jamBaru?: number | null;
   alasan: string;
   diubahOleh: string;
   createdAt: string;

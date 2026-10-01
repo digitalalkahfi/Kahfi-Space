@@ -18,6 +18,8 @@ const SEBUTAN_SUMBER: Record<string, string> = {
   gmv: "nilai GMV",
   komisi: "komisi",
   jumlah_upload: "jumlah upload",
+  gmv_live: "GMV LIVE",
+  jam_live: "jam LIVE",
 };
 
 /**

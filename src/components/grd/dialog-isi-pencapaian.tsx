@@ -59,7 +59,7 @@ export function DialogIsiPencapaian({
     if (b) {
       setTeks(
         Object.fromEntries(
-          rincian.map((r) => [r.indikatorId, keTeks(r.pencapaian)]),
+          rincian.map((r) => [r.indikatorId, keTeks(r.manual)]),
         ),
       );
       setPesan(null);
@@ -70,13 +70,17 @@ export function DialogIsiPencapaian({
   const baris = rincian.map((r) => {
     const dibaca = bacaAngka(teks[r.indikatorId] ?? "");
     const salah = dibaca !== null && Number.isNaN(dibaca);
-    const pencapaian = salah ? null : dibaca;
+    // Kotak ini isian penilai; kosong berarti memakai angka otomatis
+    // (bila indikatornya punya sumber otomatis), selain itu 0.
+    const isian = salah ? null : dibaca;
+    const pencapaian = isian ?? r.otomatis;
     return {
       r,
       salah,
+      isian,
       pencapaian,
       nilai: nilaiTangga(pencapaian, r.tangga, r.arah),
-      berubah: !salah && pencapaian !== r.pencapaian,
+      berubah: !salah && isian !== r.manual,
     };
   });
 
@@ -96,7 +100,7 @@ export function DialogIsiPencapaian({
         bulan,
         isian: berubah.map((b) => ({
           indikatorId: b.r.indikatorId,
-          nilai: b.pencapaian,
+          nilai: b.isian,
         })),
       });
       if (hasil.ok) {
@@ -130,7 +134,8 @@ export function DialogIsiPencapaian({
         </DialogHeader>
 
         <ol className="space-y-3">
-          {baris.map(({ r, salah, pencapaian, nilai }) => {
+          {baris.map(({ r, salah, isian, pencapaian, nilai }) => {
+            const otomatis = r.sumber !== "manual";
             const id = `pencapaian-${r.indikatorId}`;
             return (
               <li key={r.indikatorId} className="space-y-1.5">
@@ -146,6 +151,15 @@ export function DialogIsiPencapaian({
                   {tampilAngkaKpi(r.tangga[9], r.satuan)}
                   {r.arah === "turun" ? " · makin kecil makin baik" : ""}
                 </p>
+                {otomatis ? (
+                  <p className="text-[11px] leading-[14px] text-info-text">
+                    {r.keteranganSumber || "Otomatis dari data aplikasi"}:{" "}
+                    {r.otomatis === null
+                      ? "belum ada data"
+                      : tampilAngkaKpi(r.otomatis, r.satuan)}
+                    . Isi kotak hanya bila angka itu perlu diganti.
+                  </p>
+                ) : null}
                 <div className="flex items-center gap-2">
                   <input
                     id={id}
@@ -158,7 +172,7 @@ export function DialogIsiPencapaian({
                         [r.indikatorId]: e.target.value,
                       }))
                     }
-                    placeholder="kosong"
+                    placeholder={otomatis ? "pakai otomatis" : "kosong"}
                     aria-invalid={salah || undefined}
                     aria-describedby={`${id}-baca`}
                     className={cn(
@@ -181,7 +195,7 @@ export function DialogIsiPencapaian({
                     ? "Tidak terbaca. Pakai koma untuk desimal, mis. 92,5."
                     : pencapaian === null
                       ? `Kosong → VALUE 0 · total 0`
-                      : `Dibaca ${tampilAngkaKpi(pencapaian, r.satuan)} → VALUE ${nilai} · total ${nilai * r.bobot}`}
+                      : `${isian === null ? "Otomatis" : "Dibaca"} ${tampilAngkaKpi(pencapaian, r.satuan)} → VALUE ${nilai} · total ${nilai * r.bobot}`}
                 </p>
               </li>
             );

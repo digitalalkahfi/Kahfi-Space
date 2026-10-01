@@ -11,10 +11,26 @@ import type { KodeUnit, SasaranLaporan } from "@/lib/types";
  * departemen pelaporan.
  */
 export type KolomLaporan =
-  "gmv" | "komisi" | "jumlahUpload" | "coSampel" | "catatan";
+  | "gmv"
+  | "komisi"
+  | "jumlahUpload"
+  | "gmvLive"
+  | "jamLive"
+  | "coSampel"
+  | "catatan";
 
 export const KOLOM_PER_UNIT: Record<KodeUnit, readonly KolomLaporan[]> = {
-  affiliator: ["gmv", "komisi", "jumlahUpload", "coSampel", "catatan"],
+  // GMV LIVE dan jam LIVE (0188, 0191): GRD memisahkan target LIVE dari
+  // target video, dan menilai "LIVE 4 jam setiap hari".
+  affiliator: [
+    "gmv",
+    "komisi",
+    "jumlahUpload",
+    "gmvLive",
+    "jamLive",
+    "coSampel",
+    "catatan",
+  ],
   mcn: ["gmv", "catatan"],
   tap: ["gmv", "catatan"],
 };
@@ -59,6 +75,8 @@ export const LABEL_KOLOM: Record<KolomLaporan, string> = {
   gmv: "Nilai realisasi GMV",
   komisi: "Komisi diterima",
   jumlahUpload: "Jumlah upload",
+  gmvLive: "GMV dari LIVE",
+  jamLive: "Lama LIVE (jam)",
   coSampel: "CO sampel",
   catatan: "Catatan harian",
 };
@@ -67,6 +85,7 @@ export const LABEL_KOLOM: Record<KolomLaporan, string> = {
 export const MAKS_GMV = 100_000_000_000;
 export const MAKS_KOMISI = 10_000_000_000;
 export const MAKS_UPLOAD = 500;
+export const MAKS_JAM_LIVE = 24;
 
 /**
  * Isi satu laporan harian. Kolom yang tidak berlaku bagi departemennya
@@ -77,6 +96,10 @@ export type IsiLaporan = {
   gmv: number;
   komisi: number | null;
   jumlahUpload: number | null;
+  /** Bagian GMV dari LIVE; null bila hari itu tidak LIVE. */
+  gmvLive?: number | null;
+  /** Lama LIVE dalam jam; null bila hari itu tidak LIVE. */
+  jamLive?: number | null;
   catatan: string;
 };
 
@@ -84,6 +107,8 @@ export const ISI_KOSONG: IsiLaporan = {
   gmv: 0,
   komisi: null,
   jumlahUpload: null,
+  gmvLive: null,
+  jamLive: null,
   catatan: "",
 };
 
@@ -100,6 +125,8 @@ export function bersihkanIsi(
     gmv: isi.gmv,
     komisi: punyaKolom(unit, "komisi") ? isi.komisi : null,
     jumlahUpload: punyaKolom(unit, "jumlahUpload") ? isi.jumlahUpload : null,
+    gmvLive: punyaKolom(unit, "gmvLive") ? (isi.gmvLive ?? null) : null,
+    jamLive: punyaKolom(unit, "jamLive") ? (isi.jamLive ?? null) : null,
     catatan: isi.catatan.trim(),
   };
 }
@@ -144,12 +171,35 @@ export function periksaIsiLaporan(
     }
   }
 
+  const gmvLive = isi.gmvLive ?? null;
+  if (gmvLive !== null) {
+    if (!punyaKolom(unit, "gmvLive")) {
+      return "GMV LIVE tidak diisi untuk departemen ini.";
+    }
+    if (!Number.isFinite(gmvLive) || gmvLive < 0) {
+      return "Nilai GMV LIVE tidak sah.";
+    }
+    if (gmvLive > isi.gmv) {
+      return "GMV LIVE adalah bagian dari GMV hari itu, tidak mungkin lebih besar.";
+    }
+  }
+
+  const jamLive = isi.jamLive ?? null;
+  if (jamLive !== null) {
+    if (!punyaKolom(unit, "jamLive")) {
+      return "Jam LIVE tidak diisi untuk departemen ini.";
+    }
+    if (!Number.isFinite(jamLive) || jamLive < 0 || jamLive > MAKS_JAM_LIVE) {
+      return "Lama LIVE harus antara 0 dan 24 jam.";
+    }
+  }
+
   return null;
 }
 
 /** Satu angka yang berubah dalam sebuah perbaikan. */
 export type PerubahanRevisi = {
-  kolom: "gmv" | "komisi" | "jumlahUpload";
+  kolom: "gmv" | "komisi" | "jumlahUpload" | "gmvLive" | "jamLive";
   dari: number;
   ke: number;
 };
@@ -169,6 +219,10 @@ export function perubahanRevisi(r: {
   komisiBaru: number | null;
   uploadLama: number | null;
   uploadBaru: number | null;
+  liveLama?: number | null;
+  liveBaru?: number | null;
+  jamLama?: number | null;
+  jamBaru?: number | null;
 }): PerubahanRevisi[] {
   const hasil: PerubahanRevisi[] = [];
   if (r.gmvLama !== r.gmvBaru) {
@@ -187,6 +241,16 @@ export function perubahanRevisi(r: {
       dari: r.uploadLama ?? 0,
       ke: r.uploadBaru ?? 0,
     });
+  }
+  if ((r.liveLama ?? null) !== null || (r.liveBaru ?? null) !== null) {
+    hasil.push({
+      kolom: "gmvLive",
+      dari: r.liveLama ?? 0,
+      ke: r.liveBaru ?? 0,
+    });
+  }
+  if ((r.jamLama ?? null) !== null || (r.jamBaru ?? null) !== null) {
+    hasil.push({ kolom: "jamLive", dari: r.jamLama ?? 0, ke: r.jamBaru ?? 0 });
   }
   return hasil;
 }

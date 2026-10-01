@@ -75,7 +75,7 @@ export default async function ScorecardPage({
           </h1>
           <p className="text-[13px] leading-[18px] text-muted-foreground">
             {daftar.some((b) => b.metode === "grd")
-              ? "Lembar KPI GRD: tiap indikator dinilai dengan tangga 10 kolom, pencapaiannya diisi penilai."
+              ? "Lembar KPI GRD: tiap indikator dinilai dengan tangga 10 kolom. Pencapaian dihitung otomatis dari laporan, tonggak, dan capaian goal bila datanya ada; sisanya diisi penilai."
               : "Dihitung otomatis dari GMV, lead measure, absensi, dan tugas — bukan dinilai manual."}
           </p>
         </div>

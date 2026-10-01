@@ -445,6 +445,43 @@ join kpi_lembar l
 join kpi_indikator i on i.lembar_id = l.id and i.urutan = v.urutan
 on conflict (indikator_id) do nothing;`);
 
+// Rencana operasional GRD & tonggaknya (data contoh, 0192). Waktu selesai
+// ikut disimpan apa adanya: seed berjalan sebagai proses sistem, jadi
+// penjaga tonggak tidak menimpanya dengan now().
+const barisTonggak = data.grd_rencana.flatMap((r) =>
+  r.tonggak.map((t, n) => ({ r, t, urutan: n + 1 })),
+);
+bagian.push(`
+-- Rencana operasional GRD (data contoh, 0192) ------------------------------
+insert into grd_rencana
+  (grd_periode, kode, goal_id, induk_kode, judul, jenis, pic_ids, pic_teks,
+   jadwal_teks, urutan, asal) values
+${data.grd_rencana
+  .map(
+    (r, n) =>
+      `  (${q(r.periode)}, ${q(r.kode)}, ` +
+      `${r.goal ? `(select id from goals where judul = ${q(r.goal)})` : "null"}, ` +
+      `${q(r.induk_kode)}, ${q(r.judul)}, ${q(r.jenis)}, ` +
+      `${q(`{${r.pic.map((nama) => idUser[nama]).join(",")}}`)}::uuid[], ` +
+      `${q(r.pic_teks)}, ${q(r.jadwal_teks)}, ${n + 1}, 'data contoh')`,
+  )
+  .join(",\n")}
+on conflict (grd_periode, kode) do nothing;
+
+insert into grd_tonggak (rencana_id, kunci, judul, tenggat, status, selesai_pada, urutan)
+select r.id, v.kunci, v.judul, v.tenggat::date, v.status, v.selesai_pada::timestamptz, v.urutan
+from (values
+${barisTonggak
+  .map(
+    ({ r, t, urutan }) =>
+      `  (${q(r.periode)}, ${q(r.kode)}, ${q(t.kunci)}, ${q(t.judul)}, ` +
+      `${q(t.tenggat)}, ${q(t.status)}, ${q(t.selesai_pada)}, ${urutan})`,
+  )
+  .join(",\n")}
+) v (periode, kode, kunci, judul, tenggat, status, selesai_pada, urutan)
+join grd_rencana r on r.grd_periode = v.periode::date and r.kode = v.kode
+on conflict (rencana_id, kunci) do nothing;`);
+
 bagian.push(`
 commit;`);
 
@@ -897,6 +934,7 @@ console.log(
     `${data.tasks.length} tugas · ${data.attendance.length} absensi · ` +
     `${data.lead_measures.length} lead measure · ${data.kpi_definitions.length} KPI · ` +
     `${data.kpi_lembar.length} lembar KPI GRD · ` +
+    `${data.grd_rencana.length} rencana operasional · ` +
     `${data.daily_reports.length} laporan harian · ` +
     `${data.transaksi.length} transaksi · ${data.aset.length} aset`,
 );

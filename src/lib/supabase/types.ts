@@ -274,6 +274,8 @@ export type BarisDailyReport = {
   updated_at: string;
   /** Bagian GMV dari LIVE; null bila tanpa LIVE (0188). */
   gmv_live: number | null;
+  /** Lama LIVE dalam jam (0191). */
+  jam_live: number | null;
 };
 
 /** @tabel daily_report_revisions */
@@ -288,6 +290,8 @@ export type BarisDailyReportRevision = {
   upload_baru: number | null;
   live_lama: number | null;
   live_baru: number | null;
+  jam_lama: number | null;
+  jam_baru: number | null;
   alasan: string;
   diubah_oleh: string | null;
   created_at: string;
@@ -513,9 +517,20 @@ export type BarisLeadMeasure = {
   label_pendukung: string | null;
   aktif: boolean;
   urutan: number;
-  /** Kolom daily_reports sumber angkanya; null berarti diisi manual (0130). */
-  sumber_laporan: "gmv" | "komisi" | "jumlah_upload" | null;
+  /** Kolom daily_reports sumber angkanya; null berarti diisi manual (0130, 0193). */
+  sumber_laporan:
+    "gmv" | "komisi" | "jumlah_upload" | "gmv_live" | "jam_live" | null;
+  /** Kode rencana operasional GRD (0193). */
+  kode: string | null;
+  mulai: string | null;
+  selesai: string | null;
   created_at: string;
+};
+
+/** @tabel lead_measure_akun */
+export type BarisLeadMeasureAkun = {
+  lead_measure_id: string;
+  account_id: string;
 };
 
 /** @tabel lead_measure_entries */
@@ -850,6 +865,9 @@ export type BarisRiwayatLaporanMinimum = {
   unit_kode: string | null;
   unit_nama: string | null;
   pelapor_nama: string | null;
+  /** Kolom LIVE laporan (0191). */
+  gmv_live: number | null;
+  jam_live: number | null;
 };
 
 // Tren kepatuhan tiga hari kerja terakhir per akun aktif — view turunan
@@ -1106,10 +1124,60 @@ export type BarisKpiIndikator = {
   bobot: number;
   arah: "naik" | "turun";
   tangga: number[];
-  sumber: "manual";
+  sumber: SumberIndikatorKpi;
+  /** Rujukan sumber otomatis: kode GRD, id akun, standar, jam (0194). */
+  sumber_ref: Record<string, unknown>;
+  keterangan_sumber: string;
   asal: string;
   created_at: string;
 };
+
+/** Sumber PENCAPAIAN indikator KPI GRD (0194). */
+export type SumberIndikatorKpi =
+  | "manual"
+  | "ukuran_persen"
+  | "ukuran_nilai"
+  | "tonggak"
+  | "upload_rata"
+  | "hari_standar"
+  | "hari_live"
+  | "laporan_tepat"
+  | "lead_rata"
+  | "lead_jumlah";
+
+/** @tabel grd_rencana */
+export type BarisGrdRencana = {
+  id: string;
+  grd_periode: string;
+  kode: string;
+  goal_id: string | null;
+  induk_kode: string;
+  judul: string;
+  jenis: "sekali" | "harian" | "pekanan";
+  pic_ids: string[];
+  pic_teks: string;
+  jadwal_teks: string;
+  urutan: number;
+  asal: string;
+  created_at: string;
+};
+
+/** @tabel grd_tonggak */
+export type BarisGrdTonggak = {
+  id: string;
+  rencana_id: string;
+  kunci: string;
+  judul: string;
+  tenggat: string | null;
+  status: StatusTonggak;
+  selesai_pada: string | null;
+  catatan: string;
+  diubah_oleh: string | null;
+  diubah_pada: string | null;
+  urutan: number;
+};
+
+export type StatusTonggak = "belum" | "progress" | "selesai";
 
 /** @tabel kpi_pencapaian */
 export type BarisKpiPencapaian = {
@@ -1322,6 +1390,17 @@ export type Database = {
       lead_measures: Tabel<
         BarisLeadMeasure,
         [Relasi<"lead_measures_goal_id_fkey", "goal_id", "goals">]
+      >;
+      lead_measure_akun: Tabel<
+        BarisLeadMeasureAkun,
+        [
+          Relasi<
+            "lead_measure_akun_lead_measure_id_fkey",
+            "lead_measure_id",
+            "lead_measures"
+          >,
+          Relasi<"lead_measure_akun_account_id_fkey", "account_id", "accounts">,
+        ]
       >;
       lead_measure_entries: Tabel<
         BarisLeadMeasureEntry,
@@ -1631,6 +1710,17 @@ export type Database = {
         [
           Relasi<"grd_ukuran_isian_ukuran_id_fkey", "ukuran_id", "grd_ukuran">,
           Relasi<"grd_ukuran_isian_diisi_oleh_fkey", "diisi_oleh", "users">,
+        ]
+      >;
+      grd_rencana: Tabel<
+        BarisGrdRencana,
+        [Relasi<"grd_rencana_goal_id_fkey", "goal_id", "goals">]
+      >;
+      grd_tonggak: Tabel<
+        BarisGrdTonggak,
+        [
+          Relasi<"grd_tonggak_rencana_id_fkey", "rencana_id", "grd_rencana">,
+          Relasi<"grd_tonggak_diubah_oleh_fkey", "diubah_oleh", "users">,
         ]
       >;
       weekly_reports: Tabel<
@@ -1982,6 +2072,39 @@ export type Database = {
       isi_pencapaian_kpi: {
         Args: { p_user: string; p_bulan: string; p_isian: unknown };
         Returns: number;
+      };
+      /** PIC/atasan/CEO/Manager mengubah status tonggak (0192). */
+      ubah_status_tonggak: {
+        Args: {
+          p_tonggak: string;
+          p_status: StatusTonggak;
+          p_catatan?: string | null;
+        };
+        Returns: BarisGrdTonggak;
+      };
+      /** Rencana operasional GRD beserta tonggaknya (0192). */
+      rencana_grd: {
+        Args: { p_periode: string };
+        Returns: {
+          rencana_id: string;
+          kode: string;
+          goal_kode: string | null;
+          goal_judul: string | null;
+          induk_kode: string;
+          judul: string;
+          jenis: BarisGrdRencana["jenis"];
+          pic_teks: string;
+          pic_nama: string[];
+          jadwal_teks: string;
+          urutan: number;
+          boleh_centang: boolean;
+          tonggak: unknown;
+        }[];
+      };
+      /** Persen tonggak tepat waktu; null bila belum ada yang jatuh tempo (0192). */
+      tonggak_tepat_waktu: {
+        Args: { p_periode: string; p_kode: string[]; p_sampai: string };
+        Returns: number | null;
       };
       /** Status penguncian KPI sebuah bulan. */
       status_kunci_kpi: {
@@ -2375,7 +2498,7 @@ export type Database = {
           rasio: number;
           pendukung: number | null;
           label_pendukung: string | null;
-          sumber_laporan: "gmv" | "komisi" | "jumlah_upload" | null;
+          sumber_laporan: BarisLeadMeasure["sumber_laporan"];
         }[];
       };
       anak_tangga_target: {
@@ -2476,6 +2599,9 @@ export type Database = {
           p_catatan?: string | null;
           p_komisi?: number | null;
           p_jumlah_upload?: number | null;
+          /** null = tidak diubah (0191). */
+          p_gmv_live?: number | null;
+          p_jam_live?: number | null;
         };
         Returns: BarisDailyReport;
       };
