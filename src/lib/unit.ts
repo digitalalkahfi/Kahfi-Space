@@ -92,6 +92,21 @@ export const gayaPredikatKpi: Record<
   },
 };
 
+/**
+ * Lembar KPI GRD yang belum satu pun pencapaiannya diisi ("BELUM DIISI"
+ * di file GRD). Netral, karena belum ada penilaian sama sekali.
+ */
+export const gayaBelumDiisi = {
+  kelas: "bg-muted text-muted-foreground",
+  titik: "bg-muted-foreground/40",
+  teks: "text-muted-foreground",
+};
+
+/** Gaya sebuah predikat; null berarti belum diisi. */
+export function gayaPredikat(predikat: PredikatKpi | null) {
+  return predikat ? gayaPredikatKpi[predikat] : gayaBelumDiisi;
+}
+
 /** Ambang tiap predikat, untuk keterangan di layar. */
 export const AMBANG_PREDIKAT: { predikat: PredikatKpi; label: string }[] = [
   { predikat: "Istimewa", label: "≥ 800" },

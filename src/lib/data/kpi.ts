@@ -4,13 +4,19 @@ import "server-only";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { dataContoh, namaTerlihatContoh } from "@/lib/data/contoh";
+import { aktifDemo } from "@/lib/demo";
 import { keTanggalWib } from "@/lib/format";
 import type { Pengguna } from "@/lib/types";
 import {
+  hitungLembarKpi,
+  nilaiTangga,
   predikatDariSkor,
   skorKpi,
+  sudahDinilai,
+  type ArahTangga,
   type BarisScorecard,
   type DefinisiKpi,
+  type RincianGrd,
   type RincianKpi,
   type SumberKpi,
 } from "@/lib/kpi";
@@ -121,17 +127,60 @@ export async function scorecardTim(
 
   if (error) throw new Error(`Gagal memuat scorecard: ${error.message}`);
 
-  return (data ?? []).map((b) => ({
-    userId: b.user_id,
-    nama: b.nama,
-    inisial: b.inisial,
-    jabatan: b.jabatan,
-    unit: b.unit,
-    skor: Number(b.skor),
-    predikat: b.predikat,
-    cakupan: Number(b.cakupan),
-    rincian: (b.detail as RincianKpi[]) ?? [],
-    terkunci: b.terkunci,
+  return (data ?? []).map((b): BarisScorecard => {
+    const dasar = {
+      userId: b.user_id,
+      nama: b.nama,
+      inisial: b.inisial,
+      jabatan: b.jabatan,
+      unit: b.unit,
+      skor: Number(b.skor),
+      cakupan: Number(b.cakupan),
+      terkunci: b.terkunci,
+    };
+    return b.metode === "grd"
+      ? {
+          ...dasar,
+          metode: "grd",
+          predikat: b.predikat,
+          rincian: keRincianGrd(b.detail),
+          bolehMenilai: b.boleh_menilai,
+        }
+      : {
+          ...dasar,
+          metode: "jabatan",
+          predikat: b.predikat ?? "Perlu Perbaikan",
+          rincian: (b.detail as RincianKpi[]) ?? [],
+        };
+  });
+}
+
+/** Bentuk `detail` dari `hitung_kpi_grd` (0187), juga di snapshot terkunci. */
+type RincianGrdDb = {
+  indikator_id: string;
+  urutan: number;
+  nama: string;
+  satuan: string;
+  bobot: number;
+  arah: ArahTangga;
+  tangga: number[];
+  pencapaian: number | null;
+  nilai: number;
+  total: number;
+};
+
+function keRincianGrd(detail: unknown): RincianGrd[] {
+  return ((detail as RincianGrdDb[] | null) ?? []).map((r) => ({
+    indikatorId: r.indikator_id,
+    urutan: Number(r.urutan),
+    nama: r.nama,
+    satuan: r.satuan,
+    bobot: Number(r.bobot),
+    arah: r.arah,
+    tangga: r.tangga.map(Number),
+    pencapaian: r.pencapaian === null ? null : Number(r.pencapaian),
+    nilai: Number(r.nilai),
+    total: Number(r.total),
   }));
 }
 
@@ -206,11 +255,83 @@ function awalPekan(tanggal: string) {
   return d.toISOString().slice(0, 10);
 }
 
+/**
+ * Padanan bulan GRD (0187) di mode demo: bulan yang punya lembar aktif
+ * dinilai dari lembar, setiap orang tanpa lembar tampil belum dinilai.
+ */
+function scorecardGrdDemo(
+  pengguna: Pengguna,
+  bulan: string,
+): BarisScorecard[] | null {
+  const lembarBulan = dataContoh.kpi_lembar.filter(
+    (l) => l.bulan === bulan && l.status === "aktif",
+  );
+  if (lembarBulan.length === 0) return null;
+
+  const terlihat = namaTerlihatContoh(pengguna);
+  const { units } = dataContoh;
+
+  return dataContoh.users
+    .filter(aktifDemo)
+    .filter((u) => terlihat === null || terlihat.has(u.nama))
+    .map((u): BarisScorecard => {
+      const lembar = lembarBulan.find((l) => l.user === u.nama);
+      const rincian: RincianGrd[] = (lembar?.indikator ?? []).map((i, n) => {
+        const arah = i.arah as ArahTangga;
+        const pencapaian = i.pencapaian ?? null;
+        const nilai = nilaiTangga(pencapaian, i.tangga, arah);
+        return {
+          indikatorId: `contoh-${u.id}-${n + 1}`,
+          urutan: n + 1,
+          nama: i.nama,
+          satuan: i.satuan,
+          bobot: i.bobot,
+          arah,
+          tangga: i.tangga,
+          pencapaian,
+          nilai,
+          total: nilai * i.bobot,
+        };
+      });
+      const { total, predikat, cakupan } = hitungLembarKpi(rincian);
+
+      return {
+        userId: u.id,
+        nama: u.nama,
+        inisial: u.inisial,
+        jabatan: u.jabatan,
+        unit: u.unit
+          ? (units.find((x) => x.kode === u.unit)?.nama.split(" (")[0] ?? "")
+          : "Manajemen",
+        skor: total,
+        predikat,
+        cakupan,
+        terkunci: false,
+        metode: "grd",
+        rincian,
+        // Padanan `boleh_menilai`: atasan atau CEO/Manager, bukan diri sendiri.
+        bolehMenilai:
+          rincian.length > 0 &&
+          u.id !== pengguna.id &&
+          (terlihat === null || terlihat.has(u.nama)),
+      };
+    })
+    .sort(
+      (a, b) =>
+        Number(sudahDinilai(b)) - Number(sudahDinilai(a)) ||
+        b.skor - a.skor ||
+        a.nama.localeCompare(b.nama),
+    );
+}
+
 function scorecardDemo(
   pengguna: Pengguna,
   bulan: string,
   sampai: string,
 ): BarisScorecard[] {
+  const grd = scorecardGrdDemo(pengguna, bulan);
+  if (grd) return grd;
+
   const {
     users,
     units,
@@ -382,6 +503,7 @@ function scorecardDemo(
         predikat: predikatDariSkor(skor),
         cakupan:
           bobotTotal > 0 ? Math.round((bobotBerlaku / bobotTotal) * 100) : 0,
+        metode: "jabatan" as const,
         rincian,
         terkunci: false,
       } satisfies BarisScorecard;

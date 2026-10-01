@@ -13,7 +13,12 @@ import {
   sebagaiAdmin,
   terapkanSeed,
 } from "../../scripts/db-harness.mjs";
-import { predikatDariSkor, skorKpi } from "../../src/lib/kpi.ts";
+import {
+  hitungLembarKpi,
+  nilaiTangga,
+  predikatDariSkor,
+  skorKpi,
+} from "../../src/lib/kpi.ts";
 
 const db = await buatDb();
 await terapkanSeed(db);
@@ -102,6 +107,66 @@ uji("rincian hitung_kpi bisa ditelusuri balik ke rumusnya", async () => {
     harus(
       selisih <= 1,
       `${r.nama}: skor ${r.skor} vs penelusuran ${ulang} (selisih ${selisih})`,
+    );
+  }
+});
+
+uji("VALUE tangga GRD sama di SQL dan TypeScript", async () => {
+  // Tangga dibangkitkan acak tapi tetap sah (tidak berbalik arah, boleh
+  // mendatar), pencapaiannya sengaja banyak yang jatuh tepat di ambang.
+  let benih = 20261001;
+  const acak = () => (benih = (benih * 1103515245 + 12345) % 2 ** 31) / 2 ** 31;
+
+  for (let n = 0; n < 60; n += 1) {
+    const arah = n % 3 === 0 ? "turun" : "naik";
+    const naik = [];
+    let t = Math.round(acak() * 50);
+    for (let k = 0; k < 10; k += 1) {
+      t += acak() < 0.2 ? 0 : Math.round(acak() * 1000) / 100;
+      naik.push(t);
+    }
+    const tangga = arah === "turun" ? [...naik].reverse() : naik;
+    const uji = [null, 0, ...tangga, ...tangga.map((x) => x - 0.01), t + 5];
+
+    for (const p of uji) {
+      const { rows } = await sebagaiAdmin(
+        db,
+        "select nilai_tangga($1::numeric, $2::numeric[], $3) v",
+        [p, `{${tangga.join(",")}}`, arah],
+      );
+      harusSama(
+        nilaiTangga(p, tangga, arah),
+        rows[0].v,
+        `nilai(${p}, [${tangga.join(", ")}], ${arah})`,
+      );
+    }
+  }
+});
+
+uji("NILAI lembar GRD sama di SQL dan TypeScript", async () => {
+  const { rows } = await sebagaiAdmin(
+    db,
+    `select u.nama, h.skor_total, h.predikat, h.cakupan, h.detail
+       from kpi_lembar l
+       join users u on u.id = l.user_id
+       cross join lateral hitung_kpi_grd(l.user_id, l.periode_bulan) h
+      where l.status = 'aktif'`,
+  );
+  harus(rows.length > 0, "data contoh harus punya lembar aktif");
+
+  for (const r of rows) {
+    const ts = hitungLembarKpi(
+      r.detail.map((d) => ({
+        bobot: Number(d.bobot),
+        tangga: d.tangga.map(Number),
+        arah: d.arah,
+        pencapaian: d.pencapaian === null ? null : Number(d.pencapaian),
+      })),
+    );
+    harusSama(
+      [ts.total, ts.predikat, ts.cakupan],
+      [Number(r.skor_total), r.predikat, Number(r.cakupan)],
+      r.nama,
     );
   }
 });

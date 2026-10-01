@@ -1,6 +1,7 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import {
+  bacaAngka,
   bulanPanjang,
   bulanPendek,
   hariIniWib,
@@ -135,4 +136,21 @@ test("tanggal pendek & panjang ditulis di WIB, bukan zona mesin yang merender", 
     if (zonaSemula === undefined) delete process.env.TZ;
     else process.env.TZ = zonaSemula;
   }
+});
+
+test("bacaAngka membaca cara tulis Indonesia dan menolak yang meragukan", () => {
+  assert.equal(bacaAngka(""), null);
+  assert.equal(bacaAngka("  "), null);
+  assert.equal(bacaAngka("90"), 90);
+  assert.equal(bacaAngka("92,5"), 92.5);
+  assert.equal(bacaAngka("92,5%"), 92.5);
+  assert.equal(bacaAngka("0,875"), 0.875);
+  assert.equal(bacaAngka("1.500"), 1500);
+  assert.equal(bacaAngka("1.500.000,25"), 1500000.25);
+  assert.equal(bacaAngka(" 103,25 "), 103.25);
+  // Titik desimal gaya Inggris tidak ditebak menjadi 925.
+  assert.ok(Number.isNaN(bacaAngka("92.5") as number));
+  assert.ok(Number.isNaN(bacaAngka("1.50") as number));
+  assert.ok(Number.isNaN(bacaAngka("-5") as number));
+  assert.ok(Number.isNaN(bacaAngka("sepuluh") as number));
 });

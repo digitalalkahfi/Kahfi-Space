@@ -54,6 +54,71 @@ export async function kunciKpiBulan(bulan: string): Promise<Hasil<number>> {
   );
 }
 
+export type IsianPencapaian = {
+  indikatorId: string;
+  /** null mengosongkan pencapaian indikator itu (bernilai 0). */
+  nilai: number | null;
+  catatan?: string;
+};
+
+/**
+ * Penilai mengisi PENCAPAIAN lembar KPI GRD seseorang (migrasi 0187).
+ *
+ * Yang berhak ditentukan database (`boleh_menilai`): atasannya, langsung
+ * maupun berjenjang, atau CEO/Manager — tidak pernah orangnya sendiri.
+ * Semua isian satu lembar disimpan dalam satu transaksi, jadi tidak ada
+ * keadaan setengah tersimpan.
+ */
+export async function isiPencapaianKpi(input: {
+  userId: string;
+  bulan: string;
+  isian: IsianPencapaian[];
+}): Promise<Hasil<number>> {
+  if (!/^\d{4}-\d{2}-01$/.test(input.bulan)) {
+    return gagal("Periode harus tanggal 1 sebuah bulan.", "validasi");
+  }
+  if (input.isian.length === 0) {
+    return gagal("Tidak ada pencapaian yang berubah.", "validasi");
+  }
+  for (const i of input.isian) {
+    if (i.nilai !== null && (!Number.isFinite(i.nilai) || i.nilai < 0)) {
+      return gagal("Pencapaian harus angka 0 atau lebih.", "validasi");
+    }
+  }
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (pengguna.id === input.userId) {
+    return gagal(
+      "Pencapaian KPI-mu diisi penilaimu, bukan olehmu sendiri.",
+      "izin",
+    );
+  }
+
+  const sb = await klienServer();
+  const { data, error } = await sb.rpc("isi_pencapaian_kpi", {
+    p_user: input.userId,
+    p_bulan: input.bulan,
+    p_isian: input.isian.map((i) => ({
+      indikator_id: i.indikatorId,
+      nilai: i.nilai,
+      catatan: i.catatan ?? "",
+    })),
+  });
+
+  if (error) {
+    return error.code === "42501"
+      ? gagal("Kamu bukan penilai KPI orang ini.", "izin")
+      : gagal(error.message, "validasi");
+  }
+
+  segarkanKpi();
+  revalidatePath(`/tim/${input.userId}`);
+
+  return sukses(Number(data ?? 0), "Pencapaian KPI tersimpan.");
+}
+
 /** Indikator KPI hanya disusun CEO/Manager — sejalan `kpi_def_kelola`. */
 function bolehKelola(peran: string) {
   return peran === "CEO" || peran === "Manager";
@@ -120,7 +185,8 @@ export async function tambahIndikatorKpi(
 ): Promise<Hasil> {
   const nama = input.namaKpi.trim();
   const jabatan = input.jabatan.trim();
-  if (nama.length < 3) return gagal("Nama indikator minimal 3 huruf.", "validasi");
+  if (nama.length < 3)
+    return gagal("Nama indikator minimal 3 huruf.", "validasi");
   if (!jabatan) return gagal("Jabatan tidak boleh kosong.", "validasi");
   if (!Number.isFinite(input.bobot) || input.bobot <= 0 || input.bobot > 100) {
     return gagal("Bobot antara 1 sampai 100.", "validasi");
@@ -149,7 +215,10 @@ export async function tambahIndikatorKpi(
 
   if (error) {
     if (error.code === "23505") {
-      return gagal(`Indikator "${nama}" sudah ada untuk ${jabatan}.`, "validasi");
+      return gagal(
+        `Indikator "${nama}" sudah ada untuk ${jabatan}.`,
+        "validasi",
+      );
     }
     return error.code === "42501"
       ? gagal("Kamu tidak berhak menyusun KPI.", "izin")

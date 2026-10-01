@@ -5077,6 +5077,463 @@
       "sumber": "absensi"
     }
   ],
+  "kpi_lembar": [
+    {
+      "user": "Farhan Pratama",
+      "bulan": "2024-08-01",
+      "judul": "KPI Manager — contoh",
+      "status": "aktif",
+      "indikator": [
+        {
+          "nama": "GMV blok internal vs target — % realisasi",
+          "satuan": "%",
+          "bobot": 40,
+          "arah": "naik",
+          "tangga": [
+            70,
+            75,
+            80,
+            85,
+            90,
+            95,
+            98,
+            100,
+            105,
+            110
+          ],
+          "pencapaian": 92
+        },
+        {
+          "nama": "GMV blok eksternal vs target — % realisasi",
+          "satuan": "%",
+          "bobot": 40,
+          "arah": "naik",
+          "tangga": [
+            70,
+            75,
+            80,
+            85,
+            90,
+            95,
+            98,
+            100,
+            105,
+            110
+          ],
+          "pencapaian": 96
+        },
+        {
+          "nama": "Tonggak Manager selesai tepat waktu — %",
+          "satuan": "%",
+          "bobot": 20,
+          "arah": "naik",
+          "tangga": [
+            40,
+            50,
+            60,
+            80,
+            85,
+            90,
+            95,
+            100,
+            100,
+            100
+          ],
+          "pencapaian": 77.8
+        }
+      ]
+    },
+    {
+      "user": "Dewi Lestari",
+      "bulan": "2024-08-01",
+      "judul": "KPI Leader Affiliator — contoh",
+      "status": "aktif",
+      "indikator": [
+        {
+          "nama": "GMV akun departemen vs target — % realisasi",
+          "satuan": "%",
+          "bobot": 45,
+          "arah": "naik",
+          "tangga": [
+            70,
+            75,
+            80,
+            85,
+            90,
+            95,
+            98,
+            100,
+            105,
+            110
+          ],
+          "pencapaian": 98
+        },
+        {
+          "nama": "GMV akun utama di luar LIVE vs target — % realisasi",
+          "satuan": "%",
+          "bobot": 15,
+          "arah": "naik",
+          "tangga": [
+            70,
+            75,
+            80,
+            85,
+            90,
+            95,
+            98,
+            100,
+            105,
+            110
+          ],
+          "pencapaian": 101
+        },
+        {
+          "nama": "Rata-rata video terupload per hari di akun utama",
+          "satuan": "video/hari",
+          "bobot": 20,
+          "arah": "naik",
+          "tangga": [
+            94.75,
+            97.5,
+            100.25,
+            103,
+            105.75,
+            108.5,
+            111.25,
+            114,
+            119.5,
+            125
+          ],
+          "pencapaian": 111.25
+        },
+        {
+          "nama": "Tonggak departemen selesai tepat waktu — %",
+          "satuan": "%",
+          "bobot": 20,
+          "arah": "naik",
+          "tangga": [
+            40,
+            50,
+            60,
+            80,
+            85,
+            90,
+            95,
+            100,
+            100,
+            100
+          ],
+          "pencapaian": 100
+        }
+      ]
+    },
+    {
+      "user": "Galih Prakoso",
+      "bulan": "2024-08-01",
+      "judul": "KPI Leader MCN — contoh",
+      "status": "aktif",
+      "indikator": [
+        {
+          "nama": "GMV creator existing vs target — % realisasi",
+          "satuan": "%",
+          "bobot": 40,
+          "arah": "naik",
+          "tangga": [
+            70,
+            75,
+            80,
+            85,
+            90,
+            95,
+            98,
+            100,
+            105,
+            110
+          ],
+          "pencapaian": null
+        },
+        {
+          "nama": "Creator baru yang binding — jumlah creator",
+          "satuan": "creator",
+          "bobot": 30,
+          "arah": "naik",
+          "tangga": [
+            3.5,
+            4,
+            4.5,
+            5,
+            5.5,
+            6,
+            6.5,
+            7,
+            8,
+            9
+          ],
+          "pencapaian": null
+        },
+        {
+          "nama": "Tiket pelanggaran selesai paling lambat 2 hari — %",
+          "satuan": "%",
+          "bobot": 30,
+          "arah": "naik",
+          "tangga": [
+            55,
+            65,
+            75,
+            85,
+            90,
+            95,
+            98,
+            100,
+            100,
+            100
+          ],
+          "pencapaian": null
+        }
+      ]
+    },
+    {
+      "user": "Maya Safitri",
+      "bulan": "2024-08-01",
+      "judul": "KPI Co-Leader MCN — contoh",
+      "status": "aktif",
+      "indikator": [
+        {
+          "nama": "GMV akun tim vs target — % realisasi",
+          "satuan": "%",
+          "bobot": 50,
+          "arah": "naik",
+          "tangga": [
+            70,
+            75,
+            80,
+            85,
+            90,
+            95,
+            98,
+            100,
+            105,
+            110
+          ],
+          "pencapaian": 105
+        },
+        {
+          "nama": "Hari memenuhi standar video — % hari",
+          "satuan": "%",
+          "bobot": 30,
+          "arah": "naik",
+          "tangga": [
+            40,
+            50,
+            60,
+            80,
+            85,
+            90,
+            95,
+            100,
+            100,
+            100
+          ],
+          "pencapaian": null
+        },
+        {
+          "nama": "Komplain creator — jumlah temuan (makin kecil makin baik)",
+          "satuan": "temuan",
+          "bobot": 20,
+          "arah": "turun",
+          "tangga": [
+            9,
+            8,
+            7,
+            6,
+            5,
+            4,
+            3,
+            2,
+            1,
+            0
+          ],
+          "pencapaian": 2
+        }
+      ]
+    },
+    {
+      "user": "Nabila Putri",
+      "bulan": "2024-08-01",
+      "judul": "KPI Tim Konten — contoh",
+      "status": "aktif",
+      "indikator": [
+        {
+          "nama": "GMV akun sendiri vs target akun — % realisasi",
+          "satuan": "%",
+          "bobot": 40,
+          "arah": "naik",
+          "tangga": [
+            70,
+            75,
+            80,
+            85,
+            90,
+            95,
+            98,
+            100,
+            105,
+            110
+          ],
+          "pencapaian": 112
+        },
+        {
+          "nama": "Hari memenuhi standar video akun — % hari",
+          "satuan": "%",
+          "bobot": 40,
+          "arah": "naik",
+          "tangga": [
+            40,
+            50,
+            60,
+            80,
+            85,
+            90,
+            95,
+            100,
+            100,
+            100
+          ],
+          "pencapaian": 100
+        },
+        {
+          "nama": "Laporan harian terisi paling lambat 21.00 — % hari",
+          "satuan": "%",
+          "bobot": 20,
+          "arah": "naik",
+          "tangga": [
+            55,
+            65,
+            75,
+            85,
+            90,
+            95,
+            98,
+            100,
+            100,
+            100
+          ],
+          "pencapaian": 96
+        }
+      ]
+    },
+    {
+      "user": "Intan Permata",
+      "bulan": "2024-08-01",
+      "judul": "KPI Tim Konten — contoh",
+      "status": "aktif",
+      "indikator": [
+        {
+          "nama": "GMV akun sendiri vs target akun — % realisasi",
+          "satuan": "%",
+          "bobot": 40,
+          "arah": "naik",
+          "tangga": [
+            70,
+            75,
+            80,
+            85,
+            90,
+            95,
+            98,
+            100,
+            105,
+            110
+          ],
+          "pencapaian": 80
+        },
+        {
+          "nama": "Hari memenuhi standar video akun — % hari",
+          "satuan": "%",
+          "bobot": 40,
+          "arah": "naik",
+          "tangga": [
+            40,
+            50,
+            60,
+            80,
+            85,
+            90,
+            95,
+            100,
+            100,
+            100
+          ],
+          "pencapaian": 60
+        },
+        {
+          "nama": "Laporan harian terisi paling lambat 21.00 — % hari",
+          "satuan": "%",
+          "bobot": 20,
+          "arah": "naik",
+          "tangga": [
+            55,
+            65,
+            75,
+            85,
+            90,
+            95,
+            98,
+            100,
+            100,
+            100
+          ],
+          "pencapaian": 70
+        }
+      ]
+    },
+    {
+      "user": "Rian Hidayat",
+      "bulan": "2024-08-01",
+      "judul": "KPI Tim Konten — usulan",
+      "status": "draft",
+      "indikator": [
+        {
+          "nama": "GMV akun sendiri vs target akun — % realisasi",
+          "satuan": "%",
+          "bobot": 60,
+          "arah": "naik",
+          "tangga": [
+            70,
+            75,
+            80,
+            85,
+            90,
+            95,
+            98,
+            100,
+            105,
+            110
+          ],
+          "pencapaian": null
+        },
+        {
+          "nama": "Hari memenuhi standar video akun — % hari",
+          "satuan": "%",
+          "bobot": 40,
+          "arah": "naik",
+          "tangga": [
+            40,
+            50,
+            60,
+            80,
+            85,
+            90,
+            95,
+            100,
+            100,
+            100
+          ],
+          "pencapaian": null
+        }
+      ]
+    }
+  ],
   "samples": [
     {
       "kode": "SMP-0001",

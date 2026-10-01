@@ -1021,6 +1021,48 @@ export type BarisKpiSnapshot = {
   dikunci_oleh: string | null;
   dikunci_pada: string | null;
   created_at: string;
+  /** Rumus saat dikunci: per jabatan atau lembar GRD (0187). */
+  metode: MetodeKpiDb;
+};
+
+export type MetodeKpiDb = "jabatan" | "grd";
+
+/** @tabel kpi_lembar */
+export type BarisKpiLembar = {
+  id: string;
+  user_id: string;
+  periode_bulan: string;
+  judul: string;
+  status: "draft" | "aktif";
+  asal: string;
+  dibuat_oleh: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+/** @tabel kpi_indikator */
+export type BarisKpiIndikator = {
+  id: string;
+  lembar_id: string;
+  urutan: number;
+  nama: string;
+  satuan: string;
+  bobot: number;
+  arah: "naik" | "turun";
+  tangga: number[];
+  sumber: "manual";
+  asal: string;
+  created_at: string;
+};
+
+/** @tabel kpi_pencapaian */
+export type BarisKpiPencapaian = {
+  id: string;
+  indikator_id: string;
+  nilai: number;
+  catatan: string;
+  diisi_oleh: string | null;
+  diisi_pada: string;
 };
 
 /** @tabel weekly_reports */
@@ -1479,6 +1521,28 @@ export type Database = {
           Relasi<"kpi_snapshots_dikunci_oleh_fkey", "dikunci_oleh", "users">,
         ]
       >;
+      kpi_lembar: Tabel<
+        BarisKpiLembar,
+        [
+          Relasi<"kpi_lembar_user_id_fkey", "user_id", "users">,
+          Relasi<"kpi_lembar_dibuat_oleh_fkey", "dibuat_oleh", "users">,
+        ]
+      >;
+      kpi_indikator: Tabel<
+        BarisKpiIndikator,
+        [Relasi<"kpi_indikator_lembar_id_fkey", "lembar_id", "kpi_lembar">]
+      >;
+      kpi_pencapaian: Tabel<
+        BarisKpiPencapaian,
+        [
+          Relasi<
+            "kpi_pencapaian_indikator_id_fkey",
+            "indikator_id",
+            "kpi_indikator"
+          >,
+          Relasi<"kpi_pencapaian_diisi_oleh_fkey", "diisi_oleh", "users">,
+        ]
+      >;
       weekly_reports: Tabel<
         BarisWeeklyReport,
         [
@@ -1788,10 +1852,13 @@ export type Database = {
           jabatan: string;
           unit: string;
           skor: number;
-          predikat: PredikatKpiDb;
+          /** null hanya pada metode grd: "BELUM DIISI" (0187). */
+          predikat: PredikatKpiDb | null;
           cakupan: number;
           detail: unknown;
           terkunci: boolean;
+          metode: MetodeKpiDb;
+          boleh_menilai: boolean;
         }[];
       };
       /** Skor KPI satu orang beserta rincian indikatornya. */
@@ -1799,10 +1866,16 @@ export type Database = {
         Args: { p_user: string; p_bulan: string; p_sampai?: string };
         Returns: {
           skor_total: number;
-          predikat: PredikatKpiDb;
+          predikat: PredikatKpiDb | null;
           cakupan: number;
           detail: unknown;
+          metode: MetodeKpiDb;
         }[];
+      };
+      /** Penilai mengisi PENCAPAIAN lembar KPI aktif seseorang (0187). */
+      isi_pencapaian_kpi: {
+        Args: { p_user: string; p_bulan: string; p_isian: unknown };
+        Returns: number;
       };
       /** Status penguncian KPI sebuah bulan. */
       status_kunci_kpi: {

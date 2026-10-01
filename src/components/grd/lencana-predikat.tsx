@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { AMBANG_PREDIKAT, gayaPredikatKpi } from "@/lib/unit";
+import { AMBANG_PREDIKAT, gayaPredikat } from "@/lib/unit";
 import type { PredikatKpi } from "@/lib/kpi";
 
 /**
@@ -7,18 +7,19 @@ import type { PredikatKpi } from "@/lib/kpi";
  *
  * Warnanya menandai tingkat, bukan sekadar hiasan — jadi selalu
  * berpasangan dengan tulisan predikatnya, agar tetap terbaca oleh yang
- * tidak membedakan warna.
+ * tidak membedakan warna. Predikat null = lembar KPI GRD yang belum
+ * diisi sama sekali.
  */
 export function LencanaPredikat({
   predikat,
   ukuran = "sedang",
   className,
 }: {
-  predikat: PredikatKpi;
+  predikat: PredikatKpi | null;
   ukuran?: "kecil" | "sedang";
   className?: string;
 }) {
-  const gaya = gayaPredikatKpi[predikat];
+  const gaya = gayaPredikat(predikat);
 
   return (
     <span
@@ -32,7 +33,7 @@ export function LencanaPredikat({
       )}
     >
       <span className={cn("size-1.5 shrink-0 rounded-full", gaya.titik)} />
-      {predikat}
+      {predikat ?? "Belum diisi"}
     </span>
   );
 }
@@ -45,10 +46,10 @@ export function TandaPredikat({
   predikat,
   className,
 }: {
-  predikat: PredikatKpi;
+  predikat: PredikatKpi | null;
   className?: string;
 }) {
-  const gaya = gayaPredikatKpi[predikat];
+  const gaya = gayaPredikat(predikat);
 
   return (
     <span
@@ -58,7 +59,7 @@ export function TandaPredikat({
       )}
     >
       <span className={cn("size-1.5 shrink-0 rounded-full", gaya.titik)} />
-      {predikat}
+      {predikat ?? "Belum diisi"}
     </span>
   );
 }
