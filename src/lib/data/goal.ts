@@ -7,6 +7,7 @@ import { dataContoh } from "@/lib/data/contoh";
 import { aktifDemo } from "@/lib/demo";
 import type { Pengguna } from "@/lib/types";
 import {
+  bandingKodeGrd,
   labelPeriode,
   lengkapiRentang,
   periodeDariTangga,
@@ -91,13 +92,24 @@ export type SimpulGoal = {
   mulai: string | null;
   selesai: string | null;
   satuan: string;
-  targetBase: number;
+  /** null = base belum diukur (goal GRD staf pendukung). */
+  targetBase: number | null;
   targetGoal: number;
   targetStretch: number;
   targetBulan: number;
   realisasi: number;
   rasio: number;
   parentId: string | null;
+  /** Kode di file GRD, mis. "1.1.3"; null untuk goal di luar GRD. */
+  kode: string | null;
+  /** Tanggal "pada …" di rumusan goal GRD. */
+  tenggat: string | null;
+  jenisRealisasi: "gmv" | "isian";
+  keterangan: string;
+  /** draft = usulan yang belum disahkan; hanya terlihat CEO/Manager. */
+  status: "aktif" | "draft";
+  /** Ukuran GRD-nya; `bolehIsi` bila pembaca boleh mencatat capaiannya. */
+  ukuran: { id: string; sumber: "gmv" | "isian"; bolehIsi: boolean } | null;
   anak: SimpulGoal[];
 };
 
@@ -139,6 +151,8 @@ function keTree(datar: Omit<SimpulGoal, "anak">[]): SimpulGoal[] {
     daftar.sort(
       (a, b) =>
         URUTAN_LEVEL.indexOf(a.level) - URUTAN_LEVEL.indexOf(b.level) ||
+        // Goal GRD mengikuti urutan kodenya di file, bukan abjad judul.
+        (a.kode && b.kode ? bandingKodeGrd(a.kode, b.kode) : 0) ||
         a.judul.localeCompare(b.judul),
     );
     daftar.forEach((g) => urutkan(g.anak));
@@ -220,6 +234,12 @@ export async function pohonGoal(
           ? Math.round((realisasi / g.target_bulan) * 1000) / 10
           : 0,
         parentId: g.parent ?? null,
+        kode: null,
+        tenggat: null,
+        jenisRealisasi: "gmv" as const,
+        keterangan: "",
+        status: "aktif" as const,
+        ukuran: null,
       };
     });
 
@@ -227,19 +247,53 @@ export async function pohonGoal(
   }
 
   const sb = await klienServer();
+  // Usulan (draft) hanya untuk yang berwenang mengesahkannya.
+  const status: ("aktif" | "draft")[] = bolehKelolaGoal(pengguna)
+    ? ["aktif", "draft"]
+    : ["aktif"];
   const { data, error } = await sb
     .from("goals")
     .select(
       `id, judul, level, periode, satuan, target_base, target_goal,
        target_stretch, parent_goal_id, unit_id, account_id, pemilik_id,
+       kode, tenggat, jenis_realisasi, keterangan, status, grd_periode,
        pemilik:pemilik_id (nama, jabatan),
        units:unit_id (nama),
        accounts:account_id (username),
        goal_months (bulan, target, dari, sampai)`,
     )
-    .eq("status", "aktif");
+    .in("status", status);
 
   if (error) throw new Error(`Gagal memuat goal: ${error.message}`);
+
+  // Ukuran tiap goal GRD beserta hak mencatat capaiannya — satu panggilan
+  // per periode GRD, bukan satu per goal.
+  const periodeGrd = [
+    ...new Set(
+      (data ?? [])
+        .map((g) => g.grd_periode)
+        .filter((p): p is string => Boolean(p)),
+    ),
+  ];
+  const ukuranGoal = new Map<
+    string,
+    { id: string; sumber: "gmv" | "isian"; bolehIsi: boolean }
+  >();
+  for (const p of periodeGrd) {
+    const { data: kurva } = await sb.rpc("kurva_grd", {
+      p_periode: p,
+      p_acuan: tanggal,
+    });
+    for (const k of kurva ?? []) {
+      if (k.goal_id) {
+        ukuranGoal.set(k.goal_id, {
+          id: k.ukuran_id,
+          sumber: k.sumber,
+          bolehIsi: k.boleh_isi,
+        });
+      }
+    }
+  }
 
   // Realisasi tiap goal dihitung database lewat `progres_goal` (0066):
   // satu aturan, satu tempat, dan goal unit ikut menghitung akun-akunnya.
@@ -285,13 +339,19 @@ export async function pohonGoal(
       akunId: g.account_id,
       ...periodeDari((g.goal_months ?? []) as AnakTanggaLonggar[], g.periode),
       satuan: g.satuan,
-      targetBase: Number(g.target_base),
+      targetBase: g.target_base === null ? null : Number(g.target_base),
       targetGoal: Number(g.target_goal),
       targetStretch: Number(g.target_stretch),
       targetBulan,
       realisasi,
       rasio: capaian?.rasio ?? 0,
       parentId: g.parent_goal_id,
+      kode: g.kode,
+      tenggat: g.tenggat,
+      jenisRealisasi: g.jenis_realisasi,
+      keterangan: g.keterangan,
+      status: g.status === "draft" ? ("draft" as const) : ("aktif" as const),
+      ukuran: ukuranGoal.get(g.id) ?? null,
     };
   });
 

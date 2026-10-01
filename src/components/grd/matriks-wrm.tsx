@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { persen, tanggalPendek } from "@/lib/format";
 import { gayaKeputusanWrm } from "@/lib/unit";
-import { ARTI_WRM, keputusanWrm } from "@/lib/wrm";
+import { ARTI_WRM } from "@/lib/wrm";
 import type { StatusWrm } from "@/lib/data/grd";
 import type { LaporanMingguan } from "@/lib/data/grd";
 import type { KeputusanWrm } from "@/lib/types";
@@ -16,10 +16,10 @@ const KUADRAN: {
   kriHijau: boolean;
   keputusan: KeputusanWrm;
 }[] = [
-  { hasilHijau: true, kriHijau: false, keputusan: "SABAR" },
+  { hasilHijau: true, kriHijau: false, keputusan: "ALARM" },
   { hasilHijau: true, kriHijau: true, keputusan: "LANJUT" },
   { hasilHijau: false, kriHijau: false, keputusan: "UBAH CARA" },
-  { hasilHijau: false, kriHijau: true, keputusan: "ALARM" },
+  { hasilHijau: false, kriHijau: true, keputusan: "SABAR" },
 ];
 
 /**
@@ -72,9 +72,7 @@ export function MatriksWrm({
               const aktif =
                 k.hasilHijau === wrm.hasilHijau && k.kriHijau === wrm.kriHijau;
               const gaya = gayaKeputusanWrm[k.keputusan];
-              const pekan = jejak.filter(
-                (w) => keputusanWrm(w.hasilHijau, w.kriHijau) === k.keputusan,
-              );
+              const pekan = jejak.filter((w) => w.keputusan === k.keputusan);
 
               return (
                 <div

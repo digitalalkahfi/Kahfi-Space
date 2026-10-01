@@ -417,3 +417,36 @@ export async function tutupGoal(
       : "Goal dibatalkan; riwayatnya tetap tersimpan.",
   );
 }
+
+/**
+ * Mengesahkan goal usulan (draft) menjadi aktif — mis. target per akun
+ * yang "difinalkan di WRM" menurut file GRD. Batas 3 goal aktif per orang
+ * tetap ditegakkan trigger, jadi pesannya diteruskan apa adanya.
+ */
+export async function aktifkanGoal(goalId: string): Promise<Hasil> {
+  if (!goalId) return gagal("Goal tidak dikenali.", "validasi");
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (!bolehKelolaGoal(pengguna)) {
+    return gagal("Hanya CEO atau Manager yang boleh mengesahkan goal.", "izin");
+  }
+
+  const sb = await klienServer();
+  const { data, error } = await sb
+    .from("goals")
+    .update({ status: "aktif" })
+    .eq("id", goalId)
+    .eq("status", "draft")
+    .select("id");
+
+  if (error) return terjemahkan(error);
+  if (!data || data.length === 0) {
+    return gagal("Goal ini sudah aktif atau tidak ditemukan.", "validasi");
+  }
+
+  segarkan();
+  revalidatePath("/grd/kurva");
+  return sukses(undefined, "Goal disahkan dan mulai dihitung.");
+}

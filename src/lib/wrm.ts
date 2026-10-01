@@ -68,17 +68,26 @@ export function catatanRitme(
  */
 export const ARTI_WRM: Record<KeputusanWrm, string> = {
   LANJUT:
-    "Hasil dan langkah kunci sama-sama sehat. Lanjutkan rencana pekan ini tanpa perubahan.",
-  SABAR:
-    "Hasil masih di atas target, tetapi langkah kuncinya melemah. Rapikan eksekusi sebelum hasilnya menyusul turun.",
+    "Hasil dan kegiatan sama-sama hijau. Lanjutkan rencana pekan ini tanpa perubahan.",
   ALARM:
-    "Langkah kunci jalan, tetapi hasilnya belum ikut. Asumsi rencananya perlu diperiksa, bukan orangnya.",
+    "Hasil masih hijau, tetapi kegiatannya merah. Rapikan eksekusi sebelum hasilnya ikut turun.",
+  SABAR:
+    "Kegiatan sudah jalan, tetapi hasilnya belum ikut — biasanya faktor luar seperti tanggal tua atau menunggu Pay Day. Pertahankan kegiatannya.",
   "UBAH CARA":
-    "Eksekusi dan hasil dua-duanya tertinggal. Rencana pekan ini perlu diganti, bukan sekadar ditambah usaha.",
+    "Hasil merah bersama kegiatan merah, atau hasil merah dua pekan berturut-turut. Ubah caranya, bukan targetnya.",
 };
 
-/** Keputusan dari dua sumbu — padanan fungsi `keputusan_wrm` di database. */
-export function keputusanWrm(hasilHijau: boolean, kriHijau: boolean): KeputusanWrm {
-  if (hasilHijau) return kriHijau ? "LANJUT" : "SABAR";
-  return kriHijau ? "ALARM" : "UBAH CARA";
+/**
+ * Keputusan WRM sesuai DECISION-021 file GRD — padanan `keputusan_wrm`
+ * dan `lengkapi_laporan_mingguan` (0189). Hasil merah dua pekan
+ * berturut-turut selalu UBAH CARA.
+ */
+export function keputusanWrm(
+  hasilHijau: boolean,
+  kriHijau: boolean,
+  merahBeruntun = 0,
+): KeputusanWrm {
+  if (merahBeruntun >= 2) return "UBAH CARA";
+  if (hasilHijau) return kriHijau ? "LANJUT" : "ALARM";
+  return kriHijau ? "SABAR" : "UBAH CARA";
 }

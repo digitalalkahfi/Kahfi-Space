@@ -272,6 +272,8 @@ export type BarisDailyReport = {
   status: StatusLaporanDb;
   submitted_at: string;
   updated_at: string;
+  /** Bagian GMV dari LIVE; null bila tanpa LIVE (0188). */
+  gmv_live: number | null;
 };
 
 /** @tabel daily_report_revisions */
@@ -284,6 +286,8 @@ export type BarisDailyReportRevision = {
   komisi_baru: number | null;
   upload_lama: number | null;
   upload_baru: number | null;
+  live_lama: number | null;
+  live_baru: number | null;
   alasan: string;
   diubah_oleh: string | null;
   created_at: string;
@@ -299,7 +303,8 @@ export type BarisGoal = {
   account_id: string | null;
   parent_goal_id: string | null;
   satuan: string;
-  target_base: number;
+  /** null = base belum diukur (0188). */
+  target_base: number | null;
   target_goal: number;
   target_stretch: number;
   bobot: number;
@@ -308,6 +313,57 @@ export type BarisGoal = {
   status: StatusGoalDb;
   created_at: string;
   updated_at: string;
+  /** Kode & periode di file GRD, mis. "1.1.3" (0188). */
+  grd_periode: string | null;
+  kode: string | null;
+  tenggat: string | null;
+  jenis_realisasi: "gmv" | "isian";
+  keterangan: string;
+};
+
+/** @tabel grd_ukuran */
+export type BarisGrdUkuran = {
+  id: string;
+  grd_periode: string;
+  kode: string;
+  judul: string;
+  satuan: string;
+  sumber: "gmv" | "isian";
+  goal_id: string | null;
+  pic_id: string | null;
+  pic_teks: string;
+  urutan: number;
+  asal: string;
+  created_at: string;
+};
+
+/** @tabel grd_ukuran_lingkup */
+export type BarisGrdUkuranLingkup = {
+  id: string;
+  ukuran_id: string;
+  account_id: string | null;
+  unit_id: string | null;
+  sumber_ukuran_id: string | null;
+  jenis_gmv: "semua" | "live" | "video";
+  faktor: number;
+};
+
+/** @tabel grd_ukuran_titik */
+export type BarisGrdUkuranTitik = {
+  ukuran_id: string;
+  tanggal: string;
+  target: number;
+};
+
+/** @tabel grd_ukuran_isian */
+export type BarisGrdUkuranIsian = {
+  id: string;
+  ukuran_id: string;
+  tanggal: string;
+  nilai: number;
+  catatan: string;
+  diisi_oleh: string | null;
+  diisi_pada: string;
 };
 
 /** @tabel goal_months */
@@ -1543,6 +1599,40 @@ export type Database = {
           Relasi<"kpi_pencapaian_diisi_oleh_fkey", "diisi_oleh", "users">,
         ]
       >;
+      grd_ukuran: Tabel<
+        BarisGrdUkuran,
+        [
+          Relasi<"grd_ukuran_goal_id_fkey", "goal_id", "goals">,
+          Relasi<"grd_ukuran_pic_id_fkey", "pic_id", "users">,
+        ]
+      >;
+      grd_ukuran_lingkup: Tabel<
+        BarisGrdUkuranLingkup,
+        [
+          Relasi<
+            "grd_ukuran_lingkup_ukuran_id_fkey",
+            "ukuran_id",
+            "grd_ukuran"
+          >,
+          Relasi<
+            "grd_ukuran_lingkup_account_id_fkey",
+            "account_id",
+            "accounts"
+          >,
+          Relasi<"grd_ukuran_lingkup_unit_id_fkey", "unit_id", "units">,
+        ]
+      >;
+      grd_ukuran_titik: Tabel<
+        BarisGrdUkuranTitik,
+        [Relasi<"grd_ukuran_titik_ukuran_id_fkey", "ukuran_id", "grd_ukuran">]
+      >;
+      grd_ukuran_isian: Tabel<
+        BarisGrdUkuranIsian,
+        [
+          Relasi<"grd_ukuran_isian_ukuran_id_fkey", "ukuran_id", "grd_ukuran">,
+          Relasi<"grd_ukuran_isian_diisi_oleh_fkey", "diisi_oleh", "users">,
+        ]
+      >;
       weekly_reports: Tabel<
         BarisWeeklyReport,
         [
@@ -1870,6 +1960,22 @@ export type Database = {
           cakupan: number;
           detail: unknown;
           metode: MetodeKpiDb;
+        }[];
+      };
+      /** Kurva WRM GRD: target kumulatif per titik, aktual, status (0188). */
+      kurva_grd: {
+        Args: { p_periode: string; p_acuan: string };
+        Returns: {
+          ukuran_id: string;
+          kode: string;
+          judul: string;
+          satuan: string;
+          sumber: "gmv" | "isian";
+          goal_id: string | null;
+          pic: string;
+          urutan: number;
+          boleh_isi: boolean;
+          titik: unknown;
         }[];
       };
       /** Penilai mengisi PENCAPAIAN lembar KPI aktif seseorang (0187). */
