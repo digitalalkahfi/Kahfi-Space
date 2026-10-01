@@ -50,3 +50,8 @@ next-env.d.ts
 
 # Supabase CLI — berkas kerja hasil `supabase link`.
 supabase/.temp/
+
+# GRD (file Excel internal: GMV, nama, rencana) — repo ini publik, jadi
+# berkasnya hanya disimpan lokal sebagai sumber impor. docs/grd/GAP-*.md
+# dan berkas acuan tes berbentuk JSON tetap dikomit.
+docs/grd/*.xlsx
