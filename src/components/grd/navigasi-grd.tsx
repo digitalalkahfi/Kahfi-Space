@@ -4,6 +4,7 @@ import {
   ArrowRight,
   CalendarCheck2,
   Gauge,
+  LineChart,
   ListChecks,
   Store,
   Target,
@@ -18,6 +19,13 @@ const MENU = [
     ringkas: "Perusahaan → Manager → unit → akun, beserta anak tangga bulanan.",
     Ikon: Target,
     gaya: "bg-info-fill text-info-text",
+  },
+  {
+    href: "/grd/kurva" as const,
+    judul: "Kurva WRM",
+    ringkas: "Target kumulatif tiap Sabtu, aktual, dan status HIJAU/MERAH.",
+    Ikon: LineChart,
+    gaya: "bg-ok-fill text-ok-text",
   },
   {
     href: "/grd/lead-measure" as const,

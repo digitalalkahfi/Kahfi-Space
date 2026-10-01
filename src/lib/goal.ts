@@ -1,4 +1,5 @@
 /** Aturan goal yang dipakai server maupun layar; tanpa akses database. */
+import { angka, persen, rupiahRingkas } from "@/lib/format";
 import { geserBulan } from "@/lib/kalender";
 import { hariDalamBulan, hariDalamRentang } from "@/lib/periode-finance";
 
@@ -389,4 +390,55 @@ export function kalimatDampakHapus(d: DampakHapusGoal): string[] {
   }
   kalimat.push("Riwayat perubahan goal ini tetap tersimpan di jejak audit.");
   return kalimat;
+}
+
+// ---------------------------------------------------------------------
+// Goal GRD (0188): satuan non-rupiah dan kode file GRD
+// ---------------------------------------------------------------------
+
+/**
+ * Nilai goal menurut satuannya: "Rp 4,95 M", "15 seller", "100%".
+ * Tiga desimal pada rupiah supaya 4,95 M tidak terbaca 5 M. null berarti
+ * base yang belum diukur.
+ */
+export function tampilNilaiGoal(nilai: number | null, satuan: string): string {
+  if (nilai === null) return "belum diukur";
+  const s = satuan.trim();
+  if (s === "IDR" || s.toLowerCase() === "rupiah") {
+    return rupiahRingkas(nilai, { digit: 3 });
+  }
+  if (s === "%") return persen(nilai, 1);
+  return `${angka(nilai)} ${s.toLowerCase()}`.trim();
+}
+
+/** Urutan kode GRD yang alami: 1.1.2 < 1.1.10 < 1.2 < S.1.1 < T.INTERNAL. */
+export function bandingKodeGrd(a: string, b: string): number {
+  const pa = a.split(".");
+  const pb = b.split(".");
+  for (let i = 0; i < Math.max(pa.length, pb.length); i += 1) {
+    const x = pa[i];
+    const y = pb[i];
+    if (x === undefined) return -1;
+    if (y === undefined) return 1;
+    const nx = Number(x);
+    const ny = Number(y);
+    const c =
+      Number.isNaN(nx) || Number.isNaN(ny) ? x.localeCompare(y) : nx - ny;
+    if (c !== 0) return c;
+  }
+  return 0;
+}
+
+export type KelompokKurva = "internal" | "eksternal" | "perusahaan" | "lain";
+
+/**
+ * Blok sebuah baris kurva GRD menurut kodenya, sama dengan sheet "Target &
+ * Kurva WRM": 1.1.x dan total internal = Blok Internal, 1.2.x dan total
+ * eksternal = Blok Eksternal, total perusahaan sendiri.
+ */
+export function kelompokKurva(kode: string): KelompokKurva {
+  if (kode === "T.PERUSAHAAN") return "perusahaan";
+  if (kode === "T.INTERNAL" || kode.startsWith("1.1")) return "internal";
+  if (kode === "T.EKSTERNAL" || kode.startsWith("1.2")) return "eksternal";
+  return "lain";
 }

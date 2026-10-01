@@ -38,11 +38,11 @@ uji("periode harus hari Senin", async () => {
 });
 
 uji("pekan berjalan belum boleh dibentuk", async () => {
-  const seninIni = (
-    await sebagaiAdmin(db, "select awal_pekan(current_date) s")
-  ).rows[0].s;
+  const seninIni = (await sebagaiAdmin(db, "select awal_pekan(current_date) s"))
+    .rows[0].s;
   await harusDitolak(
-    () => bentuk("Farhan Pratama", new Date(seninIni).toISOString().slice(0, 10)),
+    () =>
+      bentuk("Farhan Pratama", new Date(seninIni).toISOString().slice(0, 10)),
     "pekan yang belum selesai seharusnya ditolak",
   );
 });
@@ -68,48 +68,60 @@ uji("Manager membentuk laporan tiap unit", async () => {
   harusSama(tersimpan.rows[0].n, unit);
 });
 
-uji("GMV laporan sama dengan penjumlahan laporan harian pekan itu", async () => {
-  const { rows } = await sebagaiAdmin(
-    db,
-    `select w.gmv_total,
+uji(
+  "GMV laporan sama dengan penjumlahan laporan harian pekan itu",
+  async () => {
+    const { rows } = await sebagaiAdmin(
+      db,
+      `select w.gmv_total,
             (select coalesce(sum(r.gmv), 0)
                from daily_reports r
                left join accounts a on a.id = r.account_id
               where coalesce(r.unit_id, a.unit_id) = w.unit_id
                 and r.tanggal between $1 and $1::date + 6) harian
        from weekly_reports w where w.periode = $1`,
-    [PEKAN],
-  );
-  harus(rows.length > 0, "laporan pekan itu harus ada");
-  for (const r of rows) {
-    harusSama(Number(r.gmv_total), Number(r.harian));
-  }
-});
-
-uji("keputusan mengikuti dua sumbunya, sama dengan rumus aplikasi", async () => {
-  const { rows } = await sebagaiAdmin(
-    db,
-    "select status_hasil, status_kri, keputusan from weekly_reports where periode = $1",
-    [PEKAN],
-  );
-  for (const r of rows) {
-    harusSama(
-      r.keputusan,
-      keputusanWrm(r.status_hasil === "hijau", r.status_kri === "hijau"),
+      [PEKAN],
     );
-  }
-});
+    harus(rows.length > 0, "laporan pekan itu harus ada");
+    for (const r of rows) {
+      harusSama(Number(r.gmv_total), Number(r.harian));
+    }
+  },
+);
+
+uji(
+  "keputusan mengikuti dua sumbunya, sama dengan rumus aplikasi",
+  async () => {
+    const { rows } = await sebagaiAdmin(
+      db,
+      "select status_hasil, status_kri, keputusan, merah_beruntun from weekly_reports where periode = $1",
+      [PEKAN],
+    );
+    for (const r of rows) {
+      harusSama(
+        r.keputusan,
+        keputusanWrm(
+          r.status_hasil === "hijau",
+          r.status_kri === "hijau",
+          r.merah_beruntun,
+        ),
+      );
+    }
+  },
+);
 
 uji("membentuk ulang memperbarui, bukan menggandakan", async () => {
   const unit = (await sebagaiAdmin(db, "select count(*)::int n from units"))
     .rows[0].n;
   await bentuk("Farhan Pratama");
   harusSama(
-    (await sebagaiAdmin(
-      db,
-      "select count(*)::int n from weekly_reports where periode = $1",
-      [PEKAN],
-    )).rows[0].n,
+    (
+      await sebagaiAdmin(
+        db,
+        "select count(*)::int n from weekly_reports where periode = $1",
+        [PEKAN],
+      )
+    ).rows[0].n,
     unit,
   );
 });
@@ -127,7 +139,10 @@ uji("koreksi laporan harian tercermin saat dibentuk ulang", async () => {
   ).rows[0].gmv_total;
 
   const akun = (
-    await sebagaiAdmin(db, "select id from accounts where username = '@fashion_hijab'")
+    await sebagaiAdmin(
+      db,
+      "select id from accounts where username = '@fashion_hijab'",
+    )
   ).rows[0].id;
   await sebagaiAdmin(
     db,

@@ -2,13 +2,16 @@ import { CalendarRange, CornerDownRight, Target } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { BarCapaian } from "@/components/motion/bar-capaian";
 import { DialogUbahGoal } from "@/components/grd/dialog-ubah-goal";
+import { DialogCatatCapaian } from "@/components/grd/dialog-catat-capaian";
+import { TombolAktifkanGoal } from "@/components/grd/tombol-aktifkan-goal";
 import { TombolHapusGoal } from "@/components/grd/tombol-hapus-goal";
 import { cn } from "@/lib/utils";
-import { persen, rupiahRingkas } from "@/lib/format";
+import { persen, tanggalKalenderPendek } from "@/lib/format";
 import {
   jumlahHariPeriode,
   keteranganTenggat,
   statusPeriode,
+  tampilNilaiGoal,
 } from "@/lib/goal";
 import type { PilihanGoal, SimpulGoal } from "@/lib/data/goal";
 
@@ -57,9 +60,12 @@ function Simpul({
     goal.mulai && goal.selesai
       ? keteranganTenggat(goal.mulai, goal.selesai, acuan)
       : null;
+  // Capaian goal isian dicatat orang yang berwenang (boleh_isi_ukuran).
+  const bolehCatat = goal.ukuran?.sumber === "isian" && goal.ukuran.bolehIsi;
+  const adaTombol = Boolean(pilihan) || bolehCatat;
   // Baris yang membentang selebar kartu: dua kolom, atau tiga bila ada
   // kolom tombol di layar lebar.
-  const lebarPenuh = pilihan ? "col-span-2 sm:col-span-3" : "col-span-2";
+  const lebarPenuh = adaTombol ? "col-span-2 sm:col-span-3" : "col-span-2";
 
   return (
     <li>
@@ -69,7 +75,7 @@ function Simpul({
           // digandakan: di HP turun ke baris bawah agar judul tidak
           // terhimpit, di layar lebar tetap di kanan atas.
           "baris-interaktif grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 rounded-2xl p-3.5",
-          pilihan && "sm:grid-cols-[minmax(0,1fr)_auto_auto]",
+          adaTombol && "sm:grid-cols-[minmax(0,1fr)_auto_auto]",
           dalam === 0 ? "bg-muted/70" : "bg-muted/40",
         )}
         // Indentasi menandai kedalaman roll-down; dibatasi agar tetap terbaca di HP.
@@ -88,7 +94,22 @@ function Simpul({
             >
               {LABEL_LEVEL[goal.level]}
             </span>
-            <p className="truncate text-sm leading-5 font-semibold">
+            {goal.kode ? (
+              <span className="tabular rounded-full bg-card px-2 py-0.5 text-[10px] leading-[13px] font-semibold text-muted-foreground ring-1 ring-border-subtle">
+                {goal.kode}
+              </span>
+            ) : null}
+            {goal.status === "draft" ? (
+              <span className="rounded-full bg-warn-fill px-2 py-0.5 text-[10px] leading-[13px] font-semibold text-warn-text">
+                Usulan
+              </span>
+            ) : null}
+            <p
+              className={cn(
+                "text-sm leading-5 font-semibold",
+                goal.kode ? "line-clamp-2" : "truncate",
+              )}
+            >
               {goal.judul}
             </p>
           </div>
@@ -97,18 +118,31 @@ function Simpul({
             {goal.unit ? ` · ${goal.unit}` : ""}
             {goal.akun ? ` · ${goal.akun}` : ""}
             {status === "berjalan"
-              ? ` · ${rupiahRingkas(goal.targetBulan)} bulan ini`
+              ? ` · capaian ${tampilNilaiGoal(goal.realisasi, goal.satuan)} dari ${tampilNilaiGoal(goal.targetBulan, goal.satuan)}`
               : ""}
           </p>
-          <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-[11px] leading-[14px] font-medium text-info-text ring-1 ring-border-subtle">
-            <CalendarRange className="size-3 shrink-0" />
-            {goal.periode}
-            {status === "berjalan" && tenggat
-              ? ` · ${tenggat}`
-              : goal.mulai && goal.selesai
-                ? ` · ${jumlahHariPeriode(goal.mulai, goal.selesai)} hari`
-                : ""}
-          </p>
+          {goal.bulan.length > 0 || goal.tenggat ? (
+            <p className="mt-1 inline-flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-[11px] leading-[14px] font-medium text-info-text ring-1 ring-border-subtle">
+              <CalendarRange className="size-3 shrink-0" />
+              {goal.bulan.length > 0
+                ? goal.periode
+                : `s.d. ${tanggalKalenderPendek(goal.tenggat ?? "")}`}
+              {goal.bulan.length > 0 &&
+              goal.tenggat &&
+              goal.tenggat !== goal.selesai
+                ? ` · tenggat ${tanggalKalenderPendek(goal.tenggat)}`
+                : status === "berjalan" && tenggat
+                  ? ` · ${tenggat}`
+                  : goal.mulai && goal.selesai
+                    ? ` · ${jumlahHariPeriode(goal.mulai, goal.selesai)} hari`
+                    : ""}
+            </p>
+          ) : null}
+          {goal.keterangan ? (
+            <p className="mt-1 line-clamp-2 text-[11px] leading-[14px] text-muted-foreground">
+              {goal.keterangan}
+            </p>
+          ) : null}
         </div>
 
         <div className="col-start-2 row-start-1">
@@ -149,22 +183,43 @@ function Simpul({
           <p
             className={cn(
               "tabular min-w-0 text-[11px] leading-[14px] text-muted-foreground sm:row-start-3 sm:mt-1.5",
-              pilihan ? "sm:col-span-3" : "sm:col-span-2",
+              adaTombol ? "sm:col-span-3" : "sm:col-span-2",
             )}
           >
-            Base {rupiahRingkas(goal.targetBase)} · Goal{" "}
-            {rupiahRingkas(goal.targetGoal)} · Stretch{" "}
-            {rupiahRingkas(goal.targetStretch)}
+            Base {tampilNilaiGoal(goal.targetBase, goal.satuan)} · Goal{" "}
+            {tampilNilaiGoal(goal.targetGoal, goal.satuan)}
+            {goal.targetStretch !== goal.targetGoal
+              ? ` · Stretch ${tampilNilaiGoal(goal.targetStretch, goal.satuan)}`
+              : ""}
           </p>
-          {pilihan ? (
-            <div className="flex shrink-0 items-center gap-2 sm:col-start-3 sm:row-start-1 sm:self-start">
-              <DialogUbahGoal
-                goal={goal}
-                pilihan={pilihan}
-                acuan={acuan}
-                kecualiInduk={idCabang(goal)}
-              />
-              <TombolHapusGoal goalId={goal.id} judul={goal.judul} />
+          {pilihan || bolehCatat ? (
+            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 sm:col-start-3 sm:row-start-1 sm:self-start">
+              {bolehCatat && goal.ukuran ? (
+                <DialogCatatCapaian
+                  ukuranId={goal.ukuran.id}
+                  judul={goal.judul}
+                  satuan={goal.satuan}
+                  acuan={acuan}
+                />
+              ) : null}
+              {pilihan && goal.status === "draft" ? (
+                <TombolAktifkanGoal goalId={goal.id} judul={goal.judul} />
+              ) : null}
+              {/* Goal isian atau ber-base kosong tidak cocok dengan isian
+                  rupiah dialog ubah; angkanya mengikuti file GRD. */}
+              {pilihan &&
+              goal.jenisRealisasi === "gmv" &&
+              goal.targetBase !== null ? (
+                <DialogUbahGoal
+                  goal={goal}
+                  pilihan={pilihan}
+                  acuan={acuan}
+                  kecualiInduk={idCabang(goal)}
+                />
+              ) : null}
+              {pilihan ? (
+                <TombolHapusGoal goalId={goal.id} judul={goal.judul} />
+              ) : null}
             </div>
           ) : null}
         </div>

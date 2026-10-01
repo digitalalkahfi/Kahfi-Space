@@ -2,6 +2,8 @@ import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import {
   akhirBulan,
+  bandingKodeGrd,
+  kelompokKurva,
   batasSelesaiGoal,
   bolehJadiInduk,
   kalimatDampakHapus,
@@ -16,6 +18,7 @@ import {
   selesaiSetelah,
   statusPeriode,
   susunAnakTangga,
+  tampilNilaiGoal,
   tanggalSah,
   tebakModeTarget,
 } from "../goal.ts";
@@ -275,4 +278,35 @@ test("dialog hapus goal hanya menyebut dampak yang memang ada", () => {
     /^1 lead measure-nya ikut terhapus/,
     "lead measure tanpa catatan",
   );
+});
+
+test("nilai goal GRD tampil menurut satuannya", () => {
+  assert.equal(tampilNilaiGoal(4_950_000_000, "IDR"), "Rp 4,95 M");
+  assert.equal(tampilNilaiGoal(2_489_000_000, "IDR"), "Rp 2,489 M");
+  assert.equal(tampilNilaiGoal(150_000_000, "IDR"), "Rp 150 Jt");
+  assert.equal(tampilNilaiGoal(15, "Seller"), "15 seller");
+  assert.equal(tampilNilaiGoal(100, "%"), "100%");
+  assert.equal(tampilNilaiGoal(null, "%"), "belum diukur");
+});
+
+test("kode GRD diurutkan alami, bukan sebagai teks", () => {
+  const kode = ["1.1.10", "S.1.1", "1.2", "1.1.2", "1", "1.1", "T.INTERNAL"];
+  assert.deepEqual([...kode].sort(bandingKodeGrd), [
+    "1",
+    "1.1",
+    "1.1.2",
+    "1.1.10",
+    "1.2",
+    "S.1.1",
+    "T.INTERNAL",
+  ]);
+});
+
+test("baris kurva dikelompokkan per blok seperti sheet Target & Kurva WRM", () => {
+  assert.equal(kelompokKurva("1.1.3"), "internal");
+  assert.equal(kelompokKurva("T.INTERNAL"), "internal");
+  assert.equal(kelompokKurva("1.2.1-gmv"), "eksternal");
+  assert.equal(kelompokKurva("T.EKSTERNAL"), "eksternal");
+  assert.equal(kelompokKurva("T.PERUSAHAAN"), "perusahaan");
+  assert.equal(kelompokKurva("S.1.1"), "lain");
 });

@@ -562,3 +562,18 @@ Bawaan yang saya pakai untuk Tahap 1 selama belum diputuskan lain:
 - **No. 15:** salinan acuan disiapkan skrip, lalu dihitung ulang oleh Excel sebelum PR Tahap 1 dibuka.
 
 Butir 6–10, 12, dan 13 diputuskan menjelang Tahap 2A/3.
+
+### Keputusan lanjutan (1 Oktober 2026, atas mandat pemilik)
+
+Pemilik menyerahkan sisa keputusan teknis kepada pelaksana ("aku percayakan sepenuhnya"). Setiap
+keputusan berikut mengikuti isi file GRD bila file menyebutnya:
+
+| No. §8 | Keputusan | Dasar |
+| --- | --- | --- |
+| 6 | Laporan harian Affiliator mendapat kolom **GMV LIVE** (bagian dari GMV hari itu). GMV di luar LIVE = GMV − GMV LIVE. | Goal 1.1.1 vs 1.1.3 dan sheet Target per akun memisahkan keduanya. |
+| 7 | Blok Internal = **1.1.1 + 1.1.2 + 1.1.3 + 1.1.4**. GMV unit TAP tidak ikut. | Baris "TOTAL GMV INTERNAL (1.1.1 + 1.1.2 + 1.1.3 + 1.1.4)" di sheet kurva. |
+| 8 | GMV creator existing MCN = GMV unit MCN − GMV creator besar baru. Angka creator besar baru diisi tiap Sabtu, sesuai baris kurva "1.2.1 GMV creator besar baru (dicatat setelah binding)". | Sheet kurva; Blok Eksternal = existing + creator baru. |
+| 9 | Tonggak dicentang selesai oleh PIC atau atasannya. Tanggal selesai = saat dicentang (WIB). Tonggak berbutir dihitung satu. Daftar tonggak KPI Siti #4: 1.1.1.1, 1.1.3.1, 1.1.2.3, 1.1.2.4, 1.1.4.5, 1.1.3.2, 1.1.3.3, 1.1.3.4, 1.1.3.5. | "SEKALI = tonggak, dicentang selesai" di GRD Cascade. |
+| 10 | Lembar KPI Oktober Rifal = **Tim Riset** (penilai Kholid). Akun santri "Rifal Cakep" tetap ikut goal 1.1.4. | Satu orang satu lembar per bulan. |
+| 12 | Matriks WRM disamakan dengan DECISION-021 di Tahap 2A (migrasi 0189), termasuk HIJAU = aktual ≥ target dan UBAH CARA setelah dua pekan merah. | Sheet kurva baris 93. |
+| 13 | Angka janggal di §5 **tidak diubah**; semua angka masuk persis seperti di file. | Aturan kerja: jangan mengubah angka, bobot, atau target dari file. |

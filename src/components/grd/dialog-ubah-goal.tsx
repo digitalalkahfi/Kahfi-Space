@@ -34,7 +34,8 @@ function dariGoal(goal: SimpulGoal, acuan: string): NilaiGoal {
     indukId: goal.parentId,
     unitId: goal.unitId,
     akunId: goal.akunId,
-    base: goal.targetBase,
+    // Dialog ini hanya dibuka untuk goal ber-base angka (pohon-goal.tsx).
+    base: goal.targetBase ?? 0,
     target: goal.targetGoal,
     stretch: goal.targetStretch,
     mulai,

@@ -58,7 +58,8 @@ export type AnakTangga = {
 };
 
 /** Ambang yang sama dengan fungsi `status_wrm` di database. */
-export const AMBANG_WRM = { hasil: 95, kri: 90 } as const;
+/** HIJAU = aktual ≥ target, untuk hasil maupun kegiatan (file GRD, 0189). */
+export const AMBANG_WRM = { hasil: 100, kri: 100 } as const;
 
 // ---------------------------------------------------------------------
 // Mode demo — menghitung ulang dari data seed dengan rumus yang sama.
@@ -240,13 +241,7 @@ function hitungDemo(tanggal: string) {
     rasioKri,
     hasilHijau,
     kriHijau,
-    keputusan: hasilHijau
-      ? kriHijau
-        ? "LANJUT"
-        : "SABAR"
-      : kriHijau
-        ? "ALARM"
-        : "UBAH CARA",
+    keputusan: keputusanWrm(hasilHijau, kriHijau),
   };
 
   return { goal, wrm, papan, tangga };
@@ -509,13 +504,7 @@ export async function laporanMingguan(
         rasioKri: i === 0 ? wrm.rasioKri : rasio,
         hasilHijau,
         kriHijau,
-        keputusan: hasilHijau
-          ? kriHijau
-            ? "LANJUT"
-            : "SABAR"
-          : kriHijau
-            ? "ALARM"
-            : "UBAH CARA",
+        keputusan: keputusanWrm(hasilHijau, kriHijau),
         merahBeruntun: 0,
         ringkasan: "",
       });
@@ -527,6 +516,8 @@ export async function laporanMingguan(
     for (const r of urut) {
       beruntun = r.hasilHijau ? 0 : beruntun + 1;
       r.merahBeruntun = beruntun;
+      // Padanan `lengkapi_laporan_mingguan` (0189): dua pekan merah = UBAH CARA.
+      r.keputusan = keputusanWrm(r.hasilHijau, r.kriHijau, beruntun);
     }
 
     return hasil;
