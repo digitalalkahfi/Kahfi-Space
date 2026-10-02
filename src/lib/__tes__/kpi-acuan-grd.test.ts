@@ -45,7 +45,7 @@ if (!existsSync(JALUR)) {
   test("acuan hitungan Excel tersedia", () => {
     assert.fail(
       `${JALUR} belum ada. Jalankan: node scripts/acuan-kpi-grd.mjs siapkan, ` +
-        "buka & simpan docs/grd/acuan-kpi-oktober.xlsx di Excel, lalu " +
+        "buka & simpan .tmp/grd/acuan-kpi-2026-10.xlsx di Excel, lalu " +
         "node scripts/acuan-kpi-grd.mjs ekstrak.",
     );
   });
@@ -56,7 +56,7 @@ if (!existsSync(JALUR)) {
   test("acuan dihitung Excel atas seluruh 16 blok KPI di tiap skenario", () => {
     assert.match(acuan.aplikasi, /Microsoft.*Excel/i);
     assert.equal(acuan.blok.length, 16 * Object.keys(acuan.skenario).length);
-    assert.equal(indikator.length, 67 * Object.keys(acuan.skenario).length);
+    assert.equal(indikator.length, 66 * Object.keys(acuan.skenario).length);
     // Acuan harus menyentuh semua predikat, termasuk "BELUM DIISI".
     const predikat = new Set(acuan.blok.map((b) => b.predikat));
     for (const p of ["Istimewa", "Baik", "Cukup", "Perlu Perbaikan", null]) {

@@ -2,7 +2,7 @@
 -- K-Space V2 — Sumber otomatis indikator KPI GRD
 --
 -- Tahap 1 (0187) membuat semua PENCAPAIAN diisi penilai. Tahap 3 menyambung
--- indikator yang datanya sudah ada di aplikasi (GAP §4f, kode A/B/C):
+-- indikator yang datanya sudah ada di aplikasi:
 --
 --   ukuran_persen  Σ realisasi ukuran / Σ target goal-nya × 100
 --                  (GMV internal, per akun, LIVE, di luar LIVE, …)

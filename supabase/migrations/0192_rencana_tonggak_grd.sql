@@ -1,8 +1,8 @@
 -- =====================================================================
 -- K-Space V2 — Rencana operasional GRD dan tonggaknya
 --
--- Kolom OPERATIONAL PLAN di sheet "GRD Cascade" (docs/grd/GAP-GRD-OKTOBER.md
--- §4d) berisi cara mencapai tiap goal, masing-masing dengan JENIS, SIAPA,
+-- Kolom OPERATIONAL PLAN di sheet "GRD Cascade" (docs/GRD-OKTOBER-2026.xlsx)
+-- berisi cara mencapai tiap goal, masing-masing dengan JENIS, SIAPA,
 -- dan KAPAN. Legenda file:
 --
 --   SEKALI  = tonggak, dicentang selesai;
@@ -264,7 +264,7 @@ comment on function ubah_status_tonggak(uuid, text, text) is
   'PIC/atasan/CEO/Manager mengubah status tonggak; waktu selesai dicatat penjaga (0192).';
 
 -- ---------------------------------------------------------------------
--- Tonggak tepat waktu (GAP §4d)
+-- Tonggak tepat waktu (indikator "Tonggak … tepat waktu" di sheet KPI)
 --
 --   jatuh = tonggak dari rencana yang disebut, bertenggat ≤ p_sampai,
 --           yang harinya sudah lewat atau sudah selesai;

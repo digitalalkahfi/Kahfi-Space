@@ -582,7 +582,8 @@ function satuanKurva(k: string): string {
 
 /** Lingkup khusus yang rumusnya tertulis di keterangan file, bukan sel. */
 const LINGKUP_KHUSUS: Record<string, LingkupMentah[]> = {
-  // GAP §9 no. 8: creator existing = GMV unit MCN − GMV creator besar baru.
+  // Creator existing = GMV unit MCN − GMV creator besar baru (sheet Target &
+  // Kurva WRM: 1.2.2 dan 1.2.1 "ESTIMASI, dicatat setelah binding").
   "1.2.2": [
     { unit: "mcn", jenisGmv: "semua", faktor: 1 },
     { sumberKode: "1.2.1-gmv", faktor: -1 },

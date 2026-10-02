@@ -1,7 +1,8 @@
 -- =====================================================================
 -- K-Space V2 — Goal GRD: ukuran, satuan non-rupiah, tenggat, kurva Sabtu
 --
--- File GRD Oktober 2026 (docs/grd/GAP-GRD-OKTOBER.md §4c, §4e) menuntut
+-- File GRD Oktober 2026 (docs/GRD-OKTOBER-2026.xlsx, sheet GOAL dan
+-- Target & Kurva WRM) menuntut
 -- hal yang belum bisa ditampung goal lama:
 --
 --   * goal bersatuan seller, produk, creator, peserta, tahap, SOP, % —

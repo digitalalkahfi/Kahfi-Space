@@ -21,10 +21,10 @@
  * Pemakaian (dari akar repo):
  *   node --import ./scripts/alias-ts.mjs scripts/impor-grd.mjs
  *   node --import ./scripts/alias-ts.mjs scripts/impor-grd.mjs --terapkan
- *   … --sumber=docs/grd/GOALS-NOVEMBER-2026.xlsx --pemetaan=docs/grd/pemetaan-2026-11.json
+ *   … --sumber=docs/GRD-NOVEMBER-2026.xlsx --pemetaan=docs/grd/pemetaan-2026-11.json
  *
  * File GRD dan berkas pemetaan berisi nama dan angka internal: keduanya
- * hanya disimpan lokal (docs/grd/*.xlsx, docs/grd/pemetaan-*.json
+ * hanya disimpan lokal (docs/GRD-*.xlsx, docs/grd/pemetaan-*.json
  * dikecualikan .gitignore). Kredensial dari .env.local, tidak dicetak.
  */
 import fs from "node:fs";
@@ -48,7 +48,7 @@ for (const a of process.argv.slice(2)) {
 
 const SUMBER = path.join(
   AKAR,
-  argumen.get("sumber") ?? "docs/grd/GOALS-OKTOBER-2026-revisi_1.xlsx",
+  argumen.get("sumber") ?? "docs/GRD-OKTOBER-2026.xlsx",
 );
 const TERAPKAN = argumen.get("terapkan") === "true";
 

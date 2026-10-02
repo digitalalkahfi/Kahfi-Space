@@ -52,8 +52,9 @@ next-env.d.ts
 supabase/.temp/
 
 # GRD (file Excel internal: GMV, nama, rencana) — repo ini publik, jadi
-# berkasnya hanya disimpan lokal sebagai sumber impor. docs/grd/GAP-*.md
-# dan berkas acuan tes berbentuk JSON tetap dikomit.
+# berkasnya hanya disimpan lokal sebagai sumber impor, mis.
+# docs/GRD-OKTOBER-2026.xlsx. Berkas acuan tes berbentuk JSON tetap dikomit.
+docs/GRD-*.xlsx
 docs/grd/*.xlsx
 # Pemetaan nama/akun untuk impor GRD — berisi nama anggota tim.
 docs/grd/pemetaan-*.json
