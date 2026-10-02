@@ -1,6 +1,7 @@
 {
   "_catatan": "Dihasilkan scripts/acuan-kpi-grd.mjs dari file GRD Oktober 2026 yang dihitung ulang Microsoft Excel. Hanya angka; jangan disunting tangan.",
-  "aplikasi": "Microsoft Macintosh Excel",
+  "sumber": "docs/GRD-OKTOBER-2026.xlsx",
+  "aplikasi": "Microsoft Excel 16.113.3",
   "skenario": {
     "U1": "tepat di ambang kolom",
     "U2": "sedikit di bawah ambang kolom",
@@ -170,7 +171,7 @@
     {
       "skenario": "U1",
       "sel": "U1 KPI Leader!A13",
-      "nilai": 540,
+      "nilai": 535,
       "predikat": "Cukup",
       "indikator": [
         {
@@ -188,10 +189,10 @@
             1.05,
             1.1
           ],
-          "bobot": 35,
+          "bobot": 45,
           "pencapaian": 0.9,
           "value": 5,
-          "total": 175
+          "total": 225
         },
         {
           "sel": "U1 KPI Leader!B18",
@@ -208,10 +209,10 @@
             1,
             1
           ],
-          "bobot": 20,
+          "bobot": 25,
           "pencapaian": 1,
           "value": 10,
-          "total": 200
+          "total": 250
         },
         {
           "sel": "U1 KPI Leader!B19",
@@ -228,10 +229,10 @@
             1.05,
             1.1
           ],
-          "bobot": 15,
+          "bobot": 20,
           "pencapaian": 0.4,
           "value": 1,
-          "total": 15
+          "total": 20
         },
         {
           "sel": "U1 KPI Leader!B20",
@@ -248,41 +249,21 @@
             1,
             1
           ],
-          "bobot": 20,
+          "bobot": 10,
           "pencapaian": 0.8,
           "value": 4,
-          "total": 80
-        },
-        {
-          "sel": "U1 KPI Leader!B21",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 10,
-          "pencapaian": 0.95,
-          "value": 7,
-          "total": 70
+          "total": 40
         }
       ]
     },
     {
       "skenario": "U1",
-      "sel": "U1 KPI Leader!A26",
-      "nilai": 690,
+      "sel": "U1 KPI Leader!A25",
+      "nilai": 675,
       "predikat": "Baik",
       "indikator": [
         {
-          "sel": "U1 KPI Leader!B30",
+          "sel": "U1 KPI Leader!B29",
           "persen": false,
           "tangga": [
             11.5,
@@ -297,12 +278,12 @@
             17
           ],
           "bobot": 30,
-          "pencapaian": 17,
-          "value": 10,
-          "total": 300
+          "pencapaian": 14.5,
+          "value": 7,
+          "total": 210
         },
         {
-          "sel": "U1 KPI Leader!B31",
+          "sel": "U1 KPI Leader!B30",
           "persen": false,
           "tangga": [
             3,
@@ -317,12 +298,12 @@
             13
           ],
           "bobot": 30,
-          "pencapaian": 5,
-          "value": 3,
-          "total": 90
+          "pencapaian": 13,
+          "value": 10,
+          "total": 300
         },
         {
-          "sel": "U1 KPI Leader!B32",
+          "sel": "U1 KPI Leader!B31",
           "persen": true,
           "tangga": [
             0.5,
@@ -337,12 +318,12 @@
             1
           ],
           "bobot": 25,
-          "pencapaian": 0.85,
-          "value": 6,
-          "total": 150
+          "pencapaian": 0.7,
+          "value": 3,
+          "total": 75
         },
         {
-          "sel": "U1 KPI Leader!B33",
+          "sel": "U1 KPI Leader!B32",
           "persen": true,
           "tangga": [
             0.55,
@@ -357,20 +338,20 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 150
+          "pencapaian": 0.95,
+          "value": 6,
+          "total": 90
         }
       ]
     },
     {
       "skenario": "U1",
-      "sel": "U1 KPI Leader!A38",
-      "nilai": 400,
-      "predikat": "Perlu Perbaikan",
+      "sel": "U1 KPI Leader!A37",
+      "nilai": 580,
+      "predikat": "Cukup",
       "indikator": [
         {
-          "sel": "U1 KPI Leader!B42",
+          "sel": "U1 KPI Leader!B41",
           "persen": true,
           "tangga": [
             0.7,
@@ -385,12 +366,12 @@
             1.1
           ],
           "bobot": 30,
-          "pencapaian": 0.75,
-          "value": 2,
-          "total": 60
+          "pencapaian": 1.05,
+          "value": 9,
+          "total": 270
         },
         {
-          "sel": "U1 KPI Leader!B43",
+          "sel": "U1 KPI Leader!B42",
           "persen": false,
           "tangga": [
             3.5,
@@ -405,12 +386,12 @@
             9
           ],
           "bobot": 20,
-          "pencapaian": 5.5,
-          "value": 5,
-          "total": 100
+          "pencapaian": 4,
+          "value": 2,
+          "total": 40
         },
         {
-          "sel": "U1 KPI Leader!B44",
+          "sel": "U1 KPI Leader!B43",
           "persen": false,
           "tangga": [
             15,
@@ -425,12 +406,12 @@
             55
           ],
           "bobot": 10,
-          "pencapaian": 50,
-          "value": 8,
-          "total": 80
+          "pencapaian": 35,
+          "value": 5,
+          "total": 50
         },
         {
-          "sel": "U1 KPI Leader!B45",
+          "sel": "U1 KPI Leader!B44",
           "persen": true,
           "tangga": [
             0.4,
@@ -445,12 +426,12 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 0.4,
-          "value": 1,
-          "total": 15
+          "pencapaian": 1,
+          "value": 10,
+          "total": 150
         },
         {
-          "sel": "U1 KPI Leader!B46",
+          "sel": "U1 KPI Leader!B45",
           "persen": true,
           "tangga": [
             0.55,
@@ -465,12 +446,12 @@
             1
           ],
           "bobot": 10,
-          "pencapaian": 0.85,
-          "value": 4,
-          "total": 40
+          "pencapaian": 0.55,
+          "value": 1,
+          "total": 10
         },
         {
-          "sel": "U1 KPI Leader!B47",
+          "sel": "U1 KPI Leader!B46",
           "persen": true,
           "tangga": [
             0.4,
@@ -485,20 +466,20 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 0.95,
-          "value": 7,
-          "total": 105
+          "pencapaian": 0.8,
+          "value": 4,
+          "total": 60
         }
       ]
     },
     {
       "skenario": "U1",
-      "sel": "U1 KPI Leader!A52",
-      "nilai": 760,
-      "predikat": "Baik",
+      "sel": "U1 KPI Leader!A51",
+      "nilai": 640,
+      "predikat": "Cukup",
       "indikator": [
         {
-          "sel": "U1 KPI Leader!B56",
+          "sel": "U1 KPI Leader!B55",
           "persen": false,
           "tangga": [
             147.5,
@@ -513,12 +494,12 @@
             220
           ],
           "bobot": 35,
-          "pencapaian": 220,
-          "value": 10,
-          "total": 350
+          "pencapaian": 192.5,
+          "value": 7,
+          "total": 245
         },
         {
-          "sel": "U1 KPI Leader!B57",
+          "sel": "U1 KPI Leader!B56",
           "persen": false,
           "tangga": [
             221.25,
@@ -533,9 +514,29 @@
             330
           ],
           "bobot": 20,
-          "pencapaian": 243.75,
+          "pencapaian": 330,
+          "value": 10,
+          "total": 200
+        },
+        {
+          "sel": "U1 KPI Leader!B57",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 25,
+          "pencapaian": 0.6,
           "value": 3,
-          "total": 60
+          "total": 75
         },
         {
           "sel": "U1 KPI Leader!B58",
@@ -552,38 +553,18 @@
             1,
             1
           ],
-          "bobot": 25,
+          "bobot": 20,
           "pencapaian": 0.9,
           "value": 6,
-          "total": 150
-        },
-        {
-          "sel": "U1 KPI Leader!B59",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 200
+          "total": 120
         }
       ]
     },
     {
       "skenario": "U1",
       "sel": "U1 KPI Tim!A1",
-      "nilai": 430,
-      "predikat": "Perlu Perbaikan",
+      "nilai": 560,
+      "predikat": "Cukup",
       "indikator": [
         {
           "sel": "U1 KPI Tim!B5",
@@ -601,9 +582,9 @@
             1.1
           ],
           "bobot": 25,
-          "pencapaian": 0.75,
-          "value": 2,
-          "total": 50
+          "pencapaian": 1.05,
+          "value": 9,
+          "total": 225
         },
         {
           "sel": "U1 KPI Tim!B6",
@@ -621,9 +602,9 @@
             1.2
           ],
           "bobot": 15,
-          "pencapaian": 0.625,
-          "value": 5,
-          "total": 75
+          "pencapaian": 0.25,
+          "value": 2,
+          "total": 30
         },
         {
           "sel": "U1 KPI Tim!B7",
@@ -641,12 +622,32 @@
             1.1
           ],
           "bobot": 20,
-          "pencapaian": 1,
-          "value": 8,
-          "total": 160
+          "pencapaian": 0.9,
+          "value": 5,
+          "total": 100
         },
         {
           "sel": "U1 KPI Tim!B8",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 15,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 150
+        },
+        {
+          "sel": "U1 KPI Tim!B9",
           "persen": true,
           "tangga": [
             0.4,
@@ -666,26 +667,6 @@
           "total": 15
         },
         {
-          "sel": "U1 KPI Tim!B9",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 15,
-          "pencapaian": 0.8,
-          "value": 4,
-          "total": 60
-        },
-        {
           "sel": "U1 KPI Tim!B10",
           "persen": true,
           "tangga": [
@@ -701,20 +682,40 @@
             1
           ],
           "bobot": 10,
-          "pencapaian": 0.95,
-          "value": 7,
-          "total": 70
+          "pencapaian": 0.8,
+          "value": 4,
+          "total": 40
         }
       ]
     },
     {
       "skenario": "U1",
       "sel": "U1 KPI Tim!A15",
-      "nilai": 575,
-      "predikat": "Cukup",
+      "nilai": 745,
+      "predikat": "Baik",
       "indikator": [
         {
           "sel": "U1 KPI Tim!B19",
+          "persen": true,
+          "tangga": [
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1.05,
+            1.1
+          ],
+          "bobot": 25,
+          "pencapaian": 0.98,
+          "value": 7,
+          "total": 175
+        },
+        {
+          "sel": "U1 KPI Tim!B20",
           "persen": true,
           "tangga": [
             0.7,
@@ -734,26 +735,6 @@
           "total": 250
         },
         {
-          "sel": "U1 KPI Tim!B20",
-          "persen": true,
-          "tangga": [
-            0.7,
-            0.75,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1.05,
-            1.1
-          ],
-          "bobot": 25,
-          "pencapaian": 0.8,
-          "value": 3,
-          "total": 75
-        },
-        {
           "sel": "U1 KPI Tim!B21",
           "persen": true,
           "tangga": [
@@ -769,9 +750,9 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": 0.9,
-          "value": 6,
-          "total": 120
+          "pencapaian": 0.6,
+          "value": 3,
+          "total": 60
         },
         {
           "sel": "U1 KPI Tim!B22",
@@ -789,9 +770,9 @@
             22
           ],
           "bobot": 10,
-          "pencapaian": 21,
-          "value": 9,
-          "total": 90
+          "pencapaian": 19,
+          "value": 6,
+          "total": 60
         },
         {
           "sel": "U1 KPI Tim!B23",
@@ -809,17 +790,17 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": 0.5,
-          "value": 2,
-          "total": 40
+          "pencapaian": 1,
+          "value": 10,
+          "total": 200
         }
       ]
     },
     {
       "skenario": "U1",
       "sel": "U1 KPI Tim!A28",
-      "nilai": 560,
-      "predikat": "Cukup",
+      "nilai": 440,
+      "predikat": "Perlu Perbaikan",
       "indikator": [
         {
           "sel": "U1 KPI Tim!B32",
@@ -837,9 +818,9 @@
             1.1
           ],
           "bobot": 40,
-          "pencapaian": 0.9,
-          "value": 5,
-          "total": 200
+          "pencapaian": 0.75,
+          "value": 2,
+          "total": 80
         },
         {
           "sel": "U1 KPI Tim!B33",
@@ -857,9 +838,9 @@
             1
           ],
           "bobot": 30,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 300
+          "pencapaian": 0.85,
+          "value": 5,
+          "total": 150
         },
         {
           "sel": "U1 KPI Tim!B34",
@@ -877,9 +858,9 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": 0.4,
-          "value": 1,
-          "total": 20
+          "pencapaian": 1,
+          "value": 10,
+          "total": 200
         },
         {
           "sel": "U1 KPI Tim!B35",
@@ -897,9 +878,9 @@
             1
           ],
           "bobot": 10,
-          "pencapaian": 0.85,
-          "value": 4,
-          "total": 40
+          "pencapaian": 0.55,
+          "value": 1,
+          "total": 10
         }
       ]
     },
@@ -925,9 +906,9 @@
             12
           ],
           "bobot": 35,
-          "pencapaian": 9.5,
-          "value": 7,
-          "total": 245
+          "pencapaian": 8,
+          "value": 4,
+          "total": 140
         },
         {
           "sel": "U1 KPI Tim!B45",
@@ -945,9 +926,9 @@
             1
           ],
           "bobot": 35,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 350
+          "pencapaian": 0.98,
+          "value": 7,
+          "total": 245
         },
         {
           "sel": "U1 KPI Tim!B46",
@@ -965,17 +946,17 @@
             1
           ],
           "bobot": 30,
-          "pencapaian": 0.6,
-          "value": 3,
-          "total": 90
+          "pencapaian": 1,
+          "value": 10,
+          "total": 300
         }
       ]
     },
     {
       "skenario": "U1",
       "sel": "U1 KPI Tim!A51",
-      "nilai": 680,
-      "predikat": "Baik",
+      "nilai": 505,
+      "predikat": "Cukup",
       "indikator": [
         {
           "sel": "U1 KPI Tim!B55",
@@ -993,9 +974,9 @@
             90
           ],
           "bobot": 25,
-          "pencapaian": 74,
-          "value": 6,
-          "total": 150
+          "pencapaian": 65,
+          "value": 3,
+          "total": 75
         },
         {
           "sel": "U1 KPI Tim!B56",
@@ -1013,12 +994,32 @@
             55
           ],
           "bobot": 25,
-          "pencapaian": 52.5,
-          "value": 9,
-          "total": 225
+          "pencapaian": 40,
+          "value": 6,
+          "total": 150
         },
         {
           "sel": "U1 KPI Tim!B57",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 15,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 150
+        },
+        {
+          "sel": "U1 KPI Tim!B58",
           "persen": true,
           "tangga": [
             0.55,
@@ -1038,26 +1039,6 @@
           "total": 30
         },
         {
-          "sel": "U1 KPI Tim!B58",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 15,
-          "pencapaian": 0.9,
-          "value": 5,
-          "total": 75
-        },
-        {
           "sel": "U1 KPI Tim!B59",
           "persen": true,
           "tangga": [
@@ -1073,17 +1054,17 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 200
+          "pencapaian": 0.85,
+          "value": 5,
+          "total": 100
         }
       ]
     },
     {
       "skenario": "U1",
       "sel": "U1 KPI Tim!A64",
-      "nilai": 445,
-      "predikat": "Perlu Perbaikan",
+      "nilai": 625,
+      "predikat": "Cukup",
       "indikator": [
         {
           "sel": "U1 KPI Tim!B68",
@@ -1101,9 +1082,9 @@
             4
           ],
           "bobot": 40,
-          "pencapaian": 2.25,
-          "value": 1,
-          "total": 40
+          "pencapaian": 4,
+          "value": 10,
+          "total": 400
         },
         {
           "sel": "U1 KPI Tim!B69",
@@ -1121,9 +1102,9 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": 0.8,
-          "value": 4,
-          "total": 80
+          "pencapaian": 0.4,
+          "value": 1,
+          "total": 20
         },
         {
           "sel": "U1 KPI Tim!B70",
@@ -1141,9 +1122,9 @@
             1
           ],
           "bobot": 25,
-          "pencapaian": 0.98,
-          "value": 7,
-          "total": 175
+          "pencapaian": 0.85,
+          "value": 4,
+          "total": 100
         },
         {
           "sel": "U1 KPI Tim!B71",
@@ -1161,17 +1142,17 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 150
+          "pencapaian": 0.95,
+          "value": 7,
+          "total": 105
         }
       ]
     },
     {
       "skenario": "U1",
       "sel": "U1 KPI Tim!A76",
-      "nilai": 530,
-      "predikat": "Cukup",
+      "nilai": 725,
+      "predikat": "Baik",
       "indikator": [
         {
           "sel": "U1 KPI Tim!B80",
@@ -1189,12 +1170,32 @@
             1
           ],
           "bobot": 30,
-          "pencapaian": 0.6,
-          "value": 3,
-          "total": 90
+          "pencapaian": 1,
+          "value": 10,
+          "total": 300
         },
         {
           "sel": "U1 KPI Tim!B81",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 25,
+          "pencapaian": 0.75,
+          "value": 3,
+          "total": 75
+        },
+        {
+          "sel": "U1 KPI Tim!B82",
           "persen": true,
           "tangga": [
             0.55,
@@ -1214,26 +1215,6 @@
           "total": 150
         },
         {
-          "sel": "U1 KPI Tim!B82",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 25,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 250
-        },
-        {
           "sel": "U1 KPI Tim!B83",
           "persen": true,
           "tangga": [
@@ -1249,17 +1230,17 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": 0.5,
-          "value": 2,
-          "total": 40
+          "pencapaian": 1,
+          "value": 10,
+          "total": 200
         }
       ]
     },
     {
       "skenario": "U1",
       "sel": "U1 KPI Tim!A89",
-      "nilai": 620,
-      "predikat": "Cukup",
+      "nilai": 480,
+      "predikat": "Perlu Perbaikan",
       "indikator": [
         {
           "sel": "U1 KPI Tim!B93",
@@ -1277,9 +1258,9 @@
             1.1
           ],
           "bobot": 40,
-          "pencapaian": 0.9,
-          "value": 5,
-          "total": 200
+          "pencapaian": 0.75,
+          "value": 2,
+          "total": 80
         },
         {
           "sel": "U1 KPI Tim!B94",
@@ -1297,80 +1278,12 @@
             1
           ],
           "bobot": 40,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 400
+          "pencapaian": 0.85,
+          "value": 5,
+          "total": 200
         },
         {
           "sel": "U1 KPI Tim!B95",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 0.55,
-          "value": 1,
-          "total": 20
-        }
-      ]
-    },
-    {
-      "skenario": "U1",
-      "sel": "U1 KPI Tim!A111",
-      "nilai": 640,
-      "predikat": "Cukup",
-      "indikator": [
-        {
-          "sel": "U1 KPI Tim!B115",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 40,
-          "pencapaian": 0.8,
-          "value": 4,
-          "total": 160
-        },
-        {
-          "sel": "U1 KPI Tim!B116",
-          "persen": true,
-          "tangga": [
-            0.125,
-            0.25,
-            0.375,
-            0.5,
-            0.625,
-            0.75,
-            0.875,
-            1,
-            1.1,
-            1.2
-          ],
-          "bobot": 40,
-          "pencapaian": 0.875,
-          "value": 7,
-          "total": 280
-        },
-        {
-          "sel": "U1 KPI Tim!B117",
           "persen": true,
           "tangga": [
             0.55,
@@ -1393,9 +1306,77 @@
     },
     {
       "skenario": "U1",
+      "sel": "U1 KPI Tim!A111",
+      "nilai": 340,
+      "predikat": "Perlu Perbaikan",
+      "indikator": [
+        {
+          "sel": "U1 KPI Tim!B115",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 40,
+          "pencapaian": 0.4,
+          "value": 1,
+          "total": 40
+        },
+        {
+          "sel": "U1 KPI Tim!B116",
+          "persen": true,
+          "tangga": [
+            0.125,
+            0.25,
+            0.375,
+            0.5,
+            0.625,
+            0.75,
+            0.875,
+            1,
+            1.1,
+            1.2
+          ],
+          "bobot": 40,
+          "pencapaian": 0.5,
+          "value": 4,
+          "total": 160
+        },
+        {
+          "sel": "U1 KPI Tim!B117",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 20,
+          "pencapaian": 0.98,
+          "value": 7,
+          "total": 140
+        }
+      ]
+    },
+    {
+      "skenario": "U1",
       "sel": "U1 KPI Tim!A123",
-      "nilai": 500,
-      "predikat": "Cukup",
+      "nilai": 710,
+      "predikat": "Baik",
       "indikator": [
         {
           "sel": "U1 KPI Tim!B127",
@@ -1413,9 +1394,9 @@
             1.1
           ],
           "bobot": 40,
-          "pencapaian": 0.8,
-          "value": 3,
-          "total": 120
+          "pencapaian": 1.1,
+          "value": 10,
+          "total": 400
         },
         {
           "sel": "U1 KPI Tim!B128",
@@ -1433,9 +1414,9 @@
             1
           ],
           "bobot": 30,
-          "pencapaian": 0.9,
-          "value": 6,
-          "total": 180
+          "pencapaian": 0.6,
+          "value": 3,
+          "total": 90
         },
         {
           "sel": "U1 KPI Tim!B129",
@@ -1453,9 +1434,9 @@
             1.1
           ],
           "bobot": 20,
-          "pencapaian": 1.05,
-          "value": 9,
-          "total": 180
+          "pencapaian": 0.9,
+          "value": 6,
+          "total": 120
         },
         {
           "sel": "U1 KPI Tim!B130",
@@ -1473,9 +1454,9 @@
             1
           ],
           "bobot": 10,
-          "pencapaian": 0.65,
-          "value": 2,
-          "total": 20
+          "pencapaian": 1,
+          "value": 10,
+          "total": 100
         }
       ]
     },
@@ -1638,7 +1619,7 @@
     {
       "skenario": "U2",
       "sel": "U2 KPI Leader!A13",
-      "nilai": 290,
+      "nilai": 265,
       "predikat": "Perlu Perbaikan",
       "indikator": [
         {
@@ -1656,7 +1637,7 @@
             1.05,
             1.1
           ],
-          "bobot": 35,
+          "bobot": 45,
           "pencapaian": 0.6999,
           "value": 0,
           "total": 0
@@ -1676,10 +1657,10 @@
             1,
             1
           ],
-          "bobot": 20,
+          "bobot": 25,
           "pencapaian": 0.9999,
           "value": 7,
-          "total": 140
+          "total": 175
         },
         {
           "sel": "U2 KPI Leader!B19",
@@ -1696,10 +1677,10 @@
             1.05,
             1.1
           ],
-          "bobot": 15,
+          "bobot": 20,
           "pencapaian": 0.8499,
           "value": 4,
-          "total": 60
+          "total": 80
         },
         {
           "sel": "U2 KPI Leader!B20",
@@ -1716,41 +1697,21 @@
             1,
             1
           ],
-          "bobot": 20,
+          "bobot": 10,
           "pencapaian": 0.4999,
           "value": 1,
-          "total": 20
-        },
-        {
-          "sel": "U2 KPI Leader!B21",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 10,
-          "pencapaian": 0.9999,
-          "value": 7,
-          "total": 70
+          "total": 10
         }
       ]
     },
     {
       "skenario": "U2",
-      "sel": "U2 KPI Leader!A26",
-      "nilai": 525,
+      "sel": "U2 KPI Leader!A25",
+      "nilai": 545,
       "predikat": "Cukup",
       "indikator": [
         {
-          "sel": "U2 KPI Leader!B30",
+          "sel": "U2 KPI Leader!B29",
           "persen": false,
           "tangga": [
             11.5,
@@ -1765,12 +1726,12 @@
             17
           ],
           "bobot": 30,
-          "pencapaian": 13.99,
-          "value": 5,
-          "total": 150
+          "pencapaian": 15.99,
+          "value": 8,
+          "total": 240
         },
         {
-          "sel": "U2 KPI Leader!B31",
+          "sel": "U2 KPI Leader!B30",
           "persen": false,
           "tangga": [
             3,
@@ -1785,12 +1746,12 @@
             13
           ],
           "bobot": 30,
-          "pencapaian": 4.99,
-          "value": 2,
-          "total": 60
+          "pencapaian": 7.99,
+          "value": 5,
+          "total": 150
         },
         {
-          "sel": "U2 KPI Leader!B32",
+          "sel": "U2 KPI Leader!B31",
           "persen": true,
           "tangga": [
             0.5,
@@ -1805,12 +1766,12 @@
             1
           ],
           "bobot": 25,
-          "pencapaian": 0.9999,
-          "value": 9,
-          "total": 225
+          "pencapaian": 0.6999,
+          "value": 2,
+          "total": 50
         },
         {
-          "sel": "U2 KPI Leader!B33",
+          "sel": "U2 KPI Leader!B32",
           "persen": true,
           "tangga": [
             0.55,
@@ -1825,20 +1786,20 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 0.9799,
-          "value": 6,
-          "total": 90
+          "pencapaian": 0.9999,
+          "value": 7,
+          "total": 105
         }
       ]
     },
     {
       "skenario": "U2",
-      "sel": "U2 KPI Leader!A38",
-      "nilai": 335,
+      "sel": "U2 KPI Leader!A37",
+      "nilai": 400,
       "predikat": "Perlu Perbaikan",
       "indikator": [
         {
-          "sel": "U2 KPI Leader!B42",
+          "sel": "U2 KPI Leader!B41",
           "persen": true,
           "tangga": [
             0.7,
@@ -1853,12 +1814,12 @@
             1.1
           ],
           "bobot": 30,
-          "pencapaian": 0.8499,
-          "value": 3,
-          "total": 90
+          "pencapaian": 0.9799,
+          "value": 6,
+          "total": 180
         },
         {
-          "sel": "U2 KPI Leader!B43",
+          "sel": "U2 KPI Leader!B42",
           "persen": false,
           "tangga": [
             3.5,
@@ -1873,12 +1834,12 @@
             9
           ],
           "bobot": 20,
-          "pencapaian": 3.49,
-          "value": 0,
-          "total": 0
+          "pencapaian": 4.99,
+          "value": 3,
+          "total": 60
         },
         {
-          "sel": "U2 KPI Leader!B44",
+          "sel": "U2 KPI Leader!B43",
           "persen": false,
           "tangga": [
             15,
@@ -1893,52 +1854,12 @@
             55
           ],
           "bobot": 10,
-          "pencapaian": 49.99,
-          "value": 7,
-          "total": 70
+          "pencapaian": 14.99,
+          "value": 0,
+          "total": 0
         },
         {
-          "sel": "U2 KPI Leader!B45",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 15,
-          "pencapaian": 0.8499,
-          "value": 4,
-          "total": 60
-        },
-        {
-          "sel": "U2 KPI Leader!B46",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 10,
-          "pencapaian": 0.6499,
-          "value": 1,
-          "total": 10
-        },
-        {
-          "sel": "U2 KPI Leader!B47",
+          "sel": "U2 KPI Leader!B44",
           "persen": true,
           "tangga": [
             0.4,
@@ -1956,17 +1877,57 @@
           "pencapaian": 0.9999,
           "value": 7,
           "total": 105
+        },
+        {
+          "sel": "U2 KPI Leader!B45",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 10,
+          "pencapaian": 0.8999,
+          "value": 4,
+          "total": 40
+        },
+        {
+          "sel": "U2 KPI Leader!B46",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 15,
+          "pencapaian": 0.4999,
+          "value": 1,
+          "total": 15
         }
       ]
     },
     {
       "skenario": "U2",
-      "sel": "U2 KPI Leader!A52",
-      "nilai": 510,
+      "sel": "U2 KPI Leader!A51",
+      "nilai": 570,
       "predikat": "Cukup",
       "indikator": [
         {
-          "sel": "U2 KPI Leader!B56",
+          "sel": "U2 KPI Leader!B55",
           "persen": false,
           "tangga": [
             147.5,
@@ -1981,12 +1942,12 @@
             220
           ],
           "bobot": 35,
-          "pencapaian": 184.99,
-          "value": 5,
-          "total": 175
+          "pencapaian": 209.99,
+          "value": 8,
+          "total": 280
         },
         {
-          "sel": "U2 KPI Leader!B57",
+          "sel": "U2 KPI Leader!B56",
           "persen": false,
           "tangga": [
             221.25,
@@ -2001,9 +1962,29 @@
             330
           ],
           "bobot": 20,
-          "pencapaian": 243.74,
+          "pencapaian": 277.49,
+          "value": 5,
+          "total": 100
+        },
+        {
+          "sel": "U2 KPI Leader!B57",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 25,
+          "pencapaian": 0.5999,
           "value": 2,
-          "total": 40
+          "total": 50
         },
         {
           "sel": "U2 KPI Leader!B58",
@@ -2020,37 +2001,17 @@
             1,
             1
           ],
-          "bobot": 25,
+          "bobot": 20,
           "pencapaian": 0.9999,
           "value": 7,
-          "total": 175
-        },
-        {
-          "sel": "U2 KPI Leader!B59",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 0.9499,
-          "value": 6,
-          "total": 120
+          "total": 140
         }
       ]
     },
     {
       "skenario": "U2",
       "sel": "U2 KPI Tim!A1",
-      "nilai": 360,
+      "nilai": 370,
       "predikat": "Perlu Perbaikan",
       "indikator": [
         {
@@ -2069,9 +2030,9 @@
             1.1
           ],
           "bobot": 25,
-          "pencapaian": 0.8499,
-          "value": 3,
-          "total": 75
+          "pencapaian": 0.9799,
+          "value": 6,
+          "total": 150
         },
         {
           "sel": "U2 KPI Tim!B6",
@@ -2089,9 +2050,9 @@
             1.2
           ],
           "bobot": 15,
-          "pencapaian": 0.1249,
-          "value": 0,
-          "total": 0
+          "pencapaian": 0.4999,
+          "value": 3,
+          "total": 45
         },
         {
           "sel": "U2 KPI Tim!B7",
@@ -2109,12 +2070,32 @@
             1.1
           ],
           "bobot": 20,
-          "pencapaian": 0.9999,
-          "value": 7,
-          "total": 140
+          "pencapaian": 0.6999,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U2 KPI Tim!B8",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 15,
+          "pencapaian": 0.9999,
+          "value": 7,
+          "total": 105
+        },
+        {
+          "sel": "U2 KPI Tim!B9",
           "persen": true,
           "tangga": [
             0.4,
@@ -2134,26 +2115,6 @@
           "total": 60
         },
         {
-          "sel": "U2 KPI Tim!B9",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 15,
-          "pencapaian": 0.4999,
-          "value": 1,
-          "total": 15
-        },
-        {
           "sel": "U2 KPI Tim!B10",
           "persen": true,
           "tangga": [
@@ -2169,20 +2130,40 @@
             1
           ],
           "bobot": 10,
-          "pencapaian": 0.9999,
-          "value": 7,
-          "total": 70
+          "pencapaian": 0.4999,
+          "value": 1,
+          "total": 10
         }
       ]
     },
     {
       "skenario": "U2",
       "sel": "U2 KPI Tim!A15",
-      "nilai": 435,
-      "predikat": "Perlu Perbaikan",
+      "nilai": 575,
+      "predikat": "Cukup",
       "indikator": [
         {
           "sel": "U2 KPI Tim!B19",
+          "persen": true,
+          "tangga": [
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1.05,
+            1.1
+          ],
+          "bobot": 25,
+          "pencapaian": 1.0499,
+          "value": 8,
+          "total": 200
+        },
+        {
+          "sel": "U2 KPI Tim!B20",
           "persen": true,
           "tangga": [
             0.7,
@@ -2202,26 +2183,6 @@
           "total": 125
         },
         {
-          "sel": "U2 KPI Tim!B20",
-          "persen": true,
-          "tangga": [
-            0.7,
-            0.75,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1.05,
-            1.1
-          ],
-          "bobot": 25,
-          "pencapaian": 0.7999,
-          "value": 2,
-          "total": 50
-        },
-        {
           "sel": "U2 KPI Tim!B21",
           "persen": true,
           "tangga": [
@@ -2237,9 +2198,9 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": 0.9999,
-          "value": 7,
-          "total": 140
+          "pencapaian": 0.5999,
+          "value": 2,
+          "total": 40
         },
         {
           "sel": "U2 KPI Tim!B22",
@@ -2257,9 +2218,9 @@
             22
           ],
           "bobot": 10,
-          "pencapaian": 19.49,
-          "value": 6,
-          "total": 60
+          "pencapaian": 21.99,
+          "value": 9,
+          "total": 90
         },
         {
           "sel": "U2 KPI Tim!B23",
@@ -2277,9 +2238,9 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": 0.7999,
-          "value": 3,
-          "total": 60
+          "pencapaian": 0.9499,
+          "value": 6,
+          "total": 120
         }
       ]
     },
@@ -2305,9 +2266,9 @@
             1.1
           ],
           "bobot": 40,
-          "pencapaian": 0.6999,
-          "value": 0,
-          "total": 0
+          "pencapaian": 0.8499,
+          "value": 3,
+          "total": 120
         },
         {
           "sel": "U2 KPI Tim!B33",
@@ -2325,9 +2286,9 @@
             1
           ],
           "bobot": 30,
-          "pencapaian": 0.9999,
-          "value": 7,
-          "total": 210
+          "pencapaian": 0.3999,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U2 KPI Tim!B34",
@@ -2345,9 +2306,9 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": 0.8499,
-          "value": 4,
-          "total": 80
+          "pencapaian": 0.9999,
+          "value": 7,
+          "total": 140
         },
         {
           "sel": "U2 KPI Tim!B35",
@@ -2365,17 +2326,17 @@
             1
           ],
           "bobot": 10,
-          "pencapaian": 0.6499,
-          "value": 1,
-          "total": 10
+          "pencapaian": 0.8999,
+          "value": 4,
+          "total": 40
         }
       ]
     },
     {
       "skenario": "U2",
       "sel": "U2 KPI Tim!A40",
-      "nilai": 515,
-      "predikat": "Cukup",
+      "nilai": 430,
+      "predikat": "Perlu Perbaikan",
       "indikator": [
         {
           "sel": "U2 KPI Tim!B44",
@@ -2393,9 +2354,9 @@
             12
           ],
           "bobot": 35,
-          "pencapaian": 10.99,
-          "value": 8,
-          "total": 280
+          "pencapaian": 6.99,
+          "value": 1,
+          "total": 35
         },
         {
           "sel": "U2 KPI Tim!B45",
@@ -2413,9 +2374,9 @@
             1
           ],
           "bobot": 35,
-          "pencapaian": 0.9499,
-          "value": 5,
-          "total": 175
+          "pencapaian": 0.9999,
+          "value": 7,
+          "total": 245
         },
         {
           "sel": "U2 KPI Tim!B46",
@@ -2433,17 +2394,17 @@
             1
           ],
           "bobot": 30,
-          "pencapaian": 0.5999,
-          "value": 2,
-          "total": 60
+          "pencapaian": 0.8999,
+          "value": 5,
+          "total": 150
         }
       ]
     },
     {
       "skenario": "U2",
       "sel": "U2 KPI Tim!A51",
-      "nilai": 560,
-      "predikat": "Cukup",
+      "nilai": 410,
+      "predikat": "Perlu Perbaikan",
       "indikator": [
         {
           "sel": "U2 KPI Tim!B55",
@@ -2461,9 +2422,9 @@
             90
           ],
           "bobot": 25,
-          "pencapaian": 89.99,
-          "value": 9,
-          "total": 225
+          "pencapaian": 64.99,
+          "value": 2,
+          "total": 50
         },
         {
           "sel": "U2 KPI Tim!B56",
@@ -2481,12 +2442,32 @@
             55
           ],
           "bobot": 25,
-          "pencapaian": 44.99,
-          "value": 6,
-          "total": 150
+          "pencapaian": 54.99,
+          "value": 9,
+          "total": 225
         },
         {
           "sel": "U2 KPI Tim!B57",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 15,
+          "pencapaian": 0.9799,
+          "value": 6,
+          "total": 90
+        },
+        {
+          "sel": "U2 KPI Tim!B58",
           "persen": true,
           "tangga": [
             0.55,
@@ -2506,26 +2487,6 @@
           "total": 45
         },
         {
-          "sel": "U2 KPI Tim!B58",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 15,
-          "pencapaian": 0.5499,
-          "value": 0,
-          "total": 0
-        },
-        {
           "sel": "U2 KPI Tim!B59",
           "persen": true,
           "tangga": [
@@ -2541,16 +2502,16 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": 0.9999,
-          "value": 7,
-          "total": 140
+          "pencapaian": 0.3999,
+          "value": 0,
+          "total": 0
         }
       ]
     },
     {
       "skenario": "U2",
       "sel": "U2 KPI Tim!A64",
-      "nilai": 430,
+      "nilai": 490,
       "predikat": "Perlu Perbaikan",
       "indikator": [
         {
@@ -2569,9 +2530,9 @@
             4
           ],
           "bobot": 40,
-          "pencapaian": 3.24,
-          "value": 4,
-          "total": 160
+          "pencapaian": 3.99,
+          "value": 7,
+          "total": 280
         },
         {
           "sel": "U2 KPI Tim!B69",
@@ -2589,12 +2550,100 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": 0.4999,
-          "value": 1,
-          "total": 20
+          "pencapaian": 0.8499,
+          "value": 4,
+          "total": 80
         },
         {
           "sel": "U2 KPI Tim!B70",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 25,
+          "pencapaian": 0.6499,
+          "value": 1,
+          "total": 25
+        },
+        {
+          "sel": "U2 KPI Tim!B71",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 15,
+          "pencapaian": 0.9999,
+          "value": 7,
+          "total": 105
+        }
+      ]
+    },
+    {
+      "skenario": "U2",
+      "sel": "U2 KPI Tim!A76",
+      "nilai": 495,
+      "predikat": "Perlu Perbaikan",
+      "indikator": [
+        {
+          "sel": "U2 KPI Tim!B80",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 30,
+          "pencapaian": 0.8999,
+          "value": 5,
+          "total": 150
+        },
+        {
+          "sel": "U2 KPI Tim!B81",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 25,
+          "pencapaian": 0.7499,
+          "value": 2,
+          "total": 50
+        },
+        {
+          "sel": "U2 KPI Tim!B82",
           "persen": true,
           "tangga": [
             0.55,
@@ -2614,7 +2663,7 @@
           "total": 175
         },
         {
-          "sel": "U2 KPI Tim!B71",
+          "sel": "U2 KPI Tim!B83",
           "persen": true,
           "tangga": [
             0.4,
@@ -2628,21 +2677,177 @@
             1,
             1
           ],
-          "bobot": 15,
-          "pencapaian": 0.8999,
-          "value": 5,
-          "total": 75
+          "bobot": 20,
+          "pencapaian": 0.9499,
+          "value": 6,
+          "total": 120
         }
       ]
     },
     {
       "skenario": "U2",
-      "sel": "U2 KPI Tim!A76",
-      "nilai": 445,
+      "sel": "U2 KPI Tim!A89",
+      "nilai": 260,
       "predikat": "Perlu Perbaikan",
       "indikator": [
         {
-          "sel": "U2 KPI Tim!B80",
+          "sel": "U2 KPI Tim!B93",
+          "persen": true,
+          "tangga": [
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1.05,
+            1.1
+          ],
+          "bobot": 40,
+          "pencapaian": 0.8499,
+          "value": 3,
+          "total": 120
+        },
+        {
+          "sel": "U2 KPI Tim!B94",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 40,
+          "pencapaian": 0.3999,
+          "value": 0,
+          "total": 0
+        },
+        {
+          "sel": "U2 KPI Tim!B95",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 20,
+          "pencapaian": 0.9999,
+          "value": 7,
+          "total": 140
+        }
+      ]
+    },
+    {
+      "skenario": "U2",
+      "sel": "U2 KPI Tim!A111",
+      "nilai": 340,
+      "predikat": "Perlu Perbaikan",
+      "indikator": [
+        {
+          "sel": "U2 KPI Tim!B115",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 40,
+          "pencapaian": 0.8499,
+          "value": 4,
+          "total": 160
+        },
+        {
+          "sel": "U2 KPI Tim!B116",
+          "persen": true,
+          "tangga": [
+            0.125,
+            0.25,
+            0.375,
+            0.5,
+            0.625,
+            0.75,
+            0.875,
+            1,
+            1.1,
+            1.2
+          ],
+          "bobot": 40,
+          "pencapaian": 0.2499,
+          "value": 1,
+          "total": 40
+        },
+        {
+          "sel": "U2 KPI Tim!B117",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 20,
+          "pencapaian": 0.9999,
+          "value": 7,
+          "total": 140
+        }
+      ]
+    },
+    {
+      "skenario": "U2",
+      "sel": "U2 KPI Tim!A123",
+      "nilai": 500,
+      "predikat": "Cukup",
+      "indikator": [
+        {
+          "sel": "U2 KPI Tim!B127",
+          "persen": true,
+          "tangga": [
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1.05,
+            1.1
+          ],
+          "bobot": 40,
+          "pencapaian": 0.9499,
+          "value": 5,
+          "total": 200
+        },
+        {
+          "sel": "U2 KPI Tim!B128",
           "persen": true,
           "tangga": [
             0.4,
@@ -2662,250 +2867,6 @@
           "total": 60
         },
         {
-          "sel": "U2 KPI Tim!B81",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 25,
-          "pencapaian": 0.9999,
-          "value": 7,
-          "total": 175
-        },
-        {
-          "sel": "U2 KPI Tim!B82",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 25,
-          "pencapaian": 0.9799,
-          "value": 6,
-          "total": 150
-        },
-        {
-          "sel": "U2 KPI Tim!B83",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 0.7999,
-          "value": 3,
-          "total": 60
-        }
-      ]
-    },
-    {
-      "skenario": "U2",
-      "sel": "U2 KPI Tim!A89",
-      "nilai": 360,
-      "predikat": "Perlu Perbaikan",
-      "indikator": [
-        {
-          "sel": "U2 KPI Tim!B93",
-          "persen": true,
-          "tangga": [
-            0.7,
-            0.75,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1.05,
-            1.1
-          ],
-          "bobot": 40,
-          "pencapaian": 0.6999,
-          "value": 0,
-          "total": 0
-        },
-        {
-          "sel": "U2 KPI Tim!B94",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 40,
-          "pencapaian": 0.9999,
-          "value": 7,
-          "total": 280
-        },
-        {
-          "sel": "U2 KPI Tim!B95",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 0.8999,
-          "value": 4,
-          "total": 80
-        }
-      ]
-    },
-    {
-      "skenario": "U2",
-      "sel": "U2 KPI Tim!A111",
-      "nilai": 460,
-      "predikat": "Perlu Perbaikan",
-      "indikator": [
-        {
-          "sel": "U2 KPI Tim!B115",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 40,
-          "pencapaian": 0.4999,
-          "value": 1,
-          "total": 40
-        },
-        {
-          "sel": "U2 KPI Tim!B116",
-          "persen": true,
-          "tangga": [
-            0.125,
-            0.25,
-            0.375,
-            0.5,
-            0.625,
-            0.75,
-            0.875,
-            1,
-            1.1,
-            1.2
-          ],
-          "bobot": 40,
-          "pencapaian": 1.0999,
-          "value": 8,
-          "total": 320
-        },
-        {
-          "sel": "U2 KPI Tim!B117",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 0.9499,
-          "value": 5,
-          "total": 100
-        }
-      ]
-    },
-    {
-      "skenario": "U2",
-      "sel": "U2 KPI Tim!A123",
-      "nilai": 440,
-      "predikat": "Perlu Perbaikan",
-      "indikator": [
-        {
-          "sel": "U2 KPI Tim!B127",
-          "persen": true,
-          "tangga": [
-            0.7,
-            0.75,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1.05,
-            1.1
-          ],
-          "bobot": 40,
-          "pencapaian": 0.7999,
-          "value": 2,
-          "total": 80
-        },
-        {
-          "sel": "U2 KPI Tim!B128",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 30,
-          "pencapaian": 0.9999,
-          "value": 7,
-          "total": 210
-        },
-        {
           "sel": "U2 KPI Tim!B129",
           "persen": true,
           "tangga": [
@@ -2921,9 +2882,9 @@
             1.1
           ],
           "bobot": 20,
-          "pencapaian": 0.9499,
-          "value": 6,
-          "total": 120
+          "pencapaian": 1.0999,
+          "value": 9,
+          "total": 180
         },
         {
           "sel": "U2 KPI Tim!B130",
@@ -2941,9 +2902,9 @@
             1
           ],
           "bobot": 10,
-          "pencapaian": 0.8499,
-          "value": 3,
-          "total": 30
+          "pencapaian": 0.9799,
+          "value": 6,
+          "total": 60
         }
       ]
     },
@@ -3106,7 +3067,7 @@
     {
       "skenario": "U3",
       "sel": "U3 KPI Leader!A13",
-      "nilai": 570,
+      "nilai": 610,
       "predikat": "Cukup",
       "indikator": [
         {
@@ -3124,10 +3085,10 @@
             1.05,
             1.1
           ],
-          "bobot": 35,
+          "bobot": 45,
           "pencapaian": 1.075,
           "value": 9,
-          "total": 315
+          "total": 405
         },
         {
           "sel": "U3 KPI Leader!B18",
@@ -3144,10 +3105,10 @@
             1,
             1
           ],
-          "bobot": 20,
+          "bobot": 25,
           "pencapaian": 0.875,
           "value": 5,
-          "total": 100
+          "total": 125
         },
         {
           "sel": "U3 KPI Leader!B19",
@@ -3164,10 +3125,10 @@
             1.05,
             1.1
           ],
-          "bobot": 15,
+          "bobot": 20,
           "pencapaian": 0.45,
           "value": 1,
-          "total": 15
+          "total": 20
         },
         {
           "sel": "U3 KPI Leader!B20",
@@ -3184,41 +3145,21 @@
             1,
             1
           ],
-          "bobot": 20,
+          "bobot": 10,
           "pencapaian": 0.925,
           "value": 6,
-          "total": 120
-        },
-        {
-          "sel": "U3 KPI Leader!B21",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 10,
-          "pencapaian": 0.55,
-          "value": 2,
-          "total": 20
+          "total": 60
         }
       ]
     },
     {
       "skenario": "U3",
-      "sel": "U3 KPI Leader!A26",
-      "nilai": 560,
-      "predikat": "Cukup",
+      "sel": "U3 KPI Leader!A25",
+      "nilai": 495,
+      "predikat": "Perlu Perbaikan",
       "indikator": [
         {
-          "sel": "U3 KPI Leader!B30",
+          "sel": "U3 KPI Leader!B29",
           "persen": false,
           "tangga": [
             11.5,
@@ -3233,12 +3174,12 @@
             17
           ],
           "bobot": 30,
-          "pencapaian": 14.75,
-          "value": 7,
-          "total": 210
+          "pencapaian": 12.25,
+          "value": 2,
+          "total": 60
         },
         {
-          "sel": "U3 KPI Leader!B31",
+          "sel": "U3 KPI Leader!B30",
           "persen": false,
           "tangga": [
             3,
@@ -3253,12 +3194,12 @@
             13
           ],
           "bobot": 30,
-          "pencapaian": 5.5,
-          "value": 3,
-          "total": 90
+          "pencapaian": 9.5,
+          "value": 7,
+          "total": 210
         },
         {
-          "sel": "U3 KPI Leader!B32",
+          "sel": "U3 KPI Leader!B31",
           "persen": true,
           "tangga": [
             0.5,
@@ -3273,12 +3214,12 @@
             1
           ],
           "bobot": 25,
-          "pencapaian": 0.925,
-          "value": 8,
-          "total": 200
+          "pencapaian": 0.75,
+          "value": 3,
+          "total": 75
         },
         {
-          "sel": "U3 KPI Leader!B33",
+          "sel": "U3 KPI Leader!B32",
           "persen": true,
           "tangga": [
             0.55,
@@ -3293,20 +3234,20 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 0.875,
-          "value": 4,
-          "total": 60
+          "pencapaian": 1,
+          "value": 10,
+          "total": 150
         }
       ]
     },
     {
       "skenario": "U3",
-      "sel": "U3 KPI Leader!A38",
-      "nilai": 595,
-      "predikat": "Cukup",
+      "sel": "U3 KPI Leader!A37",
+      "nilai": 455,
+      "predikat": "Perlu Perbaikan",
       "indikator": [
         {
-          "sel": "U3 KPI Leader!B42",
+          "sel": "U3 KPI Leader!B41",
           "persen": true,
           "tangga": [
             0.7,
@@ -3321,12 +3262,12 @@
             1.1
           ],
           "bobot": 30,
-          "pencapaian": 1.075,
-          "value": 9,
-          "total": 270
+          "pencapaian": 0.875,
+          "value": 4,
+          "total": 120
         },
         {
-          "sel": "U3 KPI Leader!B43",
+          "sel": "U3 KPI Leader!B42",
           "persen": false,
           "tangga": [
             3.5,
@@ -3341,12 +3282,12 @@
             9
           ],
           "bobot": 20,
-          "pencapaian": 5.75,
-          "value": 5,
-          "total": 100
+          "pencapaian": 8.5,
+          "value": 9,
+          "total": 180
         },
         {
-          "sel": "U3 KPI Leader!B44",
+          "sel": "U3 KPI Leader!B43",
           "persen": false,
           "tangga": [
             15,
@@ -3361,12 +3302,12 @@
             55
           ],
           "bobot": 10,
-          "pencapaian": 17.5,
-          "value": 1,
-          "total": 10
+          "pencapaian": 37.5,
+          "value": 5,
+          "total": 50
         },
         {
-          "sel": "U3 KPI Leader!B45",
+          "sel": "U3 KPI Leader!B44",
           "persen": true,
           "tangga": [
             0.4,
@@ -3381,12 +3322,12 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 0.925,
-          "value": 6,
-          "total": 90
+          "pencapaian": 0.45,
+          "value": 1,
+          "total": 15
         },
         {
-          "sel": "U3 KPI Leader!B46",
+          "sel": "U3 KPI Leader!B45",
           "persen": true,
           "tangga": [
             0.55,
@@ -3401,12 +3342,12 @@
             1
           ],
           "bobot": 10,
-          "pencapaian": 0.7,
-          "value": 2,
-          "total": 20
+          "pencapaian": 0.965,
+          "value": 6,
+          "total": 60
         },
         {
-          "sel": "U3 KPI Leader!B47",
+          "sel": "U3 KPI Leader!B46",
           "persen": true,
           "tangga": [
             0.4,
@@ -3421,20 +3362,20 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 0.975,
-          "value": 7,
-          "total": 105
+          "pencapaian": 0.55,
+          "value": 2,
+          "total": 30
         }
       ]
     },
     {
       "skenario": "U3",
-      "sel": "U3 KPI Leader!A52",
-      "nilai": 565,
+      "sel": "U3 KPI Leader!A51",
+      "nilai": 635,
       "predikat": "Cukup",
       "indikator": [
         {
-          "sel": "U3 KPI Leader!B56",
+          "sel": "U3 KPI Leader!B55",
           "persen": false,
           "tangga": [
             147.5,
@@ -3449,12 +3390,12 @@
             220
           ],
           "bobot": 35,
-          "pencapaian": 166.25,
-          "value": 3,
-          "total": 105
+          "pencapaian": 196.25,
+          "value": 7,
+          "total": 245
         },
         {
-          "sel": "U3 KPI Leader!B57",
+          "sel": "U3 KPI Leader!B56",
           "persen": false,
           "tangga": [
             221.25,
@@ -3469,9 +3410,29 @@
             330
           ],
           "bobot": 20,
-          "pencapaian": 307.5,
-          "value": 8,
-          "total": 160
+          "pencapaian": 249.375,
+          "value": 3,
+          "total": 60
+        },
+        {
+          "sel": "U3 KPI Leader!B57",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 25,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 250
         },
         {
           "sel": "U3 KPI Leader!B58",
@@ -3488,38 +3449,18 @@
             1,
             1
           ],
-          "bobot": 25,
+          "bobot": 20,
           "pencapaian": 0.825,
           "value": 4,
-          "total": 100
-        },
-        {
-          "sel": "U3 KPI Leader!B59",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 200
+          "total": 80
         }
       ]
     },
     {
       "skenario": "U3",
       "sel": "U3 KPI Tim!A1",
-      "nilai": 425,
-      "predikat": "Perlu Perbaikan",
+      "nilai": 510,
+      "predikat": "Cukup",
       "indikator": [
         {
           "sel": "U3 KPI Tim!B5",
@@ -3537,9 +3478,9 @@
             1.1
           ],
           "bobot": 25,
-          "pencapaian": 0.925,
-          "value": 5,
-          "total": 125
+          "pencapaian": 1.075,
+          "value": 9,
+          "total": 225
         },
         {
           "sel": "U3 KPI Tim!B6",
@@ -3557,9 +3498,9 @@
             1.2
           ],
           "bobot": 15,
-          "pencapaian": 0.1875,
-          "value": 1,
-          "total": 15
+          "pencapaian": 0.6875,
+          "value": 5,
+          "total": 75
         },
         {
           "sel": "U3 KPI Tim!B7",
@@ -3577,12 +3518,32 @@
             1.1
           ],
           "bobot": 20,
-          "pencapaian": 0.965,
-          "value": 6,
-          "total": 120
+          "pencapaian": 0.725,
+          "value": 1,
+          "total": 20
         },
         {
           "sel": "U3 KPI Tim!B8",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 15,
+          "pencapaian": 0.925,
+          "value": 6,
+          "total": 90
+        },
+        {
+          "sel": "U3 KPI Tim!B9",
           "persen": true,
           "tangga": [
             0.4,
@@ -3602,26 +3563,6 @@
           "total": 30
         },
         {
-          "sel": "U3 KPI Tim!B9",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 15,
-          "pencapaian": 0.975,
-          "value": 7,
-          "total": 105
-        },
-        {
           "sel": "U3 KPI Tim!B10",
           "persen": true,
           "tangga": [
@@ -3637,20 +3578,40 @@
             1
           ],
           "bobot": 10,
-          "pencapaian": 0.7,
-          "value": 3,
-          "total": 30
+          "pencapaian": 0.975,
+          "value": 7,
+          "total": 70
         }
       ]
     },
     {
       "skenario": "U3",
       "sel": "U3 KPI Tim!A15",
-      "nilai": 570,
+      "nilai": 545,
       "predikat": "Cukup",
       "indikator": [
         {
           "sel": "U3 KPI Tim!B19",
+          "persen": true,
+          "tangga": [
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1.05,
+            1.1
+          ],
+          "bobot": 25,
+          "pencapaian": 0.825,
+          "value": 3,
+          "total": 75
+        },
+        {
+          "sel": "U3 KPI Tim!B20",
           "persen": true,
           "tangga": [
             0.7,
@@ -3670,26 +3631,6 @@
           "total": 200
         },
         {
-          "sel": "U3 KPI Tim!B20",
-          "persen": true,
-          "tangga": [
-            0.7,
-            0.75,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1.05,
-            1.1
-          ],
-          "bobot": 25,
-          "pencapaian": 0.875,
-          "value": 4,
-          "total": 100
-        },
-        {
           "sel": "U3 KPI Tim!B21",
           "persen": true,
           "tangga": [
@@ -3705,9 +3646,9 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 200
+          "pencapaian": 0.825,
+          "value": 4,
+          "total": 80
         },
         {
           "sel": "U3 KPI Tim!B22",
@@ -3725,9 +3666,9 @@
             22
           ],
           "bobot": 10,
-          "pencapaian": 18.75,
-          "value": 5,
-          "total": 50
+          "pencapaian": 21.5,
+          "value": 9,
+          "total": 90
         },
         {
           "sel": "U3 KPI Tim!B23",
@@ -3745,596 +3686,20 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": 0.45,
-          "value": 1,
-          "total": 20
+          "pencapaian": 0.875,
+          "value": 5,
+          "total": 100
         }
       ]
     },
     {
       "skenario": "U3",
       "sel": "U3 KPI Tim!A28",
-      "nilai": 470,
-      "predikat": "Perlu Perbaikan",
-      "indikator": [
-        {
-          "sel": "U3 KPI Tim!B32",
-          "persen": true,
-          "tangga": [
-            0.7,
-            0.75,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1.05,
-            1.1
-          ],
-          "bobot": 40,
-          "pencapaian": 0.965,
-          "value": 6,
-          "total": 240
-        },
-        {
-          "sel": "U3 KPI Tim!B33",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 30,
-          "pencapaian": 0.55,
-          "value": 2,
-          "total": 60
-        },
-        {
-          "sel": "U3 KPI Tim!B34",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 0.975,
-          "value": 7,
-          "total": 140
-        },
-        {
-          "sel": "U3 KPI Tim!B35",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 10,
-          "pencapaian": 0.8,
-          "value": 3,
-          "total": 30
-        }
-      ]
-    },
-    {
-      "skenario": "U3",
-      "sel": "U3 KPI Tim!A40",
-      "nilai": 720,
-      "predikat": "Baik",
-      "indikator": [
-        {
-          "sel": "U3 KPI Tim!B44",
-          "persen": false,
-          "tangga": [
-            6.5,
-            7,
-            7.5,
-            8,
-            8.5,
-            9,
-            9.5,
-            10,
-            11,
-            12
-          ],
-          "bobot": 35,
-          "pencapaian": 10.5,
-          "value": 8,
-          "total": 280
-        },
-        {
-          "sel": "U3 KPI Tim!B45",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 35,
-          "pencapaian": 0.875,
-          "value": 4,
-          "total": 140
-        },
-        {
-          "sel": "U3 KPI Tim!B46",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 30,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 300
-        }
-      ]
-    },
-    {
-      "skenario": "U3",
-      "sel": "U3 KPI Tim!A51",
-      "nilai": 410,
-      "predikat": "Perlu Perbaikan",
-      "indikator": [
-        {
-          "sel": "U3 KPI Tim!B55",
-          "persen": false,
-          "tangga": [
-            59,
-            62,
-            65,
-            68,
-            71,
-            74,
-            77,
-            80,
-            85,
-            90
-          ],
-          "bobot": 25,
-          "pencapaian": 72.5,
-          "value": 5,
-          "total": 125
-        },
-        {
-          "sel": "U3 KPI Tim!B56",
-          "persen": false,
-          "tangga": [
-            15,
-            20,
-            25,
-            30,
-            35,
-            40,
-            45,
-            50,
-            52.5,
-            55
-          ],
-          "bobot": 25,
-          "pencapaian": 17.5,
-          "value": 1,
-          "total": 25
-        },
-        {
-          "sel": "U3 KPI Tim!B57",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 15,
-          "pencapaian": 0.965,
-          "value": 6,
-          "total": 90
-        },
-        {
-          "sel": "U3 KPI Tim!B58",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 15,
-          "pencapaian": 0.7,
-          "value": 2,
-          "total": 30
-        },
-        {
-          "sel": "U3 KPI Tim!B59",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 0.975,
-          "value": 7,
-          "total": 140
-        }
-      ]
-    },
-    {
-      "skenario": "U3",
-      "sel": "U3 KPI Tim!A64",
-      "nilai": 570,
-      "predikat": "Cukup",
-      "indikator": [
-        {
-          "sel": "U3 KPI Tim!B68",
-          "persen": false,
-          "tangga": [
-            2.25,
-            2.5,
-            2.75,
-            3,
-            3.25,
-            3.5,
-            3.75,
-            4,
-            4,
-            4
-          ],
-          "bobot": 40,
-          "pencapaian": 2.875,
-          "value": 3,
-          "total": 120
-        },
-        {
-          "sel": "U3 KPI Tim!B69",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 200
-        },
-        {
-          "sel": "U3 KPI Tim!B70",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 25,
-          "pencapaian": 0.875,
-          "value": 4,
-          "total": 100
-        },
-        {
-          "sel": "U3 KPI Tim!B71",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 15,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 150
-        }
-      ]
-    },
-    {
-      "skenario": "U3",
-      "sel": "U3 KPI Tim!A76",
-      "nilai": 365,
-      "predikat": "Perlu Perbaikan",
-      "indikator": [
-        {
-          "sel": "U3 KPI Tim!B80",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 30,
-          "pencapaian": 0.875,
-          "value": 5,
-          "total": 150
-        },
-        {
-          "sel": "U3 KPI Tim!B81",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 25,
-          "pencapaian": 0.6,
-          "value": 1,
-          "total": 25
-        },
-        {
-          "sel": "U3 KPI Tim!B82",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 25,
-          "pencapaian": 0.965,
-          "value": 6,
-          "total": 150
-        },
-        {
-          "sel": "U3 KPI Tim!B83",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 0.55,
-          "value": 2,
-          "total": 40
-        }
-      ]
-    },
-    {
-      "skenario": "U3",
-      "sel": "U3 KPI Tim!A89",
-      "nilai": 600,
-      "predikat": "Cukup",
-      "indikator": [
-        {
-          "sel": "U3 KPI Tim!B93",
-          "persen": true,
-          "tangga": [
-            0.7,
-            0.75,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1.05,
-            1.1
-          ],
-          "bobot": 40,
-          "pencapaian": 0.99,
-          "value": 7,
-          "total": 280
-        },
-        {
-          "sel": "U3 KPI Tim!B94",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 40,
-          "pencapaian": 0.7,
-          "value": 3,
-          "total": 120
-        },
-        {
-          "sel": "U3 KPI Tim!B95",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 200
-        }
-      ]
-    },
-    {
-      "skenario": "U3",
-      "sel": "U3 KPI Tim!A111",
-      "nilai": 620,
-      "predikat": "Cukup",
-      "indikator": [
-        {
-          "sel": "U3 KPI Tim!B115",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 40,
-          "pencapaian": 0.825,
-          "value": 4,
-          "total": 160
-        },
-        {
-          "sel": "U3 KPI Tim!B116",
-          "persen": true,
-          "tangga": [
-            0.125,
-            0.25,
-            0.375,
-            0.5,
-            0.625,
-            0.75,
-            0.875,
-            1,
-            1.1,
-            1.2
-          ],
-          "bobot": 40,
-          "pencapaian": 1.15,
-          "value": 9,
-          "total": 360
-        },
-        {
-          "sel": "U3 KPI Tim!B117",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 0.925,
-          "value": 5,
-          "total": 100
-        }
-      ]
-    },
-    {
-      "skenario": "U3",
-      "sel": "U3 KPI Tim!A123",
       "nilai": 330,
       "predikat": "Perlu Perbaikan",
       "indikator": [
         {
-          "sel": "U3 KPI Tim!B127",
+          "sel": "U3 KPI Tim!B32",
           "persen": true,
           "tangga": [
             0.7,
@@ -4354,7 +3719,7 @@
           "total": 40
         },
         {
-          "sel": "U3 KPI Tim!B128",
+          "sel": "U3 KPI Tim!B33",
           "persen": true,
           "tangga": [
             0.4,
@@ -4374,7 +3739,7 @@
           "total": 180
         },
         {
-          "sel": "U3 KPI Tim!B129",
+          "sel": "U3 KPI Tim!B34",
           "persen": true,
           "tangga": [
             0.4,
@@ -4385,8 +3750,8 @@
             0.9,
             0.95,
             1,
-            1.05,
-            1.1
+            1,
+            1
           ],
           "bobot": 20,
           "pencapaian": 0.55,
@@ -4394,7 +3759,7 @@
           "total": 40
         },
         {
-          "sel": "U3 KPI Tim!B130",
+          "sel": "U3 KPI Tim!B35",
           "persen": true,
           "tangga": [
             0.55,
@@ -4412,6 +3777,582 @@
           "pencapaian": 0.99,
           "value": 7,
           "total": 70
+        }
+      ]
+    },
+    {
+      "skenario": "U3",
+      "sel": "U3 KPI Tim!A40",
+      "nilai": 575,
+      "predikat": "Cukup",
+      "indikator": [
+        {
+          "sel": "U3 KPI Tim!B44",
+          "persen": false,
+          "tangga": [
+            6.5,
+            7,
+            7.5,
+            8,
+            8.5,
+            9,
+            9.5,
+            10,
+            11,
+            12
+          ],
+          "bobot": 35,
+          "pencapaian": 7.75,
+          "value": 3,
+          "total": 105
+        },
+        {
+          "sel": "U3 KPI Tim!B45",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 35,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 350
+        },
+        {
+          "sel": "U3 KPI Tim!B46",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 30,
+          "pencapaian": 0.825,
+          "value": 4,
+          "total": 120
+        }
+      ]
+    },
+    {
+      "skenario": "U3",
+      "sel": "U3 KPI Tim!A51",
+      "nilai": 495,
+      "predikat": "Perlu Perbaikan",
+      "indikator": [
+        {
+          "sel": "U3 KPI Tim!B55",
+          "persen": false,
+          "tangga": [
+            59,
+            62,
+            65,
+            68,
+            71,
+            74,
+            77,
+            80,
+            85,
+            90
+          ],
+          "bobot": 25,
+          "pencapaian": 87.5,
+          "value": 9,
+          "total": 225
+        },
+        {
+          "sel": "U3 KPI Tim!B56",
+          "persen": false,
+          "tangga": [
+            15,
+            20,
+            25,
+            30,
+            35,
+            40,
+            45,
+            50,
+            52.5,
+            55
+          ],
+          "bobot": 25,
+          "pencapaian": 37.5,
+          "value": 5,
+          "total": 125
+        },
+        {
+          "sel": "U3 KPI Tim!B57",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 15,
+          "pencapaian": 0.6,
+          "value": 1,
+          "total": 15
+        },
+        {
+          "sel": "U3 KPI Tim!B58",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 15,
+          "pencapaian": 0.965,
+          "value": 6,
+          "total": 90
+        },
+        {
+          "sel": "U3 KPI Tim!B59",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 20,
+          "pencapaian": 0.55,
+          "value": 2,
+          "total": 40
+        }
+      ]
+    },
+    {
+      "skenario": "U3",
+      "sel": "U3 KPI Tim!A64",
+      "nilai": 650,
+      "predikat": "Baik",
+      "indikator": [
+        {
+          "sel": "U3 KPI Tim!B68",
+          "persen": false,
+          "tangga": [
+            2.25,
+            2.5,
+            2.75,
+            3,
+            3.25,
+            3.5,
+            3.75,
+            4,
+            4,
+            4
+          ],
+          "bobot": 40,
+          "pencapaian": 3.875,
+          "value": 7,
+          "total": 280
+        },
+        {
+          "sel": "U3 KPI Tim!B69",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 20,
+          "pencapaian": 0.7,
+          "value": 3,
+          "total": 60
+        },
+        {
+          "sel": "U3 KPI Tim!B70",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 25,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 250
+        },
+        {
+          "sel": "U3 KPI Tim!B71",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 15,
+          "pencapaian": 0.825,
+          "value": 4,
+          "total": 60
+        }
+      ]
+    },
+    {
+      "skenario": "U3",
+      "sel": "U3 KPI Tim!A76",
+      "nilai": 570,
+      "predikat": "Cukup",
+      "indikator": [
+        {
+          "sel": "U3 KPI Tim!B80",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 30,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 300
+        },
+        {
+          "sel": "U3 KPI Tim!B81",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 25,
+          "pencapaian": 0.925,
+          "value": 5,
+          "total": 125
+        },
+        {
+          "sel": "U3 KPI Tim!B82",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 25,
+          "pencapaian": 0.6,
+          "value": 1,
+          "total": 25
+        },
+        {
+          "sel": "U3 KPI Tim!B83",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 20,
+          "pencapaian": 0.925,
+          "value": 6,
+          "total": 120
+        }
+      ]
+    },
+    {
+      "skenario": "U3",
+      "sel": "U3 KPI Tim!A89",
+      "nilai": 420,
+      "predikat": "Perlu Perbaikan",
+      "indikator": [
+        {
+          "sel": "U3 KPI Tim!B93",
+          "persen": true,
+          "tangga": [
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1.05,
+            1.1
+          ],
+          "bobot": 40,
+          "pencapaian": 0.775,
+          "value": 2,
+          "total": 80
+        },
+        {
+          "sel": "U3 KPI Tim!B94",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 40,
+          "pencapaian": 0.975,
+          "value": 7,
+          "total": 280
+        },
+        {
+          "sel": "U3 KPI Tim!B95",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 20,
+          "pencapaian": 0.8,
+          "value": 3,
+          "total": 60
+        }
+      ]
+    },
+    {
+      "skenario": "U3",
+      "sel": "U3 KPI Tim!A111",
+      "nilai": 760,
+      "predikat": "Baik",
+      "indikator": [
+        {
+          "sel": "U3 KPI Tim!B115",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 40,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 400
+        },
+        {
+          "sel": "U3 KPI Tim!B116",
+          "persen": true,
+          "tangga": [
+            0.125,
+            0.25,
+            0.375,
+            0.5,
+            0.625,
+            0.75,
+            0.875,
+            1,
+            1.1,
+            1.2
+          ],
+          "bobot": 40,
+          "pencapaian": 0.5625,
+          "value": 4,
+          "total": 160
+        },
+        {
+          "sel": "U3 KPI Tim!B117",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 20,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 200
+        }
+      ]
+    },
+    {
+      "skenario": "U3",
+      "sel": "U3 KPI Tim!A123",
+      "nilai": 370,
+      "predikat": "Perlu Perbaikan",
+      "indikator": [
+        {
+          "sel": "U3 KPI Tim!B127",
+          "persen": true,
+          "tangga": [
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1.05,
+            1.1
+          ],
+          "bobot": 40,
+          "pencapaian": 0.925,
+          "value": 5,
+          "total": 200
+        },
+        {
+          "sel": "U3 KPI Tim!B128",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 30,
+          "pencapaian": 0.45,
+          "value": 1,
+          "total": 30
+        },
+        {
+          "sel": "U3 KPI Tim!B129",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1.05,
+            1.1
+          ],
+          "bobot": 20,
+          "pencapaian": 0.925,
+          "value": 6,
+          "total": 120
+        },
+        {
+          "sel": "U3 KPI Tim!B130",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 10,
+          "pencapaian": 0.7,
+          "value": 2,
+          "total": 20
         }
       ]
     },
@@ -4574,8 +4515,8 @@
     {
       "skenario": "U4",
       "sel": "U4 KPI Leader!A13",
-      "nilai": 600,
-      "predikat": "Cukup",
+      "nilai": 650,
+      "predikat": "Baik",
       "indikator": [
         {
           "sel": "U4 KPI Leader!B17",
@@ -4592,10 +4533,10 @@
             1.05,
             1.1
           ],
-          "bobot": 35,
+          "bobot": 45,
           "pencapaian": 1.65,
           "value": 10,
-          "total": 350
+          "total": 450
         },
         {
           "sel": "U4 KPI Leader!B18",
@@ -4612,7 +4553,7 @@
             1,
             1
           ],
-          "bobot": 20,
+          "bobot": 25,
           "pencapaian": 0.2,
           "value": 0,
           "total": 0
@@ -4632,10 +4573,10 @@
             1.05,
             1.1
           ],
-          "bobot": 15,
+          "bobot": 20,
           "pencapaian": 1.65,
           "value": 10,
-          "total": 150
+          "total": 200
         },
         {
           "sel": "U4 KPI Leader!B20",
@@ -4652,41 +4593,21 @@
             1,
             1
           ],
-          "bobot": 20,
+          "bobot": 10,
           "pencapaian": 0.2,
           "value": 0,
           "total": 0
-        },
-        {
-          "sel": "U4 KPI Leader!B21",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 10,
-          "pencapaian": 1.5,
-          "value": 10,
-          "total": 100
         }
       ]
     },
     {
       "skenario": "U4",
-      "sel": "U4 KPI Leader!A26",
-      "nilai": 450,
-      "predikat": "Perlu Perbaikan",
+      "sel": "U4 KPI Leader!A25",
+      "nilai": 550,
+      "predikat": "Cukup",
       "indikator": [
         {
-          "sel": "U4 KPI Leader!B30",
+          "sel": "U4 KPI Leader!B29",
           "persen": false,
           "tangga": [
             11.5,
@@ -4701,12 +4622,12 @@
             17
           ],
           "bobot": 30,
-          "pencapaian": 5.75,
-          "value": 0,
-          "total": 0
+          "pencapaian": 25.5,
+          "value": 10,
+          "total": 300
         },
         {
-          "sel": "U4 KPI Leader!B31",
+          "sel": "U4 KPI Leader!B30",
           "persen": false,
           "tangga": [
             3,
@@ -4721,12 +4642,12 @@
             13
           ],
           "bobot": 30,
-          "pencapaian": 19.5,
-          "value": 10,
-          "total": 300
+          "pencapaian": 1.5,
+          "value": 0,
+          "total": 0
         },
         {
-          "sel": "U4 KPI Leader!B32",
+          "sel": "U4 KPI Leader!B31",
           "persen": true,
           "tangga": [
             0.5,
@@ -4741,12 +4662,12 @@
             1
           ],
           "bobot": 25,
-          "pencapaian": 0.25,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1.5,
+          "value": 10,
+          "total": 250
         },
         {
-          "sel": "U4 KPI Leader!B33",
+          "sel": "U4 KPI Leader!B32",
           "persen": true,
           "tangga": [
             0.55,
@@ -4761,20 +4682,20 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 1.5,
-          "value": 10,
-          "total": 150
+          "pencapaian": 0.275,
+          "value": 0,
+          "total": 0
         }
       ]
     },
     {
       "skenario": "U4",
-      "sel": "U4 KPI Leader!A38",
+      "sel": "U4 KPI Leader!A37",
       "nilai": 500,
       "predikat": "Cukup",
       "indikator": [
         {
-          "sel": "U4 KPI Leader!B42",
+          "sel": "U4 KPI Leader!B41",
           "persen": true,
           "tangga": [
             0.7,
@@ -4789,12 +4710,12 @@
             1.1
           ],
           "bobot": 30,
-          "pencapaian": 0.35,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1.65,
+          "value": 10,
+          "total": 300
         },
         {
-          "sel": "U4 KPI Leader!B43",
+          "sel": "U4 KPI Leader!B42",
           "persen": false,
           "tangga": [
             3.5,
@@ -4809,12 +4730,12 @@
             9
           ],
           "bobot": 20,
-          "pencapaian": 13.5,
-          "value": 10,
-          "total": 200
+          "pencapaian": 1.75,
+          "value": 0,
+          "total": 0
         },
         {
-          "sel": "U4 KPI Leader!B44",
+          "sel": "U4 KPI Leader!B43",
           "persen": false,
           "tangga": [
             15,
@@ -4829,12 +4750,12 @@
             55
           ],
           "bobot": 10,
-          "pencapaian": 7.5,
-          "value": 0,
-          "total": 0
+          "pencapaian": 82.5,
+          "value": 10,
+          "total": 100
         },
         {
-          "sel": "U4 KPI Leader!B45",
+          "sel": "U4 KPI Leader!B44",
           "persen": true,
           "tangga": [
             0.4,
@@ -4849,12 +4770,12 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 1.5,
-          "value": 10,
-          "total": 150
+          "pencapaian": 0.2,
+          "value": 0,
+          "total": 0
         },
         {
-          "sel": "U4 KPI Leader!B46",
+          "sel": "U4 KPI Leader!B45",
           "persen": true,
           "tangga": [
             0.55,
@@ -4869,12 +4790,12 @@
             1
           ],
           "bobot": 10,
-          "pencapaian": 0.275,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1.5,
+          "value": 10,
+          "total": 100
         },
         {
-          "sel": "U4 KPI Leader!B47",
+          "sel": "U4 KPI Leader!B46",
           "persen": true,
           "tangga": [
             0.4,
@@ -4889,20 +4810,20 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 1.5,
-          "value": 10,
-          "total": 150
+          "pencapaian": 0.2,
+          "value": 0,
+          "total": 0
         }
       ]
     },
     {
       "skenario": "U4",
-      "sel": "U4 KPI Leader!A52",
-      "nilai": 400,
-      "predikat": "Perlu Perbaikan",
+      "sel": "U4 KPI Leader!A51",
+      "nilai": 600,
+      "predikat": "Cukup",
       "indikator": [
         {
-          "sel": "U4 KPI Leader!B56",
+          "sel": "U4 KPI Leader!B55",
           "persen": false,
           "tangga": [
             147.5,
@@ -4917,12 +4838,12 @@
             220
           ],
           "bobot": 35,
-          "pencapaian": 73.75,
-          "value": 0,
-          "total": 0
+          "pencapaian": 330,
+          "value": 10,
+          "total": 350
         },
         {
-          "sel": "U4 KPI Leader!B57",
+          "sel": "U4 KPI Leader!B56",
           "persen": false,
           "tangga": [
             221.25,
@@ -4937,9 +4858,29 @@
             330
           ],
           "bobot": 20,
-          "pencapaian": 495,
+          "pencapaian": 110.625,
+          "value": 0,
+          "total": 0
+        },
+        {
+          "sel": "U4 KPI Leader!B57",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 25,
+          "pencapaian": 1.5,
           "value": 10,
-          "total": 200
+          "total": 250
         },
         {
           "sel": "U4 KPI Leader!B58",
@@ -4956,38 +4897,18 @@
             1,
             1
           ],
-          "bobot": 25,
+          "bobot": 20,
           "pencapaian": 0.2,
           "value": 0,
           "total": 0
-        },
-        {
-          "sel": "U4 KPI Leader!B59",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 1.5,
-          "value": 10,
-          "total": 200
         }
       ]
     },
     {
       "skenario": "U4",
       "sel": "U4 KPI Tim!A1",
-      "nilai": 400,
-      "predikat": "Perlu Perbaikan",
+      "nilai": 600,
+      "predikat": "Cukup",
       "indikator": [
         {
           "sel": "U4 KPI Tim!B5",
@@ -5005,9 +4926,9 @@
             1.1
           ],
           "bobot": 25,
-          "pencapaian": 0.35,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1.65,
+          "value": 10,
+          "total": 250
         },
         {
           "sel": "U4 KPI Tim!B6",
@@ -5025,9 +4946,9 @@
             1.2
           ],
           "bobot": 15,
-          "pencapaian": 1.8,
-          "value": 10,
-          "total": 150
+          "pencapaian": 0.0625,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U4 KPI Tim!B7",
@@ -5045,9 +4966,9 @@
             1.1
           ],
           "bobot": 20,
-          "pencapaian": 0.35,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1.65,
+          "value": 10,
+          "total": 200
         },
         {
           "sel": "U4 KPI Tim!B8",
@@ -5065,9 +4986,9 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 1.5,
-          "value": 10,
-          "total": 150
+          "pencapaian": 0.2,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U4 KPI Tim!B9",
@@ -5085,9 +5006,9 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 0.2,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1.5,
+          "value": 10,
+          "total": 150
         },
         {
           "sel": "U4 KPI Tim!B10",
@@ -5105,20 +5026,40 @@
             1
           ],
           "bobot": 10,
-          "pencapaian": 1.5,
-          "value": 10,
-          "total": 100
+          "pencapaian": 0.2,
+          "value": 0,
+          "total": 0
         }
       ]
     },
     {
       "skenario": "U4",
       "sel": "U4 KPI Tim!A15",
-      "nilai": 350,
-      "predikat": "Perlu Perbaikan",
+      "nilai": 650,
+      "predikat": "Baik",
       "indikator": [
         {
           "sel": "U4 KPI Tim!B19",
+          "persen": true,
+          "tangga": [
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1.05,
+            1.1
+          ],
+          "bobot": 25,
+          "pencapaian": 1.65,
+          "value": 10,
+          "total": 250
+        },
+        {
+          "sel": "U4 KPI Tim!B20",
           "persen": true,
           "tangga": [
             0.7,
@@ -5138,135 +5079,7 @@
           "total": 0
         },
         {
-          "sel": "U4 KPI Tim!B20",
-          "persen": true,
-          "tangga": [
-            0.7,
-            0.75,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1.05,
-            1.1
-          ],
-          "bobot": 25,
-          "pencapaian": 1.65,
-          "value": 10,
-          "total": 250
-        },
-        {
           "sel": "U4 KPI Tim!B21",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 0.2,
-          "value": 0,
-          "total": 0
-        },
-        {
-          "sel": "U4 KPI Tim!B22",
-          "persen": false,
-          "tangga": [
-            16.5,
-            17,
-            17.5,
-            18,
-            18.5,
-            19,
-            19.5,
-            20,
-            21,
-            22
-          ],
-          "bobot": 10,
-          "pencapaian": 33,
-          "value": 10,
-          "total": 100
-        },
-        {
-          "sel": "U4 KPI Tim!B23",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 0.2,
-          "value": 0,
-          "total": 0
-        }
-      ]
-    },
-    {
-      "skenario": "U4",
-      "sel": "U4 KPI Tim!A28",
-      "nilai": 600,
-      "predikat": "Cukup",
-      "indikator": [
-        {
-          "sel": "U4 KPI Tim!B32",
-          "persen": true,
-          "tangga": [
-            0.7,
-            0.75,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1.05,
-            1.1
-          ],
-          "bobot": 40,
-          "pencapaian": 1.65,
-          "value": 10,
-          "total": 400
-        },
-        {
-          "sel": "U4 KPI Tim!B33",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 30,
-          "pencapaian": 0.2,
-          "value": 0,
-          "total": 0
-        },
-        {
-          "sel": "U4 KPI Tim!B34",
           "persen": true,
           "tangga": [
             0.4,
@@ -5286,75 +5099,75 @@
           "total": 200
         },
         {
-          "sel": "U4 KPI Tim!B35",
+          "sel": "U4 KPI Tim!B22",
+          "persen": false,
+          "tangga": [
+            16.5,
+            17,
+            17.5,
+            18,
+            18.5,
+            19,
+            19.5,
+            20,
+            21,
+            22
+          ],
+          "bobot": 10,
+          "pencapaian": 8.25,
+          "value": 0,
+          "total": 0
+        },
+        {
+          "sel": "U4 KPI Tim!B23",
           "persen": true,
           "tangga": [
-            0.55,
-            0.65,
-            0.75,
+            0.4,
+            0.5,
+            0.6,
+            0.8,
             0.85,
             0.9,
             0.95,
-            0.98,
             1,
             1,
             1
           ],
-          "bobot": 10,
-          "pencapaian": 0.275,
-          "value": 0,
-          "total": 0
+          "bobot": 20,
+          "pencapaian": 1.5,
+          "value": 10,
+          "total": 200
         }
       ]
     },
     {
       "skenario": "U4",
-      "sel": "U4 KPI Tim!A40",
-      "nilai": 650,
-      "predikat": "Baik",
+      "sel": "U4 KPI Tim!A28",
+      "nilai": 400,
+      "predikat": "Perlu Perbaikan",
       "indikator": [
         {
-          "sel": "U4 KPI Tim!B44",
-          "persen": false,
-          "tangga": [
-            6.5,
-            7,
-            7.5,
-            8,
-            8.5,
-            9,
-            9.5,
-            10,
-            11,
-            12
-          ],
-          "bobot": 35,
-          "pencapaian": 18,
-          "value": 10,
-          "total": 350
-        },
-        {
-          "sel": "U4 KPI Tim!B45",
+          "sel": "U4 KPI Tim!B32",
           "persen": true,
           "tangga": [
-            0.55,
-            0.65,
+            0.7,
             0.75,
+            0.8,
             0.85,
             0.9,
             0.95,
             0.98,
             1,
-            1,
-            1
+            1.05,
+            1.1
           ],
-          "bobot": 35,
-          "pencapaian": 0.275,
+          "bobot": 40,
+          "pencapaian": 0.35,
           "value": 0,
           "total": 0
         },
         {
-          "sel": "U4 KPI Tim!B46",
+          "sel": "U4 KPI Tim!B33",
           "persen": true,
           "tangga": [
             0.4,
@@ -5372,14 +5185,122 @@
           "pencapaian": 1.5,
           "value": 10,
           "total": 300
+        },
+        {
+          "sel": "U4 KPI Tim!B34",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 20,
+          "pencapaian": 0.2,
+          "value": 0,
+          "total": 0
+        },
+        {
+          "sel": "U4 KPI Tim!B35",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 10,
+          "pencapaian": 1.5,
+          "value": 10,
+          "total": 100
+        }
+      ]
+    },
+    {
+      "skenario": "U4",
+      "sel": "U4 KPI Tim!A40",
+      "nilai": 350,
+      "predikat": "Perlu Perbaikan",
+      "indikator": [
+        {
+          "sel": "U4 KPI Tim!B44",
+          "persen": false,
+          "tangga": [
+            6.5,
+            7,
+            7.5,
+            8,
+            8.5,
+            9,
+            9.5,
+            10,
+            11,
+            12
+          ],
+          "bobot": 35,
+          "pencapaian": 3.25,
+          "value": 0,
+          "total": 0
+        },
+        {
+          "sel": "U4 KPI Tim!B45",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 35,
+          "pencapaian": 1.5,
+          "value": 10,
+          "total": 350
+        },
+        {
+          "sel": "U4 KPI Tim!B46",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 30,
+          "pencapaian": 0.2,
+          "value": 0,
+          "total": 0
         }
       ]
     },
     {
       "skenario": "U4",
       "sel": "U4 KPI Tim!A51",
-      "nilai": 400,
-      "predikat": "Perlu Perbaikan",
+      "nilai": 600,
+      "predikat": "Cukup",
       "indikator": [
         {
           "sel": "U4 KPI Tim!B55",
@@ -5397,9 +5318,9 @@
             90
           ],
           "bobot": 25,
-          "pencapaian": 29.5,
-          "value": 0,
-          "total": 0
+          "pencapaian": 135,
+          "value": 10,
+          "total": 250
         },
         {
           "sel": "U4 KPI Tim!B56",
@@ -5417,32 +5338,12 @@
             55
           ],
           "bobot": 25,
-          "pencapaian": 82.5,
-          "value": 10,
-          "total": 250
-        },
-        {
-          "sel": "U4 KPI Tim!B57",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 15,
-          "pencapaian": 0.275,
+          "pencapaian": 7.5,
           "value": 0,
           "total": 0
         },
         {
-          "sel": "U4 KPI Tim!B58",
+          "sel": "U4 KPI Tim!B57",
           "persen": true,
           "tangga": [
             0.55,
@@ -5462,6 +5363,26 @@
           "total": 150
         },
         {
+          "sel": "U4 KPI Tim!B58",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 15,
+          "pencapaian": 0.275,
+          "value": 0,
+          "total": 0
+        },
+        {
           "sel": "U4 KPI Tim!B59",
           "persen": true,
           "tangga": [
@@ -5477,17 +5398,17 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": 0.2,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1.5,
+          "value": 10,
+          "total": 200
         }
       ]
     },
     {
       "skenario": "U4",
       "sel": "U4 KPI Tim!A64",
-      "nilai": 650,
-      "predikat": "Baik",
+      "nilai": 350,
+      "predikat": "Perlu Perbaikan",
       "indikator": [
         {
           "sel": "U4 KPI Tim!B68",
@@ -5505,9 +5426,9 @@
             4
           ],
           "bobot": 40,
-          "pencapaian": 6,
-          "value": 10,
-          "total": 400
+          "pencapaian": 1.125,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U4 KPI Tim!B69",
@@ -5525,12 +5446,80 @@
             1
           ],
           "bobot": 20,
+          "pencapaian": 1.5,
+          "value": 10,
+          "total": 200
+        },
+        {
+          "sel": "U4 KPI Tim!B70",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 25,
+          "pencapaian": 0.275,
+          "value": 0,
+          "total": 0
+        },
+        {
+          "sel": "U4 KPI Tim!B71",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 15,
+          "pencapaian": 1.5,
+          "value": 10,
+          "total": 150
+        }
+      ]
+    },
+    {
+      "skenario": "U4",
+      "sel": "U4 KPI Tim!A76",
+      "nilai": 450,
+      "predikat": "Perlu Perbaikan",
+      "indikator": [
+        {
+          "sel": "U4 KPI Tim!B80",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 30,
           "pencapaian": 0.2,
           "value": 0,
           "total": 0
         },
         {
-          "sel": "U4 KPI Tim!B70",
+          "sel": "U4 KPI Tim!B81",
           "persen": true,
           "tangga": [
             0.55,
@@ -5550,7 +5539,27 @@
           "total": 250
         },
         {
-          "sel": "U4 KPI Tim!B71",
+          "sel": "U4 KPI Tim!B82",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 25,
+          "pencapaian": 0.275,
+          "value": 0,
+          "total": 0
+        },
+        {
+          "sel": "U4 KPI Tim!B83",
           "persen": true,
           "tangga": [
             0.4,
@@ -5564,8 +5573,76 @@
             1,
             1
           ],
-          "bobot": 15,
-          "pencapaian": 0.2,
+          "bobot": 20,
+          "pencapaian": 1.5,
+          "value": 10,
+          "total": 200
+        }
+      ]
+    },
+    {
+      "skenario": "U4",
+      "sel": "U4 KPI Tim!A89",
+      "nilai": 400,
+      "predikat": "Perlu Perbaikan",
+      "indikator": [
+        {
+          "sel": "U4 KPI Tim!B93",
+          "persen": true,
+          "tangga": [
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1.05,
+            1.1
+          ],
+          "bobot": 40,
+          "pencapaian": 0.35,
+          "value": 0,
+          "total": 0
+        },
+        {
+          "sel": "U4 KPI Tim!B94",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 40,
+          "pencapaian": 1.5,
+          "value": 10,
+          "total": 400
+        },
+        {
+          "sel": "U4 KPI Tim!B95",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 20,
+          "pencapaian": 0.275,
           "value": 0,
           "total": 0
         }
@@ -5573,12 +5650,100 @@
     },
     {
       "skenario": "U4",
-      "sel": "U4 KPI Tim!A76",
-      "nilai": 550,
+      "sel": "U4 KPI Tim!A111",
+      "nilai": 600,
       "predikat": "Cukup",
       "indikator": [
         {
-          "sel": "U4 KPI Tim!B80",
+          "sel": "U4 KPI Tim!B115",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 40,
+          "pencapaian": 1.5,
+          "value": 10,
+          "total": 400
+        },
+        {
+          "sel": "U4 KPI Tim!B116",
+          "persen": true,
+          "tangga": [
+            0.125,
+            0.25,
+            0.375,
+            0.5,
+            0.625,
+            0.75,
+            0.875,
+            1,
+            1.1,
+            1.2
+          ],
+          "bobot": 40,
+          "pencapaian": 0.0625,
+          "value": 0,
+          "total": 0
+        },
+        {
+          "sel": "U4 KPI Tim!B117",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 20,
+          "pencapaian": 1.5,
+          "value": 10,
+          "total": 200
+        }
+      ]
+    },
+    {
+      "skenario": "U4",
+      "sel": "U4 KPI Tim!A123",
+      "nilai": 400,
+      "predikat": "Perlu Perbaikan",
+      "indikator": [
+        {
+          "sel": "U4 KPI Tim!B127",
+          "persen": true,
+          "tangga": [
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1.05,
+            1.1
+          ],
+          "bobot": 40,
+          "pencapaian": 0.35,
+          "value": 0,
+          "total": 0
+        },
+        {
+          "sel": "U4 KPI Tim!B128",
           "persen": true,
           "tangga": [
             0.4,
@@ -5598,250 +5763,6 @@
           "total": 300
         },
         {
-          "sel": "U4 KPI Tim!B81",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 25,
-          "pencapaian": 0.275,
-          "value": 0,
-          "total": 0
-        },
-        {
-          "sel": "U4 KPI Tim!B82",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 25,
-          "pencapaian": 1.5,
-          "value": 10,
-          "total": 250
-        },
-        {
-          "sel": "U4 KPI Tim!B83",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 0.2,
-          "value": 0,
-          "total": 0
-        }
-      ]
-    },
-    {
-      "skenario": "U4",
-      "sel": "U4 KPI Tim!A89",
-      "nilai": 600,
-      "predikat": "Cukup",
-      "indikator": [
-        {
-          "sel": "U4 KPI Tim!B93",
-          "persen": true,
-          "tangga": [
-            0.7,
-            0.75,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1.05,
-            1.1
-          ],
-          "bobot": 40,
-          "pencapaian": 1.65,
-          "value": 10,
-          "total": 400
-        },
-        {
-          "sel": "U4 KPI Tim!B94",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 40,
-          "pencapaian": 0.2,
-          "value": 0,
-          "total": 0
-        },
-        {
-          "sel": "U4 KPI Tim!B95",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 1.5,
-          "value": 10,
-          "total": 200
-        }
-      ]
-    },
-    {
-      "skenario": "U4",
-      "sel": "U4 KPI Tim!A111",
-      "nilai": 400,
-      "predikat": "Perlu Perbaikan",
-      "indikator": [
-        {
-          "sel": "U4 KPI Tim!B115",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 40,
-          "pencapaian": 0.2,
-          "value": 0,
-          "total": 0
-        },
-        {
-          "sel": "U4 KPI Tim!B116",
-          "persen": true,
-          "tangga": [
-            0.125,
-            0.25,
-            0.375,
-            0.5,
-            0.625,
-            0.75,
-            0.875,
-            1,
-            1.1,
-            1.2
-          ],
-          "bobot": 40,
-          "pencapaian": 1.8,
-          "value": 10,
-          "total": 400
-        },
-        {
-          "sel": "U4 KPI Tim!B117",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 0.275,
-          "value": 0,
-          "total": 0
-        }
-      ]
-    },
-    {
-      "skenario": "U4",
-      "sel": "U4 KPI Tim!A123",
-      "nilai": 600,
-      "predikat": "Cukup",
-      "indikator": [
-        {
-          "sel": "U4 KPI Tim!B127",
-          "persen": true,
-          "tangga": [
-            0.7,
-            0.75,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1.05,
-            1.1
-          ],
-          "bobot": 40,
-          "pencapaian": 1.65,
-          "value": 10,
-          "total": 400
-        },
-        {
-          "sel": "U4 KPI Tim!B128",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 30,
-          "pencapaian": 0.2,
-          "value": 0,
-          "total": 0
-        },
-        {
           "sel": "U4 KPI Tim!B129",
           "persen": true,
           "tangga": [
@@ -5857,9 +5778,9 @@
             1.1
           ],
           "bobot": 20,
-          "pencapaian": 1.65,
-          "value": 10,
-          "total": 200
+          "pencapaian": 0.2,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U4 KPI Tim!B130",
@@ -5877,9 +5798,9 @@
             1
           ],
           "bobot": 10,
-          "pencapaian": 0.275,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1.5,
+          "value": 10,
+          "total": 100
         }
       ]
     },
@@ -6042,7 +5963,7 @@
     {
       "skenario": "U5",
       "sel": "U5 KPI Leader!A13",
-      "nilai": 500,
+      "nilai": 520,
       "predikat": "Cukup",
       "indikator": [
         {
@@ -6060,10 +5981,10 @@
             1.05,
             1.1
           ],
-          "bobot": 35,
+          "bobot": 45,
           "pencapaian": 1,
           "value": 8,
-          "total": 280
+          "total": 360
         },
         {
           "sel": "U5 KPI Leader!B18",
@@ -6080,7 +6001,7 @@
             1,
             1
           ],
-          "bobot": 20,
+          "bobot": 25,
           "pencapaian": null,
           "value": 0,
           "total": 0
@@ -6100,10 +6021,10 @@
             1.05,
             1.1
           ],
-          "bobot": 15,
+          "bobot": 20,
           "pencapaian": 1,
           "value": 8,
-          "total": 120
+          "total": 160
         },
         {
           "sel": "U5 KPI Leader!B20",
@@ -6120,41 +6041,21 @@
             1,
             1
           ],
-          "bobot": 20,
+          "bobot": 10,
           "pencapaian": null,
           "value": 0,
           "total": 0
-        },
-        {
-          "sel": "U5 KPI Leader!B21",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 10,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 100
         }
       ]
     },
     {
       "skenario": "U5",
-      "sel": "U5 KPI Leader!A26",
-      "nilai": 390,
+      "sel": "U5 KPI Leader!A25",
+      "nilai": 440,
       "predikat": "Perlu Perbaikan",
       "indikator": [
         {
-          "sel": "U5 KPI Leader!B30",
+          "sel": "U5 KPI Leader!B29",
           "persen": false,
           "tangga": [
             11.5,
@@ -6169,12 +6070,12 @@
             17
           ],
           "bobot": 30,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 15,
+          "value": 8,
+          "total": 240
         },
         {
-          "sel": "U5 KPI Leader!B31",
+          "sel": "U5 KPI Leader!B30",
           "persen": false,
           "tangga": [
             3,
@@ -6189,12 +6090,12 @@
             13
           ],
           "bobot": 30,
-          "pencapaian": 10,
-          "value": 8,
-          "total": 240
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         },
         {
-          "sel": "U5 KPI Leader!B32",
+          "sel": "U5 KPI Leader!B31",
           "persen": true,
           "tangga": [
             0.5,
@@ -6209,12 +6110,12 @@
             1
           ],
           "bobot": 25,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 0.9,
+          "value": 8,
+          "total": 200
         },
         {
-          "sel": "U5 KPI Leader!B33",
+          "sel": "U5 KPI Leader!B32",
           "persen": true,
           "tangga": [
             0.55,
@@ -6229,20 +6130,20 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 150
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         }
       ]
     },
     {
       "skenario": "U5",
-      "sel": "U5 KPI Leader!A38",
-      "nilai": 460,
+      "sel": "U5 KPI Leader!A37",
+      "nilai": 420,
       "predikat": "Perlu Perbaikan",
       "indikator": [
         {
-          "sel": "U5 KPI Leader!B42",
+          "sel": "U5 KPI Leader!B41",
           "persen": true,
           "tangga": [
             0.7,
@@ -6257,12 +6158,12 @@
             1.1
           ],
           "bobot": 30,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 8,
+          "total": 240
         },
         {
-          "sel": "U5 KPI Leader!B43",
+          "sel": "U5 KPI Leader!B42",
           "persen": false,
           "tangga": [
             3.5,
@@ -6277,12 +6178,12 @@
             9
           ],
           "bobot": 20,
-          "pencapaian": 7,
-          "value": 8,
-          "total": 160
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         },
         {
-          "sel": "U5 KPI Leader!B44",
+          "sel": "U5 KPI Leader!B43",
           "persen": false,
           "tangga": [
             15,
@@ -6297,12 +6198,12 @@
             55
           ],
           "bobot": 10,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 50,
+          "value": 8,
+          "total": 80
         },
         {
-          "sel": "U5 KPI Leader!B45",
+          "sel": "U5 KPI Leader!B44",
           "persen": true,
           "tangga": [
             0.4,
@@ -6317,12 +6218,12 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 150
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         },
         {
-          "sel": "U5 KPI Leader!B46",
+          "sel": "U5 KPI Leader!B45",
           "persen": true,
           "tangga": [
             0.55,
@@ -6337,12 +6238,12 @@
             1
           ],
           "bobot": 10,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 10,
+          "total": 100
         },
         {
-          "sel": "U5 KPI Leader!B47",
+          "sel": "U5 KPI Leader!B46",
           "persen": true,
           "tangga": [
             0.4,
@@ -6357,20 +6258,20 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 150
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         }
       ]
     },
     {
       "skenario": "U5",
-      "sel": "U5 KPI Leader!A52",
-      "nilai": 360,
-      "predikat": "Perlu Perbaikan",
+      "sel": "U5 KPI Leader!A51",
+      "nilai": 530,
+      "predikat": "Cukup",
       "indikator": [
         {
-          "sel": "U5 KPI Leader!B56",
+          "sel": "U5 KPI Leader!B55",
           "persen": false,
           "tangga": [
             147.5,
@@ -6385,12 +6286,12 @@
             220
           ],
           "bobot": 35,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 200,
+          "value": 8,
+          "total": 280
         },
         {
-          "sel": "U5 KPI Leader!B57",
+          "sel": "U5 KPI Leader!B56",
           "persen": false,
           "tangga": [
             221.25,
@@ -6405,9 +6306,29 @@
             330
           ],
           "bobot": 20,
-          "pencapaian": 300,
-          "value": 8,
-          "total": 160
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
+        },
+        {
+          "sel": "U5 KPI Leader!B57",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 25,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 250
         },
         {
           "sel": "U5 KPI Leader!B58",
@@ -6424,38 +6345,18 @@
             1,
             1
           ],
-          "bobot": 25,
+          "bobot": 20,
           "pencapaian": null,
           "value": 0,
           "total": 0
-        },
-        {
-          "sel": "U5 KPI Leader!B59",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 200
         }
       ]
     },
     {
       "skenario": "U5",
       "sel": "U5 KPI Tim!A1",
-      "nilai": 370,
-      "predikat": "Perlu Perbaikan",
+      "nilai": 510,
+      "predikat": "Cukup",
       "indikator": [
         {
           "sel": "U5 KPI Tim!B5",
@@ -6473,9 +6374,9 @@
             1.1
           ],
           "bobot": 25,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 8,
+          "total": 200
         },
         {
           "sel": "U5 KPI Tim!B6",
@@ -6493,9 +6394,9 @@
             1.2
           ],
           "bobot": 15,
-          "pencapaian": 1,
-          "value": 8,
-          "total": 120
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U5 KPI Tim!B7",
@@ -6513,9 +6414,9 @@
             1.1
           ],
           "bobot": 20,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 8,
+          "total": 160
         },
         {
           "sel": "U5 KPI Tim!B8",
@@ -6533,9 +6434,9 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 150
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U5 KPI Tim!B9",
@@ -6553,9 +6454,9 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 10,
+          "total": 150
         },
         {
           "sel": "U5 KPI Tim!B10",
@@ -6573,17 +6474,17 @@
             1
           ],
           "bobot": 10,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 100
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         }
       ]
     },
     {
       "skenario": "U5",
       "sel": "U5 KPI Tim!A15",
-      "nilai": 280,
-      "predikat": "Perlu Perbaikan",
+      "nilai": 600,
+      "predikat": "Cukup",
       "indikator": [
         {
           "sel": "U5 KPI Tim!B19",
@@ -6601,9 +6502,9 @@
             1.1
           ],
           "bobot": 25,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 8,
+          "total": 200
         },
         {
           "sel": "U5 KPI Tim!B20",
@@ -6621,9 +6522,9 @@
             1.1
           ],
           "bobot": 25,
-          "pencapaian": 1,
-          "value": 8,
-          "total": 200
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U5 KPI Tim!B21",
@@ -6641,9 +6542,9 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 10,
+          "total": 200
         },
         {
           "sel": "U5 KPI Tim!B22",
@@ -6661,9 +6562,9 @@
             22
           ],
           "bobot": 10,
-          "pencapaian": 20,
-          "value": 8,
-          "total": 80
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U5 KPI Tim!B23",
@@ -6681,17 +6582,17 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 10,
+          "total": 200
         }
       ]
     },
     {
       "skenario": "U5",
       "sel": "U5 KPI Tim!A28",
-      "nilai": 520,
-      "predikat": "Cukup",
+      "nilai": 400,
+      "predikat": "Perlu Perbaikan",
       "indikator": [
         {
           "sel": "U5 KPI Tim!B32",
@@ -6709,9 +6610,9 @@
             1.1
           ],
           "bobot": 40,
-          "pencapaian": 1,
-          "value": 8,
-          "total": 320
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U5 KPI Tim!B33",
@@ -6729,9 +6630,9 @@
             1
           ],
           "bobot": 30,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 10,
+          "total": 300
         },
         {
           "sel": "U5 KPI Tim!B34",
@@ -6749,9 +6650,9 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 200
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U5 KPI Tim!B35",
@@ -6769,17 +6670,17 @@
             1
           ],
           "bobot": 10,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 10,
+          "total": 100
         }
       ]
     },
     {
       "skenario": "U5",
       "sel": "U5 KPI Tim!A40",
-      "nilai": 580,
-      "predikat": "Cukup",
+      "nilai": 350,
+      "predikat": "Perlu Perbaikan",
       "indikator": [
         {
           "sel": "U5 KPI Tim!B44",
@@ -6797,9 +6698,9 @@
             12
           ],
           "bobot": 35,
-          "pencapaian": 10,
-          "value": 8,
-          "total": 280
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U5 KPI Tim!B45",
@@ -6817,9 +6718,9 @@
             1
           ],
           "bobot": 35,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 10,
+          "total": 350
         },
         {
           "sel": "U5 KPI Tim!B46",
@@ -6837,17 +6738,17 @@
             1
           ],
           "bobot": 30,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 300
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         }
       ]
     },
     {
       "skenario": "U5",
       "sel": "U5 KPI Tim!A51",
-      "nilai": 350,
-      "predikat": "Perlu Perbaikan",
+      "nilai": 550,
+      "predikat": "Cukup",
       "indikator": [
         {
           "sel": "U5 KPI Tim!B55",
@@ -6865,9 +6766,9 @@
             90
           ],
           "bobot": 25,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 80,
+          "value": 8,
+          "total": 200
         },
         {
           "sel": "U5 KPI Tim!B56",
@@ -6885,32 +6786,12 @@
             55
           ],
           "bobot": 25,
-          "pencapaian": 50,
-          "value": 8,
-          "total": 200
-        },
-        {
-          "sel": "U5 KPI Tim!B57",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 15,
           "pencapaian": null,
           "value": 0,
           "total": 0
         },
         {
-          "sel": "U5 KPI Tim!B58",
+          "sel": "U5 KPI Tim!B57",
           "persen": true,
           "tangga": [
             0.55,
@@ -6930,6 +6811,26 @@
           "total": 150
         },
         {
+          "sel": "U5 KPI Tim!B58",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 15,
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
+        },
+        {
           "sel": "U5 KPI Tim!B59",
           "persen": true,
           "tangga": [
@@ -6945,17 +6846,17 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 10,
+          "total": 200
         }
       ]
     },
     {
       "skenario": "U5",
       "sel": "U5 KPI Tim!A64",
-      "nilai": 650,
-      "predikat": "Baik",
+      "nilai": 350,
+      "predikat": "Perlu Perbaikan",
       "indikator": [
         {
           "sel": "U5 KPI Tim!B68",
@@ -6973,9 +6874,9 @@
             4
           ],
           "bobot": 40,
-          "pencapaian": 4,
-          "value": 10,
-          "total": 400
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U5 KPI Tim!B69",
@@ -6993,9 +6894,9 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 10,
+          "total": 200
         },
         {
           "sel": "U5 KPI Tim!B70",
@@ -7013,9 +6914,9 @@
             1
           ],
           "bobot": 25,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 250
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U5 KPI Tim!B71",
@@ -7033,17 +6934,17 @@
             1
           ],
           "bobot": 15,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 10,
+          "total": 150
         }
       ]
     },
     {
       "skenario": "U5",
       "sel": "U5 KPI Tim!A76",
-      "nilai": 550,
-      "predikat": "Cukup",
+      "nilai": 450,
+      "predikat": "Perlu Perbaikan",
       "indikator": [
         {
           "sel": "U5 KPI Tim!B80",
@@ -7061,32 +6962,12 @@
             1
           ],
           "bobot": 30,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 300
-        },
-        {
-          "sel": "U5 KPI Tim!B81",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 25,
           "pencapaian": null,
           "value": 0,
           "total": 0
         },
         {
-          "sel": "U5 KPI Tim!B82",
+          "sel": "U5 KPI Tim!B81",
           "persen": true,
           "tangga": [
             0.55,
@@ -7106,6 +6987,26 @@
           "total": 250
         },
         {
+          "sel": "U5 KPI Tim!B82",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 25,
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
+        },
+        {
           "sel": "U5 KPI Tim!B83",
           "persen": true,
           "tangga": [
@@ -7121,17 +7022,17 @@
             1
           ],
           "bobot": 20,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 10,
+          "total": 200
         }
       ]
     },
     {
       "skenario": "U5",
       "sel": "U5 KPI Tim!A89",
-      "nilai": 520,
-      "predikat": "Cukup",
+      "nilai": 400,
+      "predikat": "Perlu Perbaikan",
       "indikator": [
         {
           "sel": "U5 KPI Tim!B93",
@@ -7149,9 +7050,9 @@
             1.1
           ],
           "bobot": 40,
-          "pencapaian": 1,
-          "value": 8,
-          "total": 320
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U5 KPI Tim!B94",
@@ -7169,12 +7070,80 @@
             1
           ],
           "bobot": 40,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 400
+        },
+        {
+          "sel": "U5 KPI Tim!B95",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 20,
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
+        }
+      ]
+    },
+    {
+      "skenario": "U5",
+      "sel": "U5 KPI Tim!A111",
+      "nilai": 600,
+      "predikat": "Cukup",
+      "indikator": [
+        {
+          "sel": "U5 KPI Tim!B115",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 40,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 400
+        },
+        {
+          "sel": "U5 KPI Tim!B116",
+          "persen": true,
+          "tangga": [
+            0.125,
+            0.25,
+            0.375,
+            0.5,
+            0.625,
+            0.75,
+            0.875,
+            1,
+            1.1,
+            1.2
+          ],
+          "bobot": 40,
           "pencapaian": null,
           "value": 0,
           "total": 0
         },
         {
-          "sel": "U5 KPI Tim!B95",
+          "sel": "U5 KPI Tim!B117",
           "persen": true,
           "tangga": [
             0.55,
@@ -7197,76 +7166,8 @@
     },
     {
       "skenario": "U5",
-      "sel": "U5 KPI Tim!A111",
-      "nilai": 320,
-      "predikat": "Perlu Perbaikan",
-      "indikator": [
-        {
-          "sel": "U5 KPI Tim!B115",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 40,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
-        },
-        {
-          "sel": "U5 KPI Tim!B116",
-          "persen": true,
-          "tangga": [
-            0.125,
-            0.25,
-            0.375,
-            0.5,
-            0.625,
-            0.75,
-            0.875,
-            1,
-            1.1,
-            1.2
-          ],
-          "bobot": 40,
-          "pencapaian": 1,
-          "value": 8,
-          "total": 320
-        },
-        {
-          "sel": "U5 KPI Tim!B117",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
-        }
-      ]
-    },
-    {
-      "skenario": "U5",
       "sel": "U5 KPI Tim!A123",
-      "nilai": 480,
+      "nilai": 400,
       "predikat": "Perlu Perbaikan",
       "indikator": [
         {
@@ -7285,9 +7186,9 @@
             1.1
           ],
           "bobot": 40,
-          "pencapaian": 1,
-          "value": 8,
-          "total": 320
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U5 KPI Tim!B128",
@@ -7305,9 +7206,9 @@
             1
           ],
           "bobot": 30,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 10,
+          "total": 300
         },
         {
           "sel": "U5 KPI Tim!B129",
@@ -7325,9 +7226,9 @@
             1.1
           ],
           "bobot": 20,
-          "pencapaian": 1,
-          "value": 8,
-          "total": 160
+          "pencapaian": null,
+          "value": 0,
+          "total": 0
         },
         {
           "sel": "U5 KPI Tim!B130",
@@ -7345,9 +7246,9 @@
             1
           ],
           "bobot": 10,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
+          "pencapaian": 1,
+          "value": 10,
+          "total": 100
         }
       ]
     },
@@ -7528,7 +7429,7 @@
             1.05,
             1.1
           ],
-          "bobot": 35,
+          "bobot": 45,
           "pencapaian": null,
           "value": 0,
           "total": 0
@@ -7548,7 +7449,7 @@
             1,
             1
           ],
-          "bobot": 20,
+          "bobot": 25,
           "pencapaian": null,
           "value": 0,
           "total": 0
@@ -7568,7 +7469,7 @@
             1.05,
             1.1
           ],
-          "bobot": 15,
+          "bobot": 20,
           "pencapaian": null,
           "value": 0,
           "total": 0
@@ -7588,26 +7489,6 @@
             1,
             1
           ],
-          "bobot": 20,
-          "pencapaian": null,
-          "value": 0,
-          "total": 0
-        },
-        {
-          "sel": "U6 KPI Leader!B21",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
           "bobot": 10,
           "pencapaian": null,
           "value": 0,
@@ -7617,12 +7498,12 @@
     },
     {
       "skenario": "U6",
-      "sel": "U6 KPI Leader!A26",
+      "sel": "U6 KPI Leader!A25",
       "nilai": 0,
       "predikat": null,
       "indikator": [
         {
-          "sel": "U6 KPI Leader!B30",
+          "sel": "U6 KPI Leader!B29",
           "persen": false,
           "tangga": [
             11.5,
@@ -7642,7 +7523,7 @@
           "total": 0
         },
         {
-          "sel": "U6 KPI Leader!B31",
+          "sel": "U6 KPI Leader!B30",
           "persen": false,
           "tangga": [
             3,
@@ -7662,7 +7543,7 @@
           "total": 0
         },
         {
-          "sel": "U6 KPI Leader!B32",
+          "sel": "U6 KPI Leader!B31",
           "persen": true,
           "tangga": [
             0.5,
@@ -7682,7 +7563,7 @@
           "total": 0
         },
         {
-          "sel": "U6 KPI Leader!B33",
+          "sel": "U6 KPI Leader!B32",
           "persen": true,
           "tangga": [
             0.55,
@@ -7705,12 +7586,12 @@
     },
     {
       "skenario": "U6",
-      "sel": "U6 KPI Leader!A38",
+      "sel": "U6 KPI Leader!A37",
       "nilai": 0,
       "predikat": null,
       "indikator": [
         {
-          "sel": "U6 KPI Leader!B42",
+          "sel": "U6 KPI Leader!B41",
           "persen": true,
           "tangga": [
             0.7,
@@ -7730,7 +7611,7 @@
           "total": 0
         },
         {
-          "sel": "U6 KPI Leader!B43",
+          "sel": "U6 KPI Leader!B42",
           "persen": false,
           "tangga": [
             3.5,
@@ -7750,7 +7631,7 @@
           "total": 0
         },
         {
-          "sel": "U6 KPI Leader!B44",
+          "sel": "U6 KPI Leader!B43",
           "persen": false,
           "tangga": [
             15,
@@ -7770,7 +7651,7 @@
           "total": 0
         },
         {
-          "sel": "U6 KPI Leader!B45",
+          "sel": "U6 KPI Leader!B44",
           "persen": true,
           "tangga": [
             0.4,
@@ -7790,7 +7671,7 @@
           "total": 0
         },
         {
-          "sel": "U6 KPI Leader!B46",
+          "sel": "U6 KPI Leader!B45",
           "persen": true,
           "tangga": [
             0.55,
@@ -7810,7 +7691,7 @@
           "total": 0
         },
         {
-          "sel": "U6 KPI Leader!B47",
+          "sel": "U6 KPI Leader!B46",
           "persen": true,
           "tangga": [
             0.4,
@@ -7833,12 +7714,12 @@
     },
     {
       "skenario": "U6",
-      "sel": "U6 KPI Leader!A52",
+      "sel": "U6 KPI Leader!A51",
       "nilai": 0,
       "predikat": null,
       "indikator": [
         {
-          "sel": "U6 KPI Leader!B56",
+          "sel": "U6 KPI Leader!B55",
           "persen": false,
           "tangga": [
             147.5,
@@ -7858,7 +7739,7 @@
           "total": 0
         },
         {
-          "sel": "U6 KPI Leader!B57",
+          "sel": "U6 KPI Leader!B56",
           "persen": false,
           "tangga": [
             221.25,
@@ -7878,7 +7759,7 @@
           "total": 0
         },
         {
-          "sel": "U6 KPI Leader!B58",
+          "sel": "U6 KPI Leader!B57",
           "persen": true,
           "tangga": [
             0.4,
@@ -7898,7 +7779,7 @@
           "total": 0
         },
         {
-          "sel": "U6 KPI Leader!B59",
+          "sel": "U6 KPI Leader!B58",
           "persen": true,
           "tangga": [
             0.4,
@@ -8978,7 +8859,7 @@
     {
       "skenario": "U7",
       "sel": "U7 KPI Leader!A13",
-      "nilai": 935,
+      "nilai": 915,
       "predikat": "Istimewa",
       "indikator": [
         {
@@ -8996,357 +8877,13 @@
             1.05,
             1.1
           ],
-          "bobot": 35,
+          "bobot": 45,
           "pencapaian": 1.05,
           "value": 9,
-          "total": 315
+          "total": 405
         },
         {
           "sel": "U7 KPI Leader!B18",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 200
-        },
-        {
-          "sel": "U7 KPI Leader!B19",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1.05,
-            1.1
-          ],
-          "bobot": 15,
-          "pencapaian": 1,
-          "value": 8,
-          "total": 120
-        },
-        {
-          "sel": "U7 KPI Leader!B20",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 20,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 200
-        },
-        {
-          "sel": "U7 KPI Leader!B21",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 10,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 100
-        }
-      ]
-    },
-    {
-      "skenario": "U7",
-      "sel": "U7 KPI Leader!A26",
-      "nilai": 885,
-      "predikat": "Istimewa",
-      "indikator": [
-        {
-          "sel": "U7 KPI Leader!B30",
-          "persen": false,
-          "tangga": [
-            11.5,
-            12,
-            12.5,
-            13,
-            13.5,
-            14,
-            14.5,
-            15,
-            16,
-            17
-          ],
-          "bobot": 30,
-          "pencapaian": 15,
-          "value": 8,
-          "total": 240
-        },
-        {
-          "sel": "U7 KPI Leader!B31",
-          "persen": false,
-          "tangga": [
-            3,
-            4,
-            5,
-            6,
-            7,
-            8,
-            9,
-            10,
-            11.5,
-            13
-          ],
-          "bobot": 30,
-          "pencapaian": 11.5,
-          "value": 9,
-          "total": 270
-        },
-        {
-          "sel": "U7 KPI Leader!B32",
-          "persen": true,
-          "tangga": [
-            0.5,
-            0.6,
-            0.7,
-            0.8,
-            0.825,
-            0.85,
-            0.875,
-            0.9,
-            0.95,
-            1
-          ],
-          "bobot": 25,
-          "pencapaian": 0.95,
-          "value": 9,
-          "total": 225
-        },
-        {
-          "sel": "U7 KPI Leader!B33",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 15,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 150
-        }
-      ]
-    },
-    {
-      "skenario": "U7",
-      "sel": "U7 KPI Leader!A38",
-      "nilai": 930,
-      "predikat": "Istimewa",
-      "indikator": [
-        {
-          "sel": "U7 KPI Leader!B42",
-          "persen": true,
-          "tangga": [
-            0.7,
-            0.75,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1.05,
-            1.1
-          ],
-          "bobot": 30,
-          "pencapaian": 1.05,
-          "value": 9,
-          "total": 270
-        },
-        {
-          "sel": "U7 KPI Leader!B43",
-          "persen": false,
-          "tangga": [
-            3.5,
-            4,
-            4.5,
-            5,
-            5.5,
-            6,
-            6.5,
-            7,
-            8,
-            9
-          ],
-          "bobot": 20,
-          "pencapaian": 8,
-          "value": 9,
-          "total": 180
-        },
-        {
-          "sel": "U7 KPI Leader!B44",
-          "persen": false,
-          "tangga": [
-            15,
-            20,
-            25,
-            30,
-            35,
-            40,
-            45,
-            50,
-            52.5,
-            55
-          ],
-          "bobot": 10,
-          "pencapaian": 50,
-          "value": 8,
-          "total": 80
-        },
-        {
-          "sel": "U7 KPI Leader!B45",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 15,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 150
-        },
-        {
-          "sel": "U7 KPI Leader!B46",
-          "persen": true,
-          "tangga": [
-            0.55,
-            0.65,
-            0.75,
-            0.85,
-            0.9,
-            0.95,
-            0.98,
-            1,
-            1,
-            1
-          ],
-          "bobot": 10,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 100
-        },
-        {
-          "sel": "U7 KPI Leader!B47",
-          "persen": true,
-          "tangga": [
-            0.4,
-            0.5,
-            0.6,
-            0.8,
-            0.85,
-            0.9,
-            0.95,
-            1,
-            1,
-            1
-          ],
-          "bobot": 15,
-          "pencapaian": 1,
-          "value": 10,
-          "total": 150
-        }
-      ]
-    },
-    {
-      "skenario": "U7",
-      "sel": "U7 KPI Leader!A52",
-      "nilai": 945,
-      "predikat": "Istimewa",
-      "indikator": [
-        {
-          "sel": "U7 KPI Leader!B56",
-          "persen": false,
-          "tangga": [
-            147.5,
-            155,
-            162.5,
-            170,
-            177.5,
-            185,
-            192.5,
-            200,
-            210,
-            220
-          ],
-          "bobot": 35,
-          "pencapaian": 210,
-          "value": 9,
-          "total": 315
-        },
-        {
-          "sel": "U7 KPI Leader!B57",
-          "persen": false,
-          "tangga": [
-            221.25,
-            232.5,
-            243.75,
-            255,
-            266.25,
-            277.5,
-            288.75,
-            300,
-            315,
-            330
-          ],
-          "bobot": 20,
-          "pencapaian": 315,
-          "value": 9,
-          "total": 180
-        },
-        {
-          "sel": "U7 KPI Leader!B58",
           "persen": true,
           "tangga": [
             0.4,
@@ -9366,7 +8903,331 @@
           "total": 250
         },
         {
-          "sel": "U7 KPI Leader!B59",
+          "sel": "U7 KPI Leader!B19",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1.05,
+            1.1
+          ],
+          "bobot": 20,
+          "pencapaian": 1,
+          "value": 8,
+          "total": 160
+        },
+        {
+          "sel": "U7 KPI Leader!B20",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 10,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 100
+        }
+      ]
+    },
+    {
+      "skenario": "U7",
+      "sel": "U7 KPI Leader!A25",
+      "nilai": 885,
+      "predikat": "Istimewa",
+      "indikator": [
+        {
+          "sel": "U7 KPI Leader!B29",
+          "persen": false,
+          "tangga": [
+            11.5,
+            12,
+            12.5,
+            13,
+            13.5,
+            14,
+            14.5,
+            15,
+            16,
+            17
+          ],
+          "bobot": 30,
+          "pencapaian": 16,
+          "value": 9,
+          "total": 270
+        },
+        {
+          "sel": "U7 KPI Leader!B30",
+          "persen": false,
+          "tangga": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11.5,
+            13
+          ],
+          "bobot": 30,
+          "pencapaian": 10,
+          "value": 8,
+          "total": 240
+        },
+        {
+          "sel": "U7 KPI Leader!B31",
+          "persen": true,
+          "tangga": [
+            0.5,
+            0.6,
+            0.7,
+            0.8,
+            0.825,
+            0.85,
+            0.875,
+            0.9,
+            0.95,
+            1
+          ],
+          "bobot": 25,
+          "pencapaian": 0.95,
+          "value": 9,
+          "total": 225
+        },
+        {
+          "sel": "U7 KPI Leader!B32",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 15,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 150
+        }
+      ]
+    },
+    {
+      "skenario": "U7",
+      "sel": "U7 KPI Leader!A37",
+      "nilai": 910,
+      "predikat": "Istimewa",
+      "indikator": [
+        {
+          "sel": "U7 KPI Leader!B41",
+          "persen": true,
+          "tangga": [
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1.05,
+            1.1
+          ],
+          "bobot": 30,
+          "pencapaian": 1,
+          "value": 8,
+          "total": 240
+        },
+        {
+          "sel": "U7 KPI Leader!B42",
+          "persen": false,
+          "tangga": [
+            3.5,
+            4,
+            4.5,
+            5,
+            5.5,
+            6,
+            6.5,
+            7,
+            8,
+            9
+          ],
+          "bobot": 20,
+          "pencapaian": 8,
+          "value": 9,
+          "total": 180
+        },
+        {
+          "sel": "U7 KPI Leader!B43",
+          "persen": false,
+          "tangga": [
+            15,
+            20,
+            25,
+            30,
+            35,
+            40,
+            45,
+            50,
+            52.5,
+            55
+          ],
+          "bobot": 10,
+          "pencapaian": 52.5,
+          "value": 9,
+          "total": 90
+        },
+        {
+          "sel": "U7 KPI Leader!B44",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 15,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 150
+        },
+        {
+          "sel": "U7 KPI Leader!B45",
+          "persen": true,
+          "tangga": [
+            0.55,
+            0.65,
+            0.75,
+            0.85,
+            0.9,
+            0.95,
+            0.98,
+            1,
+            1,
+            1
+          ],
+          "bobot": 10,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 100
+        },
+        {
+          "sel": "U7 KPI Leader!B46",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 15,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 150
+        }
+      ]
+    },
+    {
+      "skenario": "U7",
+      "sel": "U7 KPI Leader!A51",
+      "nilai": 910,
+      "predikat": "Istimewa",
+      "indikator": [
+        {
+          "sel": "U7 KPI Leader!B55",
+          "persen": false,
+          "tangga": [
+            147.5,
+            155,
+            162.5,
+            170,
+            177.5,
+            185,
+            192.5,
+            200,
+            210,
+            220
+          ],
+          "bobot": 35,
+          "pencapaian": 200,
+          "value": 8,
+          "total": 280
+        },
+        {
+          "sel": "U7 KPI Leader!B56",
+          "persen": false,
+          "tangga": [
+            221.25,
+            232.5,
+            243.75,
+            255,
+            266.25,
+            277.5,
+            288.75,
+            300,
+            315,
+            330
+          ],
+          "bobot": 20,
+          "pencapaian": 315,
+          "value": 9,
+          "total": 180
+        },
+        {
+          "sel": "U7 KPI Leader!B57",
+          "persen": true,
+          "tangga": [
+            0.4,
+            0.5,
+            0.6,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+            1,
+            1,
+            1
+          ],
+          "bobot": 25,
+          "pencapaian": 1,
+          "value": 10,
+          "total": 250
+        },
+        {
+          "sel": "U7 KPI Leader!B58",
           "persen": true,
           "tangga": [
             0.4,
@@ -9390,7 +9251,7 @@
     {
       "skenario": "U7",
       "sel": "U7 KPI Tim!A1",
-      "nilai": 925,
+      "nilai": 920,
       "predikat": "Istimewa",
       "indikator": [
         {
@@ -9429,9 +9290,9 @@
             1.2
           ],
           "bobot": 15,
-          "pencapaian": 1,
-          "value": 8,
-          "total": 120
+          "pencapaian": 1.1,
+          "value": 9,
+          "total": 135
         },
         {
           "sel": "U7 KPI Tim!B7",
@@ -9449,9 +9310,9 @@
             1.1
           ],
           "bobot": 20,
-          "pencapaian": 1.05,
-          "value": 9,
-          "total": 180
+          "pencapaian": 1,
+          "value": 8,
+          "total": 160
         },
         {
           "sel": "U7 KPI Tim!B8",
@@ -9518,7 +9379,7 @@
     {
       "skenario": "U7",
       "sel": "U7 KPI Tim!A15",
-      "nilai": 915,
+      "nilai": 940,
       "predikat": "Istimewa",
       "indikator": [
         {
@@ -9557,9 +9418,9 @@
             1.1
           ],
           "bobot": 25,
-          "pencapaian": 1,
-          "value": 8,
-          "total": 200
+          "pencapaian": 1.05,
+          "value": 9,
+          "total": 225
         },
         {
           "sel": "U7 KPI Tim!B21",
@@ -9626,7 +9487,7 @@
     {
       "skenario": "U7",
       "sel": "U7 KPI Tim!A28",
-      "nilai": 960,
+      "nilai": 920,
       "predikat": "Istimewa",
       "indikator": [
         {
@@ -9645,9 +9506,9 @@
             1.1
           ],
           "bobot": 40,
-          "pencapaian": 1.05,
-          "value": 9,
-          "total": 360
+          "pencapaian": 1,
+          "value": 8,
+          "total": 320
         },
         {
           "sel": "U7 KPI Tim!B33",
@@ -9782,7 +9643,7 @@
     {
       "skenario": "U7",
       "sel": "U7 KPI Tim!A51",
-      "nilai": 925,
+      "nilai": 950,
       "predikat": "Istimewa",
       "indikator": [
         {
@@ -9821,9 +9682,9 @@
             55
           ],
           "bobot": 25,
-          "pencapaian": 50,
-          "value": 8,
-          "total": 200
+          "pencapaian": 52.5,
+          "value": 9,
+          "total": 225
         },
         {
           "sel": "U7 KPI Tim!B57",
@@ -10066,7 +9927,7 @@
     {
       "skenario": "U7",
       "sel": "U7 KPI Tim!A89",
-      "nilai": 920,
+      "nilai": 960,
       "predikat": "Istimewa",
       "indikator": [
         {
@@ -10085,9 +9946,9 @@
             1.1
           ],
           "bobot": 40,
-          "pencapaian": 1,
-          "value": 8,
-          "total": 320
+          "pencapaian": 1.05,
+          "value": 9,
+          "total": 360
         },
         {
           "sel": "U7 KPI Tim!B94",
@@ -10134,7 +9995,7 @@
     {
       "skenario": "U7",
       "sel": "U7 KPI Tim!A111",
-      "nilai": 960,
+      "nilai": 920,
       "predikat": "Istimewa",
       "indikator": [
         {
@@ -10173,9 +10034,9 @@
             1.2
           ],
           "bobot": 40,
-          "pencapaian": 1.1,
-          "value": 9,
-          "total": 360
+          "pencapaian": 1,
+          "value": 8,
+          "total": 320
         },
         {
           "sel": "U7 KPI Tim!B117",
@@ -10202,7 +10063,7 @@
     {
       "skenario": "U7",
       "sel": "U7 KPI Tim!A123",
-      "nilai": 900,
+      "nilai": 940,
       "predikat": "Istimewa",
       "indikator": [
         {
@@ -10221,9 +10082,9 @@
             1.1
           ],
           "bobot": 40,
-          "pencapaian": 1,
-          "value": 8,
-          "total": 320
+          "pencapaian": 1.05,
+          "value": 9,
+          "total": 360
         },
         {
           "sel": "U7 KPI Tim!B128",

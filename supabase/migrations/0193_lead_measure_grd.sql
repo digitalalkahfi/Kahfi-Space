@@ -1,7 +1,7 @@
 -- =====================================================================
 -- K-Space V2 — Lead measure GRD: kode, rentang tanggal, daftar akun
 --
--- Pekerjaan HARIAN yang berupa jumlah di GRD Cascade (GAP §4d) menjadi
+-- Pekerjaan HARIAN yang berupa jumlah di sheet GRD Cascade menjadi
 -- lead measure. Tiga hal belum bisa ditampung modul lead measure lama:
 --
 --   * target yang berganti menurut tanggal — 1.2.1.3 "5 kontak/hari"

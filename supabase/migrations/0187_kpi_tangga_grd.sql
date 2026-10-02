@@ -3,7 +3,7 @@
 --
 -- KPI selama ini didefinisikan per jabatan (`kpi_definitions`, 0024) dan
 -- dinilai dengan interpolasi lurus base → 500, goal → 800, stretch →
--- 1.000. GRD Oktober 2026 (docs/grd/GAP-GRD-OKTOBER.md §4a–b) bekerja
+-- 1.000. GRD Oktober 2026 (sheet KPI di docs/GRD-OKTOBER-2026.xlsx) bekerja
 -- lain, dan file GRD adalah sumber kebenarannya:
 --
 --   * tiap ORANG punya lembar KPI sendiri tiap BULAN — lima Leader GRD

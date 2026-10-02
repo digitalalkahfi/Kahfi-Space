@@ -14,7 +14,7 @@
 -- Aplikasi sebelumnya (0025) menukar SABAR dan ALARM, memakai ambang
 -- hasil 95% dan KRI 90%, dan tidak menegakkan pemicu dua pekan merah.
 -- File GRD adalah sumber kebenarannya, jadi aplikasi yang menyesuaikan
--- (docs/grd/GAP-GRD-OKTOBER.md §2).
+-- (matriks keputusan di sheet Target & Kurva WRM, docs/GRD-OKTOBER-2026.xlsx).
 -- =====================================================================
 
 create or replace function keputusan_wrm(p_hasil warna_wrm, p_kri warna_wrm)

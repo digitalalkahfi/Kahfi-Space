@@ -151,7 +151,7 @@ export function skorKpi(
 }
 
 // ---------------------------------------------------------------------
-// KPI GRD — tangga 10 kolom (migrasi 0187, docs/grd/GAP-GRD-OKTOBER.md)
+// KPI GRD — tangga 10 kolom (migrasi 0187; sheet KPI di file GRD bulanan)
 // ---------------------------------------------------------------------
 
 /** Banyak kolom tangga GRD. Kolom 4 = BASE, 8 = GOAL, 9–10 = STRETCH. */
