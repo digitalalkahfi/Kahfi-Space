@@ -3,6 +3,7 @@ import "server-only";
 
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
+import { klienAdmin } from "@/lib/supabase/admin";
 import { dataContoh } from "@/lib/data/contoh";
 import { inisialDari } from "@/lib/data/sesi";
 import { kontakOrang } from "@/lib/data/kontak-orang";
@@ -87,18 +88,46 @@ export async function daftarAnggotaTim(
     (data ?? []).map((u) => keAnggota(u, beban.get(u.id) ?? 0)),
   );
 
+  // CEO/Manager perlu tahu siapa yang belum bisa masuk (tombol "Buat akun
+  // login"). Gagal membacanya tidak menjatuhkan direktori.
+  const login = bolehLihatNonaktif ? await idPunyaLogin() : null;
+  const lengkap = login
+    ? terlihat.map((a) => ({ ...a, punyaLogin: login.has(a.id) }))
+    : terlihat;
+
   // Email hanya untuk yang berhak (dirinya, atasannya, CEO/Manager) dan
   // hanya lewat `kontak_orang`. Gagal membacanya tidak menjatuhkan
   // direktori — kolom email kosong lebih baik daripada halaman gagal.
   try {
-    const kontak = await kontakOrang(terlihat.map((a) => a.id));
-    return terlihat.map((a) => ({
+    const kontak = await kontakOrang(lengkap.map((a) => a.id));
+    return lengkap.map((a) => ({
       ...a,
       email: kontak.get(a.id)?.email ?? "",
     }));
   } catch (e) {
     console.error((e as Error).message);
-    return terlihat;
+    return lengkap;
+  }
+}
+
+/** Id anggota yang sudah punya akun login (Supabase Auth); null bila tak terbaca. */
+async function idPunyaLogin(): Promise<Set<string> | null> {
+  try {
+    const admin = klienAdmin();
+    const id = new Set<string>();
+    for (let page = 1; page <= 20; page += 1) {
+      const { data, error } = await admin.auth.admin.listUsers({
+        page,
+        perPage: 200,
+      });
+      if (error) throw error;
+      data.users.forEach((u) => id.add(u.id));
+      if (data.users.length < 200) break;
+    }
+    return id;
+  } catch (e) {
+    console.error(`Gagal membaca akun login: ${(e as Error).message}`);
+    return null;
   }
 }
 

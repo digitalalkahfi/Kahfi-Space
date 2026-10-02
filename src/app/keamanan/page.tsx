@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { ShieldCheck } from "lucide-react";
+import { KeyRound, ShieldCheck } from "lucide-react";
+import { Card } from "@/components/ui/card";
 import { AppShell } from "@/components/layout/app-shell";
 import { Reveal } from "@/components/motion/reveal";
 import { SubMenuAkun } from "@/components/profil/sub-menu-akun";
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
 export default async function KeamananPage({
   searchParams,
 }: PageProps<"/keamanan">) {
-  const { persona } = await searchParams;
+  const { persona, wajib } = await searchParams;
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
@@ -41,6 +42,25 @@ export default async function KeamananPage({
           </p>
           <SubMenuAkun />
         </div>
+
+        {/* Diarahkan middleware: akun baru dengan kata sandi sementara. */}
+        {wajib === "1" ? (
+          <Card className="rounded-3xl bg-warn-fill shadow-none ring-0">
+            <div className="flex items-start gap-2.5 px-5 text-warn-text">
+              <KeyRound className="mt-0.5 size-4 shrink-0" aria-hidden />
+              <div className="space-y-0.5">
+                <p className="text-[13px] leading-[18px] font-semibold">
+                  Ganti kata sandi sementara dulu
+                </p>
+                <p className="text-[13px] leading-[18px] text-pretty">
+                  Akunmu dibuat dengan kata sandi sementara. Isi kata sandi lama
+                  dengan kata sandi sementara itu, lalu buat kata sandi barumu
+                  sendiri. Setelah itu K-Space bisa dipakai seperti biasa.
+                </p>
+              </div>
+            </div>
+          </Card>
+        ) : null}
 
         <Reveal>
           <KartuAkun email={pengguna.email} />

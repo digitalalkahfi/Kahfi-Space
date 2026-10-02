@@ -22,7 +22,12 @@ import {
   jenjangAtasan,
   sebutPeran,
 } from "@/lib/atasan";
-import { tambahAnggota, ubahAnggota } from "@/app/actions/anggota";
+import {
+  tambahAnggota,
+  ubahAnggota,
+  type AkunLoginBaru,
+} from "@/app/actions/anggota";
+import { PanelAkunLogin } from "@/components/tim/akun-login";
 import type {
   AnggotaTim,
   KodeUnit,
@@ -193,8 +198,9 @@ function Isian({
             className="h-12 w-full rounded-xl bg-muted px-4 text-[15px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
           />
           <p className="text-[11px] leading-[14px] text-muted-foreground">
-            Email ini yang dipakainya masuk. Akun dibuat sendiri olehnya —
-            aplikasi tidak pernah menyimpan kata sandi siapa pun.
+            Email ini yang dipakainya masuk. Saat anggota baru disimpan, K-Space
+            langsung membuatkan akun login dengan kata sandi sementara yang
+            tampil sekali — aplikasi tidak menyimpannya.
           </p>
         </div>
 
@@ -458,9 +464,21 @@ export function DialogTambahAnggota({
   const [buka, setBuka] = useState(false);
   const [menyimpan, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
+  const [akun, setAkun] = useState<AkunLoginBaru | null>(null);
+  // Profil tersimpan tetapi akun loginnya belum: alasannya ditampilkan.
+  const [catatan, setCatatan] = useState<string | null>(null);
+
+  const ubahBuka = (b: boolean) => {
+    setBuka(b);
+    // Kata sandi sementara tidak boleh tertinggal setelah dialog ditutup.
+    if (!b) {
+      setAkun(null);
+      setCatatan(null);
+    }
+  };
 
   return (
-    <Dialog open={buka} onOpenChange={setBuka}>
+    <Dialog open={buka} onOpenChange={ubahBuka}>
       <DialogTrigger asChild>
         <Button
           type="button"
@@ -473,36 +491,66 @@ export function DialogTambahAnggota({
 
       <DialogContent className="max-h-[85dvh] overflow-y-auto rounded-3xl sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Tambah anggota</DialogTitle>
+          <DialogTitle>
+            {akun ? `${akun.nama} ditambahkan` : "Tambah anggota"}
+          </DialogTitle>
           <DialogDescription>
-            Perannya menentukan apa yang ia lihat dan boleh lakukan.
+            {akun
+              ? "Akun loginnya sudah dibuat. Teruskan email dan kata sandi sementara ini kepadanya."
+              : "Perannya menentukan apa yang ia lihat dan boleh lakukan."}
           </DialogDescription>
         </DialogHeader>
 
-        <Isian
-          pilihan={pilihan}
-          menyimpan={menyimpan}
-          pesan={pesan}
-          calon={semua
-            .filter((a) => a.status === "aktif")
-            .sort(
-              (a, b) =>
-                peringkatPeran(a.role) - peringkatPeran(b.role) ||
-                a.nama.localeCompare(b.nama),
-            )}
-          onSimpan={(data) =>
-            mulai(async () => {
-              setPesan(null);
-              const hasil = await tambahAnggota(data);
-              if (hasil.ok || hasil.kode === "demo") {
-                setBuka(false);
-                if (!hasil.ok) setPesan(hasil.pesan ?? null);
-                return;
-              }
-              setPesan(hasil.pesan ?? null);
-            })
-          }
-        />
+        {akun ? (
+          <PanelAkunLogin akun={akun} onSelesai={() => ubahBuka(false)} />
+        ) : catatan ? (
+          <div className="space-y-4">
+            <p
+              role="status"
+              className="rounded-xl bg-warn-fill px-3 py-2 text-[12px] leading-[16px] text-warn-text"
+            >
+              {catatan}
+            </p>
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                onClick={() => ubahBuka(false)}
+                className="tekan-halus rounded-full"
+              >
+                Tutup
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Isian
+            pilihan={pilihan}
+            menyimpan={menyimpan}
+            pesan={pesan}
+            calon={semua
+              .filter((a) => a.status === "aktif")
+              .sort(
+                (a, b) =>
+                  peringkatPeran(a.role) - peringkatPeran(b.role) ||
+                  a.nama.localeCompare(b.nama),
+              )}
+            onSimpan={(data) =>
+              mulai(async () => {
+                setPesan(null);
+                const hasil = await tambahAnggota(data);
+                if (hasil.ok) {
+                  if (hasil.data.akun) setAkun(hasil.data.akun);
+                  else setCatatan(hasil.pesan ?? "Anggota tersimpan.");
+                  return;
+                }
+                if (hasil.kode === "demo") {
+                  setBuka(false);
+                  return;
+                }
+                setPesan(hasil.pesan ?? null);
+              })
+            }
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
