@@ -64,9 +64,12 @@ export default async function GrdPage({ searchParams }: PageProps<"/grd">) {
           </div>
         </div>
 
-        <Reveal>
-          <KartuGoalKorporasi goal={goal} />
-        </Reveal>
+        {/* Staf hanya melihat goal miliknya (GRD Oktober 2026). */}
+        {pengguna.role !== "Staff" ? (
+          <Reveal>
+            <KartuGoalKorporasi goal={goal} />
+          </Reveal>
+        ) : null}
 
         <Reveal>
           <KartuWrm wrm={wrm} />

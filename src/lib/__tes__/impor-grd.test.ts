@@ -7,6 +7,7 @@ import {
   bacaTenggat,
   indukKode,
   jadwalTonggak,
+  lengkapiPemetaan,
   pisahKode,
   rentangHari,
   satuanAplikasi,
@@ -439,6 +440,56 @@ test("pemetaan: nama yang belum tercantum menghentikan, null dilaporkan dan dile
     rencana.lembar.map((l) => l.user_id),
     ["u-agnes"],
   );
+});
+
+test("pemetaan otomatis ke tabel tim: aturan pasti, sisanya unmapped", () => {
+  const mentah = bacaRencanaGrd(workbook());
+  assert.deepEqual(mentah.pemegangAkun, {
+    alkahfihome_: "Siti",
+    taokspill: "Agnes",
+  });
+  const data = {
+    users: [
+      { id: "u-siti", nama: "Siti Sa'adah", status: "aktif" },
+      { id: "u-krimh", nama: "krimh", status: "aktif" },
+      { id: "u-raka", nama: "Raka Pratama", status: "aktif" },
+      { id: "u-f1", nama: "fajarn632", status: "aktif" },
+      { id: "u-f2", nama: "Fajar Ramadhan", status: "aktif" },
+      { id: "u-kh", nama: "kholidfathh", status: "nonaktif" },
+      { id: "u-alma", nama: "Alma", status: "aktif" },
+    ],
+    accounts: [
+      { id: "a-home", username: "alkahfihome_", pic_user_id: "u-siti" },
+      { id: "a-tao", username: "taokspill_", pic_user_id: "u-krimh" },
+    ],
+    units: [],
+    goalLama: [],
+  };
+  const hasil = lengkapiPemetaan(
+    mentah,
+    { orang: { Alma: null }, akun: {} },
+    data,
+  );
+  const ke = (d: { nama: string; ke: string | null }[], n: string) =>
+    d.find((x) => x.nama === n)?.ke;
+
+  assert.equal(ke(hasil.akun, "alkahfihome_"), "alkahfihome_");
+  // Beda tanda _ saja: masih akun yang sama.
+  assert.equal(ke(hasil.akun, "taokspill"), "taokspill_");
+  // Awal nama yang hanya cocok satu anggota aktif.
+  assert.equal(ke(hasil.orang, "Siti"), "Siti Sa'adah");
+  assert.equal(ke(hasil.orang, "Raka"), "Raka Pratama");
+  // Nama tidak mirip, tetapi file menyebut dia pemegang taokspill.
+  assert.equal(ke(hasil.orang, "Agnes"), "krimh");
+  // Dua kandidat, anggota nonaktif, atau tidak ada: tidak ditebak.
+  assert.equal(ke(hasil.orang, "Fajar"), null);
+  assert.equal(ke(hasil.orang, "Kholid"), null);
+  assert.equal(ke(hasil.orang, "Azka"), null);
+  // Berkas pemetaan selalu menang, termasuk null yang disengaja.
+  const alma = hasil.orang.find((o) => o.nama === "Alma")!;
+  assert.deepEqual([alma.ke, alma.cara], [null, "berkas pemetaan"]);
+  assert.equal(hasil.pemetaan.orang.Siti, "Siti Sa'adah");
+  assert.equal(hasil.pemetaan.akun.taokspill, "taokspill_");
 });
 
 // ---------------------------------------------------------------------

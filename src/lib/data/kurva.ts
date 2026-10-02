@@ -8,8 +8,13 @@ import type { Pengguna } from "@/lib/types";
 export type TitikKurva = {
   tanggal: string;
   target: number;
-  /** null = titik belum tiba, atau ukuran isian yang belum dicatat. */
+  /** null = titik belum tiba, atau AKTUAL manual yang belum dicatat. */
   aktual: number | null;
+  /**
+   * AKTUAL diisi tangan: ukuran isian, atau ukuran GMV yang lingkupnya
+   * belum ada di laporan harian (0198). Selain itu otomatis.
+   */
+  manual: boolean;
   status: "hijau" | "merah" | null;
 };
 
@@ -27,8 +32,9 @@ export type BarisKurva = {
 
 /**
  * Kurva WRM GRD satu periode (bulan): target kumulatif tiap Sabtu,
- * aktualnya, dan status HIJAU/MERAH — dari `kurva_grd` (0188), jadi
- * aturan HIJAU = aktual ≥ target hanya ada di satu tempat.
+ * aktualnya, dan status HIJAU/MERAH — dari `kurva_grd` (0188, 0198), jadi
+ * aturan HIJAU = aktual ≥ target hanya ada di satu tempat. Staf hanya
+ * menerima baris miliknya.
  *
  * Mode demo belum punya kurva; daftar kosong ditampilkan apa adanya.
  */
@@ -59,6 +65,7 @@ export async function kurvaGrd(
       tanggal: t.tanggal,
       target: Number(t.target),
       aktual: t.aktual === null ? null : Number(t.aktual),
+      manual: t.manual ?? k.sumber === "isian",
       status: t.status,
     })),
   }));

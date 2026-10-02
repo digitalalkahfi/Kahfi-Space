@@ -424,14 +424,22 @@ uji("tenggat hanya diubah CEO/Manager, dan perubahannya berjejak", async () => {
 });
 
 uji(
-  "semua yang sudah masuk boleh membaca rencana; menambah tonggak hanya CEO/Manager",
+  "Leader membaca seluruh rencana, staf hanya miliknya (0198); menambah tonggak hanya CEO/Manager",
   async () => {
-    const n = await sebagai(
+    const n = async (siapa) =>
+      (await sebagai(db, siapa, "select count(*)::int n from grd_tonggak"))
+        .rows[0].n;
+    harusSama(await n(DEWI), 6);
+    // Nabila bukan PIC rencana mana pun; Rian hanya tonggak rencananya.
+    harusSama(await n(NABILA), 0);
+    const milikRian = await sebagaiAdmin(
       db,
-      NABILA,
-      "select count(*)::int n from grd_tonggak",
+      `select count(*)::int n from grd_tonggak t
+         join grd_rencana r on r.id = t.rencana_id
+        where $1 = any (r.pic_ids)`,
+      [RIAN],
     );
-    harusSama(n.rows[0].n, 6);
+    harusSama(await n(RIAN), milikRian.rows[0].n);
     const r = await tonggak("1.1.3.1");
     await harusDitolak(
       async () =>
