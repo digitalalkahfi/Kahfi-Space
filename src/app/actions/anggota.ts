@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
+import { klienAdmin } from "@/lib/supabase/admin";
+import { buatSandiSementara, WAJIB_GANTI_SANDI } from "@/lib/keamanan";
 import { sesiSaatIni } from "@/lib/data/sesi";
 import { bolehKelolaAnggota, daftarAnggotaTim } from "@/lib/data/anggota";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
@@ -99,6 +101,135 @@ async function namaUnit(kode: KodeUnit | null) {
   return data?.nama ? data.nama.split(" (")[0] : "Manajemen";
 }
 
+/** Akun login yang baru dibuat; kata sandinya hanya ada di balasan ini. */
+export type AkunLoginBaru = { nama: string; email: string; sandi: string };
+
+/**
+ * Membuat akun login (Supabase Auth) untuk profil anggota yang sudah ada,
+ * dengan kata sandi sementara yang ditampilkan SEKALI kepada CEO/Manager
+ * dan tidak pernah disimpan aplikasi. Pemiliknya wajib menggantinya saat
+ * pertama masuk (`harusGantiSandiDulu`, middleware).
+ *
+ * `supabase/auth.sql` menyamakan id profil dengan id akun Auth lewat
+ * email yang sama; bila jembatan itu belum terpasang, penyamaannya
+ * dikerjakan di sini (foreign key ikut lewat on update cascade).
+ */
+async function buatAkunAuth(profil: {
+  id: string;
+  nama: string;
+  email: string;
+}): Promise<Hasil<AkunLoginBaru>> {
+  let admin: ReturnType<typeof klienAdmin>;
+  try {
+    admin = klienAdmin();
+  } catch {
+    return gagal(
+      "Pembuatan akun login belum diaktifkan di server (kunci layanan Supabase belum dipasang).",
+    );
+  }
+
+  const { data: ada } = await admin.auth.admin.getUserById(profil.id);
+  if (ada?.user) {
+    return gagal(`${profil.nama} sudah punya akun login.`, "validasi");
+  }
+
+  const sandi = buatSandiSementara({ nama: profil.nama, email: profil.email });
+  const { data, error } = await admin.auth.admin.createUser({
+    email: profil.email,
+    password: sandi,
+    email_confirm: true,
+    user_metadata: { nama: profil.nama, [WAJIB_GANTI_SANDI]: true },
+  });
+  if (error || !data.user) {
+    return /already|registered|exists/i.test(error?.message ?? "")
+      ? gagal(
+          `Email ${profil.email} sudah dipakai akun login lain. Periksa emailnya di data anggota.`,
+          "validasi",
+        )
+      : gagal(
+          `Gagal membuat akun login: ${error?.message ?? "tanpa keterangan"}`,
+        );
+  }
+
+  const idAuth = data.user.id;
+  const { data: sudahSama } = await admin
+    .from("users")
+    .select("id")
+    .eq("id", idAuth)
+    .maybeSingle();
+  if (!sudahSama) {
+    const { error: gagalSamakan } = await admin
+      .from("users")
+      .update({ id: idAuth })
+      .eq("id", profil.id);
+    if (gagalSamakan) {
+      // Akun tanpa profil tidak berguna dan membingungkan: batalkan.
+      await admin.auth.admin.deleteUser(idAuth);
+      return gagal(
+        `Akun login belum bisa disambungkan ke profil ${profil.nama}: ${gagalSamakan.message}`,
+      );
+    }
+  }
+
+  return sukses({ nama: profil.nama, email: profil.email, sandi });
+}
+
+/**
+ * Tombol "Buat akun login" untuk anggota yang profilnya sudah ada tetapi
+ * belum bisa masuk (mis. didaftarkan sebelum fitur ini ada).
+ */
+export async function buatAkunLogin(
+  anggotaId: string,
+): Promise<Hasil<AkunLoginBaru>> {
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (!bolehKelolaAnggota(pengguna)) {
+    return gagal(
+      "Hanya CEO atau Manager yang boleh membuat akun login.",
+      "izin",
+    );
+  }
+
+  // Email anggota tidak terbuka lewat RLS biasa (hanya `kontak_orang`);
+  // hak CEO/Manager sudah diperiksa di atas, jadi dibaca lewat klien admin.
+  let admin: ReturnType<typeof klienAdmin>;
+  try {
+    admin = klienAdmin();
+  } catch {
+    return gagal(
+      "Pembuatan akun login belum diaktifkan di server (kunci layanan Supabase belum dipasang).",
+    );
+  }
+  const { data: profil } = await admin
+    .from("users")
+    .select("id, nama, email, status")
+    .eq("id", anggotaId)
+    .maybeSingle();
+  if (!profil) return gagal("Anggota tidak ditemukan.", "validasi");
+  if (profil.status !== "aktif") {
+    return gagal(
+      "Aktifkan anggota ini dulu sebelum membuat akun login.",
+      "validasi",
+    );
+  }
+  if (!profil.email || !POLA_EMAIL.test(profil.email)) {
+    return gagal(
+      "Anggota ini belum punya email yang sah. Isi emailnya dulu lewat tombol ubah.",
+      "validasi",
+    );
+  }
+
+  const hasil = await buatAkunAuth({
+    id: profil.id,
+    nama: profil.nama,
+    email: profil.email.toLowerCase(),
+  });
+  if (hasil.ok) segarkan();
+  return hasil;
+}
+
 function segarkan() {
   revalidatePath("/tim");
   revalidatePath("/tim/struktur");
@@ -106,14 +237,15 @@ function segarkan() {
 }
 
 /**
- * Tambah anggota baru.
- *
- * Yang dibuat di sini hanya baris profil, bukan akun Supabase Auth —
- * aplikasi ini sengaja tidak pernah memegang kata sandi siapa pun.
- * Orangnya mendaftar sendiri lewat Auth memakai email yang sama, lalu
- * `supabase/auth.sql` menyatukan id profilnya dengan id Auth.
+ * Tambah anggota baru: baris profil, lalu langsung akun login dengan
+ * kata sandi sementara (`buatAkunAuth`). Kata sandinya dikembalikan
+ * sekali untuk diteruskan CEO/Manager kepada orangnya; aplikasi tidak
+ * menyimpannya. Bila akun login gagal dibuat, profil tetap tersimpan dan
+ * akunnya bisa dibuat belakangan lewat tombol "Buat akun login".
  */
-export async function tambahAnggota(input: MasukanAnggota): Promise<Hasil> {
+export async function tambahAnggota(
+  input: MasukanAnggota,
+): Promise<Hasil<{ akun: AkunLoginBaru | null }>> {
   const salah = periksa(input) ?? periksaAtasan(input);
   if (salah) return gagal(salah, "validasi");
   if (modeData() === "demo") return BALASAN_DEMO;
@@ -149,15 +281,15 @@ export async function tambahAnggota(input: MasukanAnggota): Promise<Hasil> {
   }
 
   const sb = await klienServer();
+  // `users.id` mengikuti `auth.users.id` dan karena itu tidak punya nilai
+  // bawaan. Profil memakai id sementara; begitu akun login dibuat,
+  // `supabase/auth.sql` menyamakan idnya dengan id Auth.
+  const idSementara = crypto.randomUUID();
+  const email = input.email.trim().toLowerCase();
   const { error } = await sb.from("users").insert({
-    // `users.id` mengikuti `auth.users.id` dan karena itu tidak punya
-    // nilai bawaan. Profil yang dibuat lebih dulu memakai id sementara;
-    // saat orangnya mendaftar dengan email yang sama, `supabase/auth.sql`
-    // menyamakan idnya dengan id Auth dan seluruh baris anak ikut terbawa
-    // lewat foreign key on update cascade.
-    id: crypto.randomUUID(),
+    id: idSementara,
     nama: input.nama.trim(),
-    email: input.email.trim().toLowerCase(),
+    email,
     role: input.role,
     jabatan: input.jabatan.trim(),
     unit_id: await idUnit(input.unitKode),
@@ -176,11 +308,21 @@ export async function tambahAnggota(input: MasukanAnggota): Promise<Hasil> {
       : gagal(`Gagal menyimpan: ${error.message}`);
   }
 
+  const akun = await buatAkunAuth({
+    id: idSementara,
+    nama: input.nama.trim(),
+    email,
+  });
   segarkan();
-  return sukses(
-    undefined,
-    `${input.nama.trim()} ditambahkan. Ia bisa masuk setelah mendaftar dengan email tersebut.`,
-  );
+  return akun.ok
+    ? sukses(
+        { akun: akun.data },
+        `${input.nama.trim()} ditambahkan dan akun loginnya sudah dibuat.`,
+      )
+    : sukses(
+        { akun: null },
+        `${input.nama.trim()} ditambahkan, tetapi akun loginnya belum dibuat: ${akun.pesan} Coba lagi lewat tombol "Buat akun login".`,
+      );
 }
 
 /** Ubah data anggota yang sudah ada. */

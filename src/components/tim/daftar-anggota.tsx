@@ -13,6 +13,7 @@ import { DialogAtasan } from "@/components/tim/dialog-atasan";
 import { LencanaStatus } from "@/components/tim/lencana-status";
 import { TombolStatusAnggota } from "@/components/tim/tombol-status-anggota";
 import { DialogUbahAnggota } from "@/components/tim/dialog-anggota";
+import { TombolAkunLogin } from "@/components/tim/akun-login";
 import type { AnggotaTim, MataRantai, PilihanOrganisasi } from "@/lib/types";
 
 function BarisAnggota({
@@ -54,6 +55,11 @@ function BarisAnggota({
             {anggota.nama}
           </Link>
           <LencanaStatus status={anggota.status} />
+          {anggota.punyaLogin === false && anggota.status === "aktif" ? (
+            <span className="inline-flex items-center rounded-full bg-warn-fill px-2 py-0.5 text-[10px] leading-[14px] font-semibold text-warn-text">
+              belum bisa masuk
+            </span>
+          ) : null}
         </p>
         <p className="truncate text-[11px] leading-[14px] text-muted-foreground">
           {anggota.jabatan}
@@ -92,6 +98,7 @@ function BarisAnggota({
 
       {bolehKelola ? (
         <div className="flex basis-full items-center justify-end gap-1 sm:basis-auto">
+          <TombolAkunLogin anggota={anggota} />
           <Button
             type="button"
             variant="ghost"

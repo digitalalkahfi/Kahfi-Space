@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL, supabaseSiap } from "./config";
 import type { Database } from "./types";
+import { harusGantiSandiDulu } from "@/lib/keamanan";
 
 /** Halaman yang boleh dibuka tanpa sesi. */
 const TERBUKA = ["/masuk", "/auth"];
@@ -52,6 +53,15 @@ export async function segarkanSesi(request: NextRequest) {
     tujuan.pathname = "/masuk";
     // Supaya pengguna kembali ke halaman yang tadi ia tuju setelah masuk.
     tujuan.searchParams.set("lanjut", `${path}${request.nextUrl.search}`);
+    return NextResponse.redirect(tujuan);
+  }
+
+  // Akun yang dibuat CEO/Manager memakai kata sandi sementara: pemiliknya
+  // mengganti dulu di halaman Keamanan sebelum memakai K-Space.
+  if (user && harusGantiSandiDulu(user.user_metadata, path)) {
+    const tujuan = request.nextUrl.clone();
+    tujuan.pathname = "/keamanan";
+    tujuan.search = "?wajib=1";
     return NextResponse.redirect(tujuan);
   }
 

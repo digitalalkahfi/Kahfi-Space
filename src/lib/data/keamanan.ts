@@ -3,7 +3,7 @@ import "server-only";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
-import { periksaSandi, sandiBaruSah } from "@/lib/keamanan";
+import { periksaSandi, sandiBaruSah, WAJIB_GANTI_SANDI } from "@/lib/keamanan";
 import { coba, reset, type Gerbang } from "@/lib/gerbang-coba";
 import type { Pengguna } from "@/lib/types";
 
@@ -109,7 +109,11 @@ export async function gantiSandiPengguna(
   if (modeData() === "demo") return BALASAN_DEMO;
 
   const sb = await klienServer();
-  const { error } = await sb.auth.updateUser({ password: baru });
+  // Sekaligus melepas tanda kata sandi sementara (akun buatan CEO/Manager).
+  const { error } = await sb.auth.updateUser({
+    password: baru,
+    data: { [WAJIB_GANTI_SANDI]: false },
+  });
   if (error) return gagal(`Gagal mengganti kata sandi: ${error.message}`);
 
   return sukses(

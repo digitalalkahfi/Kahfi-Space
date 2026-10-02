@@ -237,3 +237,49 @@ export function sandiBaruSah(
   }
   return { ok: true };
 }
+
+// ---------------------------------------------------------------------
+// Kata sandi sementara untuk akun login baru
+// ---------------------------------------------------------------------
+
+/** Tanpa huruf/angka yang mudah tertukar saat dibacakan (0/O, 1/l/I). */
+const HURUF_SANDI = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+
+/**
+ * Kata sandi sementara yang memenuhi `periksaSandi`, mis. "Kq7m-Pt4x-9WzR".
+ * Ditampilkan sekali kepada CEO/Manager yang membuat akunnya dan tidak
+ * pernah disimpan aplikasi; pemiliknya wajib menggantinya saat masuk.
+ */
+export function buatSandiSementara(
+  konteks: { email?: string; nama?: string } = {},
+): string {
+  for (;;) {
+    const acak = new Uint32Array(12);
+    crypto.getRandomValues(acak);
+    const huruf = [...acak].map((n) => HURUF_SANDI[n % HURUF_SANDI.length]);
+    const sandi = [0, 4, 8]
+      .map((i) => huruf.slice(i, i + 4).join(""))
+      .join("-");
+    if (periksaSandi(sandi, konteks).ok) return sandi;
+  }
+}
+
+/** Kunci metadata Auth: akun dengan kata sandi sementara yang belum diganti. */
+export const WAJIB_GANTI_SANDI = "wajib_ganti_sandi";
+
+/** Jalur yang tetap boleh dibuka sebelum kata sandi sementara diganti. */
+const JALUR_SAAT_WAJIB_GANTI = ["/keamanan", "/masuk", "/auth", "/api"];
+
+/**
+ * Pemilik kata sandi sementara diarahkan ke halaman Keamanan sampai ia
+ * menggantinya. Halaman Keamanan sendiri (dan keluar) tetap terbuka.
+ */
+export function harusGantiSandiDulu(
+  metadata: Record<string, unknown> | null | undefined,
+  path: string,
+): boolean {
+  if (metadata?.[WAJIB_GANTI_SANDI] !== true) return false;
+  return !JALUR_SAAT_WAJIB_GANTI.some(
+    (j) => path === j || path.startsWith(`${j}/`),
+  );
+}

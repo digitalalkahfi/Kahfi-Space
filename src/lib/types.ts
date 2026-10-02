@@ -306,6 +306,11 @@ export type AnggotaTim = {
   status: "aktif" | "nonaktif";
   /** Akun affiliator yang ia pegang sebagai PIC. */
   akunDipegang: number;
+  /**
+   * Sudah punya akun login (Supabase Auth)? Hanya diisi untuk CEO/Manager;
+   * undefined = tidak diketahui.
+   */
+  punyaLogin?: boolean;
 };
 
 export type MataRantai = {
