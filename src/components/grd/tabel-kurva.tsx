@@ -181,7 +181,9 @@ export function TabelKurva({
                         {b.pic || "—"}
                         {b.sumber === "isian"
                           ? " · diisi tiap Sabtu"
-                          : " · dari laporan harian"}
+                          : b.titik.some((t) => t.manual)
+                            ? " · belum ada di laporan harian, diisi tiap Sabtu"
+                            : " · dari laporan harian"}
                       </span>
                     </th>
                     {tanggal.map((t) => {
