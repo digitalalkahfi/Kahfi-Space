@@ -230,14 +230,23 @@ uji("blok goal membaca judul goal: ubah goal, tabel ikut berubah", async () => {
   harusSama(rows[0].l_teks, "UMUM — berlaku untuk semua goal");
 });
 
-uji("semua yang sudah masuk boleh membaca tabel", async () => {
-  const rows = await tabel(await id("Nabila Putri"));
-  harusSama(rows.length, 4);
-  harus(
-    rows.every((x) => x.p_teks),
-    "teks perusahaan tetap terbaca",
-  );
-});
+uji(
+  "Leader membaca seluruh tabel; staf hanya baris miliknya (0198)",
+  async () => {
+    const rows = await tabel(await id("Dewi Lestari"));
+    harusSama(rows.length, 4);
+    harus(
+      rows.every((x) => x.p_teks),
+      "teks perusahaan tetap terbaca",
+    );
+    // Staf bukan PIC; hanya baris "Seluruh tim" yang tampil.
+    const staf = await tabel(await id("Nabila Putri"));
+    harusSama(
+      staf.map((x) => x.kode),
+      ["1.1.0.1"],
+    );
+  },
+);
 
 uji("impor ulang mengganti susunan sheet tanpa sisa", async () => {
   await impor(await rencana({ labelLeader: "GOAL LEADER AFFILIATOR (Siti)" }));

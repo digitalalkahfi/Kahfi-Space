@@ -10,6 +10,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { DialogTambahGoal } from "@/components/grd/dialog-tambah-goal";
 import { TabelGrd } from "@/components/grd/tabel-grd";
 import { tabelGrd } from "@/lib/data/tabel-grd";
+import { daftarDepartemen, saringDepartemen } from "@/lib/tabel-grd";
 import { cn } from "@/lib/utils";
 import {
   anakTanggaBulanan,
@@ -31,7 +32,7 @@ export const metadata: Metadata = {
 export default async function GoalPage({
   searchParams,
 }: PageProps<"/grd/goal">) {
-  const { persona, tampilan } = await searchParams;
+  const { persona, tampilan, departemen } = await searchParams;
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
@@ -44,17 +45,32 @@ export default async function GoalPage({
   // Kedua tampilan membaca data yang sama (goals, grd_rencana); hanya
   // yang ditampilkan saja yang dimuat.
   const pohon = modeTabel ? [] : await pohonGoal(pengguna, tanggal);
-  const tabel = modeTabel
+  const tabelPenuh = modeTabel
     ? await tabelGrd(pengguna, `${tanggal.slice(0, 7)}-01`)
+    : null;
+  // Filter per departemen (Affiliator, Mabit Scholar, TAP, MCN, MMC, staf
+  // pendukung, tonggak Manager) dari label blok Goal Leader di sheet.
+  const departemenList = tabelPenuh ? daftarDepartemen(tabelPenuh.baris) : [];
+  const departemenAktif =
+    typeof departemen === "string" &&
+    departemenList.some((d) => d.kunci === departemen)
+      ? departemen
+      : null;
+  const tabel = tabelPenuh
+    ? {
+        ...tabelPenuh,
+        baris: saringDepartemen(tabelPenuh.baris, departemenAktif),
+      }
     : null;
 
   // Anak tangga ditampilkan untuk goal teratas yang terlihat pengguna ini.
   const utama = pohon[0];
   const bulan = utama ? await anakTanggaBulanan(utama.id, tanggal) : [];
 
-  const alamat = (t: "hierarki" | "tabel") => {
+  const alamat = (t: "hierarki" | "tabel", dep?: string | null) => {
     const q = new URLSearchParams();
     if (t === "tabel") q.set("tampilan", "tabel");
+    if (t === "tabel" && dep) q.set("departemen", dep);
     if (typeof persona === "string") q.set("persona", persona);
     const s = q.toString();
     return s ? `/grd/goal?${s}` : "/grd/goal";
@@ -123,6 +139,40 @@ export default async function GoalPage({
             );
           })}
         </nav>
+
+        {tabel && departemenList.length > 1 ? (
+          <nav
+            aria-label="Filter departemen"
+            className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 lg:mx-0 lg:flex-wrap lg:px-0"
+          >
+            {[
+              { kunci: null, label: "Semua departemen" },
+              ...departemenList,
+            ].map((d) => {
+              const aktif = d.kunci === departemenAktif;
+              return (
+                <Link
+                  key={d.kunci ?? "semua"}
+                  href={alamat("tabel", d.kunci)}
+                  aria-current={aktif ? "page" : undefined}
+                  className={cn(
+                    "tekan-halus inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[12px] leading-[16px] font-semibold whitespace-nowrap ring-1",
+                    aktif
+                      ? "bg-primary text-primary-foreground ring-primary"
+                      : "bg-card text-muted-foreground ring-border-subtle",
+                  )}
+                >
+                  {d.label}
+                  {"jumlah" in d ? (
+                    <span className="tabular text-[10px] leading-[14px] opacity-80">
+                      {d.jumlah}
+                    </span>
+                  ) : null}
+                </Link>
+              );
+            })}
+          </nav>
+        ) : null}
 
         {tabel ? (
           <Reveal>

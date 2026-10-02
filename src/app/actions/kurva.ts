@@ -7,12 +7,13 @@ import { sesiSaatIni } from "@/lib/data/sesi";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
 
 /**
- * Mencatat capaian kumulatif sebuah ukuran GRD isian (seller, creator,
- * peserta, …) pada satu tanggal — mis. AKTUAL Sabtu di kurva WRM.
+ * Mencatat capaian kumulatif sebuah ukuran GRD pada satu tanggal — mis.
+ * AKTUAL Sabtu di kurva WRM: ukuran isian (seller, creator, peserta, …),
+ * atau ukuran GMV yang belum ada di laporan harian (0198).
  *
- * Yang boleh ditentukan database (`boleh_isi_ukuran`, 0188): CEO/Manager,
- * PIC ukurannya, pemilik goalnya, dan atasan mereka. Nilai null
- * mengosongkan catatan tanggal itu.
+ * Yang boleh ditentukan database (`boleh_isi_ukuran`, 0198): CEO/Manager,
+ * atau Leader/Co-Leader untuk ukuran divisinya. Nilai null mengosongkan
+ * catatan tanggal itu.
  */
 export async function isiCapaianUkuran(input: {
   ukuranId: string;

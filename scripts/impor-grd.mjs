@@ -4,9 +4,13 @@
  *
  * Alur:
  *   1. File GRD dibaca menjadi rencana bernama (`src/lib/impor-grd.ts`).
- *   2. Nama orang dan akun dipetakan lewat berkas pemetaan yang disetujui
- *      pemilik — tidak ada tebakan otomatis. Nama yang belum tercantum
- *      menghentikan impor; yang sengaja null dilaporkan dan dilewati.
+ *   2. Nama orang dan akun dicocokkan ke tabel anggota tim (`users`) dan
+ *      akun (`accounts`) dengan aturan pasti (`lengkapiPemetaan`): nama
+ *      persis, awal nama yang hanya cocok satu orang, atau PIC akun yang
+ *      dipegangnya menurut file. Berkas pemetaan berisi pengecualian yang
+ *      disetujui pemilik dan selalu menang. Yang tidak cocok TIDAK ditebak:
+ *      dicatat sebagai "unmapped" (dicetak dan ditulis ke
+ *      .tmp/grd/unmapped-YYYY-MM.json), lalu dilewati.
  *   3. Rencana ber-id dikirim ke `impor_grd` (migrasi 0190, 0195):
  *      seluruhnya dalam satu transaksi — goal, ukuran & kurva, lembar
  *      KPI, rencana operasional & tonggak, lead measure.
@@ -31,7 +35,11 @@ import fs from "node:fs";
 import path from "node:path";
 import * as XLSX from "xlsx";
 import { createClient } from "@supabase/supabase-js";
-import { bacaRencanaGrd, susunRencana } from "@/lib/impor-grd";
+import {
+  bacaRencanaGrd,
+  lengkapiPemetaan,
+  susunRencana,
+} from "@/lib/impor-grd";
 
 XLSX.set_fs(fs);
 const AKAR = path.resolve(import.meta.dirname, "..");
@@ -94,7 +102,7 @@ async function ambil(tabel, kolom, saring) {
 
 const data = {
   users: await ambil("users", "id, nama, status"),
-  accounts: await ambil("accounts", "id, username"),
+  accounts: await ambil("accounts", "id, username, pic_user_id"),
   units: await ambil("units", "id, kode"),
   goalLama: await ambil("goals", "id, judul, periode", (q) =>
     q.is("kode", null),
@@ -102,43 +110,49 @@ const data = {
 };
 
 // ---------------------------------------------------------------------
-// Pemetaan: tanpa berkas, dibuatkan usulan berisi padanan persis saja.
+// Pemetaan: pengecualian dari berkas + pencocokan otomatis ke tabel tim
 // ---------------------------------------------------------------------
-if (!fs.existsSync(PEMETAAN)) {
-  const persisOrang = new Map(
-    data.users.map((u) => [u.nama.toLowerCase(), u.nama]),
-  );
-  const persisAkun = new Map(
-    data.accounts.map((a) => [a.username.toLowerCase(), a.username]),
-  );
-  const orang = [
-    ...new Set([
-      ...mentah.goals.map((g) => g.pemilik),
-      ...mentah.ukuran.map((u) => u.pic),
-      ...mentah.lembar.map((l) => l.orang),
-    ]),
-  ].filter(Boolean);
-  const akun = [
-    ...new Set([
-      ...mentah.goals.map((g) => g.akun),
-      ...mentah.ukuran.flatMap((u) => u.lingkup.map((l) => l.akun)),
-    ]),
-  ].filter(Boolean);
-  const usulan = {
-    _catatan:
-      "Usulan otomatis berisi padanan persis saja. Periksa SETIAP baris: isi nama/username " +
-      "persis seperti di K-Space, atau null bila orang/akunnya belum terdaftar.",
-    orang: Object.fromEntries(
-      orang.map((n) => [n, persisOrang.get(n.toLowerCase()) ?? null]),
-    ),
-    akun: Object.fromEntries(
-      akun.map((n) => [n, persisAkun.get(n.toLowerCase()) ?? null]),
-    ),
-    struktur: [],
-    hapus_goal_periode: [],
-  };
+const berkasAda = fs.existsSync(PEMETAAN);
+const dasar = berkasAda
+  ? JSON.parse(fs.readFileSync(PEMETAAN, "utf8"))
+  : { orang: {}, akun: {} };
+const cocok = lengkapiPemetaan(mentah, dasar, data);
+const pemetaan = cocok.pemetaan;
+
+const unmapped = {
+  orang: cocok.orang
+    .filter((o) => !o.ke)
+    .map(({ nama, cara }) => ({ nama, cara })),
+  akun: cocok.akun
+    .filter((a) => !a.ke)
+    .map(({ nama, cara }) => ({ nama, cara })),
+};
+const DIR = path.join(AKAR, ".tmp", "grd");
+fs.mkdirSync(DIR, { recursive: true });
+fs.writeFileSync(
+  path.join(DIR, `unmapped-${mentah.periode.slice(0, 7)}.json`),
+  JSON.stringify(unmapped, null, 2) + "\n",
+);
+
+if (!berkasAda) {
+  // Tanpa berkas: tulis usulan dari hasil pencocokan supaya diperiksa dulu
+  // (berkas juga memuat sumber otomatis KPI, struktur, dan papan).
   fs.mkdirSync(path.dirname(PEMETAAN), { recursive: true });
-  fs.writeFileSync(PEMETAAN, JSON.stringify(usulan, null, 2) + "\n");
+  fs.writeFileSync(
+    PEMETAAN,
+    JSON.stringify(
+      {
+        _catatan:
+          "Usulan dari pencocokan otomatis ke tabel anggota tim. Periksa; null = unmapped.",
+        orang: pemetaan.orang,
+        akun: pemetaan.akun,
+        struktur: [],
+        hapus_goal_periode: [],
+      },
+      null,
+      2,
+    ) + "\n",
+  );
   console.log(
     `Berkas pemetaan belum ada; usulannya ditulis ke ${path.relative(AKAR, PEMETAAN)}.`,
   );
@@ -146,7 +160,6 @@ if (!fs.existsSync(PEMETAAN)) {
   process.exit(1);
 }
 
-const pemetaan = JSON.parse(fs.readFileSync(PEMETAAN, "utf8"));
 const { rencana, laporan } = susunRencana(mentah, pemetaan, data);
 
 // ---------------------------------------------------------------------
@@ -154,6 +167,16 @@ const { rencana, laporan } = susunRencana(mentah, pemetaan, data);
 // ---------------------------------------------------------------------
 console.log(
   `GRD ${mentah.periodeLabel} (${mentah.periode}) dari ${path.relative(AKAR, SUMBER)}`,
+);
+const otomatis = [...cocok.orang, ...cocok.akun].filter(
+  (c) => c.ke && c.cara !== "berkas pemetaan",
+).length;
+const dariBerkas = [...cocok.orang, ...cocok.akun].filter(
+  (c) => c.ke && c.cara === "berkas pemetaan",
+).length;
+console.log(
+  `  Nama: ${otomatis} cocok otomatis ke tabel tim · ${dariBerkas} dari berkas pemetaan · ` +
+    `${unmapped.orang.length + unmapped.akun.length} unmapped`,
 );
 console.log(
   `  ${rencana.goals.length} goal · ${rencana.ukuran.length} ukuran · ` +
@@ -178,11 +201,21 @@ if (laporan.goalLamaDihapus.length) {
   console.log(`\nGoal lama yang dihapus (${laporan.goalLamaDihapus.length}):`);
   for (const g of laporan.goalLamaDihapus) console.log(`  - ${g}`);
 }
-if (laporan.tidakDitemukan.length) {
+if (unmapped.orang.length || unmapped.akun.length) {
   console.log(
-    `\nBelum terdaftar di K-Space (${laporan.tidakDitemukan.length}):`,
+    `\nUNMAPPED — tidak ada padanannya di tabel tim (${unmapped.orang.length} orang, ${unmapped.akun.length} akun):`,
   );
-  for (const t of laporan.tidakDitemukan) console.log(`  - ${t}`);
+  for (const o of unmapped.orang)
+    console.log(`  - orang "${o.nama}" (${o.cara})`);
+  for (const a of unmapped.akun)
+    console.log(`  - akun "${a.nama}" (${a.cara})`);
+}
+const lainTidakDitemukan = laporan.tidakDitemukan.filter(
+  (t) => !/belum terdaftar di K-Space/.test(t),
+);
+if (lainTidakDitemukan.length) {
+  console.log(`\nTidak ada di database (${lainTidakDitemukan.length}):`);
+  for (const t of lainTidakDitemukan) console.log(`  - ${t}`);
 }
 if (laporan.dilewati.length) {
   console.log(`\nCatatan (${laporan.dilewati.length}):`);
@@ -197,8 +230,6 @@ if (laporan.belumDipetakan.length) {
   process.exit(1);
 }
 
-const DIR = path.join(AKAR, ".tmp", "grd");
-fs.mkdirSync(DIR, { recursive: true });
 fs.writeFileSync(
   path.join(DIR, `rencana-${mentah.periode.slice(0, 7)}.json`),
   JSON.stringify(rencana, null, 2) + "\n",

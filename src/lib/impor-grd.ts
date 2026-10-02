@@ -143,6 +143,12 @@ export type RencanaMentah = {
   rencanaOp: RencanaOpMentah[];
   cascade: BlokCascadeMentah[];
   lead: LeadMentah[];
+  /**
+   * Pemegang tiap akun menurut sheet Target & Kurva WRM bagian A:
+   * username di file → nama pertama pemegangnya ("Raka (tim Naima)" →
+   * "Raka"). Dipakai mencocokkan nama orang lewat PIC akun di K-Space.
+   */
+  pemegangAkun: Record<string, string>;
   /** Hal yang dilewati pembaca beserta alasannya. */
   catatan: string[];
 };
@@ -1377,6 +1383,13 @@ export function bacaRencanaGrd(workbook: {
 
   const lead = bacaLead(rencanaOp, ukuran, periode);
 
+  const pemegangAkun: Record<string, string> = {};
+  for (const a of targetAkun.akun) {
+    const nama = namaPertama(a.pemegang);
+    if (a.akun && nama && !(a.akun in pemegangAkun))
+      pemegangAkun[a.akun] = nama;
+  }
+
   return {
     periode,
     periodeLabel,
@@ -1386,6 +1399,7 @@ export function bacaRencanaGrd(workbook: {
     rencanaOp,
     cascade,
     lead,
+    pemegangAkun,
     catatan,
   };
 }
@@ -1395,9 +1409,9 @@ export function bacaRencanaGrd(workbook: {
 // ---------------------------------------------------------------------
 
 /**
- * Pemetaan nama di file → nama/username di database. Setiap nama di file
- * WAJIB tercantum; nilai null berarti sengaja tidak dipetakan (orang atau
- * akun belum ada di K-Space). Tidak ada tebakan otomatis.
+ * Pemetaan nama di file → nama/username di database. Nama yang tidak
+ * tercantum dicocokkan otomatis ke tabel anggota tim (`lengkapiPemetaan`);
+ * yang tercantum menang, dan null berarti sengaja tidak dipetakan.
  */
 export type PemetaanGrd = {
   orang: Record<string, string | null>;
@@ -1454,7 +1468,7 @@ export type AturanSumberKpi = {
 
 export type DataDb = {
   users: { id: string; nama: string; status: string }[];
-  accounts: { id: string; username: string }[];
+  accounts: { id: string; username: string; pic_user_id?: string | null }[];
   units: { id: string; kode: string }[];
   /** Goal di luar GRD (tanpa kode) beserta label periodenya. */
   goalLama: { id: string; judul: string; periode: string }[];
@@ -1483,6 +1497,145 @@ export type LaporanSusun = {
 };
 
 const URUTAN_LEVEL = ["company", "manager", "leader", "staff", "account"];
+
+// ---------------------------------------------------------------------
+// Pencocokan nama otomatis ke tabel anggota tim
+// ---------------------------------------------------------------------
+
+/** Nama orang dan akun yang muncul di file (dan di struktur pemetaan). */
+export function namaDiFile(
+  mentah: RencanaMentah,
+  pemetaan: Pick<PemetaanGrd, "struktur">,
+): { orang: string[]; akun: string[] } {
+  const unik = (d: (string | null | undefined)[]) =>
+    [...new Set(d)].filter((x): x is string => Boolean(x));
+  return {
+    orang: unik([
+      ...mentah.goals.map((g) => g.pemilik),
+      ...mentah.ukuran.map((u) => u.pic),
+      ...mentah.lembar.map((l) => l.orang),
+      ...(pemetaan.struktur ?? []).flatMap((s) => [s.orang, s.atasan]),
+    ]),
+    akun: unik([
+      ...mentah.goals.map((g) => g.akun),
+      ...mentah.ukuran.flatMap((u) =>
+        u.lingkup.map((l) => ("akun" in l ? l.akun : null)),
+      ),
+    ]),
+  };
+}
+
+export type HasilCocok = {
+  /** Nama seperti di file. */
+  nama: string;
+  /** Nama/username di K-Space; null = unmapped. */
+  ke: string | null;
+  /** Dasar pencocokan, untuk dilaporkan. */
+  cara: string;
+};
+
+/**
+ * Melengkapi pemetaan dengan mencocokkan nama di file ke tabel anggota
+ * tim (`users`) dan akun (`accounts`). Tidak ada tebakan: hanya aturan
+ * pasti berikut, dan yang tidak cocok menjadi null (unmapped).
+ *
+ *   akun   1. username sama persis (tanpa beda huruf besar/kecil);
+ *          2. sama setelah tanda _ dan . diabaikan, dan hanya satu.
+ *   orang  1. nama sama persis dengan satu anggota aktif;
+ *          2. nama satu kata (≥ 3 huruf) yang menjadi awal kata nama
+ *             tepat satu anggota aktif ("Siti" → "Siti Sa'adah");
+ *          3. file menyebut dia pemegang akun X, dan akun X di K-Space
+ *             ber-PIC seorang anggota aktif.
+ *
+ * Nama yang sudah tercantum di berkas pemetaan selalu menang.
+ */
+export function lengkapiPemetaan(
+  mentah: RencanaMentah,
+  pemetaan: PemetaanGrd,
+  data: DataDb,
+): {
+  pemetaan: PemetaanGrd;
+  orang: HasilCocok[];
+  akun: HasilCocok[];
+} {
+  const nama = namaDiFile(mentah, pemetaan);
+  const aktif = data.users.filter((u) => u.status === "aktif");
+  const kata = (t: string) =>
+    t
+      .toLowerCase()
+      .split(/[^a-z0-9]+/)
+      .filter(Boolean);
+  const polos = (t: string) => t.toLowerCase().replace(/[_.]/g, "");
+
+  const akun: HasilCocok[] = nama.akun.map((n) => {
+    if (n in pemetaan.akun)
+      return { nama: n, ke: pemetaan.akun[n], cara: "berkas pemetaan" };
+    const persis = data.accounts.filter(
+      (a) => a.username.toLowerCase() === n.toLowerCase(),
+    );
+    if (persis.length === 1)
+      return { nama: n, ke: persis[0].username, cara: "username sama persis" };
+    const mirip = data.accounts.filter((a) => polos(a.username) === polos(n));
+    if (mirip.length === 1)
+      return {
+        nama: n,
+        ke: mirip[0].username,
+        cara: "username sama tanpa tanda _ / .",
+      };
+    return { nama: n, ke: null, cara: "tidak ada akun K-Space yang cocok" };
+  });
+  const akunKe = new Map(akun.map((a) => [a.nama, a.ke]));
+
+  const orang: HasilCocok[] = nama.orang.map((n) => {
+    if (n in pemetaan.orang)
+      return { nama: n, ke: pemetaan.orang[n], cara: "berkas pemetaan" };
+    const persis = aktif.filter(
+      (u) => u.nama.toLowerCase() === n.toLowerCase(),
+    );
+    if (persis.length === 1)
+      return { nama: n, ke: persis[0].nama, cara: "nama sama persis" };
+    if (n.length >= 3 && !/\s/.test(n)) {
+      const awal = aktif.filter((u) =>
+        kata(u.nama).some((k) => k.startsWith(n.toLowerCase())),
+      );
+      if (awal.length === 1)
+        return {
+          nama: n,
+          ke: awal[0].nama,
+          cara: `satu-satunya anggota aktif yang namanya diawali "${n}"`,
+        };
+    }
+    for (const [file, pemegang] of Object.entries(mentah.pemegangAkun)) {
+      if (pemegang !== n) continue;
+      const ke = akunKe.get(file);
+      const a = ke
+        ? data.accounts.find(
+            (x) => x.username.toLowerCase() === ke.toLowerCase(),
+          )
+        : undefined;
+      const pic = a?.pic_user_id
+        ? aktif.find((u) => u.id === a.pic_user_id)
+        : undefined;
+      if (pic)
+        return {
+          nama: n,
+          ke: pic.nama,
+          cara: `pemegang akun ${file} di file; PIC akun ${a!.username} di K-Space`,
+        };
+    }
+    return { nama: n, ke: null, cara: "tidak ada anggota tim yang cocok" };
+  });
+
+  return {
+    pemetaan: {
+      ...pemetaan,
+      orang: Object.fromEntries(orang.map((o) => [o.nama, o.ke])),
+      akun: Object.fromEntries(akun.map((a) => [a.nama, a.ke])),
+    },
+    orang,
+    akun,
+  };
+}
 
 export function susunRencana(
   mentah: RencanaMentah,

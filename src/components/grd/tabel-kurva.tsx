@@ -30,7 +30,10 @@ function Sel({
   acuan: string;
 }) {
   const lewat = titik.tanggal <= acuan;
-  const bolehIsi = baris.sumber === "isian" && baris.bolehIsi && lewat;
+  // Baris GMV terisi otomatis dari laporan harian; bila laporannya belum
+  // memuat akun/unit baris itu, AKTUAL diisi manual seperti baris jumlah.
+  const bolehIsi = titik.manual && baris.bolehIsi && lewat;
+  const gmvManual = baris.sumber === "gmv" && titik.manual;
 
   return (
     <td className="px-2 py-2 align-top">
@@ -63,6 +66,14 @@ function Sel({
           {titik.status === "hijau" ? "HIJAU" : "MERAH"}
         </span>
       ) : null}
+      {gmvManual && lewat ? (
+        <span
+          className="mt-0.5 block text-[9px] leading-[12px] text-muted-foreground"
+          title="Laporan harian belum memuat baris ini; AKTUAL diisi manual"
+        >
+          manual
+        </span>
+      ) : null}
       {bolehIsi ? (
         <div className="mt-1">
           <DialogCatatCapaian
@@ -84,8 +95,9 @@ function Sel({
 /**
  * Kurva WRM: target kumulatif yang harus sudah tercapai tiap Sabtu,
  * aktualnya, dan statusnya — padanan bagian B sheet "Target & Kurva WRM".
- * Baris GMV terisi sendiri dari laporan harian; baris jumlah diisi tiap
- * Sabtu oleh PIC atau atasannya.
+ * Baris GMV terisi sendiri dari laporan harian — bila laporannya belum ada,
+ * AKTUAL diisi manual; baris jumlah diisi tiap Sabtu oleh Manager atau
+ * Leader divisinya.
  */
 export function TabelKurva({
   daftar: semua,

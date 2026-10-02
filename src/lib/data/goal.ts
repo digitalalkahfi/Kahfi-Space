@@ -21,6 +21,21 @@ export function bolehKelolaGoal(pengguna: Pengguna) {
   return pengguna.role === "CEO" || pengguna.role === "Manager";
 }
 
+/**
+ * Di modul GRD staf hanya melihat goal miliknya: goal yang dia pemiliknya,
+ * atau goal akun yang dia pegang (0198). Peran lain mengikuti RLS.
+ */
+function goalMilikStaf<T extends { pemilikId: string | null }>(
+  pengguna: Pengguna,
+  datar: T[],
+  picAkun: (g: T) => string | null,
+): T[] {
+  if (pengguna.role !== "Staff") return datar;
+  return datar.filter(
+    (g) => g.pemilikId === pengguna.id || picAkun(g) === pengguna.id,
+  );
+}
+
 export type GoalRingkas = {
   id: string;
   judul: string;
@@ -243,7 +258,16 @@ export async function pohonGoal(
       };
     });
 
-    return keTree(datar);
+    return keTree(
+      goalMilikStaf(pengguna, datar, (g) =>
+        g.akun
+          ? (users.find(
+              (u) =>
+                u.nama === accounts.find((a) => a.username === g.akun)?.pic,
+            )?.id ?? null)
+          : null,
+      ),
+    );
   }
 
   const sb = await klienServer();
@@ -259,7 +283,7 @@ export async function pohonGoal(
        kode, tenggat, jenis_realisasi, keterangan, status, grd_periode,
        pemilik:pemilik_id (nama, jabatan),
        units:unit_id (nama),
-       accounts:account_id (username),
+       accounts:account_id (username, pic_user_id),
        goal_months (bulan, target, dari, sampai)`,
     )
     .in("status", status);
@@ -313,6 +337,14 @@ export async function pohonGoal(
     ]),
   );
 
+  const picAkun = new Map(
+    (data ?? []).map((g) => [
+      g.id,
+      (g.accounts as unknown as { pic_user_id: string | null } | null)
+        ?.pic_user_id ?? null,
+    ]),
+  );
+
   const datar = (data ?? []).map((g) => {
     const pemilik = g.pemilik as unknown as {
       nama: string;
@@ -355,7 +387,9 @@ export async function pohonGoal(
     };
   });
 
-  return keTree(datar);
+  return keTree(
+    goalMilikStaf(pengguna, datar, (g) => picAkun.get(g.id) ?? null),
+  );
 }
 
 export type AnakTanggaBulan = {

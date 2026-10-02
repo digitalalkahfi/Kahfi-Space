@@ -100,3 +100,65 @@ export function statusBaris(
         : "belum";
   return { status, selesai, total };
 }
+
+// ---------------------------------------------------------------------
+// Departemen — filter Tabel GRD
+// ---------------------------------------------------------------------
+
+export type Departemen = { kunci: string; label: string };
+
+/** "MABIT SCHOLAR" → "Mabit Scholar"; singkatan pendek (TAP, MCN) tetap. */
+function rapikanNama(t: string): string {
+  return t
+    .trim()
+    .split(/\s+/)
+    .map((k) => (k.length <= 3 ? k : k[0] + k.slice(1).toLowerCase()))
+    .join(" ");
+}
+
+/**
+ * Departemen satu baris, dari label blok Goal Leader persis seperti sheet:
+ * "GOAL LEADER AFFILIATOR (Siti)" → Affiliator · Siti; "TATA KELOLA
+ * (Wildan)" → Tata Kelola · Wildan. Baris tonggak Manager (blok M) dan
+ * baris UMUM berdiri sendiri.
+ */
+export function departemenBaris(b: BarisTabelGrd): Departemen {
+  const label = b.blok.leader?.label ?? "";
+  const m = /^(?:GOAL LEADER\s+)?(.+?)\s*\(([^)]+)\)\s*$/i.exec(label);
+  if (m) {
+    return {
+      kunci: m[1]
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, ""),
+      label: `${rapikanNama(m[1])} · ${m[2].trim()}`,
+    };
+  }
+  if (b.blok.perusahaan?.kode === "M")
+    return { kunci: "tonggak-manager", label: "Tonggak Manager" };
+  return { kunci: "umum", label: "Umum" };
+}
+
+/** Departemen yang ada di tabel, urut kemunculan, beserta jumlah barisnya. */
+export function daftarDepartemen(
+  baris: BarisTabelGrd[],
+): (Departemen & { jumlah: number })[] {
+  const peta = new Map<string, Departemen & { jumlah: number }>();
+  for (const b of baris) {
+    const d = departemenBaris(b);
+    const ada = peta.get(d.kunci);
+    if (ada) ada.jumlah += 1;
+    else peta.set(d.kunci, { ...d, jumlah: 1 });
+  }
+  return [...peta.values()];
+}
+
+/** Baris satu departemen; kunci kosong atau tak dikenal = semua baris. */
+export function saringDepartemen(
+  baris: BarisTabelGrd[],
+  kunci: string | null,
+): BarisTabelGrd[] {
+  if (!kunci) return baris;
+  const hasil = baris.filter((b) => departemenBaris(b).kunci === kunci);
+  return hasil.length > 0 ? hasil : baris;
+}
