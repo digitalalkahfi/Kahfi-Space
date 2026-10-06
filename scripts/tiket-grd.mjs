@@ -102,9 +102,13 @@ if (!TERAPKAN) {
   }
 } else {
   console.log(`✓ ${data.dibuat} tiket dibuat.`);
-  console.log(
-    "  Penerima mendapat satu notifikasi ringkasan; tiket yang sudah lewat tenggat tidak memicu pengingat massal.",
-  );
+  if (data.dibuat > 0) {
+    console.log(
+      "  Penerima mendapat satu notifikasi ringkasan; tiket yang sudah lewat tenggat tidak memicu pengingat massal.",
+    );
+  } else {
+    console.log("  Tidak ada tiket baru, jadi tidak ada notifikasi.");
+  }
 }
 console.log(
   `  Laporan lengkap: ${path.relative(AKAR, path.join(dir, `tiket-${PERIODE.slice(0, 7)}.json`))}`,
