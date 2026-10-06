@@ -4,7 +4,7 @@ Rencana operasional GRD (`grd_rencana` + `grd_tonggak`) otomatis menjadi tiket d
 modul Tugas (`tasks`) untuk PIC-nya. Tim bekerja dari halaman **Tugas**; status
 tonggak di **GRD › Rencana operasional** mengikuti tiketnya. Tidak ada lapor dua kali.
 
-Migrasi: `0199`–`0203`. Kode: `src/lib/tiket-grd.ts`, `scripts/tiket-grd.mjs`.
+Migrasi: `0199`–`0204`. Kode: `src/lib/tiket-grd.ts`, `scripts/tiket-grd.mjs`.
 Tes: `supabase/tests/tiket-grd.test.mjs` (aturan di database) dan
 `src/lib/__tes__/tiket-grd.test.ts` (penyusun laporan & aturan tampilan).
 
@@ -15,7 +15,7 @@ Tes: `supabase/tests/tiket-grd.test.mjs` (aturan di database) dan
 | 1 | Hanya tonggak rencana **SEKALI** dan **PEKANAN** jadi tiket. HARIAN tidak. |
 | 2 | Satu tonggak = satu tiket (unik di `tasks.tonggak_id`). Penerima = `pic_ids[1]`; PIC lain ditulis namanya di deskripsi. |
 | 3 | Pemberi = atasan langsung penerima (yang aktif). Tanpa atasan → Manager. Penerimanya Manager sendiri → CEO. Tak ada siapa pun → sama dengan penerima. Alur QC tidak diubah. |
-| 4 | Tipe `tiket`, goal dari rencananya, judul `kode · judul tonggak` (+ judul rencana bila tonggaknya hanya bertanggal), tenggat = tenggat tonggak pukul 17.00 WIB, kriteria selesai disusun dari data rencana (pemberi boleh menajamkannya). |
+| 4 | Tipe `tiket`, goal dari rencananya, judul `kode · judul tonggak` (+ judul rencana bila tonggaknya hanya bertanggal), tenggat = tenggat tonggak pukul 17.00 WIB, bahasa dibuat pendek dan SMART (lihat di bawah); pemberi boleh menajamkannya. |
 | 5 | Tanpa tenggat / tanpa PIC terdaftar / PIC nonaktif → tidak dibuatkan tiket (dilaporkan beserta alasannya). |
 | 6 | Status mengalir **tiket → tonggak**: todo→belum; berjalan/menunggu_qc/revisi→progress; selesai (QC lolos)→selesai. Waktu selesai tonggak = saat PIC **terakhir mengajukan** pemeriksaan (`tasks.diajukan_pada`), bukan saat QC meluluskan. |
 | 7 | Tonggak yang punya tiket tidak bisa diubah manual; halaman Rencana menampilkan status + tautan "Buka tiket". Tonggak tanpa tiket tetap bisa dicentang seperti biasa. |
@@ -30,6 +30,18 @@ Keputusan tambahan (Okt 2026): tiket GRD **tidak bisa dihapus** dari aplikasi
 belum selesai **dibatalkan**, yang sudah selesai dibiarkan sebagai arsip; tiket GRD
 tidak dihitung di komponen `tiket` KPI rumus jabatan (`realisasi_kpi`), karena
 tonggaknya sudah dinilai lewat `tonggak_tepat_waktu` (rumus itu tidak diubah).
+
+## Susunan tiket (0204)
+
+Setiap bagian hanya tampil **sekali** di kartu, dengan bahasa sehari-hari:
+
+| SMART | Di kartu |
+|---|---|
+| **S**pecific | Judul `kode · kepala judul rencana` (+ ` — Sabtu, 3 Okt` / nama tahap). Judul rencana yang panjang dipisah di ":" atau kalimat pertama; sisanya jadi `Rincian:` di deskripsi. |
+| **M**easurable | `Selesai bila:` hasil sesuai isi tugas (termasuk angka/jumlah yang disebut), ditulis dengan bukti (angka, link, atau foto), lalu diajukan sebelum tanggalnya jam 17.00 WIB. |
+| **A**chievable | `Dibantu:` PIC lain (bila ada). |
+| **R**elevant | `Terhubung goal` (sudah tampil di kartu) dan `Asal: rencana GRD <kode> (<bulan>)`. |
+| **T**ime-bound | Deadline tiket (17.00 WIB); `Rutin:` bila rencana pekanan. |
 
 ## Cara memakai
 

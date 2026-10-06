@@ -207,7 +207,7 @@ uji("aturan 2: satu tonggak = satu tiket; penerima = PIC utama, PIC lain di desk
   for (const t of dua) {
     harusSama(t.penerima_id, RIAN, "penerima = PIC utama");
     harus(
-      t.deskripsi.includes("PIC lain: Nabila Putri, Bayu Nugraha"),
+      t.deskripsi.includes("Dibantu: Nabila Putri, Bayu Nugraha"),
       `PIC lain tertulis di deskripsi: ${t.deskripsi}`,
     );
   }
@@ -283,6 +283,7 @@ uji("aturan 4: isi tiket — tipe, goal, judul, tenggat 17.00 WIB, kriteria sele
     kode: "D.2",
     judul: "Membagikan Daftar Produk Laris ke semua akun",
     jenis: "pekanan",
+    jadwal: "Setiap Senin",
     tonggak: [{ tenggat: hari(p, 5), judul: "Senin, 5 Okt" }],
   });
   const tahap = await rencana(p, {
@@ -303,17 +304,30 @@ uji("aturan 4: isi tiket — tipe, goal, judul, tenggat 17.00 WIB, kriteria sele
   harusSama(t1.prioritas, "sedang", "prioritas bawaan");
   harusSama(t1.status, "todo", "tonggak belum → todo");
   harus(t1.konteks.startsWith("GRD "), `konteks menandai GRD: ${t1.konteks}`);
-  harus(t1.deskripsi.includes("Jadwal: Sabtu 3 Okt"), "jadwal di deskripsi");
+  // Deskripsi pendek: tidak mengulang judul, goal, atau tenggat yang sudah
+  // tampil sendiri di kartu, dan tanpa istilah internal.
+  harusSama(
+    t1.deskripsi,
+    `Asal: rencana GRD D.1 (${(await satu("select bulan_indonesia($1::date, true) b", [p])).b}).`,
+    "deskripsi tiket tunggal hanya menyebut asalnya",
+  );
+  for (const kata of ["Jadwal", "Tonggak:", "PIC lain", "Penanggung jawab", "Dibuat otomatis"]) {
+    harus(!t1.deskripsi.includes(kata), `tanpa istilah "${kata}"`);
+  }
   const jam = await satu(
     "select to_char(tenggat at time zone 'Asia/Jakarta', 'YYYY-MM-DD HH24:MI') j from tasks where id = $1",
     [t1.id],
   );
   harusSama(jam.j, `${hari(p, 3)} 17:00`, "tenggat = tenggat tonggak pukul 17.00 WIB");
   harus(
-    /^"Host LIVE sudah didapat" selesai dan hasilnya bisa ditunjukkan ke pemeriksa\. Diajukan paling lambat \w+, 3 \w+ \d{4} pukul 17\.00 WIB\.$/.test(
+    /^Hasil sesuai isi tugas \(termasuk angka atau jumlah yang disebut\), ditulis dengan bukti \(angka, link, atau foto\), lalu diajukan sebelum \w+, 3 \w+ \d{4} jam 17\.00 WIB\.$/.test(
       t1.kriteria_selesai,
     ),
     `kriteria selesai: ${t1.kriteria_selesai}`,
+  );
+  harus(
+    !t1.kriteria_selesai.includes("Host LIVE"),
+    "kriteria tidak mengulang judul tugas",
   );
   harus(t1.kriteria_selesai.length >= 5, "kriteria memenuhi syarat 0183");
 
@@ -324,10 +338,19 @@ uji("aturan 4: isi tiket — tipe, goal, judul, tenggat 17.00 WIB, kriteria sele
     "D.2 · Membagikan Daftar Produk Laris ke semua akun — Senin, 5 Okt",
     "judul pekanan memuat judul rencana + tonggak",
   );
+  harus(t2.deskripsi.includes("Rutin: Setiap Senin"), "jadwal rutin hanya untuk pekanan");
 
   // Tahap yang diambil dari rumusan rencana cukup berdiri sendiri.
   const t3 = await tiket(tahap.tonggak[0]);
-  harusSama(t3.judul, "D.3 · SOP Komisi", "tahap berdiri sendiri");
+  harusSama(
+    t3.judul,
+    "D.3 · Dokumen SOP ditulis — SOP Komisi",
+    "tahap: kepala rencana + nama tahap, bukan seluruh daftar tahap",
+  );
+  harus(
+    t3.deskripsi.startsWith("Rincian: SOP Komisi (1 Okt), SOP Studio (10 Okt)"),
+    `seluruh tahap ada di rincian: ${t3.deskripsi}`,
+  );
 });
 
 uji("tanggal_indonesia & judul tiket memenuhi batas 200 huruf", async () => {
@@ -1232,6 +1255,165 @@ uji("penanda PIC cadangan: nama akun yang diawali nama di kolom SIAPA tidak dita
   );
 });
 
+// ---------------------------------------------------------------------
+// Bahasa tiket (0204): pendek, jelas, SMART
+// ---------------------------------------------------------------------
+uji("0204: judul rencana panjang dipisah menjadi kepala + rincian; yang pendek utuh", async () => {
+  const pisah = async (judul, paksa = false) =>
+    (await satu("select pisah_judul_grd($1, $2) h", [judul, paksa])).h;
+
+  harusSama(await pisah("Host LIVE sudah didapat"), ["Host LIVE sudah didapat", null], "pendek: utuh");
+
+  harusSama(
+    await pisah(
+      "Jadwal LIVE tetap: jam, studio, dan host untuk alkahfihome_ & tokoalkahfi_ (LIVE internal diutamakan di jadwal studio)",
+    ),
+    [
+      "Jadwal LIVE tetap",
+      "jam, studio, dan host untuk alkahfihome_ & tokoalkahfi_ (LIVE internal diutamakan di jadwal studio)",
+    ],
+    "panjang dengan titik dua",
+  );
+
+  harusSama(
+    await pisah(
+      "Daftar 50 creator teratas + target Oktober tiap creator. Totalnya harus mencapai Rp 25,9 M. Kekurangan dibuka di WRM 10 Okt, jangan ditutupi",
+    ),
+    [
+      "Daftar 50 creator teratas + target Oktober tiap creator",
+      "Totalnya harus mencapai Rp 25,9 M. Kekurangan dibuka di WRM 10 Okt, jangan ditutupi",
+    ],
+    "panjang tanpa titik dua: kalimat pertama",
+  );
+
+  const polos =
+    "Menyediakan 1 device layak untuk dipakai bergantian oleh 2 santri yang device-nya kurang bagus, lengkap dengan jadwal gantian";
+  harusSama(await pisah(polos), [polos, null], "panjang tanpa pemisah: utuh");
+
+  // Titik dua yang terlalu dini ("Tahap 1: …") bukan kepala yang berarti.
+  const dini =
+    "Tahap 1: pendaftaran online dan tombol gabung MCN aktif, dikerjakan penuh oleh satu orang dari awal sampai akhir bulan";
+  harusSama(await pisah(dini), [dini, null], "kepala terlalu pendek: utuh");
+
+  // Tahap (judul tonggak = sepotong rencananya): dipisah walau pendek.
+  harusSama(
+    await pisah("Dokumen SOP ditulis: SOP Komisi (1 Okt), SOP Studio (10 Okt)", true),
+    ["Dokumen SOP ditulis", "SOP Komisi (1 Okt), SOP Studio (10 Okt)"],
+    "tahap: dipaksa",
+  );
+});
+
+uji("0204: contoh nyata — pekanan lintas goal, judul pendek, deskripsi tanpa istilah internal", async () => {
+  const p = periodeDepan();
+  const bulan = (await satu("select bulan_indonesia($1::date, true) b", [p])).b;
+  const r = await rencana(p, {
+    kode: "1.1.3.10",
+    judul:
+      "Mengirim hasil riset ke Admin MCN: produk skor bagus yang BELUM diuji akun internal (yang sudah teruji internal tidak dikirim)",
+    jenis: "pekanan",
+    pic: [RIAN, NABILA],
+    picTeks: "Rian → Nabila",
+    jadwal: "Setiap Senin, Rabu, Sabtu",
+    goalId: GOAL.id,
+    tonggak: [{ tenggat: hari(p, 3), judul: "Sabtu, 3 Okt" }],
+  });
+  await buat(p);
+  const t = await tiket(r.tonggak[0]);
+
+  harusSama(
+    t.judul,
+    "1.1.3.10 · Mengirim hasil riset ke Admin MCN — Sabtu, 3 Okt",
+    "judul pendek: kepala + hari",
+  );
+  harusSama(
+    t.deskripsi,
+    [
+      "Rincian: produk skor bagus yang BELUM diuji akun internal (yang sudah teruji internal tidak dikirim)",
+      "Rutin: Setiap Senin, Rabu, Sabtu",
+      "Dibantu: Nabila Putri",
+      `Asal: rencana GRD 1.1.3.10 (${bulan}).`,
+    ].join("\n"),
+    "deskripsi: rincian, rutin, dibantu, asal — masing-masing satu kali",
+  );
+  // Judul rencana yang sama tidak muncul tiga kali lagi.
+  const semua = `${t.judul}\n${t.deskripsi}\n${t.kriteria_selesai}`;
+  harusSama(
+    semua.split("Mengirim hasil riset").length - 1,
+    1,
+    "judul rencana hanya tampil sekali",
+  );
+  harus(!t.deskripsi.includes("Goal "), "goal sudah tampil sendiri di kartu");
+});
+
+uji("0204: tiket yang sudah ada dirapikan sekali — yang disunting, selesai, atau terkunci tidak disentuh", async () => {
+  const p = periodeDepan();
+  const terkunci = periodeLalu();
+  const r = await rencana(p, {
+    kode: "RP.1",
+    jenis: "pekanan",
+    pic: [RIAN],
+    tonggak: [
+      { tenggat: hari(p, 5), judul: "Senin, 5 Okt", kunci: "a" },
+      { tenggat: hari(p, 12), judul: "Senin, 12 Okt", kunci: "b" },
+      { tenggat: hari(p, 19), judul: "Senin, 19 Okt", kunci: "c" },
+    ],
+  });
+  const kunci = await rencana(terkunci, {
+    kode: "RP.2",
+    tonggak: [{ tenggat: hari(terkunci, 5) }],
+  });
+  await buat(p);
+  await buat(terkunci);
+  const [a, b, c] = await Promise.all(r.tonggak.map((x) => tiket(x)));
+  const k = await tiket(kunci.tonggak[0]);
+
+  // Keadaan sebelum 0204: teks otomatis lama.
+  const LAMA =
+    "Dibuat otomatis dari rencana operasional GRD Oktober 2026. Status tonggaknya mengikuti tiket ini.\nRencana RP.1: judul\nTonggak: Senin, 5 Okt";
+  await sebagaiAdmin(
+    db,
+    `update tasks set judul = 'judul lama', deskripsi = $2, kriteria_selesai = '"judul lama" selesai dan hasilnya bisa ditunjukkan ke pemeriksa.'
+      where id = any ($1::uuid[])`,
+    [`{${[a.id, b.id, c.id, k.id].join(",")}}`, LAMA],
+  );
+  // Pemberi sudah menyunting deskripsi tiket b; tiket c sudah selesai.
+  await sebagaiAdmin(db, "update tasks set deskripsi = 'Disunting pemberi' where id = $1", [b.id]);
+  await sebagaiAdmin(db, "update tasks set status = 'selesai' where id = $1", [c.id]);
+  await sebagaiAdmin(
+    db,
+    `insert into kpi_snapshots (user_id, periode_bulan, skor_total, predikat, dikunci_pada)
+     values ($1, $2, 0, predikat_dari_skor(0), now())`,
+    [RIAN, terkunci],
+  );
+
+  const kabar = (await notifikasi(RIAN, "Tiket diubah:%")).length;
+  const sql = await readFile(
+    path.join(process.cwd(), "supabase", "migrations", "0204_bahasa_tiket_grd.sql"),
+    "utf8",
+  );
+  await sebagaiAdmin(db, sql);
+
+  const baca = async (id) => satu("select judul, deskripsi, kriteria_selesai from tasks where id = $1", [id]);
+  const ta = await baca(a.id);
+  harusSama(ta.judul, "RP.1 · Rencana RP.1 — Senin, 5 Okt", "tiket a: judul dirapikan");
+  harus(ta.deskripsi.startsWith("Rutin") || ta.deskripsi.startsWith("Asal:"), `tiket a: deskripsi baru: ${ta.deskripsi}`);
+  harus(ta.kriteria_selesai.startsWith("Hasil sesuai isi tugas"), "tiket a: kriteria baru");
+
+  harusSama((await baca(b.id)).deskripsi, "Disunting pemberi", "tiket b: sunting pemberi tidak ditimpa");
+  harusSama((await baca(b.id)).judul, "judul lama", "tiket b: dibiarkan utuh");
+  harusSama((await baca(c.id)).judul, "judul lama", "tiket c: sudah selesai, tidak disentuh");
+  harusSama((await baca(k.id)).judul, "judul lama", "bulan terkunci tidak disentuh");
+  harusSama(
+    (await notifikasi(RIAN, "Tiket diubah:%")).length,
+    kabar,
+    "perapian tidak mengirim notifikasi 'tiket diubah'",
+  );
+
+  // Dijalankan lagi: tidak ada lagi yang berubah.
+  await sebagaiAdmin(db, sql);
+  harusSama((await baca(a.id)).deskripsi, ta.deskripsi, "idempoten");
+});
+
 uji("hanya CEO/Manager/sistem yang boleh membuat tiket dari rencana", async () => {
   const p = periodeDepan();
   await rencana(p, { kode: "H.9", tonggak: [{ tenggat: hari(p, 5) }] });
@@ -1261,6 +1443,7 @@ uji("migrasi 0199–0202 aman dijalankan ulang", async () => {
     "0201_buat_tiket_grd.sql",
     "0202_tampilan_tiket_grd.sql",
     "0203_penanda_pic_cadangan.sql",
+    "0204_bahasa_tiket_grd.sql",
   ]) {
     const sql = await readFile(
       path.join(process.cwd(), "supabase", "migrations", berkas),
