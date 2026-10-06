@@ -287,17 +287,28 @@ test("to-do: hanya pemiliknya, siapa pun perannya", () => {
   assert.equal(bolehEditTugas({ ...todo, sayaPembuat: true }), false);
 });
 
-test("hapus tetap hanya pemberi; CEO/Manager bukan pemberi tidak mendapat tombol hapus", () => {
+test("hapus: pemberinya (juga tiket selesai); CEO/Manager bukan pemberi tidak mendapat tombol", () => {
   assert.equal(bolehHapusTugas({ ...dasar, sayaPembuat: true }), true);
   assert.equal(bolehHapusTugas({ ...dasar, sayaPenerima: true }), false);
   assert.equal(bolehHapusTugas({ ...dasar }), false);
-  // Tiket GRD tidak bisa dihapus siapa pun; yang selesai pun tidak.
-  assert.equal(bolehHapusTugas({ ...dasar, dariGrd: true, sayaPembuat: true }), false);
-  assert.equal(bolehHapusTugas({ ...dasar, selesai: true, sayaPembuat: true }), false);
-  assert.equal(
-    bolehHapusTugas({ ...dasar, tipe: "pribadi", sayaPenerima: true, selesai: true }),
-    true,
-  );
+  // CEO/Manager yang bukan pemberi: tidak, walau lintas unit.
+  assert.equal(bolehHapusTugas({ ...dasar, lintasUnit: true }), false);
+});
+
+test("hapus tiket GRD: hanya pemberinya yang CEO/Manager (0206)", () => {
+  const grd = { ...dasar, dariGrd: true };
+  assert.equal(bolehHapusTugas({ ...grd, sayaPembuat: true, lintasUnit: true }), true);
+  // Pemberi biasa (atasan langsung): tidak boleh melepas tonggak dari pantauan.
+  assert.equal(bolehHapusTugas({ ...grd, sayaPembuat: true }), false);
+  assert.equal(bolehHapusTugas({ ...grd, lintasUnit: true }), false);
+  assert.equal(bolehHapusTugas({ ...grd, sayaPenerima: true }), false);
+});
+
+test("hapus to-do: pemiliknya kapan pun, orang lain tidak", () => {
+  const todo = { ...dasar, tipe: "pribadi" as TipeTugas };
+  assert.equal(bolehHapusTugas({ ...todo, sayaPenerima: true }), true);
+  assert.equal(bolehHapusTugas({ ...todo, lintasUnit: true }), false);
+  assert.equal(bolehHapusTugas({ ...todo, sayaPembuat: true }), false);
 });
 
 test("ubah deadline: tiket biasa oleh pemberi atau CEO/Manager; GRD oleh CEO/Manager saja", () => {

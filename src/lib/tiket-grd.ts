@@ -18,7 +18,8 @@ export type AlasanDilewati =
   | "sudah_selesai"
   | "tanpa_tenggat"
   | "tanpa_pic"
-  | "penerima_nonaktif";
+  | "penerima_nonaktif"
+  | "tiket_dihapus";
 
 export const KETERANGAN_ALASAN: Record<AlasanDilewati, string> = {
   bulan_terkunci: "KPI bulan itu sudah dikunci",
@@ -27,6 +28,7 @@ export const KETERANGAN_ALASAN: Record<AlasanDilewati, string> = {
   tanpa_tenggat: "tenggatnya belum ditetapkan",
   tanpa_pic: "tidak ada PIC terdaftar",
   penerima_nonaktif: "PIC-nya sudah nonaktif",
+  tiket_dihapus: "tiketnya sengaja dihapus; tonggak dikelola manual",
 };
 
 /** Laporan `buat_tiket_grd` (0201), apa adanya dari database. */
@@ -204,9 +206,9 @@ export function bolehUbahTenggatTiketGrd(role: string): boolean {
 export const PESAN_TENGGAT_GRD =
   "Tenggat tiket dari rencana GRD hanya bisa diubah CEO atau Manager — sama seperti tenggat tonggaknya.";
 
-/** Pesan baku saat tiket GRD dihapus. */
+/** Pesan baku saat tiket GRD dihapus selain oleh CEO/Manager pemberinya. */
 export const PESAN_HAPUS_TIKET_GRD =
-  "Tiket dari rencana GRD tidak bisa dihapus. Betulkan lewat rencana operasional GRD.";
+  "Tiket dari rencana GRD hanya bisa dihapus oleh CEO atau Manager yang menjadi pemberinya.";
 
 /** Pesan baku saat status tonggak ber-tiket diubah manual. */
 export const PESAN_TONGGAK_MENGIKUTI_TIKET =

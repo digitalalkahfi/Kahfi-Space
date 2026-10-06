@@ -283,17 +283,26 @@ uji("pemberi menghapus tiket; penerima dikabari, jejak QC ikut terhapus", async 
   );
 });
 
-uji("tiket selesai tidak bisa dihapus — pemberinya maupun Manager", async () => {
+uji("tiket selesai: hanya pemberinya yang boleh menghapus (0206); Manager bukan pemberi tidak", async () => {
   const tid = (
     await satu(`select id from tasks where judul = 'Rapikan stok sampel skincare'`)
   ).id;
-  for (const siapa of [DEWI, MANAGER]) {
-    const e = await galatDari(() =>
-      sebagai(db, siapa, `delete from tasks where id = $1`, [tid]),
-    );
-    harusGalat(e, "sudah selesai tidak bisa dihapus", "42501");
-  }
+  // Manager bukan pemberi tiket ini (Dewi pemberinya): ditolak sejak 0206.
+  const e = await galatDari(() =>
+    sebagai(db, MANAGER, `delete from tasks where id = $1`, [tid]),
+  );
+  harusGalat(e, "hanya bisa dihapus oleh pemberinya", "42501");
   harus(await ada(tid), "tiket selesai tetap ada");
+
+  // Pemberinya boleh (selama bulannya belum dikunci KPI-nya).
+  const milikDewi = await buatTiket(DEWI, INTAN, "Tiket selesai boleh dihapus pemberi", "selesai");
+  const { rows } = await sebagai(
+    db,
+    DEWI,
+    `delete from tasks where id = $1 returning id`,
+    [milikDewi],
+  );
+  harusSama(rows.length, 1, "pemberi boleh menghapus tiket selesai");
 
   // Proses sistem (perbaikan data oleh admin) tetap boleh.
   const salinan = await buatTiket(DEWI, INTAN, "Tiket selesai uji", "selesai");

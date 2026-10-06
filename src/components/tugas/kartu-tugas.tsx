@@ -201,7 +201,8 @@ export function KartuTugas({
   //    CEO/Manager (0205); tiket GRD oleh CEO/Manager saja (0200);
   //  · edit — to-do oleh pemiliknya; tiket oleh pemberinya atau CEO/Manager
   //    selama belum selesai (yang lolos QC sudah jadi nilai KPI, 0184);
-  //  · hapus — tetap hanya pemberinya, dan tidak untuk tiket GRD.
+  //  · hapus — pemberinya (juga tiket selesai, 0206); tiket GRD hanya oleh
+  //    pemberinya yang CEO/Manager.
   const selesai = status === "selesai" || tugas.statusAsli === "selesai";
   const bolehUbahTenggat = bolehUbahTenggatTugas({
     tipe: tugas.tipe,
@@ -224,10 +225,10 @@ export function KartuTugas({
     aksi !== null &&
     bolehHapusTugas({
       tipe: tugas.tipe,
-      selesai,
       dariGrd,
       sayaPenerima,
       sayaPembuat,
+      lintasUnit,
     });
   const namaTipe = NAMA_TIPE[tugas.tipe];
   const labelTarget =

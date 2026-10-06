@@ -127,6 +127,8 @@ function DialogHapusTugas({
       ? "komitmen"
       : "tiket";
   const sudahDikerjakan = !todo && tugas.statusAsli !== "todo";
+  const sudahSelesai = tugas.statusAsli === "selesai";
+  const dariGrd = Boolean(tugas.tonggakId);
 
   const bukaTutup = (b: boolean) => {
     setBuka(b);
@@ -164,6 +166,18 @@ function DialogHapusTugas({
               <li className="ml-4 list-disc text-pretty marker:text-muted-foreground">
                 {tugas.penerimaLengkap} sudah mulai mengerjakannya; hasil kerja
                 dan riwayat pemeriksaannya ikut terhapus.
+              </li>
+            ) : null}
+            {sudahSelesai ? (
+              <li className="ml-4 list-disc text-pretty marker:text-muted-foreground">
+                Tiket ini sudah selesai: nilainya tidak lagi dihitung di
+                riwayat kerja {tugas.penerimaLengkap}.
+              </li>
+            ) : null}
+            {dariGrd ? (
+              <li className="ml-4 list-disc text-pretty marker:text-muted-foreground">
+                Tonggaknya di rencana GRD tidak akan dibuatkan tiket lagi dan
+                statusnya dikelola manual (bisa dicentang di halaman Rencana).
               </li>
             ) : null}
           </ul>

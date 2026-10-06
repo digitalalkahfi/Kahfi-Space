@@ -974,7 +974,7 @@ uji("tautan ke tonggak tidak bisa dipalsukan atau diubah pengguna", async () => 
   harusSama((await satu("select tonggak_id from tasks where id = $1", [t.id])).tonggak_id, r.tonggak[0], "tautan utuh");
 });
 
-uji("tiket GRD tidak bisa dihapus dari aplikasi", async () => {
+uji("tiket GRD: pemberi biasa (Leader) dan Manager bukan pemberi tidak bisa menghapus", async () => {
   const p = periodeDepan();
   const r = await rencana(p, { kode: "U.1", tonggak: [{ tenggat: hari(p, 9) }] });
   await buat(p);
@@ -984,7 +984,10 @@ uji("tiket GRD tidak bisa dihapus dari aplikasi", async () => {
       () => sebagai(db, siapa, "delete from tasks where id = $1", [t.id]),
       `${nama} menghapus tiket GRD`,
     );
-    harus(pesan.includes("tidak bisa dihapus"), `pesan jelas: ${pesan}`);
+    harus(
+      pesan.includes("hanya bisa dihapus oleh CEO atau Manager yang menjadi pemberinya"),
+      `pesan jelas: ${pesan}`,
+    );
   }
   harus((await tiket(r.tonggak[0])) !== undefined, "tiket masih ada");
 });
