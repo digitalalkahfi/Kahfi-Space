@@ -396,6 +396,8 @@ export type BarisTask = {
   kriteria_selesai: string;
   target_angka: number | null;
   target_satuan: string;
+  /** Tonggak GRD yang melahirkan tiket ini; unik, null untuk tugas biasa (0199). */
+  tonggak_id: string | null;
   prioritas: PrioritasTugasDb;
   status: StatusTugasDb;
   qc_status: StatusQcDb;
@@ -404,6 +406,8 @@ export type BarisTask = {
   hasil_kerja: string;
   qc_at: string | null;
   selesai_at: string | null;
+  /** Saat penerima terakhir mengajukan pemeriksaan; hanya diisi trigger (0199). */
+  diajukan_pada: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -437,6 +441,8 @@ export type BarisTugasTersaring = {
   goal_id: string | null;
   goal_judul: string | null;
   goal_periode: string | null;
+  /** Tonggak GRD asal tiket; null untuk tugas biasa (0202). */
+  tonggak_id: string | null;
   selesai_at: string | null;
   created_at: string;
   total: number;
@@ -2211,6 +2217,15 @@ export type Database = {
           boleh_centang: boolean;
           tonggak: unknown;
         }[];
+      };
+      /**
+       * Membuat tiket dari tonggak SEKALI/PEKANAN satu periode GRD; aman
+       * diulang; `p_uji = true` hanya melaporkan (0201). Bentuk laporannya:
+       * `LaporanTiketGrd` di `@/lib/tiket-grd`.
+       */
+      buat_tiket_grd: {
+        Args: { p_periode: string; p_uji?: boolean };
+        Returns: unknown;
       };
       /** Persen tonggak tepat waktu; null bila belum ada yang jatuh tempo (0192). */
       tonggak_tepat_waktu: {

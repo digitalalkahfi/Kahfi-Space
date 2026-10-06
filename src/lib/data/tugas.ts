@@ -52,7 +52,7 @@ export function sekarangTugas(): string {
 const KOLOM = `
   id, tipe, judul, deskripsi, konteks, kriteria_selesai, target_angka,
   target_satuan, tenggat, tanpa_jam, prioritas, status, qc_status, qc_note,
-  hasil_kerja, penerima_id, pembuat_id, goal_id, selesai_at,
+  hasil_kerja, penerima_id, pembuat_id, goal_id, tonggak_id, selesai_at,
   penerima:penerima_id (nama),
   pembuat:pembuat_id (nama),
   goal:goal_id (judul, periode)
@@ -63,6 +63,7 @@ type BarisTugas = {
   penerima_id?: string;
   pembuat_id?: string;
   goal_id?: string | null;
+  tonggak_id?: string | null;
   qc_note?: string;
   hasil_kerja?: string;
   selesai_at?: string | null;
@@ -126,6 +127,7 @@ function keTugas(b: BarisTugas): Tugas {
     goalJudul: b.goal?.judul ?? null,
     goalPeriode: b.goal?.periode ?? null,
     selesaiPada: b.selesai_at ?? null,
+    tonggakId: b.tonggak_id ?? null,
     label:
       b.konteks ||
       (b.tipe === "tiket"
@@ -237,6 +239,7 @@ function dariTersaring(r: BarisTugasTersaring): BarisTugas {
     penerima_id: r.penerima_id,
     pembuat_id: r.pembuat_id,
     goal_id: r.goal_id,
+    tonggak_id: r.tonggak_id,
     qc_note: r.qc_note,
     hasil_kerja: r.hasil_kerja,
     selesai_at: r.selesai_at,

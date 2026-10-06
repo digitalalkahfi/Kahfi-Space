@@ -255,8 +255,18 @@ async function rencana({ tonggakPekanan = 4 } = {}) {
   };
 }
 
-const impor = async (r) =>
-  (await satu("select impor_grd($1::jsonb, false) r", [JSON.stringify(r)])).r;
+// Impor kini membuat tiket dari tonggak (0201), dan tonggak yang punya tiket
+// tidak bisa dicentang manual (aturan 7). Tes ini menguji tonggak sebagai
+// tonggak — centang, waktu selesai, impor ulang — jadi tiket otomatisnya
+// dilepas lagi di sini. Interaksi tonggak dengan tiketnya diuji di
+// tiket-grd.test.mjs.
+const impor = async (r) => {
+  const hasil = (
+    await satu("select impor_grd($1::jsonb, false) r", [JSON.stringify(r)])
+  ).r;
+  await satu("delete from tasks where tonggak_id is not null");
+  return hasil;
+};
 
 const tonggak = async (kode, kunci = "") =>
   satu(

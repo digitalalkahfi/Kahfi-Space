@@ -28,6 +28,13 @@ export type Tonggak = {
   status: StatusTonggak;
   selesaiPada: string | null;
   catatan: string;
+  /**
+   * Tonggak ini punya tiket di modul Tugas: statusnya hanya mengikuti
+   * tiket, tidak diubah dari halaman Rencana (0199, 0202).
+   */
+  punyaTiket?: boolean;
+  /** Id tiketnya, bila pemanggil boleh melihatnya (RLS tugas). */
+  tiketId?: string | null;
 };
 
 export type Rencana = {

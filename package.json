@@ -16,6 +16,7 @@
     "db:seed:sql": "node scripts/buat-seed-sql.mjs",
     "ekspor:contoh": "node scripts/buat-ekspor-contoh.mjs",
     "ekspor:cek": "node scripts/buat-ekspor-contoh.mjs --cek",
+    "grd:tiket": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/alias-ts.mjs scripts/tiket-grd.mjs",
     "test:unit": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --import ./scripts/alias-ts.mjs --test \"src/lib/__tes__/*.test.ts\""
   },
   "dependencies": {

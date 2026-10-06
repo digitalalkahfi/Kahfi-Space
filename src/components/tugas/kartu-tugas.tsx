@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import {
   AlarmClock,
   CalendarClock,
@@ -36,6 +37,7 @@ import { JejakPemeriksaan } from "@/components/tugas/jejak-qc";
 import { useAksiTugas } from "@/components/tugas/aksi-tugas";
 import type { JejakQc } from "@/lib/data/tugas";
 import { lewatDeadline, type Penanda } from "@/lib/papan-tanggal";
+import { TAUTAN_RENCANA_GRD, idKartuTiket } from "@/lib/tiket-grd";
 import type { Prioritas, StatusTugas, TipeTugas, Tugas } from "@/lib/types";
 
 const GAYA_PRIORITAS: Record<
@@ -113,6 +115,7 @@ export function KartuTugas({
   sayaPenerima,
   sayaPembuat,
   bolehQc,
+  lintasUnit = false,
   hariIni,
   sekarang,
   jejakQc = [],
@@ -125,6 +128,11 @@ export function KartuTugas({
   sayaPembuat: boolean;
   /** Pemberi tugas atau atasan penerima. */
   bolehQc: boolean;
+  /**
+   * CEO/Manager: satu-satunya yang boleh menggeser tenggat tiket dari
+   * rencana GRD, siapa pun pemberinya (0200).
+   */
+  lintasUnit?: boolean;
   hariIni: string;
   /**
    * Waktu server saat halaman disusun. Dengan ini deadline hari ini yang
@@ -180,9 +188,14 @@ export function KartuTugas({
       }`
     : "";
 
-  // Menjadwal ulang: to-do oleh pemiliknya, tiket oleh pemberinya (D1).
+  // Tiket yang lahir dari tonggak rencana GRD (0199): tenggatnya mengikuti
+  // tonggak, dan tidak bisa dihapus karena akan dibuat lagi oleh impor.
+  const dariGrd = Boolean(tugas.tonggakId);
+  // Menjadwal ulang: to-do oleh pemiliknya, tiket oleh pemberinya (D1);
+  // tiket GRD oleh CEO/Manager saja (0200).
   const bolehUbahTenggat =
-    (todo ? sayaPenerima : sayaPembuat) && status !== "selesai";
+    (dariGrd ? lintasUnit : todo ? sayaPenerima : sayaPembuat) &&
+    status !== "selesai";
   // Edit & hapus: to-do oleh pemiliknya kapan pun; tiket oleh pemberinya
   // selama belum selesai — yang lolos QC sudah jadi nilai KPI (0184).
   const bolehKelola =
@@ -278,7 +291,11 @@ export function KartuTugas({
     });
 
   return (
-    <Card className="kartu-interaktif rounded-2xl shadow-card ring-border-subtle">
+    <Card
+      // Tujuan tautan "Buka tiket" dari halaman Rencana operasional GRD.
+      id={dariGrd ? idKartuTiket(tugas.id) : undefined}
+      className="kartu-interaktif scroll-mt-24 rounded-2xl shadow-card ring-border-subtle target:ring-2 target:ring-secondary"
+    >
       <div className={cn("mx-(--card-spacing) rounded-2xl p-3.5", gaya.kartu)}>
         {penanda?.jenis === "terlambat" ? (
           <p className="mb-2 inline-flex items-center gap-1 rounded-full bg-danger px-2 py-0.5 text-[11px] leading-[14px] font-semibold text-white">
@@ -425,6 +442,15 @@ export function KartuTugas({
               <Target className="size-3" />
               Komitmen mingguan
             </span>
+          ) : null}
+          {dariGrd ? (
+            <Link
+              href={TAUTAN_RENCANA_GRD}
+              className="tekan-halus inline-flex items-center gap-1 text-[11px] leading-[14px] font-semibold text-secondary hover:underline"
+              title="Status tonggak di rencana operasional GRD mengikuti tiket ini"
+            >
+              Lihat rencana GRD
+            </Link>
           ) : null}
           {todo ? null : (
             <span className="text-[11px] leading-[14px] text-muted-foreground">
@@ -620,6 +646,11 @@ export function KartuTugas({
         {bolehUbahTenggat && isiTenggat ? (
           <fieldset className="space-y-2 rounded-xl bg-muted/60 p-2.5">
             <legend className="sr-only">Ubah deadline</legend>
+            {dariGrd ? (
+              <p className="text-[11px] leading-[14px] text-muted-foreground">
+                Tenggat tonggak di rencana GRD ikut berubah.
+              </p>
+            ) : null}
             <div className="grid grid-cols-2 gap-2">
               <label className="space-y-1 text-[11px] leading-[14px] font-semibold">
                 Tanggal
@@ -691,15 +722,17 @@ export function KartuTugas({
                 >
                   <Pencil className="size-3.5" />
                 </button>
-                <button
-                  type="button"
-                  onClick={() => aksi.hapus(tugas)}
-                  aria-label={`Hapus ${namaTipe.toLowerCase()}: ${tugas.judul}`}
-                  title="Hapus"
-                  className="tekan-halus sentuh-nyaman flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-danger-fill hover:text-danger-text"
-                >
-                  <Trash2 className="size-3.5" />
-                </button>
+                {dariGrd ? null : (
+                  <button
+                    type="button"
+                    onClick={() => aksi.hapus(tugas)}
+                    aria-label={`Hapus ${namaTipe.toLowerCase()}: ${tugas.judul}`}
+                    title="Hapus"
+                    className="tekan-halus sentuh-nyaman flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-danger-fill hover:text-danger-text"
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                )}
               </>
             ) : null}
           </div>

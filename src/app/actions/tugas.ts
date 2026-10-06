@@ -9,6 +9,11 @@ import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
 import { MIN_HASIL_KERJA, PESAN_TODO_TANPA_REVIEW } from "@/lib/kanban";
 import { keJamWib, keTanggalWib } from "@/lib/format";
 import {
+  PESAN_HAPUS_TIKET_GRD,
+  PESAN_TENGGAT_GRD,
+  bolehUbahTenggatTiketGrd,
+} from "@/lib/tiket-grd";
+import {
   periksaDelegasi,
   periksaTenggat,
   periksaTiketBaru,
@@ -208,6 +213,8 @@ export async function ubahStatusTugas(
 
   revalidatePath("/tugas");
   revalidatePath("/beranda");
+  // Tonggak GRD ber-tiket mengikuti statusnya (0200).
+  revalidatePath("/grd/rencana");
   return sukses(undefined, "Status tugas diperbarui.");
 }
 
@@ -254,6 +261,9 @@ export async function periksaTugas(
 
   revalidatePath("/tugas");
   revalidatePath("/beranda");
+  // QC lolos menyelesaikan tonggak GRD-nya (0200).
+  revalidatePath("/grd/rencana");
+  revalidatePath("/grd/scorecard");
   return sukses(
     undefined,
     hasil === "lolos"
@@ -355,8 +365,10 @@ export async function buatTiket(input: {
  * To-do: hanya pemiliknya, jam opsional — inilah cara menjadwal ulang
  * to-do yang terlambat. Tiket & komitmen: hanya pemberi tiketnya (D1),
  * jam wajib; penerima yang butuh waktu lebih menghubungi pemberinya.
- * Basis data menolak juga (trigger 0181), dan pengingat tenggat terbit
- * lagi untuk tanggal barunya.
+ * Tiket dari rencana GRD: hanya CEO/Manager, siapa pun pemberinya —
+ * tenggat tonggaknya ikut berubah (0200). Basis data menolak juga
+ * (trigger 0181, 0200), dan pengingat tenggat terbit lagi untuk tanggal
+ * barunya.
  */
 export async function ubahTenggatTugas(
   id: string,
@@ -375,7 +387,7 @@ export async function ubahTenggatTugas(
   const sb = await klienServer();
   const { data: tugas, error: galatBaca } = await sb
     .from("tasks")
-    .select("tipe, pembuat_id, penerima_id")
+    .select("tipe, pembuat_id, penerima_id, tonggak_id")
     .eq("id", id)
     .maybeSingle();
 
@@ -385,8 +397,13 @@ export async function ubahTenggatTugas(
   }
 
   const todo = tugas.tipe === "pribadi";
+  const dariGrd = tugas.tonggak_id !== null;
   const pemilik = todo ? tugas.penerima_id : tugas.pembuat_id;
-  if (pemilik !== pengguna.id) {
+  if (dariGrd) {
+    if (!bolehUbahTenggatTiketGrd(pengguna.role)) {
+      return gagal(PESAN_TENGGAT_GRD, "izin");
+    }
+  } else if (pemilik !== pengguna.id) {
     return gagal(
       todo
         ? "Hanya pemilik to-do yang bisa mengubah deadline-nya."
@@ -409,9 +426,11 @@ export async function ubahTenggatTugas(
       return gagal(`Gagal menyimpan: ${error.message}`);
     }
     return gagal(
-      todo
-        ? "Hanya pemilik to-do yang bisa mengubah deadline-nya."
-        : PESAN_KUNCI_TIKET,
+      dariGrd
+        ? PESAN_TENGGAT_GRD
+        : todo
+          ? "Hanya pemilik to-do yang bisa mengubah deadline-nya."
+          : PESAN_KUNCI_TIKET,
       "izin",
     );
   }
@@ -424,6 +443,8 @@ export async function ubahTenggatTugas(
 
   revalidatePath("/tugas");
   revalidatePath("/beranda");
+  // Tenggat tonggaknya ikut berubah (0200).
+  if (dariGrd) revalidatePath("/grd/rencana");
   return sukses(
     undefined,
     todo ? "Deadline to-do diperbarui." : "Deadline tiket diperbarui.",
@@ -648,7 +669,7 @@ export async function ubahTiket(
   const { data: lama, error: galatBaca } = await sb
     .from("tasks")
     .select(
-      "tipe, pembuat_id, penerima_id, status, tenggat, tanpa_jam, kriteria_selesai",
+      "tipe, pembuat_id, penerima_id, status, tenggat, tanpa_jam, kriteria_selesai, tonggak_id",
     )
     .eq("id", id)
     .maybeSingle();
@@ -683,6 +704,12 @@ export async function ubahTiket(
     kriteriaLama: lama.kriteria_selesai,
   });
   if (!cek.ok) return gagal(cek.pesan, "validasi");
+
+  // Tenggat tiket GRD punya jalurnya sendiri ("Ubah deadline", hanya
+  // CEO/Manager); form edit tidak menggesernya diam-diam (0200).
+  if (lama.tonggak_id !== null && cek.nilai.tenggatBerubah) {
+    return gagal(PESAN_TENGGAT_GRD, "izin");
+  }
 
   const { data, error } = await sb
     .from("tasks")
@@ -761,13 +788,17 @@ export async function hapusTugas(id: string): Promise<Hasil> {
   const sb = await klienServer();
   const { data: lama, error: galatBaca } = await sb
     .from("tasks")
-    .select("tipe, pembuat_id, penerima_id, status")
+    .select("tipe, pembuat_id, penerima_id, status, tonggak_id")
     .eq("id", id)
     .maybeSingle();
 
   if (galatBaca) return gagal(`Gagal memuat tugas: ${galatBaca.message}`);
   if (!lama) {
     return gagal("Tugas itu tidak ada, atau tidak terlihat olehmu.", "izin");
+  }
+  // Tiket dari rencana GRD adalah cermin tonggaknya (0200).
+  if (lama.tonggak_id !== null) {
+    return gagal(PESAN_HAPUS_TIKET_GRD, "validasi");
   }
 
   const todo = lama.tipe === "pribadi";
@@ -793,6 +824,9 @@ export async function hapusTugas(id: string): Promise<Hasil> {
     .select("id");
 
   if (error) {
+    if (error.message.includes("tidak bisa dihapus; betulkan lewat rencana")) {
+      return gagal(PESAN_HAPUS_TIKET_GRD, "validasi");
+    }
     return error.message.includes("sudah selesai")
       ? gagal(PESAN_TIKET_SELESAI, "validasi")
       : gagal(`Gagal menghapus: ${error.message}`);

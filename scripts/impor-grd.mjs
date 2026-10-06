@@ -40,6 +40,7 @@ import {
   lengkapiPemetaan,
   susunRencana,
 } from "@/lib/impor-grd";
+import { susunLaporanTiketGrd } from "@/lib/tiket-grd";
 
 XLSX.set_fs(fs);
 const AKAR = path.resolve(import.meta.dirname, "..");
@@ -247,6 +248,18 @@ if (error) {
       "\n✓ Uji coba lulus seluruh aturan database; tidak ada yang tersimpan.",
     );
     console.log(`  Ringkasan: ${uji[1]}`);
+    // Tiket dari tonggak SEKALI/PEKANAN (0201): yang akan dibuat dan yang
+    // dilewati, dalam bahasa sederhana.
+    try {
+      const tiket = JSON.parse(uji[1]).tiket_grd;
+      if (tiket && tiket.periode) {
+        console.log(
+          "\n" + susunLaporanTiketGrd(tiket, { uji: true }).join("\n"),
+        );
+      }
+    } catch {
+      // Ringkasan yang tidak terbaca tidak menggagalkan uji coba.
+    }
     console.log("  Jalankan lagi dengan --terapkan untuk menyimpan.");
     process.exit(0);
   }
@@ -257,3 +270,8 @@ if (error) {
 console.log(
   `\n✓ GRD ${mentah.periodeLabel} tersimpan: ${JSON.stringify(hasil)}`,
 );
+if (hasil?.tiket_grd?.periode) {
+  console.log(
+    "\n" + susunLaporanTiketGrd(hasil.tiket_grd, { uji: false }).join("\n"),
+  );
+}

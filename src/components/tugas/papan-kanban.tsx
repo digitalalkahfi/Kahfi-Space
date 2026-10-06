@@ -23,6 +23,7 @@ import { PesanAksi } from "@/components/shared/pesan-aksi";
 import { cn } from "@/lib/utils";
 import { kolomMenerima, periksaPindah } from "@/lib/kanban";
 import { penandaPapan, urutkanKolom } from "@/lib/papan-tanggal";
+import { bolehUbahTenggatTiketGrd } from "@/lib/tiket-grd";
 import {
   cocokLihat,
   hitungLihat,
@@ -315,6 +316,8 @@ export function PapanKanban({
 
   const sayaPenerima = (t: Tugas) => t.penerimaId === idSaya;
   const sayaPembuat = (t: Tugas) => t.pembuatId === idSaya;
+  // Tenggat tiket dari rencana GRD hanya diubah CEO/Manager (0200).
+  const lintasUnit = bolehUbahTenggatTiketGrd(peran);
   const bolehQc = (t: Tugas) =>
     t.tipe !== "pribadi" && (bolehQcSemua || sayaPembuat(t));
   // To-do pribadi boleh ditarik keluar dari Selesai (= batal centang);
@@ -515,6 +518,7 @@ export function PapanKanban({
                                 sayaPenerima={sayaPenerima(t)}
                                 sayaPembuat={sayaPembuat(t)}
                                 bolehQc={bolehQc(t)}
+                                lintasUnit={lintasUnit}
                                 hariIni={hariIni}
                                 sekarang={sekarang}
                                 penanda={penandaPapan(

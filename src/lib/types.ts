@@ -79,6 +79,12 @@ export type Tugas = {
   goalPeriode: string | null;
   /** Waktu tugas ditandai selesai; null bila belum. */
   selesaiPada: string | null;
+  /**
+   * Tonggak rencana operasional GRD asal tiket ini; null untuk tugas
+   * biasa. Tiket GRD: tenggatnya hanya diubah CEO/Manager dan tidak bisa
+   * dihapus (0200).
+   */
+  tonggakId?: string | null;
   label: string;
 };
 
