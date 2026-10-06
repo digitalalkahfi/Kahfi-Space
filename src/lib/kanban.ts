@@ -132,3 +132,69 @@ export function kolomMenerima(input: {
   const hasil = periksaPindah(input);
   return hasil.boleh || hasil.mintaHasilKerja === true;
 }
+
+// ---------------------------------------------------------------------
+// Siapa boleh apa di kartu (0205)
+//
+// Cerminan aturan database (`kunci_isi_tiket`, `jaga_hapus_tugas`): tombolnya
+// hanya kenyamanan, yang menolak adalah database. Dipakai kartu dan Server
+// Action sekaligus supaya keduanya tidak berbeda pendapat.
+// ---------------------------------------------------------------------
+
+/** CEO dan Manager: bertanggung jawab atas seluruh tim, lintas unit. */
+export function peranLintasUnit(peran: string): boolean {
+  return peran === "CEO" || peran === "Manager";
+}
+
+/**
+ * Tombol Edit. To-do: pemiliknya kapan pun. Tiket: pemberinya, atau CEO
+ * dan Manager siapa pun pemberinya (0205) — selama belum selesai, karena
+ * yang lolos QC sudah jadi nilai KPI penerimanya (0184). Penerima tidak
+ * pernah menyunting isi tiketnya sendiri.
+ */
+export function bolehEditTugas(input: {
+  tipe: TipeTugas;
+  selesai: boolean;
+  sayaPenerima: boolean;
+  sayaPembuat: boolean;
+  lintasUnit: boolean;
+}): boolean {
+  if (input.tipe === "pribadi") return input.sayaPenerima;
+  if (input.selesai) return false;
+  return input.sayaPembuat || input.lintasUnit;
+}
+
+/**
+ * Tombol Hapus tetap hanya milik pemberinya (atau pemilik to-do), dan tidak
+ * ada untuk tiket dari rencana GRD — impor berikutnya akan membuatnya lagi.
+ */
+export function bolehHapusTugas(input: {
+  tipe: TipeTugas;
+  selesai: boolean;
+  dariGrd: boolean;
+  sayaPenerima: boolean;
+  sayaPembuat: boolean;
+}): boolean {
+  if (input.tipe === "pribadi") return input.sayaPenerima;
+  return input.sayaPembuat && !input.selesai && !input.dariGrd;
+}
+
+/**
+ * Tombol "Ubah deadline". To-do: pemiliknya. Tiket dari rencana GRD: CEO
+ * dan Manager saja, supaya tonggak yang terlambat tidak "menjadi tepat"
+ * karena tenggatnya digeser orang lain (0200). Tiket biasa: pemberinya,
+ * atau CEO dan Manager (0205).
+ */
+export function bolehUbahTenggatTugas(input: {
+  tipe: TipeTugas;
+  selesai: boolean;
+  dariGrd: boolean;
+  sayaPenerima: boolean;
+  sayaPembuat: boolean;
+  lintasUnit: boolean;
+}): boolean {
+  if (input.selesai) return false;
+  if (input.tipe === "pribadi") return input.sayaPenerima;
+  if (input.dariGrd) return input.lintasUnit;
+  return input.sayaPembuat || input.lintasUnit;
+}

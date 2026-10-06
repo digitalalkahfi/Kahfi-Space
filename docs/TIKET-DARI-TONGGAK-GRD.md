@@ -4,7 +4,7 @@ Rencana operasional GRD (`grd_rencana` + `grd_tonggak`) otomatis menjadi tiket d
 modul Tugas (`tasks`) untuk PIC-nya. Tim bekerja dari halaman **Tugas**; status
 tonggak di **GRD › Rencana operasional** mengikuti tiketnya. Tidak ada lapor dua kali.
 
-Migrasi: `0199`–`0204`. Kode: `src/lib/tiket-grd.ts`, `scripts/tiket-grd.mjs`.
+Migrasi: `0199`–`0205`. Kode: `src/lib/tiket-grd.ts`, `scripts/tiket-grd.mjs`.
 Tes: `supabase/tests/tiket-grd.test.mjs` (aturan di database) dan
 `src/lib/__tes__/tiket-grd.test.ts` (penyusun laporan & aturan tampilan).
 
@@ -19,7 +19,7 @@ Tes: `supabase/tests/tiket-grd.test.mjs` (aturan di database) dan
 | 5 | Tanpa tenggat / tanpa PIC terdaftar / PIC nonaktif → tidak dibuatkan tiket (dilaporkan beserta alasannya). |
 | 6 | Status mengalir **tiket → tonggak**: todo→belum; berjalan/menunggu_qc/revisi→progress; selesai (QC lolos)→selesai. Waktu selesai tonggak = saat PIC **terakhir mengajukan** pemeriksaan (`tasks.diajukan_pada`), bukan saat QC meluluskan. |
 | 7 | Tonggak yang punya tiket tidak bisa diubah manual; halaman Rencana menampilkan status + tautan "Buka tiket". Tonggak tanpa tiket tetap bisa dicentang seperti biasa. |
-| 8 | Tenggat tiket GRD hanya boleh diubah CEO/Manager (termasuk yang bukan pemberi), dan ikut mengubah tenggat tonggak; sebaliknya tenggat tonggak yang diubah (mis. impor) membawa tiketnya. Tenggat yang sudah lewat tidak digeser saat tiket dibuat. |
+| 8 | Tenggat tiket GRD hanya boleh diubah CEO/Manager (termasuk yang bukan pemberi; pemberi biasa tidak), dan ikut mengubah tenggat tonggak; sebaliknya tenggat tonggak yang diubah (mis. impor) membawa tiketnya. Tenggat yang sudah lewat tidak digeser saat tiket dibuat. |
 | 9 | Tonggak selesai tidak dibuatkan tiket. Tonggak progress → tiket berjalan. |
 | 10 | Aman diulang (tidak pernah dobel) dan berjalan otomatis di akhir `impor_grd`. |
 | 11 | Bulan yang KPI-nya sudah dikunci tidak disentuh: tidak dibuatkan tiket, status tonggak tidak diubah tiketnya, tenggat tidak bisa digeser. |
@@ -30,6 +30,20 @@ Keputusan tambahan (Okt 2026): tiket GRD **tidak bisa dihapus** dari aplikasi
 belum selesai **dibatalkan**, yang sudah selesai dibiarkan sebagai arsip; tiket GRD
 tidak dihitung di komponen `tiket` KPI rumus jabatan (`realisasi_kpi`), karena
 tonggaknya sudah dinilai lewat `tonggak_tepat_waktu` (rumus itu tidak diubah).
+
+## Siapa boleh mengedit tiket (0205)
+
+Isi tiket yang **belum selesai** (judul, rincian, kriteria, target, tenggat, prioritas,
+goal, penerima) bisa diubah **pemberinya, CEO, atau Manager** — tiket GRD maupun tiket
+biasa. Tombol Edit (ikon pensil) tampil untuk mereka.
+
+- Penerima tetap tidak bisa mengedit tiketnya; to-do hanya pemiliknya.
+- Tiket selesai terkunci untuk semua (nilainya sudah masuk KPI).
+- CEO/Manager tidak bisa mengambil alih pemberi atau mengubah jenis tiket.
+- Penerima baru hanya bisa diganti selagi tiket To Do.
+- Tenggat tiket GRD tetap hanya CEO/Manager, dan tidak diubah lewat formulir edit
+  (pakai "Ubah deadline"); tombol hapus tetap hanya milik pemberi, dan tidak ada untuk tiket GRD.
+- Pemberi mendapat notifikasi "Tiket diubah oleh <nama>" bila orang lain yang mengubah isinya.
 
 ## Susunan tiket (0204)
 

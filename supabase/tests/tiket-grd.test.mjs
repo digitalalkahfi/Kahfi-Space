@@ -854,9 +854,18 @@ uji("aturan 8: tenggat tiket GRD hanya CEO/Manager, dan ikut mengubah tonggaknya
   );
   harusSama(sesudah.j, `${hari(p, 12)} 15:00`, "tenggat tiket berubah");
   harusSama((await tonggak(r.tonggak[0])).tenggat, hari(p, 12), "tenggat tonggak ikut berubah");
+  // Sejak 0205 Manager boleh menyunting isi tiket siapa pun yang belum
+  // selesai (judul, rincian, kriteria) — tetapi tidak mengambil alih
+  // kepemilikannya.
+  await sebagai(db, FARHAN, "update tasks set judul = 'diganti Manager' where id = $1", [t.id]);
+  harusSama(
+    (await satu("select judul from tasks where id = $1", [t.id])).judul,
+    "diganti Manager",
+    "Manager boleh menyunting judul tiket GRD",
+  );
   await pesanTolak(
-    () => sebagai(db, FARHAN, "update tasks set judul = 'diganti Manager' where id = $1", [t.id]),
-    "Manager mengubah judul tiket orang lain",
+    () => sebagai(db, FARHAN, "update tasks set pembuat_id = $2 where id = $1", [t.id, FARHAN]),
+    "Manager mengambil alih pemberi tiket",
   );
   // CEO juga boleh.
   await sebagai(db, HAFIDZ, geser, [t.id, `${hari(p, 14)}T17:00:00+07:00`]);
@@ -895,7 +904,7 @@ uji("aturan 8: tenggat tonggak diubah CEO/Manager membawa tiketnya dan mengabari
   );
 });
 
-uji("tiket biasa tidak berubah: pemberi boleh menggeser tenggat, Manager lain tidak (D1)", async () => {
+uji("tiket biasa: pemberi dan Manager boleh menggeser tenggat, penerima tidak (0205)", async () => {
   const buatTiket = async () =>
     (
       await satu(
@@ -906,12 +915,19 @@ uji("tiket biasa tidak berubah: pemberi boleh menggeser tenggat, Manager lain ti
     ).id;
   const tid = await buatTiket();
   await sebagai(db, DEWI, "update tasks set tenggat = '2099-01-12T17:00:00+07:00' where id = $1", [tid]);
-  await pesanTolak(
-    () => sebagai(db, FARHAN, "update tasks set tenggat = '2099-01-13T17:00:00+07:00' where id = $1", [tid]),
-    "Manager bukan pemberi pada tiket biasa",
+  await sebagai(db, FARHAN, "update tasks set tenggat = '2099-01-13T17:00:00+07:00' where id = $1", [tid]);
+  harusSama(
+    (
+      await satu(
+        "select to_char(tenggat at time zone 'Asia/Jakarta', 'YYYY-MM-DD') d from tasks where id = $1",
+        [tid],
+      )
+    ).d,
+    "2099-01-13",
+    "Manager boleh menggeser tenggat tiket biasa",
   );
   await pesanTolak(
-    () => sebagai(db, RIAN, "update tasks set tenggat = '2099-01-13T17:00:00+07:00' where id = $1", [tid]),
+    () => sebagai(db, RIAN, "update tasks set tenggat = '2099-01-14T17:00:00+07:00' where id = $1", [tid]),
     "penerima tiket biasa",
   );
   // Tiket biasa masih bisa dihapus pemberinya.

@@ -5,7 +5,9 @@
  * `authenticated` dengan RLS aktif — bukan dibaca dari kode:
  *   · penerima: ubah tenggat/judul → ditolak; ubah status → boleh
  *   · pemberi tiket: ubah tenggat → boleh, pengingat di-reset
- *   · Manager bukan pemberi tiket: ubah tenggat → ditolak
+ *   · Manager bukan pemberi tiket: ubah tenggat → BOLEH sejak 0205 (CEO dan
+ *     Manager boleh mengedit semua tiket; Leader atasan penerima yang bukan
+ *     pemberi tetap ditolak)
  */
 import { readFile } from "node:fs/promises";
 import path from "node:path";
@@ -160,16 +162,29 @@ uji("pemberi tiket bisa mengubah tenggat, dan pengingatnya di-reset", async () =
   harusSama(penanda.n, 0, "penanda pengingat harus terhapus");
 });
 
-uji("Manager yang bukan pemberi tiket tidak bisa mengubah tenggat", async () => {
+uji("Leader atasan penerima yang bukan pemberi tetap tidak bisa mengubah tenggat", async () => {
+  // AUDIT diberikan Manager untuk Rian; Dewi atasan Rian tetapi bukan
+  // pemberinya — ia melihat tiketnya, namun isinya bukan wewenangnya.
   const e = await galatDari(() =>
     sebagai(
       db,
-      MANAGER,
+      DEWI,
       `update tasks set tenggat = now() + interval '2 days' where id = $1`,
-      [QC_FYP],
+      [AUDIT],
     ),
   );
   await harusDikunci(e);
+});
+
+uji("Manager yang bukan pemberi tiket boleh mengubah tenggat (0205)", async () => {
+  // QC_FYP diberikan Dewi untuk Bayu; Manager bukan pemberinya.
+  const { rows } = await sebagai(
+    db,
+    MANAGER,
+    `update tasks set tenggat = now() + interval '2 days' where id = $1 returning id`,
+    [QC_FYP],
+  );
+  harusSama(rows.length, 1, "Manager boleh sejak 0205");
 });
 
 uji("Manager yang bukan pemberi tiket tetap bisa melakukan QC", async () => {

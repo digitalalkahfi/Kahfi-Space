@@ -8,6 +8,7 @@
  * tampilan yang sama di semua layar.
  */
 import { bulanPanjang } from "@/lib/format";
+import { peranLintasUnit } from "@/lib/kanban";
 import type { StatusTonggak } from "@/lib/rencana";
 
 /** Alasan sebuah tonggak tidak dibuatkan tiket (kode dari `buat_tiket_grd`). */
@@ -196,7 +197,7 @@ export const TAUTAN_RENCANA_GRD = "/grd/rencana";
 
 /** Tenggat tiket GRD hanya diubah CEO/Manager (aturan tonggak, 0192). */
 export function bolehUbahTenggatTiketGrd(role: string): boolean {
-  return role === "CEO" || role === "Manager";
+  return peranLintasUnit(role);
 }
 
 /** Pesan baku saat tenggat tiket GRD diubah selain oleh CEO/Manager. */
