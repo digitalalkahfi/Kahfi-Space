@@ -2,8 +2,12 @@ import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import {
   PESAN_TODO_TANPA_REVIEW,
+  bolehEditTugas,
+  bolehHapusTugas,
+  bolehUbahTenggatTugas,
   dapatDigeser,
   kolomMenerima,
+  peranLintasUnit,
   periksaPindah,
 } from "@/lib/kanban";
 import type { StatusTugas, TipeTugas } from "@/lib/types";
@@ -230,4 +234,93 @@ test("aturan tiket tidak berubah oleh aturan to-do", () => {
       mintaHasilKerja: true,
     });
   }
+});
+
+// ---------------------------------------------------------------------
+// Siapa boleh apa di kartu (0205)
+// ---------------------------------------------------------------------
+const dasar = {
+  tipe: "tiket" as TipeTugas,
+  selesai: false,
+  dariGrd: false,
+  sayaPenerima: false,
+  sayaPembuat: false,
+  lintasUnit: false,
+};
+
+test("hanya CEO dan Manager yang lintas unit", () => {
+  assert.equal(peranLintasUnit("CEO"), true);
+  assert.equal(peranLintasUnit("Manager"), true);
+  for (const peran of ["Leader", "Co-Leader", "Staff", "Finance"]) {
+    assert.equal(peranLintasUnit(peran), false, peran);
+  }
+});
+
+test("edit tiket: pemberi, CEO, atau Manager; penerima tidak", () => {
+  assert.equal(bolehEditTugas({ ...dasar, sayaPembuat: true }), true);
+  assert.equal(bolehEditTugas({ ...dasar, lintasUnit: true }), true);
+  assert.equal(bolehEditTugas({ ...dasar, sayaPenerima: true }), false);
+  // Leader atasan yang bukan pemberi: tidak.
+  assert.equal(bolehEditTugas({ ...dasar }), false);
+});
+
+test("edit tiket: yang sudah selesai terkunci untuk semua, termasuk CEO/Manager", () => {
+  assert.equal(
+    bolehEditTugas({ ...dasar, selesai: true, sayaPembuat: true, lintasUnit: true }),
+    false,
+  );
+});
+
+test("edit tiket GRD sama dengan tiket biasa (yang dikunci hanya tenggatnya)", () => {
+  // Aturan edit tidak membedakan asal tiket; tenggat GRD punya aturannya
+  // sendiri di `bolehUbahTenggatTugas`, dan form edit mengunci tanggalnya.
+  const grd = { ...dasar, dariGrd: true };
+  assert.equal(bolehEditTugas({ ...grd, lintasUnit: true }), true);
+  assert.equal(bolehEditTugas({ ...grd, sayaPembuat: true }), true);
+  assert.equal(bolehEditTugas({ ...grd, sayaPenerima: true }), false);
+});
+
+test("to-do: hanya pemiliknya, siapa pun perannya", () => {
+  const todo = { ...dasar, tipe: "pribadi" as TipeTugas };
+  assert.equal(bolehEditTugas({ ...todo, sayaPenerima: true }), true);
+  assert.equal(bolehEditTugas({ ...todo, lintasUnit: true }), false);
+  assert.equal(bolehEditTugas({ ...todo, sayaPembuat: true }), false);
+});
+
+test("hapus tetap hanya pemberi; CEO/Manager bukan pemberi tidak mendapat tombol hapus", () => {
+  assert.equal(bolehHapusTugas({ ...dasar, sayaPembuat: true }), true);
+  assert.equal(bolehHapusTugas({ ...dasar, sayaPenerima: true }), false);
+  assert.equal(bolehHapusTugas({ ...dasar }), false);
+  // Tiket GRD tidak bisa dihapus siapa pun; yang selesai pun tidak.
+  assert.equal(bolehHapusTugas({ ...dasar, dariGrd: true, sayaPembuat: true }), false);
+  assert.equal(bolehHapusTugas({ ...dasar, selesai: true, sayaPembuat: true }), false);
+  assert.equal(
+    bolehHapusTugas({ ...dasar, tipe: "pribadi", sayaPenerima: true, selesai: true }),
+    true,
+  );
+});
+
+test("ubah deadline: tiket biasa oleh pemberi atau CEO/Manager; GRD oleh CEO/Manager saja", () => {
+  assert.equal(bolehUbahTenggatTugas({ ...dasar, sayaPembuat: true }), true);
+  assert.equal(bolehUbahTenggatTugas({ ...dasar, lintasUnit: true }), true);
+  assert.equal(bolehUbahTenggatTugas({ ...dasar, sayaPenerima: true }), false);
+
+  const grd = { ...dasar, dariGrd: true };
+  assert.equal(bolehUbahTenggatTugas({ ...grd, lintasUnit: true }), true);
+  // Pemberi GRD yang bukan CEO/Manager (atasan langsung): tidak.
+  assert.equal(bolehUbahTenggatTugas({ ...grd, sayaPembuat: true }), false);
+  assert.equal(bolehUbahTenggatTugas({ ...grd, sayaPenerima: true }), false);
+
+  assert.equal(
+    bolehUbahTenggatTugas({ ...dasar, selesai: true, sayaPembuat: true, lintasUnit: true }),
+    false,
+  );
+  assert.equal(
+    bolehUbahTenggatTugas({ ...dasar, tipe: "pribadi", sayaPenerima: true }),
+    true,
+  );
+  assert.equal(
+    bolehUbahTenggatTugas({ ...dasar, tipe: "pribadi", lintasUnit: true }),
+    false,
+  );
 });

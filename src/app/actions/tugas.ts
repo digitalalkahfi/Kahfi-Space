@@ -6,7 +6,11 @@ import { klienServer } from "@/lib/supabase/server";
 import { sesiSaatIni } from "@/lib/data/sesi";
 import { bebanPenerima, hariIniTugas } from "@/lib/data/tugas";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
-import { MIN_HASIL_KERJA, PESAN_TODO_TANPA_REVIEW } from "@/lib/kanban";
+import {
+  MIN_HASIL_KERJA,
+  PESAN_TODO_TANPA_REVIEW,
+  peranLintasUnit,
+} from "@/lib/kanban";
 import { keJamWib, keTanggalWib } from "@/lib/format";
 import {
   PESAN_HAPUS_TIKET_GRD,
@@ -25,8 +29,12 @@ import {
 } from "@/lib/validasi-tugas";
 import type { Prioritas } from "@/lib/types";
 
-/** Pesan baku saat isi tiket diubah selain oleh pemberinya (D1, 0181). */
-const PESAN_KUNCI_TIKET = "Isi tiket hanya bisa diubah oleh pemberi tiket.";
+/**
+ * Pesan baku saat isi tiket diubah selain oleh pemberinya, CEO, atau
+ * Manager (D1, 0181; CEO/Manager sejak 0205).
+ */
+const PESAN_KUNCI_TIKET =
+  "Isi tiket hanya bisa diubah oleh pemberi tiket, CEO, atau Manager.";
 
 /** Pesan baku saat to-do diubah selain oleh pemiliknya (D1, 0181). */
 const PESAN_KUNCI_TODO = "Hanya pemilik to-do yang bisa mengubahnya.";
@@ -363,8 +371,9 @@ export async function buatTiket(input: {
  * Ubah tenggat sebuah tugas.
  *
  * To-do: hanya pemiliknya, jam opsional — inilah cara menjadwal ulang
- * to-do yang terlambat. Tiket & komitmen: hanya pemberi tiketnya (D1),
- * jam wajib; penerima yang butuh waktu lebih menghubungi pemberinya.
+ * to-do yang terlambat. Tiket & komitmen: pemberi tiketnya atau CEO/Manager
+ * (D1; CEO/Manager sejak 0205), jam wajib; penerima yang butuh waktu lebih
+ * menghubungi pemberinya.
  * Tiket dari rencana GRD: hanya CEO/Manager, siapa pun pemberinya —
  * tenggat tonggaknya ikut berubah (0200). Basis data menolak juga
  * (trigger 0181, 0200), dan pengingat tenggat terbit lagi untuk tanggal
@@ -398,18 +407,17 @@ export async function ubahTenggatTugas(
 
   const todo = tugas.tipe === "pribadi";
   const dariGrd = tugas.tonggak_id !== null;
-  const pemilik = todo ? tugas.penerima_id : tugas.pembuat_id;
+  const lintas = peranLintasUnit(pengguna.role);
   if (dariGrd) {
     if (!bolehUbahTenggatTiketGrd(pengguna.role)) {
       return gagal(PESAN_TENGGAT_GRD, "izin");
     }
-  } else if (pemilik !== pengguna.id) {
-    return gagal(
-      todo
-        ? "Hanya pemilik to-do yang bisa mengubah deadline-nya."
-        : PESAN_KUNCI_TIKET,
-      "izin",
-    );
+  } else if (todo) {
+    if (tugas.penerima_id !== pengguna.id) {
+      return gagal("Hanya pemilik to-do yang bisa mengubah deadline-nya.", "izin");
+    }
+  } else if (tugas.pembuat_id !== pengguna.id && !lintas) {
+    return gagal(PESAN_KUNCI_TIKET, "izin");
   }
 
   const cek = periksaTenggat({ tanggal, jam, jamWajib: !todo, hariIni });
@@ -637,7 +645,8 @@ export async function delegasikanToDo(
 }
 
 /**
- * Edit tiket & komitmen — hanya pemberinya, selama belum selesai (0184).
+ * Edit tiket & komitmen — pemberinya atau CEO/Manager (0205), selama belum
+ * selesai (0184). Pemberi dikabari bila orang lain yang mengubahnya.
  *
  * Isiannya SMART seperti tiket baru; jenisnya (tiket/komitmen) tetap.
  * Penerima boleh diganti selama tiket masih To Do dan penerima barunya
@@ -681,7 +690,10 @@ export async function ubahTiket(
   if (lama.tipe === "pribadi") {
     return gagal("Ini to-do pribadi, bukan tiket.", "validasi");
   }
-  if (lama.pembuat_id !== pengguna.id) return gagal(PESAN_KUNCI_TIKET, "izin");
+  // Pemberinya, atau CEO/Manager (0205); database menjaga hal yang sama.
+  if (lama.pembuat_id !== pengguna.id && !peranLintasUnit(pengguna.role)) {
+    return gagal(PESAN_KUNCI_TIKET, "izin");
+  }
   if (lama.status === "selesai") return gagal(PESAN_TIKET_SELESAI, "validasi");
 
   const gantiPenerima = input.penerimaId !== lama.penerima_id;

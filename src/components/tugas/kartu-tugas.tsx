@@ -36,6 +36,11 @@ import {
 import { JejakPemeriksaan } from "@/components/tugas/jejak-qc";
 import { useAksiTugas } from "@/components/tugas/aksi-tugas";
 import type { JejakQc } from "@/lib/data/tugas";
+import {
+  bolehEditTugas,
+  bolehHapusTugas,
+  bolehUbahTenggatTugas,
+} from "@/lib/kanban";
 import { lewatDeadline, type Penanda } from "@/lib/papan-tanggal";
 import { TAUTAN_RENCANA_GRD, idKartuTiket } from "@/lib/tiket-grd";
 import type { Prioritas, StatusTugas, TipeTugas, Tugas } from "@/lib/types";
@@ -191,18 +196,39 @@ export function KartuTugas({
   // Tiket yang lahir dari tonggak rencana GRD (0199): tenggatnya mengikuti
   // tonggak, dan tidak bisa dihapus karena akan dibuat lagi oleh impor.
   const dariGrd = Boolean(tugas.tonggakId);
-  // Menjadwal ulang: to-do oleh pemiliknya, tiket oleh pemberinya (D1);
-  // tiket GRD oleh CEO/Manager saja (0200).
-  const bolehUbahTenggat =
-    (dariGrd ? lintasUnit : todo ? sayaPenerima : sayaPembuat) &&
-    status !== "selesai";
-  // Edit & hapus: to-do oleh pemiliknya kapan pun; tiket oleh pemberinya
-  // selama belum selesai — yang lolos QC sudah jadi nilai KPI (0184).
-  const bolehKelola =
+  // Siapa boleh apa (aturannya di `@/lib/kanban`, cerminan database):
+  //  · ubah deadline — to-do oleh pemiliknya; tiket oleh pemberinya atau
+  //    CEO/Manager (0205); tiket GRD oleh CEO/Manager saja (0200);
+  //  · edit — to-do oleh pemiliknya; tiket oleh pemberinya atau CEO/Manager
+  //    selama belum selesai (yang lolos QC sudah jadi nilai KPI, 0184);
+  //  · hapus — tetap hanya pemberinya, dan tidak untuk tiket GRD.
+  const selesai = status === "selesai" || tugas.statusAsli === "selesai";
+  const bolehUbahTenggat = bolehUbahTenggatTugas({
+    tipe: tugas.tipe,
+    selesai: status === "selesai",
+    dariGrd,
+    sayaPenerima,
+    sayaPembuat,
+    lintasUnit,
+  });
+  const bolehEdit =
     aksi !== null &&
-    (todo
-      ? sayaPenerima
-      : sayaPembuat && status !== "selesai" && tugas.statusAsli !== "selesai");
+    bolehEditTugas({
+      tipe: tugas.tipe,
+      selesai,
+      sayaPenerima,
+      sayaPembuat,
+      lintasUnit,
+    });
+  const bolehHapus =
+    aksi !== null &&
+    bolehHapusTugas({
+      tipe: tugas.tipe,
+      selesai,
+      dariGrd,
+      sayaPenerima,
+      sayaPembuat,
+    });
   const namaTipe = NAMA_TIPE[tugas.tipe];
   const labelTarget =
     tugas.targetAngka !== null
@@ -697,7 +723,7 @@ export function KartuTugas({
               </Button>
             </div>
           </fieldset>
-        ) : bolehUbahTenggat || bolehKelola ? (
+        ) : bolehUbahTenggat || bolehEdit || bolehHapus ? (
           <div className="flex items-center gap-1">
             {bolehUbahTenggat ? (
               <button
@@ -711,29 +737,27 @@ export function KartuTugas({
             ) : (
               <span className="flex-1" />
             )}
-            {bolehKelola && aksi ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => aksi.ubah(tugas)}
-                  aria-label={`Edit ${namaTipe.toLowerCase()}: ${tugas.judul}`}
-                  title="Edit"
-                  className="tekan-halus sentuh-nyaman flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
-                >
-                  <Pencil className="size-3.5" />
-                </button>
-                {dariGrd ? null : (
-                  <button
-                    type="button"
-                    onClick={() => aksi.hapus(tugas)}
-                    aria-label={`Hapus ${namaTipe.toLowerCase()}: ${tugas.judul}`}
-                    title="Hapus"
-                    className="tekan-halus sentuh-nyaman flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-danger-fill hover:text-danger-text"
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
-                )}
-              </>
+            {bolehEdit && aksi ? (
+              <button
+                type="button"
+                onClick={() => aksi.ubah(tugas)}
+                aria-label={`Edit ${namaTipe.toLowerCase()}: ${tugas.judul}`}
+                title="Edit"
+                className="tekan-halus sentuh-nyaman flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                <Pencil className="size-3.5" />
+              </button>
+            ) : null}
+            {bolehHapus && aksi ? (
+              <button
+                type="button"
+                onClick={() => aksi.hapus(tugas)}
+                aria-label={`Hapus ${namaTipe.toLowerCase()}: ${tugas.judul}`}
+                title="Hapus"
+                className="tekan-halus sentuh-nyaman flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-danger-fill hover:text-danger-text"
+              >
+                <Trash2 className="size-3.5" />
+              </button>
             ) : null}
           </div>
         ) : null}
