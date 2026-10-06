@@ -1,15 +1,20 @@
 import { TrendingUp } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { jamWib, persen, rasioCapaian, rupiahRingkas } from "@/lib/format";
+import { persen, rasioCapaian, rupiahRingkas } from "@/lib/format";
+import { tanggalLaporanSingkat } from "@/lib/laporan";
 import { gayaKeputusanWrm } from "@/lib/unit";
 import { AngkaBerjalan } from "@/components/motion/angka-berjalan";
 import { BarCapaian } from "@/components/motion/bar-capaian";
 import type { KeputusanWrm } from "@/lib/types";
 
 /**
- * "Hari ini kita di mana?" — satu pandangan GMV hari ini vs target harian,
- * dengan keputusan matriks WRM sebagai konteks (PRD §3 Beranda).
+ * "Hari ini kita di mana?" — satu pandangan GMV hari penuh terbaru vs
+ * target harian, dengan keputusan matriks WRM sebagai konteks (PRD §3
+ * Beranda). GMV dihitung 24 jam penuh dan dilaporkan keesokan harinya,
+ * jadi angka yang tampil adalah GMV kemarin (H-1), bukan hari ini.
+ *
+ * `gmvHariIni` = GMV pada `tanggalGmv`; `gmvKemarin` = sehari sebelumnya.
  */
 export function HeroWrm({
   gmvHariIni,
@@ -17,7 +22,7 @@ export function HeroWrm({
   targetHarian,
   keputusan,
   catatan,
-  disinkronPada,
+  tanggalGmv,
 }: {
   gmvHariIni: number;
   gmvKemarin: number;
@@ -25,7 +30,8 @@ export function HeroWrm({
   keputusan: KeputusanWrm;
   /** Catatan ritme perusahaan; hanya untuk peran yang melihat semua unit. */
   catatan?: string;
-  disinkronPada: string;
+  /** Tanggal GMV yang ditampilkan (kemarin), "YYYY-MM-DD". */
+  tanggalGmv: string;
 }) {
   const capaian = rasioCapaian(gmvHariIni, targetHarian);
   const sisa = Math.max(0, targetHarian - gmvHariIni);
@@ -56,7 +62,7 @@ export function HeroWrm({
         <div className="flex items-end justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[13px] leading-[18px] text-muted-foreground">
-              Total Capaian GMV Hari Ini
+              Total Capaian GMV Kemarin · {tanggalLaporanSingkat(tanggalGmv)}
             </p>
             <div className="mt-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
               <AngkaBerjalan
@@ -100,7 +106,7 @@ export function HeroWrm({
 
         <div className="flex flex-wrap items-center justify-between gap-2 text-[13px] leading-[18px]">
           <span className="text-muted-foreground">
-            {persen(capaian)} tercapai per {jamWib(disinkronPada)}
+            {persen(capaian)} tercapai · GMV satu hari penuh
           </span>
           <span className="font-semibold">
             Sisa {rupiahRingkas(sisa, { digit: 2, pangkas: false })}

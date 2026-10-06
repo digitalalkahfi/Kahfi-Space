@@ -7,15 +7,18 @@ import {
   ISI_KOSONG,
   type IsiLaporan,
   kapanLaporan,
+  keteranganDikirim,
   kolomLaporan,
   kunciSasaranLaporan,
   labelHariLaporan,
   periksaIsiLaporan,
   perubahanRevisi,
+  PESAN_GMV_BELUM_PENUH,
   punyaKolom,
   sasaranBelumDilapor,
   statusLaporanBulan,
   tanggalBolehLapor,
+  tanggalDataTerakhir,
   tanggalLaporanPanjang,
   unitSasaran,
 } from "@/lib/laporan";
@@ -360,15 +363,25 @@ test("kunci sasaran unit memakai kode unitnya", () => {
   );
 });
 
-test("tanggal laporan: hari ini atau susulan sejak sasaran terdaftar", () => {
+test("tanggal laporan: kemarin atau susulan sejak sasaran terdaftar (H-1)", () => {
   const hariIni = "2026-09-29";
-  assert.equal(alasanTanggalLaporan("2026-09-29", hariIni), null, "hari ini");
+  assert.equal(tanggalDataTerakhir(hariIni), "2026-09-28", "kemarin");
+  assert.equal(tanggalDataTerakhir("2026-10-01"), "2026-09-30", "lintas bulan");
+  assert.equal(tanggalDataTerakhir("2027-01-01"), "2026-12-31", "lintas tahun");
+  assert.equal(alasanTanggalLaporan("2026-09-28", hariIni), null, "kemarin");
   assert.equal(alasanTanggalLaporan("2026-09-25", hariIni), null, "susulan");
   assert.equal(
     alasanTanggalLaporan("2026-06-01", hariIni),
     null,
     "tanpa batas hari, selama tidak sebelum sasaran terdaftar",
   );
+  // GMV hari ini belum satu hari penuh: ditolak dengan alasan yang jelas.
+  assert.equal(
+    alasanTanggalLaporan("2026-09-29", hariIni),
+    PESAN_GMV_BELUM_PENUH,
+    "hari ini belum bisa",
+  );
+  assert.match(PESAN_GMV_BELUM_PENUH, /24 jam/);
   assert.match(alasanTanggalLaporan("2026-09-30", hariIni) ?? "", /masa depan/);
   assert.match(
     alasanTanggalLaporan("2026-09-20", hariIni, "2026-09-23") ?? "",
@@ -380,6 +393,7 @@ test("tanggal laporan: hari ini atau susulan sejak sasaran terdaftar", () => {
     "Tanggal laporan tidak sah.",
   );
   assert.equal(tanggalBolehLapor("", hariIni), false);
+  assert.equal(tanggalBolehLapor("2026-09-29", hariIni), false, "hari ini");
   assert.equal(tanggalBolehLapor("2026-09-28", hariIni, "2026-09-23"), true);
 });
 
@@ -408,7 +422,12 @@ test("kalender laporan: merah bila ada yang belum, hijau bila semua sudah", () =
     "akun kedua baru ditagih sejak ia terdaftar",
   );
   assert.deepEqual(status["2026-09-26"], { wajib: 2, belum: 0 });
-  assert.deepEqual(status["2026-09-29"], { wajib: 2, belum: 2 }, "hari ini");
+  assert.deepEqual(status["2026-09-28"], { wajib: 2, belum: 2 }, "kemarin");
+  assert.equal(
+    status["2026-09-29"],
+    undefined,
+    "hari ini belum ditagih: GMV-nya belum satu hari penuh",
+  );
   assert.equal(status["2026-09-30"], undefined, "masa depan tanpa warna");
   assert.deepEqual(
     statusLaporanBulan("2026-10-01", ["akun:a"], [], "2026-09-29"),
@@ -419,10 +438,9 @@ test("kalender laporan: merah bila ada yang belum, hijau bila semua sudah", () =
 
 test("label tanggal laporan dibaca orang", () => {
   const hariIni = "2026-09-28";
-  assert.equal(labelHariLaporan("2026-09-28", hariIni), "Hari ini");
   assert.equal(labelHariLaporan("2026-09-27", hariIni), "Kemarin");
   assert.equal(labelHariLaporan("2026-09-26", hariIni), "Sab, 26 Sep");
-  assert.equal(kapanLaporan("2026-09-28", hariIni), "hari ini");
+  assert.equal(kapanLaporan("2026-09-27", hariIni), "kemarin");
   assert.equal(kapanLaporan("2026-09-26", hariIni), "pada Sab, 26 Sep");
   assert.equal(tanggalLaporanPanjang("2026-09-26"), "Sabtu, 26 September 2026");
 });
@@ -447,4 +465,29 @@ test("GMV LIVE bagian dari GMV, jam LIVE 0–24, hanya untuk Affiliator", () => 
   // MCN: kolom LIVE dibuang sebelum dikirim.
   const bersih = bersihkanIsi("mcn", isi({ gmvLive: 5, jamLive: 2 }));
   assert.deepEqual([bersih.gmvLive, bersih.jamLive], [null, null]);
+});
+
+test("riwayat menyebut kapan laporan dikirim, terpisah dari tanggal GMV-nya", () => {
+  // Laporan bertanggal 5 Okt dikirim 6 Okt pukul 08:12 WIB (01:12 UTC).
+  assert.equal(keteranganDikirim("2026-10-06T01:12:00Z"), "dikirim 6 Okt, 08:12");
+  // Lewat tengah malam WIB: tanggalnya ikut WIB, bukan UTC.
+  assert.equal(keteranganDikirim("2026-10-05T17:30:00Z"), "dikirim 6 Okt, 00:30");
+});
+
+test("aturan H-1 di pergantian bulan dan tahun", () => {
+  // Tanggal 1 menagih laporan hari terakhir bulan lalu.
+  assert.equal(tanggalDataTerakhir("2026-11-01"), "2026-10-31");
+  assert.equal(alasanTanggalLaporan("2026-10-31", "2026-11-01"), null);
+  assert.equal(
+    alasanTanggalLaporan("2026-11-01", "2026-11-01"),
+    PESAN_GMV_BELUM_PENUH,
+  );
+  // Pada tanggal 1, kalender bulan baru belum punya tanggal yang ditagih.
+  assert.deepEqual(
+    statusLaporanBulan("2026-11-01", ["akun:a"], [], "2026-11-01"),
+    {},
+  );
+  // ...sedangkan bulan lalu masih menagih sampai hari terakhirnya.
+  const oktober = statusLaporanBulan("2026-10-01", ["akun:a"], [], "2026-11-01");
+  assert.deepEqual(oktober["2026-10-31"], { wajib: 1, belum: 1 });
 });

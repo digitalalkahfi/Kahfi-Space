@@ -33,8 +33,8 @@ export function KunciPulang({
             </p>
             <p className="mt-0.5 text-[13px] leading-[18px] text-warn-text/90">
               {belumDilapor.length > 0
-                ? "Laporan GMV hari ini belum lengkap. Kunci terbuka otomatis begitu semuanya terkirim."
-                : "Laporan harian hari ini belum terkirim. Kunci terbuka otomatis setelah laporan masuk."}
+                ? "Laporan GMV kemarin belum lengkap. Kunci terbuka otomatis begitu semuanya terkirim."
+                : "Laporan harian (GMV kemarin) belum terkirim. Kunci terbuka otomatis setelah laporan masuk."}
             </p>
           </div>
         </div>

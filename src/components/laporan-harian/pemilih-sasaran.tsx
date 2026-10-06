@@ -28,7 +28,7 @@ export function targetSasaran(s: SasaranLaporan) {
 
 /**
  * Pemilih sasaran laporan: akun affiliator yang dipegang PIC, atau unit
- * yang dipimpin Leader. Sasaran yang sudah dilapor hari ini dikunci supaya
+ * yang dipimpin Leader. Sasaran yang sudah dilapor pada tanggal itu dikunci supaya
  * tidak dobel — laporan unik per (akun/unit, tanggal) (PRD §6).
  */
 export function PemilihSasaran({

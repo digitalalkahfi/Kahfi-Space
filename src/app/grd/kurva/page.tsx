@@ -15,6 +15,7 @@ import { bulanPanjang, hariIniWib } from "@/lib/format";
 import { gayaKeputusanWrm } from "@/lib/unit";
 import { ARTI_WRM } from "@/lib/wrm";
 import { cn } from "@/lib/utils";
+import { tanggalDataTerakhir } from "@/lib/laporan";
 import type { KeputusanWrm } from "@/lib/types";
 
 export const metadata: Metadata = {
@@ -41,7 +42,8 @@ export default async function KurvaPage({
 
   const tanggal = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
   const periode = `${tanggal.slice(0, 7)}-01`;
-  const daftar = await kurvaGrd(pengguna, periode, tanggal);
+  // Aktual dibaca sampai kemarin: GMV dilaporkan keesokan harinya (H-1).
+  const daftar = await kurvaGrd(pengguna, periode, tanggalDataTerakhir(tanggal));
 
   return (
     <AppShell pengguna={pengguna} halaman="GRD">

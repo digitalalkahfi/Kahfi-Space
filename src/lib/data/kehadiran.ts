@@ -8,6 +8,7 @@ import { dataContoh, lingkupContoh } from "@/lib/data/contoh";
 import { aktifDemo } from "@/lib/demo";
 import { jamEfektifMasuk, menitTelat } from "@/lib/izin";
 import { batasMinimum } from "@/lib/batas-minimum";
+import { tanggalDataTerakhir } from "@/lib/laporan";
 import { dalamLingkup } from "@/lib/lingkup";
 import { wajibAbsen } from "@/lib/rekap-kehadiran";
 import type {
@@ -106,8 +107,11 @@ function efektifDemo(a: {
 function hitungDemo(pengguna: Pengguna, tanggal: string): RekapKehadiran {
   const { users, units, attendance, daily_reports, accounts } = dataContoh;
 
+  // Laporan yang jatuh tempo pada `tanggal` memuat GMV kemarin (H-1).
   const pelapor = new Set(
-    daily_reports.filter((l) => l.tanggal === tanggal).map((l) => l.user),
+    daily_reports
+      .filter((l) => l.tanggal === tanggalDataTerakhir(tanggal))
+      .map((l) => l.user),
   );
 
   // Padanan `wajib_lapor_harian` di SQL: PIC akun aktif, plus Leader unit
@@ -176,7 +180,7 @@ function unggahanDemo(nama: string, tanggal: string) {
   const username = new Set(miliknya.map((a) => a.username));
   const laporan = daily_reports.filter(
     (l) =>
-      l.tanggal === tanggal &&
+      l.tanggal === tanggalDataTerakhir(tanggal) &&
       l.akun !== null &&
       username.has(l.akun) &&
       (l as { jumlah_upload?: number }).jumlah_upload !== undefined,

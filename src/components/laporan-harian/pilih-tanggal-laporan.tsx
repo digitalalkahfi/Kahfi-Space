@@ -17,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import { dalamBulan, geserBulan, petakBulan } from "@/lib/kalender";
 import {
+  tanggalDataTerakhir,
   tanggalLaporanPanjang,
   tanggalLaporanSingkat,
   type KalenderLaporan,
@@ -40,15 +41,19 @@ const NAMA_BULAN = [
   "Desember",
 ];
 
-/** Alamat halaman laporan untuk sebuah tanggal; persona demo ikut dibawa. */
+/**
+ * Alamat halaman laporan untuk sebuah tanggal; persona demo ikut dibawa.
+ * `hariData` = tanggal laporan bawaan (kemarin), yang tidak perlu ditulis
+ * di alamatnya.
+ */
 export function tautanTanggalLaporan(
   tanggal: string,
-  hariIni: string,
+  hariData: string,
   persona?: string,
 ) {
   const q = new URLSearchParams();
   if (persona) q.set("persona", persona);
-  if (tanggal !== hariIni) q.set("tanggal", tanggal);
+  if (tanggal !== hariData) q.set("tanggal", tanggal);
   const teks = q.toString();
   return teks ? `/laporan-harian?${teks}` : "/laporan-harian";
 }
@@ -66,8 +71,8 @@ function uraianStatus(st: StatusHariLaporan) {
  * Pemilih tanggal laporan berbentuk kalender, lengkap dengan bulan dan
  * tahunnya. Tanggal merah: masih ada sasaran yang belum dilapor. Tanggal
  * hijau: semua sudah. Tanggal merah yang sudah lewat bisa dipilih untuk
- * melapor menyusul; masa depan dan tanggal sebelum sasaran terdaftar di
- * K-Space tidak bisa dipilih.
+ * melapor menyusul; hari ini (GMV-nya belum satu hari penuh), masa depan,
+ * dan tanggal sebelum sasaran terdaftar di K-Space tidak bisa dipilih.
  */
 export function PilihTanggalLaporan({
   hariIni,
@@ -92,12 +97,14 @@ export function PilihTanggalLaporan({
   // Bulan milik tanggal terpilih selalu memakai data terbaru dari server,
   // supaya warna langsung berubah sesudah laporan terkirim.
   const data = bulan === kalender.bulan ? kalender : simpanan[bulan];
+  // Tanggal terbaru yang bisa dilapor: kemarin. Hari ini belum satu hari penuh.
+  const hariData = tanggalDataTerakhir(hariIni);
   const bulanMulai = `${kalender.mulai.slice(0, 7)}-01`;
-  const bulanIni = `${hariIni.slice(0, 7)}-01`;
+  const bulanIni = `${hariData.slice(0, 7)}-01`;
   const statusTerpilih = kalender.status[tanggal];
 
   const merahSebelumnya = Object.entries(kalender.status).filter(
-    ([t, st]) => st.belum > 0 && t < hariIni && t !== tanggal,
+    ([t, st]) => st.belum > 0 && t < hariData && t !== tanggal,
   ).length;
 
   const pindahBulan = (tujuan: string) => {
@@ -125,14 +132,14 @@ export function PilihTanggalLaporan({
   const pilih = (t: string) => {
     setBuka(false);
     if (t !== tanggal) {
-      router.push(tautanTanggalLaporan(t, hariIni, persona), { scroll: false });
+      router.push(tautanTanggalLaporan(t, hariData, persona), { scroll: false });
     }
   };
 
   const tahun = Number(bulan.slice(0, 4));
   const pilihanTahun = Array.from(
     {
-      length: Number(hariIni.slice(0, 4)) - Number(bulanMulai.slice(0, 4)) + 1,
+      length: Number(hariData.slice(0, 4)) - Number(bulanMulai.slice(0, 4)) + 1,
     },
     (_, i) => Number(bulanMulai.slice(0, 4)) + i,
   );
@@ -248,7 +255,7 @@ export function PilihTanggalLaporan({
                 .map((t) => {
                   if (!dalamBulan(t, bulan)) return <span key={t} />;
                   const st = data?.status[t];
-                  const bisa = t <= hariIni && t >= kalender.mulai;
+                  const bisa = t <= hariData && t >= kalender.mulai;
                   const angka = Number(t.slice(8, 10));
                   const kelas = cn(
                     "tabular flex h-9 items-center justify-center rounded-lg text-[13px] leading-[18px] font-semibold",
@@ -258,7 +265,7 @@ export function PilihTanggalLaporan({
                         : "bg-ok-fill text-ok-text"
                       : "text-muted-foreground/45",
                     t === tanggal && "ring-2 ring-primary ring-offset-1",
-                    t === hariIni && "underline underline-offset-4",
+                    t === hariData && "underline underline-offset-4",
                   );
                   if (!bisa || !st) {
                     return (
@@ -306,13 +313,13 @@ export function PilihTanggalLaporan({
                 Belum lapor
               </li>
             </ul>
-            {tanggal !== hariIni ? (
+            {tanggal !== hariData ? (
               <button
                 type="button"
-                onClick={() => pilih(hariIni)}
+                onClick={() => pilih(hariData)}
                 className="tekan-halus shrink-0 rounded-full bg-muted px-3 py-1.5 text-[11px] font-semibold"
               >
-                Hari ini
+                Kemarin
               </button>
             ) : null}
           </div>

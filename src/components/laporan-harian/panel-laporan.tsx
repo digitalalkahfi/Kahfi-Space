@@ -5,12 +5,13 @@ import { FormLaporan } from "@/components/laporan-harian/form-laporan";
 import { StatusAbsen } from "@/components/laporan-harian/status-absen";
 import { RiwayatLaporan } from "@/components/laporan-harian/riwayat-laporan";
 import { Reveal } from "@/components/motion/reveal";
-import type { KalenderLaporan } from "@/lib/laporan";
+import { tanggalDataTerakhir, type KalenderLaporan } from "@/lib/laporan";
 import type { LaporanHarian, SasaranLaporan } from "@/lib/types";
 
 /**
  * Menyatukan form dan status absensi agar kunci Absen Pulang selalu
- * mencerminkan apakah laporan hari ini sudah terkirim (PRD §2). Laporan
+ * mencerminkan apakah laporan yang jatuh tempo hari ini — GMV kemarin,
+ * karena GMV dihitung satu hari penuh — sudah terkirim (PRD §2). Laporan
  * susulan untuk hari yang terlewat tidak menyentuh kunci itu.
  */
 export function PanelLaporan({
@@ -29,8 +30,9 @@ export function PanelLaporan({
   sasaran: SasaranLaporan[];
   sudahDilaporkan: string[];
   riwayat: LaporanHarian[];
+  /** Hari ini (WIB); laporan terbarunya bertanggal kemarin (H-1). */
   hariIni: string;
-  /** Tanggal laporan dalam format YYYY-MM-DD: hari ini, atau susulan. */
+  /** Tanggal laporan dalam format YYYY-MM-DD: kemarin, atau susulan. */
   tanggal: string;
   /** Status merah/hijau bulan tempat `tanggal` berada. */
   kalender: KalenderLaporan;
@@ -60,7 +62,9 @@ export function PanelLaporan({
             persona={persona}
             absenTerbuka={sudahLapor}
             onTerkirim={
-              tanggal === hariIni ? () => setSudahLapor(true) : undefined
+              tanggal === tanggalDataTerakhir(hariIni)
+                ? () => setSudahLapor(true)
+                : undefined
             }
             coSampel={coSampel}
           />

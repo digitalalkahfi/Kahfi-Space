@@ -44,6 +44,7 @@ import {
   periksaIsiLaporan,
   punyaKolom,
   sasaranBelumDilapor,
+  tanggalDataTerakhir,
   tanggalLaporanPanjang,
   tanggalLaporanSingkat,
   unitSasaran,
@@ -76,6 +77,10 @@ type LaporanTerkirim = {
  * Satu-satunya tempat input GMV (PRD §2). Angka diketik manual sambil
  * melihat Partner Center — tidak ada integrasi API.
  *
+ * GMV dihitung satu hari penuh (24 jam), jadi laporan yang dikirim hari
+ * ini memuat GMV kemarin (H-1) dan tersimpan bertanggal kemarin. Hari ini
+ * sendiri belum bisa dilaporkan.
+ *
  * Isian menyesuaikan departemen sasaran yang dipilih (PRD Fase 1):
  * Affiliator menambah komisi, jumlah upload, dan CO sampel; MCN & TAP
  * cukup GMV dan catatan.
@@ -88,7 +93,7 @@ type LaporanTerkirim = {
  * Tanggal laporan dipilih dari kalender: merah bila masih ada sasaran yang
  * belum dilapor, hijau bila sudah. Tanggal merah yang lewat bisa diisi
  * menyusul. Laporan susulan tidak membuka Absen Pulang — kunci itu milik
- * laporan hari ini.
+ * laporan yang jatuh tempo hari ini, yaitu laporan kemarin.
  */
 export function FormLaporan({
   sasaran,
@@ -102,8 +107,9 @@ export function FormLaporan({
   coSampel = {},
 }: {
   sasaran: SasaranLaporan[];
-  /** Tanggal yang sedang dilapor: hari ini, atau tanggal susulan. */
+  /** Tanggal yang sedang dilapor: kemarin, atau tanggal susulan. */
   tanggal: string;
+  /** Hari ini (WIB). Tanggal laporan terbarunya adalah kemarin. */
   hariIni: string;
   /** Status merah/hijau bulan tempat `tanggal` berada, untuk kalender. */
   kalender: KalenderLaporan;
@@ -111,13 +117,13 @@ export function FormLaporan({
   persona?: string;
   /** Kunci sasaran yang laporannya sudah masuk pada tanggal itu. */
   sudahDilaporkan: string[];
-  /** Absen Pulang sudah terbuka — laporan pertama hari ini sudah masuk. */
+  /** Absen Pulang sudah terbuka — laporan yang jatuh tempo hari ini sudah masuk. */
   absenTerbuka: boolean;
-  /** Dipakai induk untuk membuka kunci Absen Pulang (hanya laporan hari ini). */
+  /** Dipakai induk untuk membuka kunci Absen Pulang (hanya laporan kemarin). */
   onTerkirim?: () => void;
   /**
-   * CO sampel hari ini per kunci sasaran, dihitung dari log pemindaian
-   * sampel. Read-only: pelapor tidak pernah mengetiknya sendiri.
+   * CO sampel pada tanggal laporan per kunci sasaran, dihitung dari log
+   * pemindaian sampel. Read-only: pelapor tidak pernah mengetiknya sendiri.
    */
   coSampel?: Record<string, number>;
 }) {
@@ -130,12 +136,14 @@ export function FormLaporan({
   );
   const sisa = sasaranBelumDilapor(sasaran, terlapor);
 
-  const susulan = tanggal !== hariIni;
-  // "hari ini" atau "pada Sab, 26 Sep" — dipakai di kalimat bantuan.
+  // Tanggal laporan biasa = kemarin (H-1); selain itu susulan.
+  const hariData = tanggalDataTerakhir(hariIni);
+  const susulan = tanggal !== hariData;
+  // "kemarin" atau "pada Sab, 26 Sep" — dipakai di kalimat bantuan.
   const kapan = kapanLaporan(tanggal, hariIni);
   const untukTanggal = susulan
     ? `untuk ${tanggalLaporanSingkat(tanggal)}`
-    : "hari ini";
+    : "kemarin";
   const pilihTanggal = (
     <PilihTanggalLaporan
       hariIni={hariIni}
@@ -236,7 +244,7 @@ export function FormLaporan({
                   ? `Semua laporan ${tanggalLaporanSingkat(tanggal)} terkirim`
                   : `Laporan ${tanggalLaporanSingkat(tanggal)} terkirim`
                 : sasaran.length > 1
-                  ? "Semua laporan hari ini terkirim"
+                  ? "Semua laporan kemarin terkirim"
                   : "Laporan harian terkirim"}
             </h2>
             <p className="mt-1 text-[13px] leading-[18px] text-muted-foreground">
@@ -250,7 +258,7 @@ export function FormLaporan({
                   ? ""
                   : susulan
                     ? `Laporan ${tanggalLaporanSingkat(tanggal)} sudah masuk. `
-                    : "Laporan hari ini sudah masuk. "}
+                    : "Laporan kemarin sudah masuk. "}
               {susulan ? null : "Tombol Absen Pulang sekarang terbuka."}
             </p>
             {terakhir ? <PeringatanMinimum laporan={terakhir} /> : null}
@@ -262,8 +270,8 @@ export function FormLaporan({
                 asChild
                 className="tekan-halus h-10 rounded-full px-5 text-[13px] font-semibold"
               >
-                <Link href={tautanTanggalLaporan(hariIni, hariIni, persona)}>
-                  Kembali ke laporan hari ini
+                <Link href={tautanTanggalLaporan(hariData, hariData, persona)}>
+                  Kembali ke laporan kemarin
                 </Link>
               </Button>
             ) : null}
@@ -287,12 +295,12 @@ export function FormLaporan({
       <div className="flex items-start justify-between gap-3 px-5">
         <div>
           <h2 className="text-base leading-6 font-semibold">
-            {susulan ? "Laporan Susulan" : "Input GMV Hari Ini"}
+            {susulan ? "Laporan Susulan" : "Input GMV Kemarin"}
           </h2>
           <p className="text-[13px] leading-[18px] text-muted-foreground">
             {susulan
               ? `Untuk ${tanggalLaporanPanjang(tanggal)}`
-              : "Sumber angka: TikTok Shop Partner Center"}
+              : `GMV ${tanggalLaporanPanjang(tanggal)} · Sumber: TikTok Shop Partner Center`}
           </p>
         </div>
         <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-info-fill text-info-text">
@@ -304,11 +312,17 @@ export function FormLaporan({
 
       {susulan ? (
         <p className="mx-5 rounded-2xl bg-warn-fill px-4 py-2.5 text-[11px] leading-[14px] text-pretty text-warn-text">
-          Laporan ini dicatat untuk {tanggalLaporanPanjang(tanggal)}, bukan hari
-          ini, dan tidak membuka Absen Pulang. Isi angka GMV hari itu sesuai
-          Partner Center.
+          Laporan ini dicatat untuk {tanggalLaporanPanjang(tanggal)}, bukan
+          kemarin, dan tidak membuka Absen Pulang. Isi angka GMV hari itu
+          sesuai Partner Center.
         </p>
-      ) : null}
+      ) : (
+        <p className="mx-5 rounded-2xl bg-info-fill px-4 py-2.5 text-[11px] leading-[14px] text-pretty text-info-text">
+          GMV dihitung satu hari penuh (24 jam), jadi laporan hari ini berisi
+          GMV {tanggalLaporanPanjang(tanggal)}. GMV hari ini baru bisa
+          dilaporkan besok.
+        </p>
+      )}
 
       {terakhir ? (
         <div className="mx-5 space-y-1.5 rounded-2xl bg-ok-fill px-4 py-3 text-ok-text">
@@ -442,7 +456,8 @@ export function FormLaporan({
               id="gmv-bantuan"
               className="text-[11px] leading-[14px] text-muted-foreground"
             >
-              Buka Partner Center, salin angka GMV {kapan} apa adanya.
+              Buka Partner Center, salin angka GMV {kapan} (24 jam penuh) apa
+              adanya.
             </p>
           )}
         </div>
@@ -629,7 +644,7 @@ export function FormLaporan({
         <KolomCatatan
           nilai={catatan}
           onUbah={setCatatan}
-          hari={susulan ? "hari itu" : "hari ini"}
+          hari={susulan ? "hari itu" : "kemarin"}
         />
 
         <p

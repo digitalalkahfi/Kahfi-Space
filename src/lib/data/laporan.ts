@@ -15,6 +15,7 @@ import {
   bolehLihatLaporan,
   kunciSasaranLaporan,
   statusLaporanBulan,
+  tanggalDataTerakhir,
   type KalenderLaporan,
 } from "@/lib/laporan";
 import { batasMinimum } from "@/lib/batas-minimum";
@@ -506,6 +507,7 @@ export async function mulaiSasaranLaporan(
  * Status laporan tiap tanggal dalam satu bulan untuk sasaran pengguna
  * ini: merah bila ada yang belum dilapor, hijau bila semua sudah.
  * Laporan dari siapa pun untuk sasaran itu dihitung sudah masuk.
+ * Berhenti di kemarin: hari ini belum satu hari penuh, jadi belum ditagih.
  */
 export async function kalenderLaporan(
   bulan: string,
@@ -516,17 +518,18 @@ export async function kalenderLaporan(
   const awalBulan = `${bulan.slice(0, 7)}-01`;
   const mulai = mulaiPer ?? (await mulaiSasaran(sasaran));
   const kunci = sasaran.map(kunciSasaranLaporan);
+  const hariData = tanggalDataTerakhir(hariIni);
   const mulaiTerawal =
     Object.values(mulai).reduce<string | null>(
       (a, b) => (a === null || b < a ? b : a),
       null,
-    ) ?? hariIni;
+    ) ?? hariData;
 
   const akhir = new Date(`${awalBulan}T00:00:00Z`);
   akhir.setUTCMonth(akhir.getUTCMonth() + 1);
   akhir.setUTCDate(0);
   const akhirBulan = akhir.toISOString().slice(0, 10);
-  const sampai = akhirBulan < hariIni ? akhirBulan : hariIni;
+  const sampai = akhirBulan < hariData ? akhirBulan : hariData;
 
   let terlapor: { tanggal: string; kunci: string }[] = [];
   if (kunci.length > 0 && awalBulan <= sampai) {

@@ -38,6 +38,7 @@ import { catatanRitme, keputusanDariCapaian } from "@/lib/wrm";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { modeData } from "@/lib/supabase/config";
 import { hariIniWib } from "@/lib/format";
+import { tanggalDataTerakhir } from "@/lib/laporan";
 import type { Peran } from "@/lib/types";
 
 export const metadata: Metadata = {
@@ -62,6 +63,9 @@ export default async function BerandaPage({
   // Mode demo mematok "hari ini" ke tanggal data contoh supaya dasbornya
   // berisi. Mode nyata memakai tanggal WIB (D7), bukan UTC.
   const tanggal = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
+  // GMV dihitung satu hari penuh dan dilaporkan keesokan harinya, jadi
+  // angka GMV terbaru yang lengkap adalah milik kemarin (H-1).
+  const tanggalGmv = tanggalDataTerakhir(tanggal);
   // Data contoh berhenti di jam sinkron terakhirnya; mode nyata memakai jam kini.
   const disinkronPada =
     modeData() === "demo"
@@ -79,7 +83,7 @@ export default async function BerandaPage({
     capaian,
   ] = await Promise.all([
     ambilPengumuman(pengguna),
-    ringkasanGmv(pengguna, tanggal),
+    ringkasanGmv(pengguna, tanggalGmv),
     // To-do milik sendiri (lewat id) bertenggat hari ini WIB, ditambah
     // yang terlambat dan belum selesai.
     ambilToDo(pengguna, tanggal),
@@ -94,7 +98,7 @@ export default async function BerandaPage({
     // Peran yang memang tidak punya kartu ini tidak perlu membayar satu
     // RPC lagi setiap kali membuka Beranda.
     bolehLihat(peran, "capaianPribadi")
-      ? capaianPribadi(pengguna, tanggal)
+      ? capaianPribadi(pengguna, tanggalGmv)
       : Promise.resolve(null),
   ]);
 
@@ -164,7 +168,7 @@ export default async function BerandaPage({
                               )
                             : undefined
                         }
-                        disinkronPada={disinkronPada}
+                        tanggalGmv={tanggalGmv}
                       />
                     ),
                   },
@@ -209,7 +213,7 @@ export default async function BerandaPage({
                     kunci: "gmvUnit" as const,
                     isi: (
                       <Reveal>
-                        <GmvPerUnit unit={unit} disinkronPada={disinkronPada} />
+                        <GmvPerUnit unit={unit} tanggalGmv={tanggalGmv} />
                       </Reveal>
                     ),
                   },
