@@ -75,7 +75,7 @@ test("rencana harian disebut tidak dibuatkan tiket (aturan 1)", () => {
 
 test("tonggak yang dilewati disebut beserta alasannya (aturan 5)", () => {
   const teks = susunLaporanTiketGrd(laporan()).join("\n");
-  assert.match(teks, /Dilewati \(2\)/);
+  assert.match(teks, /Dilewati \(2 tonggak\)/);
   assert.match(teks, /S\.2\.2\.9 "MRM H-1" — tenggatnya belum ditetapkan/);
   assert.match(teks, /1\.4\.1\.1 "Santri aktif" — tidak ada PIC terdaftar/);
   // "Sudah bertiket" bukan alasan dilewati; dihitung terpisah.
@@ -84,8 +84,40 @@ test("tonggak yang dilewati disebut beserta alasannya (aturan 5)", () => {
 
 test("catatan 'perlu diperiksa' ikut dicetak", () => {
   const teks = susunLaporanTiketGrd(laporan()).join("\n");
-  assert.match(teks, /Perlu diperiksa \(1\)/);
+  assert.match(teks, /Perlu diperiksa \(1 tonggak\)/);
   assert.match(teks, /1\.4\.1\.2 \(Siti\): Kolom SIAPA tidak tampak/);
+});
+
+test("baris kembar digabung supaya yang penting tidak tenggelam", () => {
+  const empat = (kode: string) =>
+    ["Sen, 5", "Sen, 12", "Sen, 19", "Sen, 26"].map((t) => ({
+      kode,
+      tonggak: t,
+      penerima: "Alma",
+      catatan: "Kolom SIAPA tidak tampak pada nama PIC",
+    }));
+  const teks = susunLaporanTiketGrd(
+    laporan({
+      dilewati: [
+        ...["Sab, 3", "Sab, 10", "Sab, 17"].map((t) => ({
+          kode: "1.1.4.6",
+          tonggak: t,
+          alasan: "tanpa_pic" as const,
+        })),
+        { kode: "S.2.2.1", tonggak: "MRM H-1", alasan: "tanpa_tenggat" },
+      ],
+      perlu_diperiksa: [...empat("S.2.2.1"), ...empat("S.2.2.2")],
+    }),
+  ).join("\n");
+  // Tiga tonggak sama-sama tanpa PIC → satu baris.
+  assert.match(teks, /Dilewati \(4 tonggak\)/);
+  assert.match(teks, /1\.1\.4\.6 \(3 tonggak\) — tidak ada PIC terdaftar/);
+  assert.equal((teks.match(/1\.1\.4\.6/g) ?? []).length, 1);
+  // Delapan catatan kembar → dua baris, masing-masing menyebut jumlahnya.
+  assert.match(teks, /Perlu diperiksa \(8 tonggak\)/);
+  assert.match(teks, /S\.2\.2\.1 \(Alma · 4 tonggak\): Kolom SIAPA/);
+  assert.match(teks, /S\.2\.2\.2 \(Alma · 4 tonggak\): Kolom SIAPA/);
+  assert.equal((teks.match(/Kolom SIAPA/g) ?? []).length, 2);
 });
 
 test("bulan terkunci dijelaskan: tidak ada yang dibuat", () => {

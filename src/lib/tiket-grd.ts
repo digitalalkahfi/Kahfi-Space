@@ -64,6 +64,26 @@ const keterangan = (a: string) =>
   KETERANGAN_ALASAN[a as AlasanDilewati] ?? a;
 
 /**
+ * Menggabungkan baris yang kembar menurut `kunci`, mempertahankan urutan
+ * kemunculan pertama. Satu rencana pekanan bisa melahirkan puluhan tonggak
+ * dengan catatan yang sama; membaca puluhan baris kembar menyembunyikan
+ * yang benar-benar perlu dilihat.
+ */
+function kelompokkan<T>(
+  daftar: T[],
+  kunci: (x: T) => string,
+): { contoh: T; jumlah: number }[] {
+  const peta = new Map<string, { contoh: T; jumlah: number }>();
+  for (const x of daftar) {
+    const k = kunci(x);
+    const ada = peta.get(k);
+    if (ada) ada.jumlah += 1;
+    else peta.set(k, { contoh: x, jumlah: 1 });
+  }
+  return [...peta.values()];
+}
+
+/**
  * Laporan dalam bahasa sederhana untuk dicetak skrip: berapa tiket, untuk
  * siapa, dari siapa, dan tonggak mana dilewati beserta alasannya.
  *
@@ -120,17 +140,30 @@ export function susunLaporanTiketGrd(
 
   const lewat = l.dilewati ?? [];
   if (lewat.length > 0) {
-    baris.push("", `Dilewati (${lewat.length}):`);
-    for (const d of lewat) {
-      baris.push(`  - ${d.kode} "${d.tonggak}" — ${keterangan(d.alasan)}`);
+    baris.push("", `Dilewati (${lewat.length} tonggak):`);
+    for (const { contoh: d, jumlah } of kelompokkan(
+      lewat,
+      (x) => `${x.kode}|${x.alasan}`,
+    )) {
+      baris.push(
+        jumlah === 1
+          ? `  - ${d.kode} "${d.tonggak}" — ${keterangan(d.alasan)}`
+          : `  - ${d.kode} (${jumlah} tonggak) — ${keterangan(d.alasan)}`,
+      );
     }
   }
 
   const periksa = l.perlu_diperiksa ?? [];
   if (periksa.length > 0) {
-    baris.push("", `Perlu diperiksa (${periksa.length}):`);
-    for (const d of periksa) {
-      baris.push(`  - ${d.kode} (${d.penerima ?? "tanpa penerima"}): ${d.catatan}`);
+    baris.push("", `Perlu diperiksa (${periksa.length} tonggak):`);
+    for (const { contoh: d, jumlah } of kelompokkan(
+      periksa,
+      (x) => `${x.kode}|${x.penerima}|${x.catatan}`,
+    )) {
+      const ket = jumlah > 1 ? ` · ${jumlah} tonggak` : "";
+      baris.push(
+        `  - ${d.kode} (${d.penerima ?? "tanpa penerima"}${ket}): ${d.catatan}`,
+      );
     }
   }
 

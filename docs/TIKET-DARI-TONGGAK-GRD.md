@@ -4,7 +4,7 @@ Rencana operasional GRD (`grd_rencana` + `grd_tonggak`) otomatis menjadi tiket d
 modul Tugas (`tasks`) untuk PIC-nya. Tim bekerja dari halaman **Tugas**; status
 tonggak di **GRD › Rencana operasional** mengikuti tiketnya. Tidak ada lapor dua kali.
 
-Migrasi: `0199`–`0202`. Kode: `src/lib/tiket-grd.ts`, `scripts/tiket-grd.mjs`.
+Migrasi: `0199`–`0203`. Kode: `src/lib/tiket-grd.ts`, `scripts/tiket-grd.mjs`.
 Tes: `supabase/tests/tiket-grd.test.mjs` (aturan di database) dan
 `src/lib/__tes__/tiket-grd.test.ts` (penyusun laporan & aturan tampilan).
 
@@ -46,7 +46,7 @@ membuat tiketnya, dan uji cobanya (tanpa `--terapkan`) ikut menampilkan laporan 
 ## Urutan rilis
 
 1. Cadangkan `tasks` dan `grd_tonggak` (Supabase › Database › Backups, atau ekspor CSV dari Table Editor).
-2. Migrasi database dulu: `npx --yes supabase@2.118.0 db push --linked --dry-run`, lalu tanpa `--dry-run`.
+2. Migrasi database dulu: `npx --yes supabase@2.118.0 db push --linked --dry-run`, lalu `--yes` (migrasi 0199–0203).
 3. Baru kode (kode memilih kolom `tasks.tonggak_id`; tanpa migrasi, halaman Tugas gagal dimuat).
 4. `npm run grd:tiket -- --bulan=2026-10` (uji coba), periksa laporannya, lalu `--terapkan`.
 
@@ -67,7 +67,8 @@ tidak diinginkan sesudah rollback 0200.
   sehingga PIC dengan banyak tonggak pekanan (Okt 2026: sampai 26 tiket) melihatnya sekaligus.
 - **PIC cadangan.** Bila kolom SIAPA berisi peran yang belum terdaftar ("Santri"),
   impor mengisi PIC dengan pemilik goal/Manager; tiketnya ikut ke orang itu. Laporan uji
-  coba menandainya di bagian "Perlu diperiksa".
+  coba menandainya di bagian "Perlu diperiksa" (0203: PIC ditandai bila tak satu pun kata
+  pada namanya saling mengawali dengan kata di kolom SIAPA, mis. "Alma" ~ "almailminafiatin").
 - Tiket yang sudah ada tidak dipindahkan otomatis bila PIC rencana berubah di impor
   berikutnya (dilaporkan di "Perlu diperiksa"); pemberi bisa mengganti penerimanya selama
   tiket masih To Do.

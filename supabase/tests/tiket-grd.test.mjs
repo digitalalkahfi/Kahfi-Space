@@ -1198,6 +1198,40 @@ uji("mode uji melaporkan jumlah, penerima, pemberi, dan yang dilewati — lalu h
   harusSama(await jumlahTugas(), sebelum + 3, "tiga tiket tersimpan");
 });
 
+uji("penanda PIC cadangan: nama akun yang diawali nama di kolom SIAPA tidak ditandai (0203)", async () => {
+  // Nama pengguna asli sering berupa nama akun ("almailminafiatin") atau
+  // nama panjang ("Muhammad Ardiansyah"); kolom SIAPA hanya menulis
+  // "Alma" atau "Ardi". Yang ditandai hanya PIC yang tak berhubungan sama
+  // sekali dengan tulisan di kolom SIAPA — PIC cadangan.
+  const p = periodeDepan();
+  const akun = (
+    await satu(
+      `insert into users (id, nama, role, jabatan, atasan_id)
+       values (gen_random_uuid(), 'almailminafiatin', 'Staff', '', $1) returning id`,
+      [FARHAN],
+    )
+  ).id;
+  const panjang = (
+    await satu(
+      `insert into users (id, nama, role, jabatan, atasan_id)
+       values (gen_random_uuid(), 'Muhammad Ardiansyah', 'Staff', '', $1) returning id`,
+      [FARHAN],
+    )
+  ).id;
+  await rencana(p, { kode: "PC.1", pic: [akun], picTeks: "Alma", tonggak: [{ tenggat: hari(p, 5) }] });
+  await rencana(p, { kode: "PC.2", pic: [panjang], picTeks: "Kholid → Ardi", tonggak: [{ tenggat: hari(p, 6) }] });
+  await rencana(p, { kode: "PC.3", pic: [RIAN], picTeks: "Santri", tonggak: [{ tenggat: hari(p, 7) }] });
+  await rencana(p, { kode: "PC.4", pic: [NABILA], picTeks: "Naima + host LIVE", tonggak: [{ tenggat: hari(p, 8) }] });
+
+  const lap = await buat(p, true);
+  const ditandai = lap.perlu_diperiksa.map((x) => x.kode);
+  harusSama(ditandai, ["PC.3", "PC.4"], "hanya yang tak berhubungan dengan kolom SIAPA");
+  harus(
+    lap.perlu_diperiksa[0].catatan.includes("kemungkinan PIC cadangan"),
+    "alasannya jelas",
+  );
+});
+
 uji("hanya CEO/Manager/sistem yang boleh membuat tiket dari rencana", async () => {
   const p = periodeDepan();
   await rencana(p, { kode: "H.9", tonggak: [{ tenggat: hari(p, 5) }] });
@@ -1226,6 +1260,7 @@ uji("migrasi 0199–0202 aman dijalankan ulang", async () => {
     "0200_sinkron_tonggak_tiket.sql",
     "0201_buat_tiket_grd.sql",
     "0202_tampilan_tiket_grd.sql",
+    "0203_penanda_pic_cadangan.sql",
   ]) {
     const sql = await readFile(
       path.join(process.cwd(), "supabase", "migrations", berkas),
