@@ -175,6 +175,7 @@ test("setiap kode alasan punya keterangan berbahasa Indonesia", () => {
     "tanpa_tenggat",
     "tanpa_pic",
     "penerima_nonaktif",
+    "tiket_dihapus",
   ];
   for (const k of kode) {
     assert.ok(KETERANGAN_ALASAN[k].length > 5, k);

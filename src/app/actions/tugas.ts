@@ -788,9 +788,10 @@ export async function ubahTiket(
 /**
  * Hapus to-do (oleh pemiliknya) atau tiket (oleh pemberinya).
  *
- * Tiket yang sudah selesai tidak bisa dihapus — nilai KPI dan riwayat
- * kerja penerimanya bergantung padanya (0184). Penerima tiket dikabari
- * basis data; to-do tidak mengabari siapa pun.
+ * Tiket yang sudah selesai boleh dihapus pemberinya, kecuali ikut KPI bulan
+ * yang sudah dikunci (0206). Tiket dari rencana GRD: pemberinya yang
+ * CEO/Manager; tonggaknya ditandai supaya tidak dibuatkan tiket lagi.
+ * Penerima tiket dikabari basis data; to-do tidak mengabari siapa pun.
  */
 export async function hapusTugas(id: string): Promise<Hasil> {
   const pengguna = await sesiSaatIni();
@@ -808,11 +809,6 @@ export async function hapusTugas(id: string): Promise<Hasil> {
   if (!lama) {
     return gagal("Tugas itu tidak ada, atau tidak terlihat olehmu.", "izin");
   }
-  // Tiket dari rencana GRD adalah cermin tonggaknya (0200).
-  if (lama.tonggak_id !== null) {
-    return gagal(PESAN_HAPUS_TIKET_GRD, "validasi");
-  }
-
   const todo = lama.tipe === "pribadi";
   const pemilik = todo ? lama.penerima_id : lama.pembuat_id;
   if (pemilik !== pengguna.id) {
@@ -823,8 +819,10 @@ export async function hapusTugas(id: string): Promise<Hasil> {
       "izin",
     );
   }
-  if (!todo && lama.status === "selesai") {
-    return gagal(PESAN_TIKET_SELESAI, "validasi");
+  // Tiket dari rencana GRD: pemberinya yang CEO/Manager (0206). Tonggaknya
+  // lalu tidak dibuatkan tiket lagi.
+  if (lama.tonggak_id !== null && !peranLintasUnit(pengguna.role)) {
+    return gagal(PESAN_HAPUS_TIKET_GRD, "izin");
   }
 
   // Sama seperti update: RLS menolak dengan tidak mencocokkan baris, jadi
@@ -836,11 +834,13 @@ export async function hapusTugas(id: string): Promise<Hasil> {
     .select("id");
 
   if (error) {
-    if (error.message.includes("tidak bisa dihapus; betulkan lewat rencana")) {
-      return gagal(PESAN_HAPUS_TIKET_GRD, "validasi");
+    if (error.message.includes("rencana GRD hanya bisa dihapus")) {
+      return gagal(PESAN_HAPUS_TIKET_GRD, "izin");
     }
-    return error.message.includes("sudah selesai")
-      ? gagal(PESAN_TIKET_SELESAI, "validasi")
+    // Tiket selesai yang ikut KPI bulan terkunci, atau bulan GRD terkunci:
+    // pesan databasenya sudah jelas.
+    return error.code === "check_violation" || error.code === "23514"
+      ? gagal(error.message, "validasi")
       : gagal(`Gagal menghapus: ${error.message}`);
   }
   if ((data ?? []).length === 0) {
@@ -852,6 +852,8 @@ export async function hapusTugas(id: string): Promise<Hasil> {
 
   revalidatePath("/tugas");
   revalidatePath("/beranda");
+  // Tonggaknya kini dikelola manual (0206).
+  if (lama.tonggak_id !== null) revalidatePath("/grd/rencana");
   return sukses(undefined, todo ? "To-do dihapus." : "Tiket dihapus.");
 }
 

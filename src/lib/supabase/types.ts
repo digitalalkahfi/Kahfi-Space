@@ -1185,6 +1185,8 @@ export type BarisGrdTonggak = {
   diubah_oleh: string | null;
   diubah_pada: string | null;
   urutan: number;
+  /** Tiketnya sengaja dihapus pemberinya; tidak dibuatkan tiket lagi (0206). */
+  tanpa_tiket: boolean;
 };
 
 export type StatusTonggak = "belum" | "progress" | "selesai";

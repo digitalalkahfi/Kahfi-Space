@@ -165,18 +165,22 @@ export function bolehEditTugas(input: {
 }
 
 /**
- * Tombol Hapus tetap hanya milik pemberinya (atau pemilik to-do), dan tidak
- * ada untuk tiket dari rencana GRD — impor berikutnya akan membuatnya lagi.
+ * Tombol Hapus. To-do: pemiliknya, kapan pun. Tiket: pemberinya — juga yang
+ * sudah selesai (0206; database menolaknya bila tiket itu ikut KPI bulan
+ * yang sudah dikunci). Tiket dari rencana GRD: pemberinya yang CEO/Manager;
+ * tonggaknya lalu tidak dibuatkan tiket lagi dan dikelola manual. CEO/Manager
+ * yang bukan pemberi tidak mendapat tombol hapus.
  */
 export function bolehHapusTugas(input: {
   tipe: TipeTugas;
-  selesai: boolean;
   dariGrd: boolean;
   sayaPenerima: boolean;
   sayaPembuat: boolean;
+  lintasUnit: boolean;
 }): boolean {
   if (input.tipe === "pribadi") return input.sayaPenerima;
-  return input.sayaPembuat && !input.selesai && !input.dariGrd;
+  if (!input.sayaPembuat) return false;
+  return !input.dariGrd || input.lintasUnit;
 }
 
 /**
