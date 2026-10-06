@@ -77,6 +77,9 @@ export function DialogTiket({
   onTutup?: () => void;
 }) {
   const tanggalLama = ubah?.tenggat ? keTanggalWib(ubah.tenggat) : "";
+  // Tiket dari rencana GRD: tenggatnya mengikuti tonggak dan hanya diubah
+  // CEO/Manager lewat "Ubah deadline" di kartunya (0200).
+  const tenggatTerkunci = Boolean(ubah?.tonggakId);
   const [buka, setBuka] = useState(ubah !== undefined);
   const [tipe, setTipe] = useState<"tiket" | "komitmen_mingguan">(
     ubah?.tipe === "komitmen_mingguan" ? "komitmen_mingguan" : "tiket",
@@ -444,6 +447,7 @@ export function DialogTiket({
                   id="tanggal-tiket"
                   type="date"
                   required
+                  disabled={tenggatTerkunci}
                   min={tanggalMin}
                   value={tanggal}
                   onChange={(e) => {
@@ -464,6 +468,7 @@ export function DialogTiket({
                   id="jam-tiket"
                   type="time"
                   required
+                  disabled={tenggatTerkunci}
                   value={jam}
                   onChange={(e) => setJam(e.target.value)}
                   className="tabular h-11 w-full rounded-xl bg-muted px-3 text-[13px] outline-none focus-visible:ring-2 focus-visible:ring-ring/40"
@@ -471,9 +476,11 @@ export function DialogTiket({
               </div>
             </div>
             <p className="text-[11px] leading-[14px] text-muted-foreground">
-              {komitmen && !tanggalDipilih
-                ? "Batas tiket harus selesai. Bawaannya akhir pekan ini (Sabtu); boleh diganti."
-                : "Batas waktu tiket harus selesai."}
+              {tenggatTerkunci
+                ? "Tiket dari rencana GRD: tenggatnya mengikuti tonggak. Hanya CEO atau Manager yang bisa mengubahnya, lewat \"Ubah deadline\" di kartu."
+                : komitmen && !tanggalDipilih
+                  ? "Batas tiket harus selesai. Bawaannya akhir pekan ini (Sabtu); boleh diganti."
+                  : "Batas waktu tiket harus selesai."}
             </p>
           </fieldset>
 

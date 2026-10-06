@@ -8,6 +8,7 @@ import { SaringSumber } from "@/components/tugas/saring-sumber";
 import { cn } from "@/lib/utils";
 import { keTanggalWib } from "@/lib/format";
 import { geserTanggal } from "@/lib/validasi-tugas";
+import { bolehUbahTenggatTiketGrd } from "@/lib/tiket-grd";
 import {
   cocokLihat,
   hitungLihat,
@@ -172,6 +173,7 @@ export function DaftarTugas({
                         t.tipe !== "pribadi" &&
                         (bolehQcSemua || t.pembuatId === idSaya)
                       }
+                      lintasUnit={bolehUbahTenggatTiketGrd(peran)}
                       hariIni={hariIni}
                       sekarang={sekarang}
                       jejakQc={jejakQc[t.id]}

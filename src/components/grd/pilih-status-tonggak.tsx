@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Check, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, Check, Loader2, Ticket } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -17,6 +18,11 @@ import {
   type Tonggak,
 } from "@/lib/rencana";
 import { ubahStatusTonggak } from "@/app/actions/rencana";
+import {
+  PESAN_TONGGAK_MENGIKUTI_TIKET,
+  keteranganTonggakBertiket,
+  tautanBukaTiket,
+} from "@/lib/tiket-grd";
 
 const GAYA_KEADAAN: Record<KeadaanTonggak, string> = {
   tepat: "bg-ok-fill text-ok-text ring-ok-text/20",
@@ -40,6 +46,10 @@ const URUTAN: StatusTonggak[] = ["belum", "progress", "selesai"];
  * Satu tonggak sebagai chip: tanggal tenggat (atau judul tahapnya) dan
  * warnanya menurut keadaan. Yang berwenang mengetuknya untuk mengubah
  * status; waktu selesai dicatat database saat dicentang.
+ *
+ * Tonggak yang sudah punya tiket di modul Tugas (0199) tidak bisa diubah
+ * dari sini, siapa pun yang membukanya: statusnya mengikuti tiket, jadi
+ * chip hanya menampilkan status dan tautan "Buka tiket".
  */
 export function PilihStatusTonggak({
   tonggak,
@@ -84,6 +94,59 @@ export function PilihStatusTonggak({
     GAYA_KEADAAN[keadaan],
   );
   const judul = `${tonggak.judul} — ${LABEL_STATUS[status]} · ${KET_KEADAAN[keadaan]}`;
+
+  if (tonggak.punyaTiket) {
+    return (
+      <Popover open={buka} onOpenChange={setBuka}>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className={cn(kelas, "tekan-halus cursor-pointer")}
+            title={`${judul} · punya tiket`}
+            aria-label={`Lihat tiket tonggak: ${judul}`}
+          >
+            <Ticket className="size-3 shrink-0" aria-hidden />
+            {isi}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent align="start" className="w-64 space-y-3 p-3">
+          <div>
+            <p className="text-[13px] leading-[18px] font-semibold">
+              {tonggak.judul}
+            </p>
+            <p className="text-[11px] leading-[14px] text-muted-foreground">
+              {tonggak.tenggat
+                ? `Tenggat ${tanggalKalenderPendek(tonggak.tenggat, hariIni)}`
+                : "Tenggat belum ditetapkan"}
+              {tonggak.status === "selesai" && tonggak.selesaiPada
+                ? ` · diajukan ${tanggalKalenderPendek(keTanggalWib(tonggak.selesaiPada), hariIni)} ${jamWib(tonggak.selesaiPada)}`
+                : ""}
+            </p>
+          </div>
+          <p className="text-[12px] leading-4 font-semibold">
+            {keteranganTonggakBertiket(tonggak.status)}
+          </p>
+          <p className="text-[11px] leading-[14px] text-muted-foreground">
+            {PESAN_TONGGAK_MENGIKUTI_TIKET} Tepat waktu dihitung dari saat
+            PIC mengajukan pemeriksaan.
+          </p>
+          {tonggak.tiketId ? (
+            <Link
+              href={tautanBukaTiket(tonggak.tiketId)}
+              className="tekan-halus sentuh-nyaman inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1.5 text-[12px] leading-4 font-semibold text-foreground"
+            >
+              Buka tiket
+              <ArrowUpRight className="size-3.5" aria-hidden />
+            </Link>
+          ) : (
+            <p className="text-[11px] leading-[14px] text-muted-foreground">
+              Tiketnya ada di halaman Tugas milik PIC.
+            </p>
+          )}
+        </PopoverContent>
+      </Popover>
+    );
+  }
 
   if (!bolehUbah) {
     return (

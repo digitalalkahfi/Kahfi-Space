@@ -15,6 +15,8 @@ type TonggakDb = {
   status: StatusTonggak;
   selesai_pada: string | null;
   catatan: string;
+  punya_tiket?: boolean;
+  tiket_id?: string | null;
 };
 
 const keTonggak = (t: TonggakDb): Tonggak => ({
@@ -25,6 +27,8 @@ const keTonggak = (t: TonggakDb): Tonggak => ({
   status: t.status,
   selesaiPada: t.selesai_pada,
   catatan: t.catatan ?? "",
+  punyaTiket: t.punya_tiket ?? false,
+  tiketId: t.tiket_id ?? null,
 });
 
 /**
