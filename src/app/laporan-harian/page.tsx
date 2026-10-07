@@ -15,13 +15,18 @@ import {
   sudahDilaporkan,
 } from "@/lib/data/laporan";
 import { bulanDari } from "@/lib/kalender";
-import { kunciSasaranLaporan, tanggalBolehLapor } from "@/lib/laporan";
+import {
+  kunciSasaranLaporan,
+  tanggalBolehLapor,
+  tanggalDataTerakhir,
+  tanggalLaporanPanjang,
+} from "@/lib/laporan";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 
 export const metadata: Metadata = {
   title: "Laporan Harian — K-Space V2",
   description:
-    "Satu form untuk mengisi GMV dan catatan harian. Satu-satunya tempat input GMV.",
+    "Satu form untuk mengisi GMV kemarin (satu hari penuh) dan catatan harian. Satu-satunya tempat input GMV.",
 };
 
 export default async function LaporanHarianPage({
@@ -34,11 +39,14 @@ export default async function LaporanHarianPage({
 
   // Mode demo mengunci "hari ini" ke tanggal acuan data contoh.
   const hariIni = hariIniLaporan();
+  // GMV dihitung satu hari penuh (24 jam): laporan yang dikirim hari ini
+  // memuat GMV kemarin dan tersimpan bertanggal kemarin (H-1).
+  const hariData = tanggalDataTerakhir(hariIni);
 
   // Yang tidak bergantung pada tanggal terpilih dimuat lebih dulu, sekaligus
   // tanggal mulai tiap sasaran (sejak terdaftar di K-Space).
-  const [[sasaranHariIni, mulaiPer], riwayat, absen] = await Promise.all([
-    sasaranUntuk(pengguna, hariIni).then(
+  const [[sasaranHariData, mulaiPer], riwayat, absen] = await Promise.all([
+    sasaranUntuk(pengguna, hariData).then(
       async (s) => [s, await mulaiSasaran(s)] as const,
     ),
     riwayatLaporan(pengguna, hariIni),
@@ -50,20 +58,20 @@ export default async function LaporanHarianPage({
     null,
   );
 
-  // Tanggal yang dilapor: hari ini, atau susulan yang dipilih dari
-  // kalender (?tanggal=YYYY-MM-DD). Masa depan atau sebelum sasaran
-  // terdaftar kembali ke hari ini.
+  // Tanggal yang dilapor: kemarin, atau susulan yang dipilih dari
+  // kalender (?tanggal=YYYY-MM-DD). Hari ini, masa depan, atau sebelum
+  // sasaran terdaftar kembali ke kemarin.
   const tanggal =
     typeof diminta === "string" &&
     tanggalBolehLapor(diminta, hariIni, mulaiTerawal)
       ? diminta
-      : hariIni;
+      : hariData;
 
   const [sasaranTanggal, terlapor, coSampel, kalender] = await Promise.all([
-    tanggal === hariIni ? sasaranHariIni : sasaranUntuk(pengguna, tanggal),
+    tanggal === hariData ? sasaranHariData : sasaranUntuk(pengguna, tanggal),
     sudahDilaporkan(pengguna, tanggal),
     coSampelHariIni(tanggal),
-    kalenderLaporan(bulanDari(tanggal), hariIni, sasaranHariIni, mulaiPer),
+    kalenderLaporan(bulanDari(tanggal), hariIni, sasaranHariData, mulaiPer),
   ]);
   // Sasaran yang baru terdaftar sesudah tanggal itu tidak ditagih.
   const sasaran = sasaranTanggal.filter((s) => {
@@ -101,7 +109,9 @@ export default async function LaporanHarianPage({
             Laporan Harian
           </h1>
           <p className="mt-1 text-[13px] leading-[18px] text-muted-foreground">
-            Cukup satu form: pilih akun atau unit, isi GMV, tulis catatan.
+            Cukup satu form: pilih akun atau unit, isi GMV, tulis catatan. GMV
+            dihitung satu hari penuh, jadi yang dilaporkan hari ini adalah GMV{" "}
+            {tanggalLaporanPanjang(hariData)}.
           </p>
         </div>
 

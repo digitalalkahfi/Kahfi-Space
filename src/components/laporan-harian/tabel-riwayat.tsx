@@ -34,6 +34,7 @@ import {
   rupiahRingkas,
   tanggalPendek,
 } from "@/lib/format";
+import { keteranganDikirim } from "@/lib/laporan";
 import type { LaporanHarian, RevisiLaporan } from "@/lib/types";
 
 const SEMUA = "semua";
@@ -328,7 +329,7 @@ export function TabelRiwayat({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Tanggal</TableHead>
+                <TableHead>Tanggal GMV</TableHead>
                 <TableHead>Akun / unit</TableHead>
                 <TableHead className="text-right">GMV</TableHead>
                 {adaKomisi ? (
@@ -363,7 +364,7 @@ export function TabelRiwayat({
                         {tanggalPendek(r.tanggal)}
                       </span>
                       <span className="tabular block text-[11px] leading-[14px] text-muted-foreground">
-                        {jamWib(r.submittedAt)}
+                        {keteranganDikirim(r.submittedAt)}
                       </span>
                     </TableCell>
                     <TableCell className="max-w-[16rem]">
@@ -485,7 +486,8 @@ export function TabelRiwayat({
                       <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
                     </Link>
                     <p className="tabular text-[11px] leading-[14px] text-muted-foreground">
-                      {tanggalPendek(r.tanggal)} · {jamWib(r.submittedAt)}
+                      GMV {tanggalPendek(r.tanggal)} ·{" "}
+                      {keteranganDikirim(r.submittedAt)}
                     </p>
                   </div>
                   <span

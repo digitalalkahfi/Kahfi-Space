@@ -299,14 +299,55 @@ export function bolehLihatLaporan(
 // sudah; tanggal merah yang lewat bisa diisi menyusul — mis. karena
 // pelapornya sakit. Sebuah sasaran baru ditagih sejak ia terdaftar di
 // K-Space, jadi riwayat sebelum itu tidak berubah menjadi merah semua.
-// Database sendiri hanya menolak tanggal masa depan (0128) dan laporan
-// ganda per sasaran per tanggal.
+//
+// GMV dihitung untuk satu hari penuh (24 jam), jadi hari ini belum bisa
+// dilapor: laporan yang dikirim pada tanggal 6 memuat GMV tanggal 5 dan
+// disimpan bertanggal 5 (H-1). Tanggal laporan = tanggal GMV-nya, sehingga
+// KPI, GRD, dan grafik membaca angka itu di harinya sendiri. Database
+// menolak tanggal hari ini dan masa depan (0207) serta laporan ganda per
+// sasaran per tanggal.
 // ---------------------------------------------------------------------
 
 /** Geser tanggal "YYYY-MM-DD" sebanyak `n` hari, bebas zona waktu. */
-function geserHari(tanggal: string, n: number): string {
+export function geserHari(tanggal: string, n: number): string {
   const [t, b, h] = tanggal.split("-").map(Number);
   return new Date(Date.UTC(t, b - 1, h + n)).toISOString().slice(0, 10);
+}
+
+/**
+ * Tanggal terbaru yang boleh dilapor: kemarin. GMV baru lengkap setelah
+ * hari itu berakhir, jadi hari ini tidak bisa dilaporkan sampai besok.
+ * Satu-satunya tempat aturan H-1 ditulis di sisi aplikasi; semua layar
+ * yang butuh "tanggal laporan yang jatuh tempo hari ini" memanggilnya.
+ */
+export function tanggalDataTerakhir(hariIni: string): string {
+  return geserHari(hariIni, -1);
+}
+
+/** Pesan baku saat laporan diminta untuk hari ini (belum satu hari penuh). */
+export const PESAN_GMV_BELUM_PENUH =
+  "GMV dihitung satu hari penuh (24 jam), jadi laporan hari ini baru bisa dikirim besok. Kirim laporan untuk kemarin.";
+
+/**
+ * "dikirim 6 Okt, 08:12" (WIB). Tanggal sebuah laporan adalah tanggal GMV-nya
+ * (kemarin), bukan hari ia dikirim, jadi riwayat menyebut keduanya.
+ */
+export function keteranganDikirim(dikirim: string): string {
+  const d = new Date(dikirim);
+  const tanggal = d.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    timeZone: "Asia/Jakarta",
+  });
+  const jam = d
+    .toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Jakarta",
+    })
+    .replace(".", ":");
+  return `dikirim ${tanggal}, ${jam}`;
 }
 
 /** Tanggal "YYYY-MM-DD" yang benar-benar ada di kalender. */
@@ -327,13 +368,14 @@ export function alasanTanggalLaporan(
 ): string | null {
   if (!tanggalAda(tanggal)) return "Tanggal laporan tidak sah.";
   if (tanggal > hariIni) return "Laporan tidak bisa bertanggal masa depan.";
+  if (tanggal === hariIni) return PESAN_GMV_BELUM_PENUH;
   if (mulai && tanggal < mulai) {
     return `Sasaran ini baru terdaftar di K-Space sejak ${tanggalLaporanPanjang(mulai)}; laporan sebelum tanggal itu tidak bisa dikirim.`;
   }
   return null;
 }
 
-/** Tanggal yang boleh dilapor: hari ini atau susulan sejak sasaran terdaftar. */
+/** Tanggal yang boleh dilapor: kemarin, atau susulan sejak sasaran terdaftar. */
 export function tanggalBolehLapor(
   tanggal: string,
   hariIni: string,
@@ -361,9 +403,10 @@ export type KalenderLaporan = {
 };
 
 /**
- * Status laporan tiap tanggal dalam satu bulan, sampai hari ini.
- * Tanggal tanpa sasaran wajib — sebelum sasaran pertama terdaftar, atau
- * masa depan — tidak ikut, dan di kalender tampil tanpa warna.
+ * Status laporan tiap tanggal dalam satu bulan, sampai kemarin.
+ * Tanggal tanpa sasaran wajib — sebelum sasaran pertama terdaftar, hari
+ * ini (GMV-nya belum satu hari penuh), atau masa depan — tidak ikut, dan
+ * di kalender tampil tanpa warna.
  */
 export function statusLaporanBulan(
   bulan: string,
@@ -375,9 +418,10 @@ export function statusLaporanBulan(
   const sudah = new Set(terlapor.map((t) => `${t.tanggal}|${t.kunci}`));
   const hasil: Record<string, StatusHariLaporan> = {};
   const awal = `${bulan.slice(0, 7)}-01`;
+  const akhir = tanggalDataTerakhir(hariIni);
   for (
     let tanggal = awal;
-    tanggal.slice(0, 7) === awal.slice(0, 7) && tanggal <= hariIni;
+    tanggal.slice(0, 7) === awal.slice(0, 7) && tanggal <= akhir;
     tanggal = geserHari(tanggal, 1)
   ) {
     const wajib = kunciSasaran.filter(
@@ -402,20 +446,19 @@ export function tanggalLaporanSingkat(tanggal: string): string {
   });
 }
 
-/** Label pilihan tanggal: "Hari ini", "Kemarin", atau "Sab, 26 Sep". */
+/** Label pilihan tanggal: "Kemarin" (laporan biasa) atau "Sab, 26 Sep". */
 export function labelHariLaporan(tanggal: string, hariIni: string): string {
-  if (tanggal === hariIni) return "Hari ini";
-  if (tanggal === geserHari(hariIni, -1)) return "Kemarin";
+  if (tanggal === tanggalDataTerakhir(hariIni)) return "Kemarin";
   return tanggalLaporanSingkat(tanggal);
 }
 
 /**
- * Keterangan waktu di dalam kalimat form: "hari ini" untuk laporan biasa,
+ * Keterangan waktu di dalam kalimat form: "kemarin" untuk laporan biasa,
  * "pada Sab, 26 Sep" untuk susulan — mis. "salin angka GMV pada Sab, 26 Sep".
  */
 export function kapanLaporan(tanggal: string, hariIni: string): string {
-  return tanggal === hariIni
-    ? "hari ini"
+  return tanggal === tanggalDataTerakhir(hariIni)
+    ? "kemarin"
     : `pada ${tanggalLaporanSingkat(tanggal)}`;
 }
 

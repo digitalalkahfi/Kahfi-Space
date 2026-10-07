@@ -45,6 +45,7 @@ import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { modeData } from "@/lib/supabase/config";
 import { hariIniWib } from "@/lib/format";
+import { tanggalDataTerakhir } from "@/lib/laporan";
 import type { Pengguna } from "@/lib/types";
 
 export const metadata: Metadata = {
@@ -66,7 +67,13 @@ export default async function GmvPage({ searchParams }: PageProps<"/gmv">) {
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
-  const hariIni = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
+  // "Hari ini" di dasbor ini = hari penuh terbaru yang GMV-nya sudah
+  // dilaporkan: kemarin (H-1). Hari ini sendiri belum punya angka, jadi
+  // tidak ikut dihitung — termasuk saat memotong pembanding sepanjang
+  // hari yang sudah berjalan.
+  const hariIni = tanggalDataTerakhir(
+    modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib(),
+  );
 
   const satu = (n: string | string[] | undefined) =>
     Array.isArray(n) ? n[0] : n;

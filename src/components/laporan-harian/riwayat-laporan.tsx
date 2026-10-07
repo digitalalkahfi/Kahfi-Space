@@ -11,6 +11,7 @@ import {
   rupiahPenuh,
   tanggalRelatif,
 } from "@/lib/format";
+import { keteranganDikirim } from "@/lib/laporan";
 import type { LaporanHarian } from "@/lib/types";
 
 /** Riwayat laporan yang pernah dikirim, lengkap dengan penanda revisi. */
@@ -60,6 +61,9 @@ export function RiwayatLaporan({
                   </p>
                   <p className="tabular mt-0.5 text-sm leading-5 font-bold">
                     {rupiahPenuh(r.gmv)}
+                  </p>
+                  <p className="tabular text-[11px] leading-[14px] text-muted-foreground">
+                    {keteranganDikirim(r.submittedAt)}
                   </p>
                 </div>
                 <span

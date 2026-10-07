@@ -14,6 +14,7 @@ import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
 import { hariIniWib } from "@/lib/format";
+import { geserHari } from "@/lib/laporan";
 
 export const metadata: Metadata = {
   title: "Laporan Mingguan — K-Space V2",
@@ -34,11 +35,10 @@ export default async function MingguanPage({
     laporanMingguan(pengguna, tanggal),
   ]);
 
-  // Pekan lalu: pekan terakhir yang benar-benar sudah selesai.
-  const pekanIni = seninPekan(tanggal);
-  const senin = new Date(`${pekanIni}T00:00:00Z`);
-  senin.setUTCDate(senin.getUTCDate() - 7);
-  const pekanLalu = senin.toISOString().slice(0, 10);
+  // Pekan terbaru yang boleh dibentuk: pekan yang sudah selesai DAN GMV
+  // hari terakhirnya sudah dilaporkan (satu hari sesudahnya, H-1) — sama
+  // dengan penjaga `buat_laporan_mingguan` di database (0207).
+  const pekanLalu = seninPekan(geserHari(tanggal, -8));
 
   const bolehBentuk = pengguna.role === "CEO" || pengguna.role === "Manager";
 

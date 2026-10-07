@@ -2,6 +2,9 @@
  * Alur harian satu staf dari pagi sampai sore (PRD §4).
  * Menguji rantainya, bukan potongannya: absen masuk → kerja → lapor GMV →
  * absen pulang terbuka → angkanya muncul di dasbor Manager.
+ *
+ * GMV dihitung satu hari penuh (0207): laporan yang dikirim sore ini memuat
+ * GMV KEMARIN dan tersimpan bertanggal kemarin.
  */
 import {
   buatDb,
@@ -19,6 +22,7 @@ await terapkanSeed(db);
 const { uji, jalankan } = buatSuite("Alur harian staf");
 
 const HARI = "2024-10-28"; // hari kerja baru, belum ada data
+const HARI_DATA = "2024-10-27"; // hari yang GMV-nya dilaporkan pada HARI
 const idUser = async (n) =>
   (await sebagaiAdmin(db, `select id from users where nama=$1`, [n])).rows[0].id;
 
@@ -66,13 +70,13 @@ uji("sore: absen pulang MASIH terkunci sebelum lapor", async () => {
   );
 });
 
-uji("sore: kirim laporan harian GMV", async () => {
+uji("sore: kirim laporan harian GMV (GMV kemarin)", async () => {
   await sebagai(
     db,
     RIAN,
     `insert into daily_reports (user_id, tanggal, account_id, gmv, catatan)
      values ($1, $2, $3, 5120000, 'Live 3 jam, bundling serum laku.')`,
-    [RIAN, HARI, AKUN],
+    [RIAN, HARI_DATA, AKUN],
   );
 });
 
@@ -93,12 +97,12 @@ uji("absen pulang TERBUKA setelah laporan masuk", async () => {
   harus(rows[0].jam_pulang, "jam pulang harus tersimpan");
 });
 
-uji("GMV-nya langsung terhitung di dasbor Manager", async () => {
+uji("GMV-nya langsung terhitung di dasbor Manager (pada tanggal GMV-nya)", async () => {
   const { rows } = await sebagai(
     db,
     MANAGER,
     `select kode, gmv_hari_ini from ringkasan_gmv_unit($1::date)`,
-    [HARI],
+    [HARI_DATA],
   );
   const aff = rows.find((r) => r.kode === "affiliator");
   harusSama(
@@ -130,7 +134,7 @@ uji("laporan kedua untuk akun yang sama ditolak", async () => {
         RIAN,
         `insert into daily_reports (user_id, tanggal, account_id, gmv)
          values ($1, $2, $3, 999000)`,
-        [RIAN, HARI, AKUN],
+        [RIAN, HARI_DATA, AKUN],
       ),
     "satu sasaran hanya boleh satu laporan per hari",
   );
@@ -141,7 +145,7 @@ uji("perbaikan angka meninggalkan jejak, bukan menimpa diam-diam", async () => {
     await sebagaiAdmin(
       db,
       `select id from daily_reports where account_id=$1 and tanggal=$2`,
-      [AKUN, HARI],
+      [AKUN, HARI_DATA],
     )
   ).rows[0].id;
 
@@ -168,7 +172,7 @@ uji("dasbor ikut menyesuaikan setelah perbaikan", async () => {
     db,
     MANAGER,
     `select gmv_hari_ini from ringkasan_gmv_unit($1::date) where kode='affiliator'`,
-    [HARI],
+    [HARI_DATA],
   );
   harusSama(Number(rows[0].gmv_hari_ini), 5400000);
 });

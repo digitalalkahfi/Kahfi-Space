@@ -7,6 +7,7 @@ import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { dataContoh } from "@/lib/data/contoh";
 import { keputusanWrm } from "@/lib/wrm";
+import { tanggalDataTerakhir } from "@/lib/laporan";
 import type { KeputusanWrm, KodeUnit, Pengguna } from "@/lib/types";
 import type { BarisLeadMeasure } from "@/lib/supabase/types";
 
@@ -458,7 +459,10 @@ export async function laporanMingguan(
   tanggal: string,
   jumlahPekan = 6,
 ): Promise<LaporanMingguan[]> {
-  const mulai = awalPekan(tanggal);
+  // GMV dilaporkan keesokan harinya (H-1): pekan "berjalan" dibaca sampai
+  // kemarin, jadi hari Senin menampilkan pekan lalu yang sudah lengkap.
+  const acuan = tanggalDataTerakhir(tanggal);
+  const mulai = awalPekan(acuan);
 
   if (modeData() === "demo") {
     const { wrm } = hitungDemo(tanggal);
@@ -557,7 +561,7 @@ export async function laporanMingguan(
 
   const { data: berjalan } = await sb.rpc("hitung_laporan_mingguan", {
     p_pekan: mulai,
-    p_sampai: tanggal,
+    p_sampai: acuan,
   });
 
   const gabungan = (berjalan ?? []).reduce(

@@ -13,6 +13,7 @@ import {
 } from "@/lib/data/hasil";
 import {
   alasanTanggalLaporan,
+  PESAN_GMV_BELUM_PENUH,
   periksaIsiLaporan,
   type IsiLaporan,
   type KalenderLaporan,
@@ -46,6 +47,8 @@ function pesanGalatLaporan(error: {
     [/gmv_wajar/, "Nilai GMV di luar batas wajar, periksa lagi."],
     [/hanya melaporkan GMV/, error.message],
     [/bertanggal masa depan/, "Laporan tidak bisa bertanggal masa depan."],
+    // 0207: hari ini pun belum bisa dilaporkan — GMV-nya belum satu hari penuh.
+    [/GMV dihitung satu hari penuh/, PESAN_GMV_BELUM_PENUH],
   ];
   for (const [pola, pesan] of cocok) {
     if (pola.test(error.message)) return [pesan, "validasi"];
@@ -64,9 +67,11 @@ function uraikanSasaran(kunci: string) {
  * Kirim laporan harian — satu-satunya tempat GMV masuk ke sistem.
  * Database memaksa satu laporan per (sasaran, tanggal).
  *
- * Tanggalnya boleh hari ini atau susulan untuk tanggal yang terlewat,
- * sejak sasarannya terdaftar di K-Space — aturan yang sama dengan
- * kalender di form.
+ * GMV dihitung satu hari penuh, jadi tanggalnya paling baru kemarin (H-1):
+ * laporan yang dikirim tanggal 6 memuat GMV tanggal 5 dan disimpan
+ * bertanggal 5. Boleh juga susulan untuk tanggal yang terlewat, sejak
+ * sasarannya terdaftar di K-Space — aturan yang sama dengan kalender di
+ * form dan dengan penjaga di database (0207).
  */
 export async function kirimLaporanHarian(input: {
   sasaran: string;

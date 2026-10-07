@@ -16,7 +16,7 @@ export function StatusAbsen({
 }: {
   jamMasuk: string;
   lokasi: string;
-  /** Terkunci selama laporan harian hari ini belum terkirim. */
+  /** Terkunci selama laporan harian yang jatuh tempo hari ini (GMV kemarin) belum terkirim. */
   terkunci: boolean;
 }) {
   return (
@@ -116,7 +116,7 @@ export function StatusAbsen({
         >
           {terkunci
             ? "Absen pulang terbuka otomatis begitu laporan GMV harian terkirim."
-            : "Laporan hari ini sudah masuk — Absen Pulang kini terbuka. Selesaikan sebelum meninggalkan lokasi."}
+            : "Laporan GMV kemarin sudah masuk — Absen Pulang kini terbuka. Selesaikan sebelum meninggalkan lokasi."}
         </p>
       </div>
     </div>

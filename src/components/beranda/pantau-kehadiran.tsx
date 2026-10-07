@@ -155,7 +155,7 @@ export function PantauKehadiran({ tim }: { tim: AnggotaKehadiran[] }) {
           {saringan === "belum_lapor"
             ? "Semua laporan harian sudah masuk."
             : saringan === "kurang_upload"
-              ? "Semua unggahan hari ini sudah memenuhi batas minimum."
+              ? "Semua unggahan kemarin sudah memenuhi batas minimum."
               : "Seluruh tim sudah absen hari ini."}
         </p>
       ) : (

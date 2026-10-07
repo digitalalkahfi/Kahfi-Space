@@ -22,8 +22,8 @@ export function KolomCatatan({
   nilai: string;
   onUbah: (teks: string) => void;
   maks?: number;
-  /** "hari ini", atau "hari itu" untuk laporan susulan. */
-  hari?: "hari ini" | "hari itu";
+  /** "hari ini", "kemarin" (laporan biasa), atau "hari itu" (susulan). */
+  hari?: "hari ini" | "kemarin" | "hari itu";
 }) {
   const ref = useRef<HTMLTextAreaElement>(null);
 

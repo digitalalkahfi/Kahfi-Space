@@ -15,6 +15,9 @@ await terapkanSeed(db);
 const { uji, jalankan } = buatSuite("Absensi");
 
 const TGL = "2024-10-24";
+// GMV dihitung satu hari penuh (0207): laporan yang ditagih pada hari absen
+// memuat GMV hari sebelumnya, jadi bertanggal H-1.
+const TGL_DATA = "2024-10-23";
 const idUser = async (n) =>
   (await sebagaiAdmin(db, `select id from users where nama = $1`, [n])).rows[0]
     .id;
@@ -35,6 +38,20 @@ uji("seed absensi idempoten", async () => {
     [TGL],
   );
   harusSama(Number(rows[0].n), 24);
+});
+
+// Seed menyimpan laporan bertanggal sama dengan hari absen. Skenarionya
+// "Nabila belum lapor pada hari itu" kini berarti Nabila belum mengirim
+// laporan yang jatuh tempo hari itu, yaitu laporan bertanggal H-1. Dipasang
+// SETELAH test idempotensi, karena test itu menerapkan seed sekali lagi.
+uji("skenario: Nabila belum mengirim laporan yang jatuh tempo hari itu", async () => {
+  await sebagaiAdmin(
+    db,
+    `delete from daily_reports
+      where account_id = (select id from accounts where username='@fashion_hijab')
+        and tanggal = $1`,
+    [TGL_DATA],
+  );
 });
 
 uji("22 dari 25 staf tercatat check-in", async () => {
@@ -109,7 +126,7 @@ uji("absen pulang TERKUNCI sebelum laporan harian terkirim", async () => {
 });
 
 uji("absen pulang terbuka setelah laporan harian masuk", async () => {
-  // Rian PIC akun; laporannya sudah ada di seed untuk tanggal ini.
+  // Rian PIC akun; laporan H-1 (yang jatuh tempo hari ini) sudah ada di seed.
   const { rows } = await sebagaiAdmin(
     db,
     `select sudah_lapor_harian($1, $2::date) as lapor`,
@@ -241,7 +258,7 @@ uji("hanya PIC akun & Leader unit yang wajib lapor", async () => {
 });
 
 const gagal = uji(
-  "status tim membawa unggahan hari ini dan batas minimumnya",
+  "status tim membawa unggahan terakhir (kemarin) dan batas minimumnya",
   async () => {
     // Kolom ini yang dipakai kartu Pantau Kehadiran untuk menyaring
     // "di bawah minimum" tanpa memanggil rekap terpisah (migrasi 0145).
@@ -260,7 +277,7 @@ const gagal = uji(
             coalesce(sum(r.jumlah_upload),0)::int as unggahan
        from accounts a
        left join daily_reports r
-         on r.account_id = a.id and r.tanggal = '2024-10-24'
+         on r.account_id = a.id and r.tanggal = '2024-10-23'
       where a.pic_user_id = (select id from users where nama='Rian Hidayat')
         and a.status = 'aktif'`,
     );

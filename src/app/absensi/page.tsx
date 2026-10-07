@@ -19,6 +19,7 @@ import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
 import { hariIniWib, tanggalPanjang } from "@/lib/format";
 import { KANTOR } from "@/lib/geo";
+import { tanggalDataTerakhir } from "@/lib/laporan";
 import { wajibAbsen } from "@/lib/rekap-kehadiran";
 
 export const metadata: Metadata = {
@@ -36,11 +37,15 @@ export default async function AbsensiPage({
 
   const tanggal = modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib();
 
+  // Yang menunggu Absen Pulang adalah laporan yang jatuh tempo hari ini:
+  // GMV kemarin, karena GMV dihitung satu hari penuh.
+  const tanggalLaporan = tanggalDataTerakhir(tanggal);
+
   const [absen, aturan, sasaran, terlapor] = await Promise.all([
     absensiHariIni(pengguna, tanggal),
     pengaturanAbsensi(),
-    sasaranUntuk(pengguna, tanggal),
-    sudahDilaporkan(pengguna, tanggal),
+    sasaranUntuk(pengguna, tanggalLaporan),
+    sudahDilaporkan(pengguna, tanggalLaporan),
   ]);
 
   const kunciSasaran = (s: (typeof sasaran)[number]) =>

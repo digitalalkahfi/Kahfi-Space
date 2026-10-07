@@ -7,6 +7,7 @@ import { klienServer } from "@/lib/supabase/server";
 import { dataContoh, namaTerlihatContoh } from "@/lib/data/contoh";
 import { jamEfektifMasuk, menitTelat } from "@/lib/izin";
 import { KANTOR, jarakDariKantor } from "@/lib/geo";
+import { tanggalDataTerakhir } from "@/lib/laporan";
 import type { Pengguna, StatusAbsen } from "@/lib/types";
 
 export type PengaturanAbsensi = {
@@ -116,9 +117,10 @@ export async function absensiHariIni(
         Boolean(pengguna.unitId) &&
         !unitBerakun.has(pengguna.unitId as string));
 
+    // Laporan yang jatuh tempo pada `tanggal` memuat GMV kemarin (H-1).
     const punyaLaporan = daily_reports.some(
       (l) =>
-        l.tanggal === tanggal &&
+        l.tanggal === tanggalDataTerakhir(tanggal) &&
         (l.user === pengguna.nama ||
           (l.akun ? akunSaya.some((a) => a.username === l.akun) : false)),
     );
@@ -296,7 +298,9 @@ export async function rekapAbsensi(
           lokasiValid: jarak !== null && jarak <= KANTOR.radius,
           jarakMeter: jarak,
           alasan: a.alasan ?? "",
-          sudahLapor: pelapor.has([a.tanggal, a.user].join("|")),
+          sudahLapor: pelapor.has(
+            [tanggalDataTerakhir(a.tanggal), a.user].join("|"),
+          ),
           ulangMasuk: 0,
           ulangPulang: 0,
         };

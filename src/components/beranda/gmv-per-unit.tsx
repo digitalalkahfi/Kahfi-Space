@@ -9,7 +9,8 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { jamWib, persen, rasioCapaian, rupiahRingkas } from "@/lib/format";
+import { persen, rasioCapaian, rupiahRingkas } from "@/lib/format";
+import { tanggalLaporanSingkat } from "@/lib/laporan";
 import { gayaUnit } from "@/lib/unit";
 import { BarCapaian } from "@/components/motion/bar-capaian";
 import type { CapaianUnit, KodeUnit } from "@/lib/types";
@@ -21,16 +22,21 @@ const ikonUnit: Record<KodeUnit, typeof Users> = {
 };
 
 /**
- * GMV hari ini DAN kemarin dibanding target, untuk tiga pilar operasional
- * (PRD §3 Beranda — "GMV vs Target"). Angka kemarin muncul dua kali:
- * sebagai selisih persen di baris nilai, dan sebagai garis pembanding di bar.
+ * GMV kemarin DAN sehari sebelumnya dibanding target, untuk tiga pilar
+ * operasional (PRD §3 Beranda — "GMV vs Target"). GMV dihitung satu hari
+ * penuh dan dilaporkan keesokan harinya, jadi hari penuh terbaru adalah
+ * kemarin (H-1). Angka hari sebelumnya muncul dua kali: sebagai selisih
+ * persen di baris nilai, dan sebagai garis pembanding di bar.
+ *
+ * Di sini `gmv` = GMV pada `tanggalGmv`, `gmvKemarin` = sehari sebelumnya.
  */
 export function GmvPerUnit({
   unit,
-  disinkronPada,
+  tanggalGmv,
 }: {
   unit: CapaianUnit[];
-  disinkronPada: string;
+  /** Tanggal GMV yang ditampilkan (kemarin), "YYYY-MM-DD". */
+  tanggalGmv: string;
 }) {
   const totalGmv = unit.reduce((a, u) => a + u.gmv, 0);
   const totalTarget = unit.reduce((a, u) => a + u.target, 0);
@@ -43,10 +49,11 @@ export function GmvPerUnit({
       <div className="flex items-start justify-between gap-3 px-5">
         <div>
           <h2 className="text-base leading-6 font-semibold">
-            GMV vs Target per Unit Hari Ini
+            GMV vs Target per Unit Kemarin
           </h2>
           <p className="text-[13px] leading-[18px] text-muted-foreground">
-            Hari ini vs kemarin per lini bisnis, sampai {jamWib(disinkronPada)}
+            {tanggalLaporanSingkat(tanggalGmv)} vs sehari sebelumnya per lini
+            bisnis · GMV satu hari penuh
           </p>
         </div>
         <span
@@ -119,7 +126,7 @@ export function GmvPerUnit({
                 tinggi="h-1.5"
                 penanda={{
                   rasio: rasioKemarin,
-                  label: `Kemarin ${rupiahRingkas(u.gmvKemarin)} (${persen(rasioKemarin)} dari target)`,
+                  label: `Sehari sebelumnya ${rupiahRingkas(u.gmvKemarin)} (${persen(rasioKemarin)} dari target)`,
                 }}
                 className="mt-2.5 bg-border-subtle"
               />
@@ -146,7 +153,7 @@ export function GmvPerUnit({
                   </span>
                 </span>
                 <span className="tabular text-muted-foreground">
-                  Kemarin {rupiahRingkas(u.gmvKemarin)} · sisa{" "}
+                  Sehari sebelumnya {rupiahRingkas(u.gmvKemarin)} · sisa{" "}
                   {rupiahRingkas(sisa)}
                 </span>
               </div>
@@ -158,7 +165,7 @@ export function GmvPerUnit({
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 border-t border-border-subtle px-5 pt-3 text-[11px] leading-[14px] sm:text-[13px] sm:leading-[18px]">
         <span className="flex items-center gap-1.5 text-muted-foreground">
           <span className="h-3 w-0.5 shrink-0 rounded-full bg-foreground/35" />
-          Garis = posisi kemarin ({rupiahRingkas(totalKemarin)})
+          Garis = sehari sebelumnya ({rupiahRingkas(totalKemarin)})
         </span>
         <Link
           href="/gmv"
