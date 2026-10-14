@@ -89,8 +89,9 @@ uji("PIC boleh melapor untuk akunnya", async () => {
   await sebagai(
     db,
     U.rian,
-    `insert into daily_reports (user_id, tanggal, account_id, gmv, catatan)
-     values ($1,$2,$3,4600000,'Live sore stabil.')`,
+    // Komisi wajib untuk laporan akun Affiliator sejak 0211.
+    `insert into daily_reports (user_id, tanggal, account_id, gmv, komisi, catatan)
+     values ($1,$2,$3,4600000,0,'Live sore stabil.')`,
     [U.rian, BESOK, A.skincare],
   );
 });
@@ -101,8 +102,8 @@ uji("Staff tidak boleh melapor untuk akun orang lain", async () => {
       sebagai(
         db,
         U.anisa,
-        `insert into daily_reports (user_id, tanggal, account_id, gmv)
-         values ($1,$2,$3,1000000)`,
+        `insert into daily_reports (user_id, tanggal, account_id, gmv, komisi)
+         values ($1,$2,$3,1000000,0)`,
         [U.anisa, BESOK, A.fashion],
       ),
     "Anisa bukan PIC @fashion_hijab",
@@ -139,8 +140,8 @@ uji("Staff tidak bisa melapor atas nama orang lain", async () => {
       sebagai(
         db,
         U.anisa,
-        `insert into daily_reports (user_id, tanggal, account_id, gmv)
-         values ($1,$2,$3,1000000)`,
+        `insert into daily_reports (user_id, tanggal, account_id, gmv, komisi)
+         values ($1,$2,$3,1000000,0)`,
         [U.rian, BESOK, A.skincare],
       ),
     "user_id harus dirinya sendiri",

@@ -7,7 +7,6 @@ import {
   buatDb,
   buatSuite,
   harus,
-  harusDitolak,
   harusSama,
   sebagaiAdmin,
   terapkanSeed,
@@ -92,15 +91,16 @@ uji(
   },
 );
 
-uji("komisi yang melebihi GMV barunya ditolak kendala, bukan lolos diam-diam", async () => {
-  await harusDitolak(
-    () =>
-      satu(
-        `select gmv from perbaiki_laporan_harian($1, 1000, 'Migrasi: uji kendala komisi', null, 5000, null)`,
-        [idLaporan],
-      ),
-    "komisi > gmv seharusnya ditolak",
+uji("komisi boleh melebihi GMV barunya sejak 0211 (komisi real bisa dari hari lain)", async () => {
+  await satu(
+    `select perbaiki_laporan_harian($1, 1000, 'Migrasi: uji komisi > GMV', null, 5000, null) id`,
+    [idLaporan],
   );
+  const { komisi } = await satu(
+    `select komisi::int komisi from daily_reports where id = $1`,
+    [idLaporan],
+  );
+  harusSama(komisi, 5000);
 });
 
 uji("rekap unit MCN masuk sebagai laporan unit", async () => {

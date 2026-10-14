@@ -74,8 +74,9 @@ uji("sore: kirim laporan harian GMV (GMV kemarin)", async () => {
   await sebagai(
     db,
     RIAN,
-    `insert into daily_reports (user_id, tanggal, account_id, gmv, catatan)
-     values ($1, $2, $3, 5120000, 'Live 3 jam, bundling serum laku.')`,
+    // Komisi wajib untuk laporan akun Affiliator sejak 0211.
+    `insert into daily_reports (user_id, tanggal, account_id, gmv, komisi, catatan)
+     values ($1, $2, $3, 5120000, 0, 'Live 3 jam, bundling serum laku.')`,
     [RIAN, HARI_DATA, AKUN],
   );
 });
@@ -132,8 +133,8 @@ uji("laporan kedua untuk akun yang sama ditolak", async () => {
       sebagai(
         db,
         RIAN,
-        `insert into daily_reports (user_id, tanggal, account_id, gmv)
-         values ($1, $2, $3, 999000)`,
+        `insert into daily_reports (user_id, tanggal, account_id, gmv, komisi)
+         values ($1, $2, $3, 999000, 0)`,
         [RIAN, HARI_DATA, AKUN],
       ),
     "satu sasaran hanya boleh satu laporan per hari",

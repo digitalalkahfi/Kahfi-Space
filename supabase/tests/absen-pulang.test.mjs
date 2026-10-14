@@ -66,8 +66,9 @@ uji("pulang terbuka setelah laporan yang jatuh tempo hari itu masuk (GMV H-1)", 
   await sebagai(
     db,
     NABILA,
-    `insert into daily_reports (user_id, tanggal, account_id, gmv)
-     values ($1, $2, $3, 3250000)`,
+    // Komisi wajib untuk laporan akun Affiliator sejak 0211.
+    `insert into daily_reports (user_id, tanggal, account_id, gmv, komisi)
+     values ($1, $2, $3, 3250000, 0)`,
     [NABILA, HARI_DATA, AKUN],
   );
 

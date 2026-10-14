@@ -903,21 +903,12 @@ export async function terapkanLaporan(
       ? gmvLaporanAkun(rekap, akun, tanggal, diketik)
       : { gmv: 0, keterangan: null };
 
-    // Komisi tidak boleh melebihi GMV (kendala V2). Angka lama yang
-    // melanggarnya tidak dibuang: komisinya dikosongkan dan nilai aslinya
-    // ditulis di catatan, supaya laporannya tetap masuk dan angkanya
-    // tetap bisa diperiksa orang.
-    let komisi = keAngka(medan.komisi);
+    // Komisi boleh melebihi GMV hari itu sejak 0211 (komisi real bisa
+    // berasal dari pesanan hari sebelumnya), jadi angkanya dibawa utuh.
+    const komisi = keAngka(medan.komisi);
     let catatan = catatanLaporan(baris, medan.dipakai);
     if (keterangan) {
       catatan = `${catatan}\n${keterangan}`.trim().slice(0, 2000);
-    }
-    if (komisi !== null && komisi > gmvAkhir) {
-      catatan =
-        `${catatan}\nKomisi lama: ${komisi} (lebih besar dari GMV ${gmvAkhir}; dikosongkan saat migrasi)`
-          .trim()
-          .slice(0, 2000);
-      komisi = null;
     }
     // Jumlah upload V2 dibatasi 0–500 per hari (kendala yang sama).
     let upload = keAngka(medan.upload);
@@ -1188,21 +1179,13 @@ async function samakanLaporan(
   }
 
   const gmv = "gmv" in target ? (target.gmv ?? 0) : (angkaDb(ada.gmv) ?? 0);
-  let komisi =
+  const komisi =
     "komisi" in target ? (target.komisi ?? null) : angkaDb(ada.komisi);
   const upload =
     "jumlah_upload" in target
       ? (target.jumlah_upload ?? null)
       : angkaDb(ada.jumlah_upload);
-  // Komisi yang jadi lebih besar dari GMV barunya melanggar kendala V2;
-  // dikosongkan dan angkanya dicatat, bukan dibiarkan gagal.
-  if (komisi !== null && komisi > gmv) {
-    catatan =
-      `${catatan}\nKomisi lama: ${komisi} (lebih besar dari GMV ${gmv}; dikosongkan saat migrasi)`
-        .trim()
-        .slice(0, 2000);
-    komisi = null;
-  }
+  // Komisi boleh melebihi GMV sejak 0211; angkanya tidak dikosongkan.
   const catatanBeda = catatan !== ada.catatan;
   const angkaBeda =
     gmv !== angkaDb(ada.gmv) ||
@@ -1346,7 +1329,8 @@ export async function terapkanRekapGmv(
       akun: b.akun,
       unitKode: b.unit,
       gmv: b.gmv,
-      komisi: b.komisi !== null && b.komisi <= b.gmv ? b.komisi : null,
+      // Komisi boleh melebihi GMV sejak 0211; dibawa apa adanya.
+      komisi: b.komisi,
       upload:
         b.upload !== null && b.upload >= 0 && b.upload <= 500 ? b.upload : null,
       catatan: bagian.filter((t) => t !== null).join(" · "),

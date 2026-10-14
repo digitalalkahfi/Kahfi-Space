@@ -67,8 +67,9 @@ uji("laporan bertanggal hari ini ditolak, bertanggal kemarin diterima", async ()
       sebagai(
         db,
         NABILA,
-        `insert into daily_reports (user_id, tanggal, account_id, gmv)
-         values ($1,$2,$3,5000000)`,
+        // Komisi wajib untuk laporan akun Affiliator sejak 0211.
+        `insert into daily_reports (user_id, tanggal, account_id, gmv, komisi)
+         values ($1,$2,$3,5000000,0)`,
         [NABILA, HARI_INI, AKUN],
       ),
     /satu hari penuh/,
@@ -78,8 +79,8 @@ uji("laporan bertanggal hari ini ditolak, bertanggal kemarin diterima", async ()
   await sebagai(
     db,
     NABILA,
-    `insert into daily_reports (user_id, tanggal, account_id, gmv, jumlah_upload)
-     values ($1,$2,$3,5000000,7)`,
+    `insert into daily_reports (user_id, tanggal, account_id, gmv, komisi, jumlah_upload)
+     values ($1,$2,$3,5000000,0,7)`,
     [NABILA, KEMARIN, AKUN],
   );
   const { n } = await satu(
@@ -97,8 +98,8 @@ uji("masa depan tetap ditolak", async () => {
       sebagai(
         db,
         NABILA,
-        `insert into daily_reports (user_id, tanggal, account_id, gmv)
-         values ($1,$2,$3,5000000)`,
+        `insert into daily_reports (user_id, tanggal, account_id, gmv, komisi)
+         values ($1,$2,$3,5000000,0)`,
         [NABILA, lusa, AKUN],
       ),
     /satu hari penuh/,

@@ -12,6 +12,7 @@ import {
   kunciSasaranLaporan,
   labelHariLaporan,
   periksaIsiLaporan,
+  periksaKomisiWajib,
   perubahanRevisi,
   PESAN_GMV_BELUM_PENUH,
   punyaKolom,
@@ -125,18 +126,38 @@ test("komisi di luar departemennya ditolak, bukan diam-diam dibuang", () => {
   );
 });
 
-test("komisi tidak boleh melebihi GMV-nya sendiri", () => {
-  assert.match(
-    String(
-      periksaIsiLaporan("affiliator", isi({ gmv: 100_000, komisi: 100_001 })),
-    ),
-    /melebihi GMV/,
-  );
+test("komisi boleh melebihi GMV hari itu (0211, BR-K3)", () => {
+  // Komisi real yang masuk hari ini bisa berasal dari pesanan kemarin.
   assert.equal(
-    periksaIsiLaporan("affiliator", isi({ gmv: 100_000, komisi: 100_000 })),
+    periksaIsiLaporan("affiliator", isi({ gmv: 100_000, komisi: 100_001 })),
     null,
-    "sama besar masih mungkin, meski jarang",
   );
+});
+
+test("AC2: GMV Rp 0 dengan komisi masuk Rp 50.000 sah", () => {
+  assert.equal(
+    periksaIsiLaporan("affiliator", isi({ gmv: 0, komisi: 50_000 })),
+    null,
+  );
+  // Tanpa GMV dan tanpa komisi tetap dianggap lupa diisi.
+  assert.equal(
+    periksaIsiLaporan("affiliator", isi({ gmv: 0, komisi: 0 })),
+    "GMV belum diisi.",
+  );
+});
+
+test("AC1/BR-K1: komisi akun Affiliator wajib, 0 boleh", () => {
+  assert.equal(
+    periksaKomisiWajib("affiliator", { komisi: null }),
+    "Isi 0 kalau hari ini tidak ada komisi masuk.",
+  );
+  assert.equal(periksaKomisiWajib("affiliator", { komisi: 0 }), null);
+  assert.equal(periksaKomisiWajib("affiliator", { komisi: 75_000 }), null);
+});
+
+test("BR-K4: MCN dan TAP tidak diwajibkan komisi", () => {
+  assert.equal(periksaKomisiWajib("mcn", { komisi: null }), null);
+  assert.equal(periksaKomisiWajib("tap", { komisi: null }), null);
 });
 
 test("jumlah upload harus bilangan bulat yang wajar", () => {
