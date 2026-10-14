@@ -268,7 +268,9 @@ export function buatSandiSementara(
 export const WAJIB_GANTI_SANDI = "wajib_ganti_sandi";
 
 /** Jalur yang tetap boleh dibuka sebelum kata sandi sementara diganti. */
-const JALUR_SAAT_WAJIB_GANTI = ["/keamanan", "/masuk", "/auth", "/api"];
+// `/menunggu` ikut terbuka: akun yang belum aktif dialihkan ke sana, dan
+// tanpa pengecualian ini dua pengalihan saling melempar tanpa henti.
+const JALUR_SAAT_WAJIB_GANTI = ["/keamanan", "/masuk", "/auth", "/api", "/menunggu"];
 
 /**
  * Pemilik kata sandi sementara diarahkan ke halaman Keamanan sampai ia

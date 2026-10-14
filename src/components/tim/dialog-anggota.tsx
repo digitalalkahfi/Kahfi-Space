@@ -49,13 +49,16 @@ export type MasukanAnggota = {
   atasanId?: string | null;
 };
 
-function Isian({
+export function Isian({
   awal,
   pilihan,
   onSimpan,
   menyimpan,
   pesan,
   calon,
+  emailTetap,
+  namaAwal,
+  labelSimpan = "Simpan",
 }: {
   awal?: AnggotaTim;
   pilihan: PilihanOrganisasi;
@@ -67,9 +70,17 @@ function Isian({
    * atasan anggota lama punya dialognya sendiri yang memeriksa siklus.
    */
   calon?: AnggotaTim[];
+  /**
+   * Email yang tidak boleh diubah — persetujuan pendaftaran Google:
+   * emailnya adalah identitas login orang itu.
+   */
+  emailTetap?: string;
+  /** Nama awal untuk orang baru, mis. nama dari akun Google-nya. */
+  namaAwal?: string;
+  labelSimpan?: string;
 }) {
-  const [nama, setNama] = useState(awal?.nama ?? "");
-  const [email, setEmail] = useState(awal?.email ?? "");
+  const [nama, setNama] = useState(awal?.nama ?? namaAwal ?? "");
+  const [email, setEmail] = useState(emailTetap ?? awal?.email ?? "");
   const [role, setRole] = useState<Peran>(awal?.role ?? "Staff");
   const [jabatan, setJabatan] = useState(awal?.jabatan ?? "");
   const [unitKode, setUnitKode] = useState<KodeUnit | null>(
@@ -189,6 +200,7 @@ function Isian({
             id="email-anggota"
             type="email"
             value={email}
+            readOnly={emailTetap !== undefined}
             maxLength={120}
             autoComplete="off"
             autoCapitalize="none"
@@ -198,9 +210,9 @@ function Isian({
             className="h-12 w-full rounded-xl bg-muted px-4 text-[15px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
           />
           <p className="text-[11px] leading-[14px] text-muted-foreground">
-            Email ini yang dipakainya masuk. Saat anggota baru disimpan, K-Space
-            langsung membuatkan akun login dengan kata sandi sementara yang
-            tampil sekali — aplikasi tidak menyimpannya.
+            {emailTetap !== undefined
+              ? "Email Google yang dipakainya mendaftar. Tidak bisa diubah di sini."
+              : "Email ini yang dipakainya masuk. Saat anggota baru disimpan, K-Space langsung membuatkan akun login dengan kata sandi sementara yang tampil sekali — aplikasi tidak menyimpannya."}
           </p>
         </div>
 
@@ -445,7 +457,7 @@ function Isian({
           className="tekan-halus rounded-full"
         >
           {menyimpan ? <Loader2 className="size-4 animate-spin" /> : null}
-          {menyimpan ? "Menyimpan…" : "Simpan"}
+          {menyimpan ? "Menyimpan…" : labelSimpan}
         </Button>
       </DialogFooter>
     </>

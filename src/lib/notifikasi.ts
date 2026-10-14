@@ -16,6 +16,7 @@ export const KATEGORI_NOTIFIKASI = [
   "transaksi",
   "anggaran",
   "masukan",
+  "anggota",
 ] as const;
 
 export type KategoriNotifikasi = (typeof KATEGORI_NOTIFIKASI)[number];
@@ -28,6 +29,7 @@ export const LABEL_KATEGORI: Record<KategoriNotifikasi, string> = {
   transaksi: "Transaksi",
   anggaran: "Anggaran",
   masukan: "Masukan & Kaizen",
+  anggota: "Pendaftaran anggota",
 };
 
 /** Penjelasan singkat, dipakai di halaman preferensi. */
@@ -39,6 +41,10 @@ export const KETERANGAN_KATEGORI: Record<KategoriNotifikasi, string> = {
   transaksi: "Keputusan atas transaksi yang kamu ajukan",
   anggaran: "Keputusan atas anggaran dan alokasinya",
   masukan: "Balasan atas masukan, bug, atau masalah yang kamu kirim",
+  // Keputusan Manager 14 Okt 2026: hanya in-app, tidak lewat WhatsApp
+  // (trigger antrean melewatkannya, migrasi 0209).
+  anggota:
+    "Pendaftaran akun baru menunggu persetujuan (CEO & Manager; hanya di aplikasi)",
 };
 
 export const GAYA_KATEGORI: Record<
@@ -52,6 +58,7 @@ export const GAYA_KATEGORI: Record<
   transaksi: { latar: "bg-ok-fill", teks: "text-ok-text" },
   anggaran: { latar: "bg-ok-fill", teks: "text-ok-text" },
   masukan: { latar: "bg-info-fill", teks: "text-info-text" },
+  anggota: { latar: "bg-warn-fill", teks: "text-warn-text" },
 };
 
 export type Notifikasi = {

@@ -8,6 +8,7 @@ import {
   MessageCircleOff,
   MessageSquare,
   UserCheck,
+  UserPlus,
   Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ const IKON: Record<KategoriNotifikasi, typeof Bell> = {
   transaksi: Wallet,
   anggaran: Wallet,
   masukan: MessageSquare,
+  anggota: UserPlus,
 };
 
 /**

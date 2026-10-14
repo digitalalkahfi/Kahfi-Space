@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { menuPendampingTerlihat, menuUtama } from "@/lib/navigasi";
 import { useSusunan } from "@/components/tampilan/penyedia-tampilan";
 import { TombolKeluar } from "@/components/layout/tombol-keluar";
+import { LencanaMenu } from "@/components/layout/lencana-menu";
 import type { LucideIcon } from "lucide-react";
 
 function TautanRail({
@@ -13,11 +14,13 @@ function TautanRail({
   label,
   icon: Icon,
   aktif,
+  lencana,
 }: {
   href: string;
   label: string;
   icon: LucideIcon;
   aktif: boolean;
+  lencana?: number;
 }) {
   return (
     <Link
@@ -26,13 +29,14 @@ function TautanRail({
       aria-label={label}
       aria-current={aktif ? "page" : undefined}
       className={cn(
-        "tekan-halus flex size-11 items-center justify-center rounded-2xl",
+        "tekan-halus relative flex size-11 items-center justify-center rounded-2xl",
         aktif
           ? "bg-primary text-primary-foreground"
           : "text-muted-foreground hover:bg-muted hover:text-foreground",
       )}
     >
       <Icon className="size-[19px]" strokeWidth={2} />
+      <LencanaMenu jumlah={lencana} />
     </Link>
   );
 }
@@ -42,11 +46,14 @@ export function SidebarRail({
   demo,
   bolehMigrasi,
   bolehKeuangan,
+  lencana = {},
 }: {
   demo: boolean;
   bolehMigrasi: boolean;
   /** Angka perusahaan: hanya Finance, Manager, dan CEO. */
   bolehKeuangan: boolean;
+  /** Angka di pojok ikon menu, per href. */
+  lencana?: Record<string, number>;
 }) {
   const pathname = usePathname();
   // Kalender dan Kaizen sudah punya pintu masuk lain di desktop; tidak
@@ -89,6 +96,7 @@ export function SidebarRail({
             label={menu.label}
             icon={menu.icon}
             aktif={pathname.startsWith(menu.href)}
+            lencana={lencana[menu.href]}
           />
         ))}
 

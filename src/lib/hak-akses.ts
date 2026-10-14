@@ -72,6 +72,13 @@ export const HAK_AKSES: BarisHak[] = [
     punya: (p) => bolehKelolaPeran(p),
   },
   {
+    kunci: "setujuiPendaftaran",
+    label: "Menyetujui pendaftaran akun Google",
+    alasan:
+      "Menetapkan posisi orang baru sama dengan menambah anggota: hanya CEO dan Manager (migrasi 0209).",
+    punya: (p) => bolehKelolaPeran(p),
+  },
+  {
     kunci: "kelolaAkun",
     label: "Mengubah akun, PIC, dan levelnya",
     alasan: "Sejalan policy `accounts_kelola`: hanya CEO dan Manager.",

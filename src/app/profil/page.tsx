@@ -12,6 +12,9 @@ import {
 } from "@/components/profil/kartu-profil";
 import { KartuKontak } from "@/components/profil/kartu-kontak";
 import { SubMenuAkun } from "@/components/profil/sub-menu-akun";
+import { KartuGoogle } from "@/components/profil/kartu-google";
+import { googleTersambung } from "@/lib/data/pendaftaran";
+import { loginGoogleAktif } from "@/lib/supabase/config";
 import { profilSaya } from "@/lib/data/profil";
 import { kelengkapanProfil, kesiapanWhatsapp } from "@/lib/profil";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
@@ -38,11 +41,14 @@ export const metadata: Metadata = {
 export default async function ProfilPage({
   searchParams,
 }: PageProps<"/profil">) {
-  const { persona } = await searchParams;
+  const { persona, galat_google: galatGoogle } = await searchParams;
   const pengguna = await sesiSaatIni(peranValid(persona) ? persona : undefined);
   if (!pengguna) redirect("/masuk");
 
-  const profil = await profilSaya(pengguna);
+  const [profil, google] = await Promise.all([
+    profilSaya(pengguna),
+    loginGoogleAktif() ? googleTersambung() : Promise.resolve(null),
+  ]);
 
   return (
     <AppShell pengguna={pengguna} halaman="Profil saya">
@@ -72,6 +78,15 @@ export default async function ProfilPage({
         ) : (
           <IsiProfil profil={profil} />
         )}
+
+        {loginGoogleAktif() ? (
+          <Reveal>
+            <KartuGoogle
+              tersambung={google}
+              galat={typeof galatGoogle === "string" ? galatGoogle : null}
+            />
+          </Reveal>
+        ) : null}
       </div>
     </AppShell>
   );

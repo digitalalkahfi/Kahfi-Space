@@ -11,6 +11,14 @@ export type PeranDb =
 
 export type StatusAktifDb = "aktif" | "nonaktif";
 
+/** Hasil `status_akses_saya()` (migrasi 0208/0209). */
+export type StatusAkses =
+  | "aktif"
+  | "nonaktif"
+  | "tanpa_profil"
+  | "menunggu"
+  | "ditolak";
+
 export type StatusLaporanDb = "terkirim" | "revisi";
 
 export type LevelGoalDb =
@@ -143,7 +151,31 @@ export type KategoriNotifikasiDb =
   | "izin"
   | "transaksi"
   | "anggaran"
-  | "masukan";
+  | "masukan"
+  /** Pendaftaran akun baru menunggu persetujuan (migrasi 0209). */
+  | "anggota";
+
+export type StatusPendaftaranDb = "menunggu" | "disetujui" | "ditolak";
+export type CaraPersetujuanDb = "baru" | "sambung";
+
+// Pendaftaran akun lewat Google + keputusan CEO/Manager (migrasi 0209).
+/** @tabel pendaftaran_akun */
+export type BarisPendaftaranAkun = {
+  id: string;
+  email: string;
+  nama_google: string;
+  foto_url: string | null;
+  no_wa: string | null;
+  unit_diajukan: string | null;
+  catatan: string | null;
+  status: StatusPendaftaranDb;
+  diputuskan_oleh: string | null;
+  diputuskan_pada: string | null;
+  alasan_tolak: string | null;
+  profil_id: string | null;
+  cara: CaraPersetujuanDb | null;
+  dibuat_pada: string;
+};
 
 /** @tabel notifications */
 export type BarisNotification = {
@@ -1273,6 +1305,13 @@ type Tabel<Baris, Rel extends readonly unknown[] = []> = {
 export type Database = {
   public: {
     Tables: {
+      pendaftaran_akun: Tabel<
+        BarisPendaftaranAkun,
+        [
+          Relasi<"pendaftaran_akun_diputuskan_oleh_fkey", "diputuskan_oleh", "users">,
+          Relasi<"pendaftaran_akun_profil_id_fkey", "profil_id", "users">,
+        ]
+      >;
       notifications: Tabel<
         BarisNotification,
         [Relasi<"notifications_user_id_fkey", "user_id", "users">]
@@ -2044,6 +2083,43 @@ export type Database = {
       };
       /** Leader ke bawah wajib absen (migrasi 0170). */
       peran_wajib_absen: { Args: { p_role: PeranDb }; Returns: boolean };
+      /** Gerbang seluruh RLS: profil sendiri ada dan aktif (migrasi 0208). */
+      anggota_aktif: { Args: Record<string, never>; Returns: boolean };
+      /**
+       * Status akses akun yang sedang login (migrasi 0208/0209). Dipakai
+       * middleware untuk mengarahkan akun yang belum/tidak aktif.
+       */
+      status_akses_saya: {
+        Args: Record<string, never>;
+        Returns: StatusAkses | null;
+      };
+      /** Keputusan pendaftaran — hanya CEO/Manager aktif (migrasi 0209). */
+      setujui_pendaftaran_baru: {
+        Args: {
+          p_id: string;
+          p_status_awal: StatusPendaftaranDb;
+          p_nama: string;
+          p_role: PeranDb;
+          p_jabatan: string;
+          p_unit: string | null;
+          p_departemen: string | null;
+          p_program: string | null;
+          p_atasan: string | null;
+        };
+        Returns: undefined;
+      };
+      sambungkan_pendaftaran: {
+        Args: {
+          p_id: string;
+          p_status_awal: StatusPendaftaranDb;
+          p_profil: string;
+        };
+        Returns: undefined;
+      };
+      tolak_pendaftaran: {
+        Args: { p_id: string; p_alasan: string };
+        Returns: undefined;
+      };
       /**
        * Email & nomor WhatsApp orang dalam cakupan pemanggil — satu-satunya
        * jalan membaca kolom itu (migrasi 0174/0175).

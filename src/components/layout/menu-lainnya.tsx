@@ -13,6 +13,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { LencanaMenu } from "@/components/layout/lencana-menu";
 import type { LucideIcon } from "lucide-react";
 
 export type IsiLaci = {
@@ -33,10 +34,17 @@ export type IsiLaci = {
  * dua bagian dari satu daftar yang sama, dan menghitungnya dua kali
  * membuat sebuah menu bisa muncul di keduanya — atau di tidak satu pun.
  */
-export function MenuLainnya({ menu }: { menu: IsiLaci[] }) {
+export function MenuLainnya({
+  menu,
+  lencana = {},
+}: {
+  menu: IsiLaci[];
+  lencana?: Record<string, number>;
+}) {
   const [buka, setBuka] = useState(false);
   const pathname = usePathname();
   const adaYangAktif = menu.some((m) => pathname.startsWith(m.href));
+  const totalLencana = menu.reduce((n, m) => n + (lencana[m.href] ?? 0), 0);
 
   return (
     <Dialog open={buka} onOpenChange={setBuka}>
@@ -48,13 +56,14 @@ export function MenuLainnya({ menu }: { menu: IsiLaci[] }) {
         >
           <span
             className={cn(
-              "flex h-9 w-full max-w-[3.5rem] items-center justify-center rounded-full transition-colors",
+              "relative flex h-9 w-full max-w-[3.5rem] items-center justify-center rounded-full transition-colors",
               adaYangAktif
                 ? "bg-primary text-primary-foreground"
                 : "text-muted-foreground",
             )}
           >
             <LayoutGrid className="size-[18px]" strokeWidth={2} />
+            <LencanaMenu jumlah={totalLencana} />
           </span>
           <span
             className={cn(
@@ -103,13 +112,14 @@ export function MenuLainnya({ menu }: { menu: IsiLaci[] }) {
                 >
                   <span
                     className={cn(
-                      "flex size-9 shrink-0 items-center justify-center rounded-2xl",
+                      "relative flex size-9 shrink-0 items-center justify-center rounded-2xl",
                       aktif
                         ? "bg-primary text-primary-foreground"
                         : "bg-card text-muted-foreground",
                     )}
                   >
                     <Icon className="size-4" strokeWidth={2} />
+                    <LencanaMenu jumlah={lencana[m.href]} />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm leading-5 font-semibold">

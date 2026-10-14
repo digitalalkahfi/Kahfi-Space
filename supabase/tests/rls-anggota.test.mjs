@@ -78,9 +78,11 @@ uji("Staff tidak bisa mengangkat atasannya sendiri", async () => {
 uji("Staff tidak bisa mengaktifkan kembali dirinya", async () => {
   const orang = await id("Yusuf Ramadhan"); // nonaktif di data contoh
   await sebagaiAdmin(db, "update users set status = 'nonaktif' where id = $1", [orang]);
-  await harusDitolak(
-    () => sebagai(db, orang, "update users set status = 'aktif' where id = $1", [orang]),
-    "mengaktifkan diri sendiri seharusnya ditolak",
+  // Sejak 0208 profil nonaktif tidak melihat barisnya sendiri, jadi
+  // UPDATE-nya tidak menyentuh apa pun (bukan galat). Yang diuji adalah
+  // hasilnya: statusnya tetap nonaktif.
+  await sebagai(db, orang, "update users set status = 'aktif' where id = $1", [orang]).catch(
+    () => null,
   );
   harusSama(await nilai("status", "Yusuf Ramadhan"), "nonaktif");
   await terapkanSeed(db);

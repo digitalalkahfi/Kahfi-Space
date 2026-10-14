@@ -15,68 +15,14 @@ import {
   petaBawahan,
   sebabAtasanTakSah,
 } from "@/lib/atasan";
-import { peranSah } from "@/lib/peran";
-import type { KodeUnit, Peran } from "@/lib/types";
-
-const POLA_EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-/** Peran yang memang bertugas di sebuah unit. */
-const PERAN_BERUNIT: Peran[] = ["Leader", "Co-Leader", "Staff"];
-
-type MasukanAnggota = {
-  nama: string;
-  email: string;
-  role: Peran;
-  jabatan: string;
-  unitKode: KodeUnit | null;
-  departemenId: string | null;
-  programId: string | null;
-  /**
-   * Atasan langsung. Hanya dipakai saat menambah; perubahan atasan
-   * anggota lama lewat DialogAtasan, yang memeriksa siklus dan
-   * memperlihatkan akibatnya lebih dulu.
-   */
-  atasanId?: string | null;
-};
-
-function periksa(input: MasukanAnggota): string | null {
-  if (input.nama.trim().length < 3) return "Nama minimal 3 huruf.";
-  if (!POLA_EMAIL.test(input.email.trim())) return "Format email tidak sah.";
-  if (!peranSah(input.role)) return "Peran tidak dikenali.";
-  if (input.jabatan.trim().length < 3) return "Jabatan minimal 3 huruf.";
-
-  // Unit menentukan cakupan RLS; Leader tanpa unit tidak akan melihat
-  // siapa pun. Staff boleh tanpa unit hanya sebagai tim manajemen —
-  // langsung di bawah CEO atau Manager (dijaga aturan atasan dan 0164).
-  if (
-    PERAN_BERUNIT.includes(input.role) &&
-    !input.unitKode &&
-    input.role !== "Staff"
-  ) {
-    return `${input.role} wajib ditempatkan di salah satu unit.`;
-  }
-  if (!PERAN_BERUNIT.includes(input.role) && input.unitKode) {
-    return `${input.role} bekerja lintas unit, jadi tidak ditempatkan di satu unit.`;
-  }
-  if (input.programId && !input.unitKode) {
-    return "Program menempel pada satu unit, jadi unitnya harus dipilih dulu.";
-  }
-  return null;
-}
-
-/**
- * Atasan wajib bagi siapa pun kecuali CEO.
- *
- * Bukan formalitas: atasan itulah yang menyetujui izin dan menerima
- * laporannya. Anggota tanpa atasan tidak bisa mengajukan izin sama
- * sekali, dan itu baru ketahuan pada hari ia membutuhkannya.
- */
-function periksaAtasan(input: MasukanAnggota): string | null {
-  if (input.role === "CEO") return null;
-  return input.atasanId
-    ? null
-    : "Pilih atasan langsungnya — dialah yang menyetujui izin dan menerima laporannya.";
-}
+import {
+  POLA_EMAIL,
+  periksa,
+  periksaAtasan,
+  type MasukanAnggota,
+} from "@/lib/validasi-anggota";
+import { periksaAlasanTolak } from "@/lib/pendaftaran";
+import type { AnggotaTim, KodeUnit, Pengguna } from "@/lib/types";
 
 async function idUnit(kode: KodeUnit | null) {
   if (!kode) return null;
@@ -99,6 +45,33 @@ async function namaUnit(kode: KodeUnit | null) {
     .eq("kode", kode)
     .maybeSingle();
   return data?.nama ? data.nama.split(" (")[0] : "Manajemen";
+}
+
+/**
+ * Atasan orang baru diperiksa terhadap hierarki (BR-04). Dipakai
+ * "Tambah anggota" dan persetujuan pendaftaran Google, supaya keduanya
+ * tidak bisa berbeda aturan.
+ */
+async function sebabAtasanAnggotaBaru(
+  pengguna: Pengguna,
+  input: MasukanAnggota,
+): Promise<string | null> {
+  if (!input.atasanId) return null;
+  const semua: AnggotaTim[] = await daftarAnggotaTim(pengguna);
+  const calon = semua.find((a) => a.id === input.atasanId);
+  if (!calon || calon.status !== "aktif") {
+    return "Atasan yang dipilih tidak ditemukan atau nonaktif.";
+  }
+  return sebabAtasanTakSah(
+    {
+      id: "baru",
+      nama: input.nama.trim(),
+      role: input.role,
+      unitNama: await namaUnit(input.unitKode),
+    },
+    calon,
+    { adaManager: adaManagerAktif(semua) },
+  );
 }
 
 /** Akun login yang baru dibuat; kata sandinya hanya ada di balasan ini. */
@@ -258,27 +231,8 @@ export async function tambahAnggota(
 
   // Atasannya diperiksa terhadap hierarki di sini juga, bukan hanya di
   // formulir: formulir bisa saja lama, aturannya tidak boleh.
-  if (input.atasanId) {
-    const semua = await daftarAnggotaTim(pengguna);
-    const calon = semua.find((a) => a.id === input.atasanId);
-    if (!calon || calon.status !== "aktif") {
-      return gagal(
-        "Atasan yang dipilih tidak ditemukan atau nonaktif.",
-        "validasi",
-      );
-    }
-    const sebab = sebabAtasanTakSah(
-      {
-        id: "baru",
-        nama: input.nama.trim(),
-        role: input.role,
-        unitNama: await namaUnit(input.unitKode),
-      },
-      calon,
-      { adaManager: adaManagerAktif(semua) },
-    );
-    if (sebab) return gagal(sebab, "validasi");
-  }
+  const sebab = await sebabAtasanAnggotaBaru(pengguna, input);
+  if (sebab) return gagal(sebab, "validasi");
 
   const sb = await klienServer();
   // `users.id` mengikuti `auth.users.id` dan karena itu tidak punya nilai
@@ -612,4 +566,129 @@ export async function rapikanStruktur(): Promise<
     { diubah, gagal: [] },
     `${diubah} orang tersambung ke atasan yang sesuai aturan.`,
   );
+}
+
+// ---------------------------------------------------------------------
+// Persetujuan pendaftaran Google (docs/DAFTAR-GOOGLE-PERSETUJUAN.md)
+//
+// Ketiganya memanggil fungsi database (0209) yang mengubah profil dan
+// status pendaftaran dalam satu transaksi, dan yang sekali lagi
+// memeriksa bahwa pemanggilnya CEO/Manager AKTIF serta pendaftarannya
+// belum diputuskan orang lain. Tidak butuh kunci service role.
+// ---------------------------------------------------------------------
+
+/** Status pendaftaran yang sedang dilihat approver saat menekan tombol. */
+type StatusAwal = "menunggu" | "ditolak";
+
+const HANYA_PENGELOLA =
+  "Hanya CEO atau Manager yang boleh memutuskan pendaftaran.";
+
+function segarkanPendaftaran() {
+  segarkan();
+  revalidatePath("/tim/pendaftaran");
+}
+
+/** Galat RPC keputusan → balasan; pesan dari database sudah berbahasa pengguna. */
+function gagalKeputusan(error: { code?: string; message: string }) {
+  return error.code === "42501"
+    ? gagal(HANYA_PENGELOLA, "izin")
+    : gagal(error.message, "validasi");
+}
+
+async function pengelolaAktif(): Promise<Pengguna | ReturnType<typeof gagal>> {
+  const pengguna = await sesiSaatIni();
+  if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");
+  if (!bolehKelolaAnggota(pengguna)) return gagal(HANYA_PENGELOLA, "izin");
+  return pengguna;
+}
+
+/** Setujui sebagai ANGGOTA BARU: profil dibuat dengan id akun Google-nya. */
+export async function setujuiPendaftaranBaru(
+  pendaftaranId: string,
+  statusAwal: StatusAwal,
+  input: MasukanAnggota,
+): Promise<Hasil> {
+  const salah = periksa(input) ?? periksaAtasan(input);
+  if (salah) return gagal(salah, "validasi");
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const pengguna = await pengelolaAktif();
+  if ("ok" in pengguna) return pengguna;
+
+  const sebab = await sebabAtasanAnggotaBaru(pengguna, input);
+  if (sebab) return gagal(sebab, "validasi");
+
+  const sb = await klienServer();
+  const { error } = await sb.rpc("setujui_pendaftaran_baru", {
+    p_id: pendaftaranId,
+    p_status_awal: statusAwal,
+    p_nama: input.nama.trim(),
+    p_role: input.role,
+    p_jabatan: input.jabatan.trim(),
+    p_unit: await idUnit(input.unitKode),
+    p_departemen: input.departemenId,
+    p_program: input.programId,
+    p_atasan: input.role === "CEO" ? null : (input.atasanId ?? null),
+  });
+  if (error) return gagalKeputusan(error);
+
+  segarkanPendaftaran();
+  return sukses(
+    undefined,
+    `${input.nama.trim()} disetujui. Ia langsung bisa memakai K-Space setelah membuka ulang halaman.`,
+  );
+}
+
+/**
+ * Setujui dengan MENYAMBUNGKAN ke profil yang sudah ada (jalur C).
+ * Database menolak profil nonaktif, profil yang sudah punya akun login,
+ * dan email Google yang sudah dipakai profil lain.
+ */
+export async function sambungkanPendaftaran(
+  pendaftaranId: string,
+  statusAwal: StatusAwal,
+  profilId: string,
+): Promise<Hasil> {
+  if (!profilId) return gagal("Pilih profil yang akan disambungkan.", "validasi");
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const pengguna = await pengelolaAktif();
+  if ("ok" in pengguna) return pengguna;
+
+  const sb = await klienServer();
+  const { error } = await sb.rpc("sambungkan_pendaftaran", {
+    p_id: pendaftaranId,
+    p_status_awal: statusAwal,
+    p_profil: profilId,
+  });
+  if (error) return gagalKeputusan(error);
+
+  segarkanPendaftaran();
+  return sukses(
+    undefined,
+    "Akun Google tersambung ke profilnya. Riwayatnya tetap utuh.",
+  );
+}
+
+/** Tolak pendaftaran; alasan wajib (BR-07). */
+export async function tolakPendaftaran(
+  pendaftaranId: string,
+  alasan: string,
+): Promise<Hasil> {
+  const salah = periksaAlasanTolak(alasan);
+  if (salah) return gagal(salah, "validasi");
+  if (modeData() === "demo") return BALASAN_DEMO;
+
+  const pengguna = await pengelolaAktif();
+  if ("ok" in pengguna) return pengguna;
+
+  const sb = await klienServer();
+  const { error } = await sb.rpc("tolak_pendaftaran", {
+    p_id: pendaftaranId,
+    p_alasan: alasan.trim(),
+  });
+  if (error) return gagalKeputusan(error);
+
+  segarkanPendaftaran();
+  return sukses(undefined, "Pendaftaran ditolak.");
 }
