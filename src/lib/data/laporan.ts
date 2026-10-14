@@ -324,13 +324,12 @@ export async function riwayatLaporan(
           departemen: ((akun?.unit ?? l.unit) as KodeUnit) ?? null,
           pelaporNama: l.user,
           gmv: l.gmv,
-          // Meniru `komisi_laporan()` (0210): CEO/Manager semua, Staff
-          // laporannya sendiri, peran lain tidak sama sekali.
-          komisi:
-            bolehLihatKomisiSemua(pengguna.role) ||
-            (pengguna.role === "Staff" && l.user === pengguna.nama)
-              ? (l.komisi ?? null)
-              : null,
+          // Mode demo tidak punya tabel akses lihat komisi (0212): selain
+          // CEO/Manager tidak melihat komisi sama sekali.
+          komisi: bolehLihatKomisiSemua(pengguna.role)
+            ? (l.komisi ?? null)
+            : null,
+          komisiTerlihat: bolehLihatKomisiSemua(pengguna.role),
           jumlahUpload: l.jumlah_upload ?? null,
           gmvLive: null,
           jamLive: null,
@@ -370,19 +369,22 @@ export async function riwayatLaporan(
   }
 
   return baris.map((b) => ({
-    ...bentukLaporan(b, sasaran, komisi.get(b.id) ?? null),
+    ...bentukLaporan(b, sasaran, komisi),
     jumlahRevisi: jumlahRevisi.get(b.id) ?? 0,
   }));
 }
 
 /**
  * Komisi laporan yang boleh dilihat pengguna ini — satu-satunya jalan
- * membacanya sejak kolomnya dikunci (0210). CEO/Manager menerima semua,
- * Staff laporannya sendiri, peran lain tidak menerima apa pun: komisi
- * laporan yang tidak dikembalikan tampil seperti tidak diisi.
+ * membacanya sejak kolomnya dikunci (0210). CEO/Manager menerima semua;
+ * yang lain hanya akun dalam akses lihat komisinya (0212). Laporan yang
+ * tidak ada di peta berarti komisinya TIDAK BOLEH ditampilkan; yang ada
+ * dengan nilai null berarti memang belum diisi (laporan lama).
  */
-async function komisiLaporan(ids: string[]): Promise<Map<string, number>> {
-  const peta = new Map<string, number>();
+async function komisiLaporan(
+  ids: string[],
+): Promise<Map<string, number | null>> {
+  const peta = new Map<string, number | null>();
   if (ids.length === 0) return peta;
   const sb = await klienServer();
   const { data, error } = await sb.rpc("komisi_laporan", { p_ids: ids });
@@ -393,7 +395,7 @@ async function komisiLaporan(ids: string[]): Promise<Map<string, number>> {
     return peta;
   }
   for (const k of data ?? []) {
-    if (k.komisi !== null) peta.set(k.report_id, Number(k.komisi));
+    peta.set(k.report_id, k.komisi === null ? null : Number(k.komisi));
   }
   return peta;
 }
@@ -408,7 +410,7 @@ async function komisiLaporan(ids: string[]): Promise<Map<string, number>> {
 function bentukLaporan(
   b: BarisLaporan,
   sasaran: SasaranLaporan[],
-  komisi: number | null,
+  komisi: ReadonlyMap<string, number | null>,
 ): Omit<LaporanHarian, "jumlahRevisi"> {
   return {
     id: b.id,
@@ -419,7 +421,8 @@ function bentukLaporan(
     departemen: b.akun_unit_kode ?? b.unit_kode,
     pelaporNama: b.pelapor_nama ?? "—",
     gmv: Number(b.gmv),
-    komisi,
+    komisi: komisi.get(b.id) ?? null,
+    komisiTerlihat: komisi.has(b.id),
     jumlahUpload: b.jumlah_upload,
     gmvLive: b.gmv_live === null ? null : Number(b.gmv_live),
     jamLive: b.jam_live === null ? null : Number(b.jam_live),
@@ -715,7 +718,7 @@ export async function ambilLaporan(
   ]);
 
   const laporan: LaporanHarian = {
-    ...bentukLaporan(b, sasaran, komisi.get(id) ?? null),
+    ...bentukLaporan(b, sasaran, komisi),
     jumlahRevisi: jejak.length,
   };
 

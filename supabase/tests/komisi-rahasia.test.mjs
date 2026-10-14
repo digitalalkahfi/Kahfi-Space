@@ -156,14 +156,14 @@ uji("komisi_laporan: CEO & Manager membaca semua", async () => {
   }
 });
 
-uji("AC5: Staff membaca komisi laporannya sendiri, bukan milik Staff lain", async () => {
+uji("AC5/K5: pelapor tanpa akses lihat tidak membaca komisi laporannya sendiri", async () => {
+  // Sejak 0212 tidak ada jalur khusus "laporan sendiri": mengisi ≠ melihat.
   const rian = await id("Rian Hidayat");
   const milikRian = await laporanMilik("Rian Hidayat");
-  const milikNabila = await laporanMilik("Nabila Putri");
   const { rows } = await sebagai(db, rian, "select report_id from komisi_laporan($1)", [
-    [milikRian, milikNabila],
+    [milikRian],
   ]);
-  harusSama(rows.map((r) => r.report_id), [milikRian]);
+  harusSama(rows.length, 0);
 });
 
 uji("Leader, Co-Leader, Finance: komisi_laporan selalu kosong", async () => {
@@ -197,15 +197,17 @@ uji("AC5: Leader yang mengisi komisi akunnya sendiri tidak melihat angkanya lagi
   );
 });
 
-uji("Staff: capaian pribadi tetap memuat komisinya", async () => {
+uji("K5: Staff tanpa akses lihat — capaian pribadinya tanpa komisi", async () => {
   const rian = await id("Rian Hidayat");
   const { rows } = await sebagai(
     db,
     rian,
-    `select count(*) filter (where komisi is not null)::int n
+    `select count(*) filter (where komisi is not null)::int n,
+            count(*) filter (where gmv > 0)::int g
      from capaian_pribadi_saya(date '2024-10-01', date '2024-10-24')`,
   );
-  harus(rows[0].n > 0, "komisi Staff hilang dari capaian");
+  harusSama(rows[0].n, 0, "komisi terlihat tanpa akses");
+  harus(rows[0].g > 0, "GMV capaian seharusnya tetap ada");
 });
 
 uji("komisi_affiliator: hanya CEO/Manager; total = jumlah komisi laporan Affiliator", async () => {
@@ -283,7 +285,7 @@ uji("E5: Leader memperbaiki komisi → jejak tercatat, tetapi ia tak melihat ang
   harus(m.rows.some((r) => Number(r.komisi_baru) === 175000), "Manager tidak melihat komisi revisi");
 });
 
-uji("BR-K5: Staff pelapor membaca komisi revisinya sendiri", async () => {
+uji("BR-K5: pelapor tanpa akses tidak membaca angka revisi komisinya; Manager membaca", async () => {
   const rian = await id("Rian Hidayat");
   const lap = await laporanMilik("Rian Hidayat");
   const gmv = await angka("select gmv::bigint n from daily_reports where id = $1", [lap]);
@@ -294,10 +296,10 @@ uji("BR-K5: Staff pelapor membaca komisi revisinya sendiri", async () => {
     [lap, gmv],
   );
   const { rows } = await sebagai(db, rian, "select komisi_baru from komisi_revisi($1)", [[lap]]);
-  harus(rows.some((r) => Number(r.komisi_baru) === 12345), "Staff tidak melihat revisinya");
-  const nabila = await id("Nabila Putri");
-  const lain = await sebagai(db, nabila, "select * from komisi_revisi($1)", [[lap]]);
-  harusSama(lain.rows.length, 0);
+  harusSama(rows.length, 0);
+  const manager = await idPeran(db, "Manager");
+  const m = await sebagai(db, manager, "select komisi_baru from komisi_revisi($1)", [[lap]]);
+  harus(m.rows.some((r) => Number(r.komisi_baru) === 12345), "Manager tidak melihat revisi");
 });
 
 // ---------------------------------------------------------------------

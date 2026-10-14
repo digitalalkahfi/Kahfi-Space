@@ -46,22 +46,19 @@ export function DialogRevisi({
   jejak,
   olehNama,
   onSimpan,
-  komisiTerlihat = true,
 }: {
   laporan: LaporanHarian;
   jejak: RevisiLaporan[];
   olehNama: string;
   onSimpan: (revisi: RevisiLaporan) => void;
-  /**
-   * false bagi Leader/Co-Leader: komisi lamanya dirahasiakan (0210), jadi
-   * komisi hanya dikirim bila ia sengaja mengisinya ulang. Tanpa itu
-   * komisi tidak diubah — memperbaiki GMV tidak boleh menimpa komisi
-   * yang tidak bisa ia lihat.
-   */
-  komisiTerlihat?: boolean;
 }) {
   const unit = laporan.departemen;
-  const komisiRahasia = punyaKolom(unit, "komisi") && !komisiTerlihat;
+  // Pelapor tanpa akses lihat untuk akun ini (0212, BR-K6, E11): angka
+  // tersimpannya tidak ditampilkan. Kotak komisi dibiarkan kosong; kosong
+  // berarti tidak diubah — memperbaiki GMV tidak boleh menimpa komisi
+  // yang tidak bisa ia lihat. Mengetik angka berarti menggantinya penuh.
+  const komisiRahasia =
+    punyaKolom(unit, "komisi") && laporan.komisiTerlihat === false;
   const [buka, setBuka] = useState(false);
   const [gmvBaru, setGmvBaru] = useState(laporan.gmv);
   const [komisiBaru, setKomisiBaru] = useState(
@@ -246,27 +243,27 @@ export function DialogRevisi({
                   >
                     Komisi diterima
                   </label>
+                  <InputGmv
+                    id="komisi-revisi"
+                    ringkas
+                    label="komisi"
+                    maks={MAKS_KOMISI}
+                    nilai={komisiBaru}
+                    onUbah={setKomisiBaru}
+                    onKosong={
+                      komisiRahasia
+                        ? (kosong) => setIsiUlangKomisi(!kosong)
+                        : undefined
+                    }
+                  />
                   {komisiRahasia ? (
-                    <label className="flex items-start gap-2 text-[11px] leading-[14px] text-muted-foreground">
-                      <input
-                        type="checkbox"
-                        checked={isiUlangKomisi}
-                        onChange={(e) => setIsiUlangKomisi(e.target.checked)}
-                        className="mt-0.5"
-                      />
-                      Angka komisi dirahasiakan. Centang hanya bila komisinya
-                      juga keliru dan perlu diisi ulang.
-                    </label>
-                  ) : null}
-                  {!komisiRahasia || isiUlangKomisi ? (
-                    <InputGmv
-                      id="komisi-revisi"
-                      ringkas
-                      label="komisi"
-                      maks={MAKS_KOMISI}
-                      nilai={komisiBaru}
-                      onUbah={setKomisiBaru}
-                    />
+                    <p
+                      id="komisi-revisi-bantuan"
+                      className="text-[11px] leading-[14px] text-pretty text-muted-foreground"
+                    >
+                      Angka tersimpan tidak ditampilkan. Ketik ulang angka yang
+                      benar bila perlu diperbaiki.
+                    </p>
                   ) : null}
                 </div>
               ) : null}

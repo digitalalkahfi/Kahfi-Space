@@ -54,13 +54,40 @@ export type PapanLead = {
 };
 
 /**
- * Lead measure bersumber komisi hanya menampilkan angka kepada CEO/
- * Manager. Database sudah menyembunyikan entrinya (policy
- * `lme_komisi_rahasia`), sehingga realisasinya terbaca nol; di sini nol
- * itu diganti tanda rahasia supaya tidak terbaca "belum tercapai".
+ * Lead measure bersumber komisi yang angkanya terlihat pengguna ini:
+ * semua bagi CEO/Manager; bagi yang lain hanya bila akses lihat
+ * komisinya mencakup seluruh akun lead measure itu
+ * (`lead_komisi_terlihat`, 0212).
  */
-function rahasiakanKomisi<T extends PapanLead>(m: T, pengguna: Pengguna): T {
-  if (m.sumberLaporan !== "komisi" || bolehLihatKomisiSemua(pengguna.role)) {
+async function leadKomisiTerlihat(
+  pengguna: Pengguna,
+): Promise<"semua" | Set<string>> {
+  if (bolehLihatKomisiSemua(pengguna.role)) return "semua";
+  if (modeData() === "demo") return new Set();
+  const sb = await klienServer();
+  const { data, error } = await sb.rpc("lead_komisi_terlihat_semua");
+  if (error) {
+    console.error(`Gagal memuat akses lead measure komisi: ${error.message}`);
+    return new Set();
+  }
+  return new Set((data ?? []).map((b) => b.lead_measure_id));
+}
+
+/**
+ * Database sudah menyembunyikan entri lead measure bersumber komisi yang
+ * tidak terlihat (policy `lme_komisi_rahasia`), sehingga realisasinya
+ * terbaca nol; di sini nol itu diganti tanda rahasia supaya tidak
+ * terbaca "belum tercapai".
+ */
+function rahasiakanKomisi<T extends PapanLead>(
+  m: T,
+  terlihat: "semua" | ReadonlySet<string>,
+): T {
+  if (
+    m.sumberLaporan !== "komisi" ||
+    terlihat === "semua" ||
+    terlihat.has(m.id)
+  ) {
     return m;
   }
   return {
@@ -283,15 +310,17 @@ function hitungDemo(tanggal: string) {
  * yang bukan lintas unit (migrasi 0173).
  */
 export async function ringkasanGrd(pengguna: Pengguna, tanggal: string) {
-  const hasil =
+  const [hasil, terlihat] = await Promise.all([
     modeData() === "demo"
-      ? hitungDemo(tanggal)
-      : await ringkasanGrdSupabase(tanggal);
+      ? Promise.resolve(hitungDemo(tanggal))
+      : ringkasanGrdSupabase(tanggal),
+    leadKomisiTerlihat(pengguna),
+  ]);
   return {
     ...hasil,
     papan: hasil.papan
       .filter((m) => unitKodeTerlihat(pengguna, m.unit))
-      .map((m) => rahasiakanKomisi(m, pengguna)),
+      .map((m) => rahasiakanKomisi(m, terlihat)),
     tangga: hasil.tangga.filter((t) => unitKodeTerlihat(pengguna, t.unit)),
   };
 }
@@ -380,6 +409,8 @@ export async function detailLeadMeasure(
   sampai.setUTCDate(sampai.getUTCDate() + 6);
   const akhir = sampai.toISOString().slice(0, 10);
 
+  const terlihat = await leadKomisiTerlihat(pengguna);
+
   if (modeData() === "demo") {
     const { papan } = hitungDemo(tanggal);
     const { goals, lead_measures } = dataContoh;
@@ -413,7 +444,7 @@ export async function detailLeadMeasure(
           m,
           lead_measures.find((x) => x.id === m.id),
         ),
-        pengguna,
+        terlihat,
       ),
     );
   }
@@ -468,7 +499,7 @@ export async function detailLeadMeasure(
             oleh: (e.users as unknown as { nama: string } | null)?.nama ?? "—",
           })),
       },
-      pengguna,
+      terlihat,
     ),
   );
 }

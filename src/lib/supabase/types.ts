@@ -13,11 +13,7 @@ export type StatusAktifDb = "aktif" | "nonaktif";
 
 /** Hasil `status_akses_saya()` (migrasi 0208/0209). */
 export type StatusAkses =
-  | "aktif"
-  | "nonaktif"
-  | "tanpa_profil"
-  | "menunggu"
-  | "ditolak";
+  "aktif" | "nonaktif" | "tanpa_profil" | "menunggu" | "ditolak";
 
 export type StatusLaporanDb = "terkirim" | "revisi";
 
@@ -175,6 +171,39 @@ export type BarisPendaftaranAkun = {
   profil_id: string | null;
   cara: CaraPersetujuanDb | null;
   dibuat_pada: string;
+};
+
+export type CakupanAksesKomisiDb = "pegangan" | "tertentu" | "semua";
+
+// Akses lihat komisi per orang, diatur CEO/Manager (migrasi 0212).
+/** @tabel akses_komisi */
+export type BarisAksesKomisi = {
+  user_id: string;
+  cakupan: CakupanAksesKomisiDb;
+  diberi_oleh: string | null;
+  diberi_pada: string;
+};
+
+/** @tabel akses_komisi_akun */
+export type BarisAksesKomisiAkun = {
+  user_id: string;
+  account_id: string;
+};
+
+/** Potret akses pada `riwayat_akses_komisi`; null = tidak ada akses. */
+export type PotretAksesKomisi = {
+  cakupan: CakupanAksesKomisiDb;
+  akun: { id: string; username: string }[];
+} | null;
+
+/** @tabel riwayat_akses_komisi */
+export type BarisRiwayatAksesKomisi = {
+  id: string;
+  user_id: string;
+  sebelum: PotretAksesKomisi;
+  sesudah: PotretAksesKomisi;
+  oleh: string | null;
+  pada: string;
 };
 
 /** @tabel notifications */
@@ -1305,10 +1334,29 @@ type Tabel<Baris, Rel extends readonly unknown[] = []> = {
 export type Database = {
   public: {
     Tables: {
+      akses_komisi: Tabel<
+        BarisAksesKomisi,
+        [
+          Relasi<"akses_komisi_user_id_fkey", "user_id", "users">,
+          Relasi<"akses_komisi_diberi_oleh_fkey", "diberi_oleh", "users">,
+        ]
+      >;
+      akses_komisi_akun: Tabel<
+        BarisAksesKomisiAkun,
+        [Relasi<"akses_komisi_akun_account_id_fkey", "account_id", "accounts">]
+      >;
+      riwayat_akses_komisi: Tabel<
+        BarisRiwayatAksesKomisi,
+        [Relasi<"riwayat_akses_komisi_oleh_fkey", "oleh", "users">]
+      >;
       pendaftaran_akun: Tabel<
         BarisPendaftaranAkun,
         [
-          Relasi<"pendaftaran_akun_diputuskan_oleh_fkey", "diputuskan_oleh", "users">,
+          Relasi<
+            "pendaftaran_akun_diputuskan_oleh_fkey",
+            "diputuskan_oleh",
+            "users"
+          >,
           Relasi<"pendaftaran_akun_profil_id_fkey", "profil_id", "users">,
         ]
       >;
@@ -2816,6 +2864,36 @@ export type Database = {
        * sendiri, peran lain tidak menerima baris apa pun.
        */
       boleh_lihat_komisi: { Args: Record<string, never>; Returns: boolean };
+      /** Akun Affiliator yang komisinya terlihat pemanggil (0212). */
+      akun_komisi_terlihat: {
+        Args: Record<string, never>;
+        Returns: { account_id: string }[];
+      };
+      /** Komisi per akun per hari, hanya akun yang terlihat (0212). */
+      komisi_akun: {
+        Args: { p_dari: string; p_sampai: string; p_account?: string | null };
+        Returns: {
+          account_id: string;
+          tanggal: string;
+          komisi: number;
+          laporan: number;
+          berkomisi: number;
+        }[];
+      };
+      /** Lead measure bersumber komisi yang angkanya terlihat (0212). */
+      lead_komisi_terlihat_semua: {
+        Args: Record<string, never>;
+        Returns: { lead_measure_id: string }[];
+      };
+      /** Hanya CEO/Manager; p_cakupan null = cabut (0212). */
+      atur_akses_komisi: {
+        Args: {
+          p_user: string;
+          p_cakupan: CakupanAksesKomisiDb | null;
+          p_akun?: string[] | null;
+        };
+        Returns: undefined;
+      };
       komisi_laporan: {
         Args: { p_ids: string[] };
         Returns: { report_id: string; komisi: number | null }[];

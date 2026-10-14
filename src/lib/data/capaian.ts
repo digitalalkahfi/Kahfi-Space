@@ -3,6 +3,8 @@
 import "server-only";
 
 import { modeData } from "@/lib/supabase/config";
+import { akunKomisiTerlihat } from "@/lib/data/akses-komisi";
+import { komisiAkunTerlihat } from "@/lib/komisi";
 import { klienServer } from "@/lib/supabase/server";
 import { dataContoh } from "@/lib/data/contoh";
 import { targetHarianGrd } from "@/lib/goal";
@@ -94,10 +96,15 @@ export async function capaianPribadi(
   // ditampilkan tanpa target — bukan dengan target nol, yang akan
   // terbaca sebagai "sudah tercapai".
   //
-  // Komisi bersifat rahasia (0210, K5): hanya Staff yang melihat komisi
-  // laporannya sendiri. Leader dan Co-Leader tidak — termasuk miliknya —
-  // jadi angkanya tidak ditampilkan sama sekali, bukan ditampilkan nol.
-  if (kolom.includes("komisi") && pengguna.role === "Staff") {
+  // Komisi bersifat rahasia (K5): ditampilkan hanya bila akses lihat
+  // komisinya (0212) mencakup akun yang ia pegang. Tanpa akses, angkanya
+  // tidak ditampilkan sama sekali — bukan ditampilkan nol. Database juga
+  // hanya mengembalikan komisi akun yang terlihat.
+  const terlihat = await akunKomisiTerlihat(pengguna);
+  const komisiTerlihat = [...akunSendiri].some((id) =>
+    komisiAkunTerlihat(terlihat, id),
+  );
+  if (kolom.includes("komisi") && komisiTerlihat) {
     angka.push({
       kunci: "komisi",
       label: LABEL_KOLOM.komisi,

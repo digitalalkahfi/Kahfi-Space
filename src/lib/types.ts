@@ -244,6 +244,12 @@ export type LaporanHarian = {
   gmv: number;
   /** Kolom departemen Affiliator; null bagi departemen yang tak memakainya. */
   komisi: number | null;
+  /**
+   * Komisi laporan ini boleh dilihat pengguna yang sedang membuka (0212).
+   * false: `komisi` selalu null dan tidak berarti "belum diisi" — angka
+   * tersimpannya memang tidak ditampilkan kepadanya.
+   */
+  komisiTerlihat?: boolean;
   jumlahUpload: number | null;
   /** Bagian GMV dari LIVE dan lama LIVE (jam); null bila tidak LIVE. */
   gmvLive: number | null;

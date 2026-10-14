@@ -107,7 +107,7 @@ export function FormLaporan({
   absenTerbuka,
   onTerkirim,
   coSampel = {},
-  komisiTerlihat = true,
+  sasaranKomisiTerlihat = [],
 }: {
   sasaran: SasaranLaporan[];
   /** Tanggal yang sedang dilapor: kemarin, atau tanggal susulan. */
@@ -130,11 +130,12 @@ export function FormLaporan({
    */
   coSampel?: Record<string, number>;
   /**
-   * false bagi Leader/Co-Leader: mereka mengisi komisi, tetapi setelah
-   * terkirim angkanya tidak ditampilkan lagi di mana pun (K5) —
-   * termasuk di ringkasan "terkirim" di form ini.
+   * Kunci sasaran yang komisinya boleh ia lihat (0212). Pelapor mengisi
+   * komisi semua akun Affiliator-nya, tetapi setelah terkirim angkanya
+   * hanya ditampilkan lagi — termasuk di ringkasan "terkirim" di form
+   * ini — untuk akun dalam akses lihatnya (K5).
    */
-  komisiTerlihat?: boolean;
+  sasaranKomisiTerlihat?: string[];
 }) {
   // Yang terkirim dari layar ini ikut dihitung walau halaman belum
   // dimuat ulang, supaya pemilih langsung berpindah ke sasaran berikutnya.
@@ -222,7 +223,7 @@ export function FormLaporan({
     setTerakhir({
       label: aktif ? labelSasaran(aktif) : "",
       gmv: bersih.gmv,
-      komisi: komisiTerlihat ? bersih.komisi : null,
+      komisi: sasaranKomisiTerlihat.includes(dipilih) ? bersih.komisi : null,
       jumlahUpload: bersih.jumlahUpload,
       kurangUpload:
         statusTerkirim(bersih.jumlahUpload, minimum) === "kurang"

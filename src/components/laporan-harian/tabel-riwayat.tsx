@@ -53,12 +53,9 @@ type AngkaLaporan = {
 export function TabelRiwayat({
   riwayat,
   olehNama,
-  komisiTerlihat = true,
 }: {
   riwayat: LaporanHarian[];
   olehNama: string;
-  /** false bagi Leader/Co-Leader — lihat `DialogRevisi` (0210). */
-  komisiTerlihat?: boolean;
 }) {
   const [saringan, setSaringan] = useState(SEMUA);
   // Penyaring kedua, berdiri sendiri dari pilihan akun: Leader biasanya
@@ -103,7 +100,14 @@ export function TabelRiwayat({
 
   // Kolom departemen hanya ditampilkan bila memang ada isinya di daftar
   // yang sedang dilihat — Leader MCN tidak perlu dua kolom kosong.
-  const adaKomisi = riwayat.some((r) => angkaKini(r).komisi !== null);
+  // Kolom komisi hanya ada bila setidaknya satu laporan di daftar ini
+  // boleh dilihat komisinya (0212). Tanpa akses, kolom dan "Total
+  // komisi" tidak tampil sama sekali — bukan nol, bukan "—".
+  const adaKomisi = riwayat.some(
+    (r) =>
+      r.komisiTerlihat !== false &&
+      (angkaKini(r).komisi !== null || r.departemen === "affiliator"),
+  );
   const adaUpload = riwayat.some((r) => angkaKini(r).jumlahUpload !== null);
   // Kolom "Min." menyusul kolom upload, dan hanya bila ada akun berlevel
   // di daftar ini — unit MCN & TAP tidak punya batas minimum sama sekali.
@@ -163,11 +167,15 @@ export function TabelRiwayat({
       ambil: (r) => Number(rasioCapaian(gmvKini(r), r.target).toFixed(1)),
       lebar: 12,
     },
-    {
-      judul: "Komisi (Rp)",
-      ambil: (r) => angkaKini(r).komisi ?? "",
-      lebar: 16,
-    },
+    ...(adaKomisi
+      ? [
+          {
+            judul: "Komisi (Rp)",
+            ambil: (r: LaporanHarian) => angkaKini(r).komisi ?? "",
+            lebar: 16,
+          },
+        ]
+      : []),
     {
       judul: "Jumlah upload",
       ambil: (r) => angkaKini(r).jumlahUpload ?? "",
@@ -386,7 +394,8 @@ export function TabelRiwayat({
                     </TableCell>
                     {adaKomisi ? (
                       <TableCell className="tabular text-right whitespace-nowrap">
-                        {angka.komisi === null ? (
+                        {r.komisiTerlihat === false ? null : angka.komisi ===
+                          null ? (
                           <span className="text-muted-foreground">—</span>
                         ) : (
                           rupiahRingkas(angka.komisi)
@@ -450,7 +459,6 @@ export function TabelRiwayat({
                           jejak={jejak}
                           olehNama={olehNama}
                           onSimpan={simpanRevisi}
-                          komisiTerlihat={komisiTerlihat}
                         />
                       </div>
                     </TableCell>
@@ -561,7 +569,6 @@ export function TabelRiwayat({
                     jejak={jejak}
                     olehNama={olehNama}
                     onSimpan={simpanRevisi}
-                    komisiTerlihat={komisiTerlihat}
                   />
                 </div>
               </div>

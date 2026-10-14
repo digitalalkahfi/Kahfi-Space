@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/layout/app-shell";
-import { bolehLihatKomisiSendiri } from "@/lib/komisi";
+import { komisiAkunTerlihat } from "@/lib/komisi";
+import { akunKomisiTerlihat } from "@/lib/data/akses-komisi";
 import { PanelLaporan } from "@/components/laporan-harian/panel-laporan";
 import { tanggalPanjang } from "@/lib/format";
 import { absensiHariIni } from "@/lib/data/absensi";
@@ -75,6 +76,8 @@ export default async function LaporanHarianPage({
     kalenderLaporan(bulanDari(tanggal), hariIni, sasaranHariData, mulaiPer),
   ]);
   // Sasaran yang baru terdaftar sesudah tanggal itu tidak ditagih.
+  // Akun yang komisinya boleh ia lihat kembali sesudah terkirim (0212).
+  const terlihat = await akunKomisiTerlihat(pengguna);
   const sasaran = sasaranTanggal.filter((s) => {
     const mulai = mulaiPer[kunciSasaranLaporan(s)];
     return !mulai || mulai <= tanggal;
@@ -128,7 +131,11 @@ export default async function LaporanHarianPage({
           lokasi={lokasi}
           sudahLaporAwal={absen.sudahLapor}
           coSampel={coSampel}
-          komisiTerlihat={bolehLihatKomisiSendiri(pengguna.role)}
+          sasaranKomisiTerlihat={sasaran.flatMap((x) =>
+            x.jenis === "akun" && komisiAkunTerlihat(terlihat, x.akun.id)
+              ? [`akun:${x.akun.id}`]
+              : [],
+          )}
         />
       </div>
     </AppShell>

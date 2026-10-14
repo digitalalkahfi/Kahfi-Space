@@ -400,6 +400,17 @@ function BarisAkun({
           <span className="block text-[11px] leading-[14px] text-muted-foreground">
             GMV periode
           </span>
+          {/* Hanya bila akses lihat komisi mencakup akun ini (0212). */}
+          {akun.komisiPeriode !== null ? (
+            <>
+              <span className="mt-1 block text-[13px] leading-[18px] font-semibold">
+                {rupiahRingkas(akun.komisiPeriode)}
+              </span>
+              <span className="block text-[11px] leading-[14px] text-muted-foreground">
+                Komisi periode
+              </span>
+            </>
+          ) : null}
         </span>
       </div>
 

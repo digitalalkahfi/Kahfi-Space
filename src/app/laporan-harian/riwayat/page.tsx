@@ -10,7 +10,6 @@ import { riwayatLaporan } from "@/lib/data/laporan";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
 import { hariIniWib } from "@/lib/format";
-import { bolehLihatKomisiSendiri } from "@/lib/komisi";
 
 export const metadata: Metadata = {
   title: "Riwayat Laporan — K-Space V2",
@@ -47,11 +46,7 @@ export default async function RiwayatPage({
           </p>
         </div>
 
-        <TabelRiwayat
-          riwayat={riwayat}
-          olehNama={pengguna.nama}
-          komisiTerlihat={bolehLihatKomisiSendiri(pengguna.role)}
-        />
+        <TabelRiwayat riwayat={riwayat} olehNama={pengguna.nama} />
       </div>
     </AppShell>
   );
