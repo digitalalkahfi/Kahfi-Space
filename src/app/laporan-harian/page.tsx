@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { bolehLihatKomisiSendiri } from "@/lib/komisi";
 import { PanelLaporan } from "@/components/laporan-harian/panel-laporan";
 import { tanggalPanjang } from "@/lib/format";
 import { absensiHariIni } from "@/lib/data/absensi";
@@ -127,6 +128,7 @@ export default async function LaporanHarianPage({
           lokasi={lokasi}
           sudahLaporAwal={absen.sudahLapor}
           coSampel={coSampel}
+          komisiTerlihat={bolehLihatKomisiSendiri(pengguna.role)}
         />
       </div>
     </AppShell>

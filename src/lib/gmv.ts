@@ -1,6 +1,11 @@
 import type { SatuanGrafik, TitikGrafik } from "@/lib/grafik";
 import type { KodeUnit } from "@/lib/types";
 import { gayaUnit } from "@/lib/unit";
+import {
+  bacaJenisPeriode,
+  rentangPeriode,
+  type RentangPeriode,
+} from "@/lib/periode-finance";
 
 /**
  * Analitik GMV harian.
@@ -610,6 +615,8 @@ export type MetrikGmv = {
   catatan?: string;
   /** Keterangan kecil di bawah angka, mis. kelengkapan data komisi. */
   keterangan?: string;
+  /** Tautan rincian di kartu, mis. "Lihat per akun" (CEO/Manager). */
+  tautan?: { href: string; label: string };
   warna: string;
   warnaLegenda: string;
   putus?: boolean;
@@ -742,4 +749,25 @@ export function metrikKomisi({
     putus: true,
     titik: keTitikGrafik(titik),
   };
+}
+
+/**
+ * Rentang periode dasbor GMV dari parameter URL-nya (`periode`, `acuan`,
+ * `dari`, `sampai`). Dipakai dasbor GMV dan halaman Detail akun
+ * Affiliator supaya keduanya membaca periode yang sama dari URL yang sama.
+ */
+export function bacaRentangGmv(
+  params: Record<string, string | string[] | undefined>,
+  hariIni: string,
+): RentangPeriode {
+  const satu = (n: string | string[] | undefined) =>
+    Array.isArray(n) ? n[0] : n;
+  const acuanDiminta = satu(params.acuan);
+  const acuan = /^\d{4}-\d{2}-\d{2}$/.test(acuanDiminta ?? "")
+    ? acuanDiminta!
+    : hariIni;
+  return rentangPeriode(bacaJenisPeriode(satu(params.periode)), acuan, {
+    dari: satu(params.dari),
+    sampai: satu(params.sampai),
+  });
 }

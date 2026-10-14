@@ -19,7 +19,9 @@ import {
   seriUnitHarian,
 } from "@/lib/data/gmv";
 import { komisiAffiliatorHarian, type KomisiHarian } from "@/lib/data/komisi";
+import { bolehLihatKomisiSemua } from "@/lib/komisi";
 import {
+  bacaRentangGmv,
   bandingkan,
   kelompokkanPerUnit,
   kelompokkanSeri,
@@ -37,9 +39,7 @@ import {
 } from "@/lib/gmv";
 import { PilihRentangPeriode } from "@/components/shared/pilih-rentang-periode";
 import {
-  bacaJenisPeriode,
   hariDalamRentang,
-  rentangPeriode,
   rentangSebelumnya,
   type RentangPeriode,
 } from "@/lib/periode-finance";
@@ -77,21 +77,24 @@ export default async function GmvPage({ searchParams }: PageProps<"/gmv">) {
     modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib(),
   );
 
-  const satu = (n: string | string[] | undefined) =>
-    Array.isArray(n) ? n[0] : n;
-  const acuanDiminta = satu(params.acuan);
-  const acuan = /^\d{4}-\d{2}-\d{2}$/.test(acuanDiminta ?? "")
-    ? acuanDiminta!
-    : hariIni;
-
   // Filter periode dan rentang kustomnya memakai modul yang sama dengan
   // dasbor Finance (lib/periode-finance.ts): "mingguan" harus berarti
   // pekan yang sama persis di kedua dasbor, kalau tidak dua halaman
   // akan menyebut angka berbeda untuk rentang yang orang kira sama.
-  const rentang = rentangPeriode(bacaJenisPeriode(params.periode), acuan, {
-    dari: satu(params.dari),
-    sampai: satu(params.sampai),
-  });
+  // `bacaRentangGmv` dipakai juga halaman Detail akun Affiliator.
+  const rentang = bacaRentangGmv(params, hariIni);
+
+  // Detail per akun mengikuti periode yang sedang dipilih (§4.4).
+  const kueri = new URLSearchParams();
+  for (const k of ["periode", "acuan", "dari", "sampai", "persona"]) {
+    const v = params[k];
+    if (typeof v === "string") kueri.set(k, v);
+  }
+  const tautanAffiliator = bolehLihatKomisiSemua(pengguna.role)
+    ? kueri.size > 0
+      ? `/gmv/affiliator?${kueri}`
+      : "/gmv/affiliator"
+    : null;
 
   return (
     <AppShell pengguna={pengguna} halaman="Analitik GMV">
@@ -122,6 +125,7 @@ export default async function GmvPage({ searchParams }: PageProps<"/gmv">) {
             pengguna={pengguna}
             rentang={rentang}
             hariIni={hariIni}
+            tautanAffiliator={tautanAffiliator}
           />
         </Suspense>
       </div>
@@ -134,10 +138,13 @@ async function IsiAnalitik({
   pengguna,
   rentang,
   hariIni,
+  tautanAffiliator,
 }: {
   pengguna: Pengguna;
   rentang: RentangPeriode;
   hariIni: string;
+  /** Hanya CEO/Manager (K4): kartu Affiliator bisa dibuka per akun. */
+  tautanAffiliator: string | null;
 }) {
   const penuh = rentangSebelumnya(rentang);
   // Pembandingnya dipotong sepanjang hari yang sudah berjalan: pada
@@ -208,6 +215,16 @@ async function IsiAnalitik({
     },
     sebelumLini: totalPerUnit(unitHarianSebelum),
   });
+
+  if (tautanAffiliator) {
+    const kartuAffiliator = metrik.find((m) => m.kunci === "affiliator");
+    if (kartuAffiliator) {
+      kartuAffiliator.tautan = {
+        href: tautanAffiliator,
+        label: "Lihat per akun",
+      };
+    }
+  }
 
   if (komisi) {
     // Garis komisi berbagi sumbu dengan GMV: titik harian GMV dipakai

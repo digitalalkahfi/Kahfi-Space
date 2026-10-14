@@ -107,6 +107,7 @@ export function FormLaporan({
   absenTerbuka,
   onTerkirim,
   coSampel = {},
+  komisiTerlihat = true,
 }: {
   sasaran: SasaranLaporan[];
   /** Tanggal yang sedang dilapor: kemarin, atau tanggal susulan. */
@@ -128,6 +129,12 @@ export function FormLaporan({
    * pemindaian sampel. Read-only: pelapor tidak pernah mengetiknya sendiri.
    */
   coSampel?: Record<string, number>;
+  /**
+   * false bagi Leader/Co-Leader: mereka mengisi komisi, tetapi setelah
+   * terkirim angkanya tidak ditampilkan lagi di mana pun (K5) —
+   * termasuk di ringkasan "terkirim" di form ini.
+   */
+  komisiTerlihat?: boolean;
 }) {
   // Yang terkirim dari layar ini ikut dihitung walau halaman belum
   // dimuat ulang, supaya pemilih langsung berpindah ke sasaran berikutnya.
@@ -215,7 +222,7 @@ export function FormLaporan({
     setTerakhir({
       label: aktif ? labelSasaran(aktif) : "",
       gmv: bersih.gmv,
-      komisi: bersih.komisi,
+      komisi: komisiTerlihat ? bersih.komisi : null,
       jumlahUpload: bersih.jumlahUpload,
       kurangUpload:
         statusTerkirim(bersih.jumlahUpload, minimum) === "kurang"
@@ -320,8 +327,8 @@ export function FormLaporan({
       {susulan ? (
         <p className="mx-5 rounded-2xl bg-warn-fill px-4 py-2.5 text-[11px] leading-[14px] text-pretty text-warn-text">
           Laporan ini dicatat untuk {tanggalLaporanPanjang(tanggal)}, bukan
-          kemarin, dan tidak membuka Absen Pulang. Isi angka GMV hari itu
-          sesuai Partner Center.
+          kemarin, dan tidak membuka Absen Pulang. Isi angka GMV hari itu sesuai
+          Partner Center.
         </p>
       ) : (
         <p className="mx-5 rounded-2xl bg-info-fill px-4 py-2.5 text-[11px] leading-[14px] text-pretty text-info-text">
