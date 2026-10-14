@@ -64,9 +64,16 @@ uji(
   async () => {
     const alasan =
       "Migrasi K-Space lama: angka disamakan dengan rekap GMV harian sistem lama.";
-    const hasil = await satu(
-      `select gmv, status from perbaiki_laporan_harian($1, 18300000, $2, null, null, null)`,
+    // Sejak 0210 fungsinya mengembalikan id, bukan baris (barisnya memuat
+    // komisi yang tidak boleh dibaca pemanggil).
+    const id = await satu(
+      `select perbaiki_laporan_harian($1, 18300000, $2, null, null, null) as id`,
       [idLaporan, alasan],
+    );
+    harusSama(id.id, idLaporan);
+    const hasil = await satu(
+      `select gmv, status from daily_reports where id = $1`,
+      [idLaporan],
     );
     harusSama(Number(hasil.gmv), 18300000);
     harusSama(hasil.status, "revisi");

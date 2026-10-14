@@ -4,6 +4,7 @@ import "server-only";
 import { unitKodeTerlihat } from "@/lib/akses";
 
 import { modeData } from "@/lib/supabase/config";
+import { bolehLihatKomisiSemua } from "@/lib/komisi";
 import { klienServer } from "@/lib/supabase/server";
 import { dataContoh } from "@/lib/data/contoh";
 import { keputusanWrm } from "@/lib/wrm";
@@ -45,7 +46,32 @@ export type PapanLead = {
    * null berarti masih diisi manual di papan.
    */
   sumberLaporan: BarisLeadMeasure["sumber_laporan"];
+  /**
+   * Bersumber komisi dan pengguna ini bukan CEO/Manager: angkanya
+   * dirahasiakan (0210, K5) dan layar menampilkan "Rahasia".
+   */
+  rahasia?: boolean;
 };
+
+/**
+ * Lead measure bersumber komisi hanya menampilkan angka kepada CEO/
+ * Manager. Database sudah menyembunyikan entrinya (policy
+ * `lme_komisi_rahasia`), sehingga realisasinya terbaca nol; di sini nol
+ * itu diganti tanda rahasia supaya tidak terbaca "belum tercapai".
+ */
+function rahasiakanKomisi<T extends PapanLead>(m: T, pengguna: Pengguna): T {
+  if (m.sumberLaporan !== "komisi" || bolehLihatKomisiSemua(pengguna.role)) {
+    return m;
+  }
+  return {
+    ...m,
+    realisasi: 0,
+    rasio: 0,
+    pendukung: null,
+    rahasia: true,
+    ...("entri" in m ? { entri: [] } : {}),
+  };
+}
 
 export type AnakTangga = {
   id: string;
@@ -263,7 +289,9 @@ export async function ringkasanGrd(pengguna: Pengguna, tanggal: string) {
       : await ringkasanGrdSupabase(tanggal);
   return {
     ...hasil,
-    papan: hasil.papan.filter((m) => unitKodeTerlihat(pengguna, m.unit)),
+    papan: hasil.papan
+      .filter((m) => unitKodeTerlihat(pengguna, m.unit))
+      .map((m) => rahasiakanKomisi(m, pengguna)),
     tangga: hasil.tangga.filter((t) => unitKodeTerlihat(pengguna, t.unit)),
   };
 }
@@ -356,8 +384,10 @@ export async function detailLeadMeasure(
     const { papan } = hitungDemo(tanggal);
     const { goals, lead_measures } = dataContoh;
 
-    return papan.map((m) => {
-      const sumber = lead_measures.find((x) => x.id === m.id);
+    const detailDemo = (
+      m: PapanLead,
+      sumber: (typeof lead_measures)[number] | undefined,
+    ): LeadDetail => {
       const goal = goals.find(
         (g) => g.unit === sumber?.unit && g.level === "leader",
       );
@@ -375,7 +405,17 @@ export async function detailLeadMeasure(
             oleh: e.oleh ?? "Laporan harian",
           })),
       };
-    });
+    };
+
+    return papan.map((m) =>
+      rahasiakanKomisi(
+        detailDemo(
+          m,
+          lead_measures.find((x) => x.id === m.id),
+        ),
+        pengguna,
+      ),
+    );
   }
 
   const sb = await klienServer();
@@ -403,29 +443,34 @@ export async function detailLeadMeasure(
     ]),
   );
 
-  return (papanData ?? []).map((m) => ({
-    id: m.lead_id,
-    judul: m.judul,
-    satuan: m.satuan,
-    unit: m.unit_kode,
-    realisasi: Number(m.realisasi),
-    target: Number(m.target),
-    rasio: Number(m.rasio),
-    pendukung: m.pendukung === null ? null : Number(m.pendukung),
-    labelPendukung: m.label_pendukung,
-    sumberLaporan: m.sumber_laporan,
-    goalJudul: judulGoal.get(m.lead_id) ?? "",
-    entri: (entriData ?? [])
-      .filter((e) => e.lead_measure_id === m.lead_id)
-      .map((e) => ({
-        tanggal: e.tanggal,
-        nilai: Number(e.nilai),
-        nilaiPendukung:
-          e.nilai_pendukung === null ? null : Number(e.nilai_pendukung),
-        catatan: e.catatan,
-        oleh: (e.users as unknown as { nama: string } | null)?.nama ?? "—",
-      })),
-  }));
+  return (papanData ?? []).map((m) =>
+    rahasiakanKomisi<LeadDetail>(
+      {
+        id: m.lead_id,
+        judul: m.judul,
+        satuan: m.satuan,
+        unit: m.unit_kode,
+        realisasi: Number(m.realisasi),
+        target: Number(m.target),
+        rasio: Number(m.rasio),
+        pendukung: m.pendukung === null ? null : Number(m.pendukung),
+        labelPendukung: m.label_pendukung,
+        sumberLaporan: m.sumber_laporan,
+        goalJudul: judulGoal.get(m.lead_id) ?? "",
+        entri: (entriData ?? [])
+          .filter((e) => e.lead_measure_id === m.lead_id)
+          .map((e) => ({
+            tanggal: e.tanggal,
+            nilai: Number(e.nilai),
+            nilaiPendukung:
+              e.nilai_pendukung === null ? null : Number(e.nilai_pendukung),
+            catatan: e.catatan,
+            oleh: (e.users as unknown as { nama: string } | null)?.nama ?? "—",
+          })),
+      },
+      pengguna,
+    ),
+  );
 }
 
 export type LaporanMingguan = {

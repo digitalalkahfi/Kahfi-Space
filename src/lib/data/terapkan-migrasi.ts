@@ -1155,15 +1155,23 @@ async function samakanLaporan(
   target: Partial<KolomLaporan>,
   alasan: string,
 ): Promise<{ id: string } | { galat: string } | null> {
-  const { data: ada, error } = await sb
-    .from("daily_reports")
-    .select(
-      "id, user_id, tanggal, account_id, unit_id, gmv, komisi, jumlah_upload, catatan",
-    )
-    .eq("id", id)
-    .maybeSingle();
+  // Komisi tidak bisa di-SELECT langsung sejak 0210; pemigrasi (CEO/
+  // Manager) membacanya lewat `komisi_laporan`.
+  const [{ data: baris, error }, { data: komisiAda, error: galatKomisi }] =
+    await Promise.all([
+      sb
+        .from("daily_reports")
+        .select(
+          "id, user_id, tanggal, account_id, unit_id, gmv, jumlah_upload, catatan",
+        )
+        .eq("id", id)
+        .maybeSingle(),
+      sb.rpc("komisi_laporan", { p_ids: [id] }),
+    ]);
   if (error) return { galat: error.message };
-  if (!ada) return null;
+  if (galatKomisi) return { galat: galatKomisi.message };
+  if (!baris) return null;
+  const ada = { ...baris, komisi: komisiAda?.[0]?.komisi ?? null };
 
   const teks: Record<string, string | null> = {};
   for (const k of ["user_id", "tanggal", "account_id", "unit_id"] as const) {

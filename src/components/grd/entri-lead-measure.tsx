@@ -75,27 +75,38 @@ export function EntriLeadMeasure({
         <span
           className={cn(
             "tabular shrink-0 rounded-full px-3 py-1 text-[13px] leading-[18px] font-bold",
-            kuat ? "bg-ok-fill text-ok-text" : "bg-warn-fill text-warn-text",
+            lead.rahasia
+              ? "bg-muted text-muted-foreground"
+              : kuat
+                ? "bg-ok-fill text-ok-text"
+                : "bg-warn-fill text-warn-text",
           )}
         >
-          {persen(lead.rasio)}
+          {lead.rahasia ? "Rahasia" : persen(lead.rasio)}
         </span>
       </div>
 
-      <div className="space-y-1.5 px-5">
-        <BarCapaian
-          rasio={lead.rasio}
-          label={`Capaian ${lead.judul}`}
-          warna={kuat ? "bg-ok" : "bg-warn"}
-        />
-        <p className="tabular text-[11px] leading-[14px] text-muted-foreground">
-          {ANGKA.format(lead.realisasi)} dari {ANGKA.format(lead.target)}{" "}
-          {lead.satuan} pekan ini
-          {lead.labelPendukung && lead.pendukung !== null
-            ? ` · ${lead.labelPendukung}: ${ANGKA.format(lead.pendukung)}`
-            : ""}
+      {lead.rahasia ? (
+        <p className="px-5 text-[13px] leading-[18px] text-pretty text-muted-foreground">
+          Lead measure ini bersumber komisi. Angka komisi hanya terlihat oleh
+          CEO dan Manager.
         </p>
-      </div>
+      ) : (
+        <div className="space-y-1.5 px-5">
+          <BarCapaian
+            rasio={lead.rasio}
+            label={`Capaian ${lead.judul}`}
+            warna={kuat ? "bg-ok" : "bg-warn"}
+          />
+          <p className="tabular text-[11px] leading-[14px] text-muted-foreground">
+            {ANGKA.format(lead.realisasi)} dari {ANGKA.format(lead.target)}{" "}
+            {lead.satuan} pekan ini
+            {lead.labelPendukung && lead.pendukung !== null
+              ? ` · ${lead.labelPendukung}: ${ANGKA.format(lead.pendukung)}`
+              : ""}
+          </p>
+        </div>
+      )}
 
       {lead.entri.length > 0 ? (
         <ul className="flex flex-wrap gap-1.5 px-5">

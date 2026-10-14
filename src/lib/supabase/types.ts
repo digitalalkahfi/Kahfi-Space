@@ -891,7 +891,7 @@ export type BarisRiwayatLaporanMinimum = {
   account_id: string | null;
   unit_id: string | null;
   gmv: number;
-  komisi: number | null;
+  // Tanpa komisi sejak 0210 — komisi dibaca lewat `komisi_laporan()`.
   jumlah_upload: number | null;
   catatan: string;
   status: StatusLaporanDb;
@@ -2807,7 +2807,55 @@ export type Database = {
           p_gmv_live?: number | null;
           p_jam_live?: number | null;
         };
-        Returns: BarisDailyReport;
+        /** Id laporan; barisnya tidak dikembalikan karena memuat komisi (0210). */
+        Returns: string;
+      };
+      /**
+       * Pintu resmi membaca komisi (0210). Kolomnya sendiri tidak bisa
+       * di-SELECT klien: CEO/Manager membaca semua, Staff laporannya
+       * sendiri, peran lain tidak menerima baris apa pun.
+       */
+      boleh_lihat_komisi: { Args: Record<string, never>; Returns: boolean };
+      komisi_laporan: {
+        Args: { p_ids: string[] };
+        Returns: { report_id: string; komisi: number | null }[];
+      };
+      komisi_laporan_saya: {
+        Args: { p_dari: string; p_sampai: string };
+        Returns: {
+          report_id: string;
+          tanggal: string;
+          account_id: string | null;
+          komisi: number | null;
+        }[];
+      };
+      komisi_revisi: {
+        Args: { p_report_ids: string[] };
+        Returns: {
+          revisi_id: string;
+          komisi_lama: number | null;
+          komisi_baru: number | null;
+        }[];
+      };
+      /** Hanya CEO/Manager; selain itu galat 42501. */
+      komisi_affiliator: {
+        Args: { p_dari: string; p_sampai: string };
+        Returns: {
+          /** null = laporan tingkat unit Affiliator (tanpa akun). */
+          account_id: string | null;
+          komisi: number;
+          laporan: number;
+          berkomisi: number;
+        }[];
+      };
+      komisi_affiliator_harian: {
+        Args: { p_dari: string; p_sampai: string };
+        Returns: {
+          tanggal: string;
+          komisi: number;
+          laporan: number;
+          berkomisi: number;
+        }[];
       };
       /** Migrasi 0119 — verifikasi nomor oleh CEO/Manager. */
       verifikasi_kontak: {

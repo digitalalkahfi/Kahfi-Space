@@ -46,16 +46,28 @@ export function DialogRevisi({
   jejak,
   olehNama,
   onSimpan,
+  komisiTerlihat = true,
 }: {
   laporan: LaporanHarian;
   jejak: RevisiLaporan[];
   olehNama: string;
   onSimpan: (revisi: RevisiLaporan) => void;
+  /**
+   * false bagi Leader/Co-Leader: komisi lamanya dirahasiakan (0210), jadi
+   * komisi hanya dikirim bila ia sengaja mengisinya ulang. Tanpa itu
+   * komisi tidak diubah — memperbaiki GMV tidak boleh menimpa komisi
+   * yang tidak bisa ia lihat.
+   */
+  komisiTerlihat?: boolean;
 }) {
   const unit = laporan.departemen;
+  const komisiRahasia = punyaKolom(unit, "komisi") && !komisiTerlihat;
   const [buka, setBuka] = useState(false);
   const [gmvBaru, setGmvBaru] = useState(laporan.gmv);
-  const [komisiBaru, setKomisiBaru] = useState(laporan.komisi ?? 0);
+  const [komisiBaru, setKomisiBaru] = useState(
+    komisiRahasia ? 0 : (laporan.komisi ?? 0),
+  );
+  const [isiUlangKomisi, setIsiUlangKomisi] = useState(false);
   const [uploadBaru, setUploadBaru] = useState(laporan.jumlahUpload ?? 0);
   const [liveBaru, setLiveBaru] = useState(laporan.gmvLive ?? 0);
   const [jamBaru, setJamBaru] = useState(
@@ -70,7 +82,7 @@ export function DialogRevisi({
   const jamDibaca = bacaAngka(jamBaru);
   const isiBaru = bersihkanIsi(unit, {
     gmv: gmvBaru,
-    komisi: komisiBaru,
+    komisi: komisiRahasia && !isiUlangKomisi ? null : komisiBaru,
     jumlahUpload: uploadBaru,
     gmvLive: laporan.gmvLive === null && liveBaru === 0 ? null : liveBaru,
     jamLive: jamDibaca,
@@ -80,9 +92,12 @@ export function DialogRevisi({
   // benar-benar berubah, dan alasannya.
   const ubahLive = (isiBaru.gmvLive ?? null) !== laporan.gmvLive;
   const ubahJam = (isiBaru.jamLive ?? null) !== laporan.jamLive;
+  const ubahKomisi = komisiRahasia
+    ? isiUlangKomisi
+    : isiBaru.komisi !== (laporan.komisi ?? null);
   const berubah =
     isiBaru.gmv !== laporan.gmv ||
-    isiBaru.komisi !== (laporan.komisi ?? null) ||
+    ubahKomisi ||
     isiBaru.jumlahUpload !== (laporan.jumlahUpload ?? null) ||
     ubahLive ||
     ubahJam;
@@ -112,7 +127,6 @@ export function DialogRevisi({
         return;
       }
 
-      const ubahKomisi = isiBaru.komisi !== (laporan.komisi ?? null);
       const ubahUpload =
         isiBaru.jumlahUpload !== (laporan.jumlahUpload ?? null);
       onSimpan({
@@ -120,8 +134,10 @@ export function DialogRevisi({
         reportId: laporan.id,
         gmvLama: laporan.gmv,
         gmvBaru: isiBaru.gmv,
-        komisiLama: ubahKomisi ? (laporan.komisi ?? 0) : null,
-        komisiBaru: ubahKomisi ? isiBaru.komisi : null,
+        // Komisi rahasia tidak dicatat di jejak lokal: angkanya memang
+        // tidak boleh tampil bagi pengirimnya.
+        komisiLama: ubahKomisi && !komisiRahasia ? (laporan.komisi ?? 0) : null,
+        komisiBaru: ubahKomisi && !komisiRahasia ? isiBaru.komisi : null,
         uploadLama: ubahUpload ? (laporan.jumlahUpload ?? 0) : null,
         uploadBaru: ubahUpload ? isiBaru.jumlahUpload : null,
         liveLama: ubahLive ? (laporan.gmvLive ?? 0) : null,
@@ -144,7 +160,8 @@ export function DialogRevisi({
         setBuka(v);
         if (v) {
           setGmvBaru(laporan.gmv);
-          setKomisiBaru(laporan.komisi ?? 0);
+          setKomisiBaru(komisiRahasia ? 0 : (laporan.komisi ?? 0));
+          setIsiUlangKomisi(false);
           setUploadBaru(laporan.jumlahUpload ?? 0);
           setLiveBaru(laporan.gmvLive ?? 0);
           setJamBaru(laporan.jamLive === null ? "" : angka(laporan.jamLive));
@@ -229,14 +246,28 @@ export function DialogRevisi({
                   >
                     Komisi diterima
                   </label>
-                  <InputGmv
-                    id="komisi-revisi"
-                    ringkas
-                    label="komisi"
-                    maks={MAKS_KOMISI}
-                    nilai={komisiBaru}
-                    onUbah={setKomisiBaru}
-                  />
+                  {komisiRahasia ? (
+                    <label className="flex items-start gap-2 text-[11px] leading-[14px] text-muted-foreground">
+                      <input
+                        type="checkbox"
+                        checked={isiUlangKomisi}
+                        onChange={(e) => setIsiUlangKomisi(e.target.checked)}
+                        className="mt-0.5"
+                      />
+                      Angka komisi dirahasiakan. Centang hanya bila komisinya
+                      juga keliru dan perlu diisi ulang.
+                    </label>
+                  ) : null}
+                  {!komisiRahasia || isiUlangKomisi ? (
+                    <InputGmv
+                      id="komisi-revisi"
+                      ringkas
+                      label="komisi"
+                      maks={MAKS_KOMISI}
+                      nilai={komisiBaru}
+                      onUbah={setKomisiBaru}
+                    />
+                  ) : null}
                 </div>
               ) : null}
 

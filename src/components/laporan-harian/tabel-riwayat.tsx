@@ -53,9 +53,12 @@ type AngkaLaporan = {
 export function TabelRiwayat({
   riwayat,
   olehNama,
+  komisiTerlihat = true,
 }: {
   riwayat: LaporanHarian[];
   olehNama: string;
+  /** false bagi Leader/Co-Leader — lihat `DialogRevisi` (0210). */
+  komisiTerlihat?: boolean;
 }) {
   const [saringan, setSaringan] = useState(SEMUA);
   // Penyaring kedua, berdiri sendiri dari pilihan akun: Leader biasanya
@@ -447,6 +450,7 @@ export function TabelRiwayat({
                           jejak={jejak}
                           olehNama={olehNama}
                           onSimpan={simpanRevisi}
+                          komisiTerlihat={komisiTerlihat}
                         />
                       </div>
                     </TableCell>
@@ -557,6 +561,7 @@ export function TabelRiwayat({
                     jejak={jejak}
                     olehNama={olehNama}
                     onSimpan={simpanRevisi}
+                    komisiTerlihat={komisiTerlihat}
                   />
                 </div>
               </div>

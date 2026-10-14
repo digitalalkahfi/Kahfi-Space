@@ -93,7 +93,11 @@ export async function capaianPribadi(
   // Komisi, upload, dan CO sampel belum punya anak tangga di GRD, jadi
   // ditampilkan tanpa target — bukan dengan target nol, yang akan
   // terbaca sebagai "sudah tercapai".
-  if (kolom.includes("komisi")) {
+  //
+  // Komisi bersifat rahasia (0210, K5): hanya Staff yang melihat komisi
+  // laporannya sendiri. Leader dan Co-Leader tidak — termasuk miliknya —
+  // jadi angkanya tidak ditampilkan sama sekali, bukan ditampilkan nol.
+  if (kolom.includes("komisi") && pengguna.role === "Staff") {
     angka.push({
       kunci: "komisi",
       label: LABEL_KOLOM.komisi,
