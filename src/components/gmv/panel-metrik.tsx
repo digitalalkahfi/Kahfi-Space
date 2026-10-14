@@ -204,6 +204,11 @@ export function PanelMetrik({
                   </span>
 
                   {tren ? <Tren metrik={m} pembanding={pembanding} /> : null}
+                  {m.keterangan ? (
+                    <span className="text-[11px] leading-[14px] text-pretty text-muted-foreground">
+                      {m.keterangan}
+                    </span>
+                  ) : null}
                 </button>
               </li>
             );

@@ -18,12 +18,14 @@ import {
   seriGmvHarian,
   seriUnitHarian,
 } from "@/lib/data/gmv";
+import { komisiAffiliatorHarian, type KomisiHarian } from "@/lib/data/komisi";
 import {
   bandingkan,
   kelompokkanPerUnit,
   kelompokkanSeri,
   granularitasUntuk,
   metrikGmv,
+  metrikKomisi,
   selisihHari,
   LABEL_GRANULARITAS,
   potongSepadan,
@@ -156,6 +158,8 @@ async function IsiAnalitik({
     agregatSebelum,
     unitHarian,
     unitHarianSebelum,
+    komisi,
+    komisiSebelum,
   ] = await Promise.all([
     rinci
       ? laporanGmv(pengguna, rentang.dari, rentang.sampai)
@@ -170,6 +174,10 @@ async function IsiAnalitik({
     // jadi "naik/turun" per lini dihitung dari sumber yang sama —
     // bukan ditaksir dari porsinya.
     seriUnitHarian(pengguna, sebelumnya.dari, sebelumnya.sampai),
+    // Kartu Komisi hanya untuk CEO/Manager (K3): bagi peran lain kedua
+    // panggilan ini kembali null tanpa menyentuh database.
+    komisiAffiliatorHarian(pengguna, rentang.dari, rentang.sampai),
+    komisiAffiliatorHarian(pengguna, sebelumnya.dari, sebelumnya.sampai),
   ]);
 
   const titik = baris ? seriHarian(baris) : seriDariAgregat(agregat ?? []);
@@ -200,6 +208,29 @@ async function IsiAnalitik({
     },
     sebelumLini: totalPerUnit(unitHarianSebelum),
   });
+
+  if (komisi) {
+    // Garis komisi berbagi sumbu dengan GMV: titik harian GMV dipakai
+    // sebagai kerangka, angkanya diganti komisi hari itu, lalu
+    // dikelompokkan dengan kekasaran yang sama.
+    const perHari = new Map(komisi.map((k) => [k.tanggal, k.komisi]));
+    const titikKomisi = kelompokkanSeri(
+      titik.map((t) => ({ ...t, gmv: perHari.get(t.tanggal) ?? 0 })),
+      granularitas,
+    );
+    const jumlah = (d: KomisiHarian[], ambil: (k: KomisiHarian) => number) =>
+      d.reduce((a, k) => a + ambil(k), 0);
+    const kartu = metrikKomisi({
+      titik: titikKomisi,
+      total: jumlah(komisi, (k) => k.komisi),
+      sebelumnya: jumlah(komisiSebelum ?? [], (k) => k.komisi),
+      laporan: jumlah(komisi, (k) => k.laporan),
+      berkomisi: jumlah(komisi, (k) => k.berkomisi),
+    });
+    // Di antara metrik utama dan metrik per lini.
+    const iLini = metrik.findIndex((m) => m.kelompok === "lini");
+    metrik.splice(iLini < 0 ? metrik.length : iLini, 0, kartu);
+  }
 
   if (titik.length === 0) {
     return (
