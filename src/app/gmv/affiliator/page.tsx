@@ -10,7 +10,8 @@ import { detailAkunAffiliator } from "@/lib/data/akun-affiliator";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { bolehLihatKomisiSemua } from "@/lib/komisi";
-import { bacaRentangGmv } from "@/lib/gmv";
+import { bacaRentangGmv, rentangPembanding } from "@/lib/gmv";
+import { denganPembanding } from "@/lib/akun-affiliator";
 import { tanggalDataTerakhir } from "@/lib/laporan";
 import { hariIniWib } from "@/lib/format";
 import { modeData } from "@/lib/supabase/config";
@@ -43,8 +44,14 @@ export default async function AkunAffiliatorPage({
     modeData() === "demo" ? TANGGAL_ACUAN : hariIniWib(),
   );
   const rentang = bacaRentangGmv(params, hariIni);
-  const baris =
-    (await detailAkunAffiliator(pengguna, rentang.dari, rentang.sampai)) ?? [];
+  // Pembanding naik/turun: definisi yang sama dengan kartu Metrik utama
+  // di dasbor GMV (docs/DETAIL-PER-AKUN-GRAFIK.md §4).
+  const pembanding = rentangPembanding(rentang, hariIni);
+  const [sekarang, sebelum] = await Promise.all([
+    detailAkunAffiliator(pengguna, rentang.dari, rentang.sampai),
+    detailAkunAffiliator(pengguna, pembanding.dari, pembanding.sampai),
+  ]);
+  const baris = denganPembanding(sekarang ?? [], sebelum ?? []);
 
   // Kembali ke dasbor dengan periode yang sama.
   const kembali = new URLSearchParams();
@@ -80,7 +87,15 @@ export default async function AkunAffiliatorPage({
         </div>
 
         <Reveal>
-          <TabelAkunAffiliator baris={baris} />
+          <TabelAkunAffiliator
+            baris={baris}
+            pembanding={
+              pembanding.dipotong
+                ? `${pembanding.penuh.label} (sepadan)`
+                : pembanding.penuh.label
+            }
+            kueriPeriode={kembali.toString()}
+          />
         </Reveal>
       </div>
     </AppShell>
