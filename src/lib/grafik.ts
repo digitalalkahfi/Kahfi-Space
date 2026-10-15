@@ -18,6 +18,19 @@ import { bilangan, persen, rupiahRingkas } from "@/lib/format";
 export type TitikGrafik = {
   label: string;
   nilai: number;
+  /**
+   * Titik tanpa data (mis. hari tanpa laporan): digambar sebagai celah,
+   * bukan nol, dan tidak ikut menentukan skala. `nilai`-nya diabaikan.
+   */
+  kosong?: boolean;
+  /** Keterangan titik kosong saat disorot, mis. "tidak lapor". */
+  catatan?: string;
+  /**
+   * Tandai titik kosong ini di dasar grafik (lingkaran berongga), mis.
+   * hari kerja yang tidak dilaporkan. Tanpa ini celahnya polos — untuk
+   * hari libur/izin yang memang tidak diharapkan ada laporannya.
+   */
+  tandai?: boolean;
 };
 
 export type BagianKomposisi = {
