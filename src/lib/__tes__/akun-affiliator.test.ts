@@ -3,9 +3,12 @@ import { test } from "node:test";
 import {
   barisAkunAffiliator,
   barisLaporanUnit,
+  denganPembanding,
+  perubahan,
   totalAkun,
   urutkanAkun,
 } from "@/lib/akun-affiliator";
+import { bandingkan } from "@/lib/gmv";
 import { KEPATUHAN_KOSONG } from "@/lib/batas-minimum";
 
 const akun = (
@@ -112,4 +115,72 @@ test("AC7: total GMV tabel termasuk laporan tingkat unit", () => {
   );
   baris.push(barisLaporanUnit([{ gmv: 500, upload: null }], 50));
   assert.deepEqual(totalAkun(baris), { upload: 2, gmv: 3_500, komisi: 150 });
+});
+
+// ---------------------------------------------------------------------
+// Naik/turun per akun (docs/DETAIL-PER-AKUN-GRAFIK.md §4)
+// ---------------------------------------------------------------------
+
+test("AC1: perubahan dihitung dengan bandingkan() yang sama dengan kartu Metrik utama", () => {
+  for (const [sekarang, lalu] of [
+    [1_124_000, 1_000_000],
+    [919_000, 1_000_000],
+    [5, 3],
+    [2, 7],
+  ] as const) {
+    const b = bandingkan(sekarang, lalu);
+    const p = perubahan(sekarang, lalu);
+    assert.equal(p.persen, b.persen);
+    assert.equal(p.arah, b.arah);
+  }
+  assert.equal(perubahan(1_124_000, 1_000_000).teks, "▲ 12,4%");
+  assert.equal(perubahan(919_000, 1_000_000).teks, "▼ 8,1%");
+  assert.equal(perubahan(500, 500).teks, "= 0%");
+});
+
+test("AC2: tanpa data periode lalu → Baru; keduanya 0 → —", () => {
+  assert.deepEqual(perubahan(10, 0), { arah: "baru", teks: "Baru", persen: null });
+  assert.deepEqual(perubahan(0, 0), { arah: "kosong", teks: "—", persen: null });
+});
+
+test("pembanding dipasang per id akun; akun yang tak ada di periode lalu dianggap 0", () => {
+  const sekarang = barisAkunAffiliator(
+    [akun("a", { gmvPeriode: 200 }), akun("b", { gmvPeriode: 50 })],
+    [{ accountId: "a", upload: 4, komisi: null }],
+    new Map([["a", 20]]),
+  );
+  const lalu = barisAkunAffiliator(
+    [akun("a", { gmvPeriode: 100 })],
+    [{ accountId: "a", upload: 2, komisi: null }],
+    new Map([["a", 10]]),
+  );
+  const [a, b] = denganPembanding(sekarang, lalu);
+  assert.deepEqual(a.sebelum, { gmv: 100, komisi: 10, upload: 2 });
+  assert.deepEqual(b.sebelum, { gmv: 0, komisi: 0, upload: 0 });
+});
+
+test("urut 'Turun terbanyak' menaruh penurunan GMV terdalam di atas; Baru/— di bawah", () => {
+  const baris = denganPembanding(
+    barisAkunAffiliator(
+      [
+        akun("naik", { gmvPeriode: 150 }),
+        akun("turun-dikit", { gmvPeriode: 90 }),
+        akun("turun-banyak", { gmvPeriode: 20 }),
+        akun("baru", { gmvPeriode: 10 }),
+      ],
+      [],
+    ),
+    barisAkunAffiliator(
+      [
+        akun("naik", { gmvPeriode: 100 }),
+        akun("turun-dikit", { gmvPeriode: 100 }),
+        akun("turun-banyak", { gmvPeriode: 100 }),
+      ],
+      [],
+    ),
+  );
+  assert.deepEqual(
+    urutkanAkun(baris, "perubahanGmv", "naik").map((b) => b.id),
+    ["turun-banyak", "turun-dikit", "naik", "baru"],
+  );
 });

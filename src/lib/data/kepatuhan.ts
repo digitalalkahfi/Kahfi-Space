@@ -5,6 +5,7 @@ import "server-only";
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { dataContoh, TANGGAL_ACUAN } from "@/lib/data/contoh";
+import { tanggalDataTerakhir } from "@/lib/laporan";
 import {
   rekapMinimumPerAkun,
   rekapMinimumPerOrang,
@@ -223,12 +224,15 @@ function hariAkunDemo(
   if (!akun) return null;
 
   // Hanya hari dengan jam masuk yang dinilai; izin yang sudah disetujui
-  // tidak boleh ikut menjadi pembagi.
+  // tidak boleh ikut menjadi pembagi. Hari acuan sendiri belum dinilai
+  // (H-1, sama dengan `tanggal_data_terakhir()` di 0207).
+  const batas = tanggalDataTerakhir(TANGGAL_ACUAN);
   const masuk = attendance.filter(
     (t) =>
       t.user === akun.pic &&
       t.tanggal >= dari &&
       t.tanggal <= sampai &&
+      t.tanggal <= batas &&
       Boolean(t.jam_masuk),
   );
 

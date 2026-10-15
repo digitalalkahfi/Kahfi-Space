@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { Loader2, Power, Store, UserRound } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -343,9 +344,12 @@ function BarisAkun({
 
         <div className="min-w-0 flex-1">
           <p className="flex flex-wrap items-center gap-1.5">
-            <span className="truncate text-sm leading-5 font-semibold">
+            <Link
+              href={`/akun/${akun.id}?asal=akun`}
+              className="truncate text-sm leading-5 font-semibold underline-offset-2 hover:underline"
+            >
               {akun.username}
-            </span>
+            </Link>
             {akun.program && akun.program !== "Reguler" ? (
               <span className="rounded-full bg-accentmuted-fill px-2 py-0.5 text-[10px] leading-[14px] font-semibold text-accentmuted-text">
                 {akun.program}

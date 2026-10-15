@@ -58,9 +58,15 @@ export function GrafikBanding({
     seri.every((s) => s.titik.length === panjang);
   if (!sepadan) return null;
 
-  const sisi = bagiSumbu(seri);
+  // Titik kosong (hari tanpa laporan) tidak ikut menentukan pembagian
+  // sumbu maupun skalanya: nol palsu akan menarik sumbu ke bawah.
+  const isi = seri.map((g) => ({
+    ...g,
+    titik: g.titik.filter((t) => !t.kosong),
+  }));
+  const sisi = bagiSumbu(isi);
   const nilaiSisi = (s: SisiSumbu) =>
-    seri.flatMap((g, i) => (sisi[i] === s ? g.titik.map((t) => t.nilai) : []));
+    isi.flatMap((g, i) => (sisi[i] === s ? g.titik.map((t) => t.nilai) : []));
   const skala: Record<SisiSumbu, SkalaGrafik | null> = {
     kiri: skalaGrafik(nilaiSisi("kiri")),
     kanan: sisi.includes("kanan") ? skalaGrafik(nilaiSisi("kanan")) : null,
@@ -113,8 +119,34 @@ export function GrafikBanding({
     e.preventDefault();
   };
 
+  /** Angka satu titik, atau keterangannya bila titik itu kosong. */
+  const teksTitik = (s: GarisSeri, i: number) => {
+    const t = s.titik[i];
+    return t.kosong
+      ? (t.catatan ?? "tidak ada data")
+      : teksSatuan(t.nilai, s.satuan);
+  };
+
+  /**
+   * Potongan garis yang tersambung: titik kosong memutus garisnya.
+   * Satu titik yang berdiri sendiri digambar sebagai titik kecil.
+   */
+  const potongan = (s: GarisSeri) => {
+    const hasil: number[][] = [];
+    let kini: number[] = [];
+    s.titik.forEach((t, n) => {
+      if (t.kosong) {
+        if (kini.length) hasil.push(kini);
+        kini = [];
+      } else kini.push(n);
+    });
+    if (kini.length) hasil.push(kini);
+    return hasil;
+  };
+  const adaTanda = seri.some((s) => !s.putus && s.titik.some((t) => t.tandai));
+
   const bacaan = `${label[dibaca]}: ${seri
-    .map((s) => `${s.label} ${teksSatuan(s.titik[dibaca].nilai, s.satuan)}`)
+    .map((s) => `${s.label} ${teksTitik(s, dibaca)}`)
     .join(", ")}`;
 
   /** Label satu sisi sumbu; posisinya sama untuk kiri dan kanan. */
@@ -210,36 +242,66 @@ export function GrafikBanding({
               aria-label={`${judul}, ${label[0]} sampai ${label[panjang - 1]}. ${seri
                 .map(
                   (s) =>
-                    `${s.label} dari ${teksSatuan(s.titik[0].nilai, s.satuan)} ke ${teksSatuan(s.titik[panjang - 1].nilai, s.satuan)}`,
+                    `${s.label} dari ${teksTitik(s, 0)} ke ${teksTitik(s, panjang - 1)}`,
                 )
                 .join("; ")}.`}
               className="absolute inset-0 size-full overflow-visible"
             >
-              {seri.map((s, i) => (
-                <polyline
-                  key={s.kunci}
-                  points={s.titik
-                    .map(
-                      (t, n) =>
-                        `${x(n).toFixed(2)},${y(t.nilai, sisi[i]).toFixed(2)}`,
+              {seri.flatMap((s, i) =>
+                potongan(s).map((bagian) => (
+                  <polyline
+                    key={`${s.kunci}-${bagian[0]}`}
+                    // Satu titik saja: garis nol-panjang yang ujungnya
+                    // bulat tergambar sebagai titik kecil.
+                    points={(bagian.length === 1
+                      ? [bagian[0], bagian[0]]
+                      : bagian
                     )
-                    .join(" ")}
-                  fill="none"
-                  strokeWidth={s.putus ? 1.5 : 2}
-                  strokeDasharray={s.putus ? "5 4" : undefined}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className={s.warna}
-                  vectorEffect="non-scaling-stroke"
-                />
-              ))}
+                      .map(
+                        (n) =>
+                          `${x(n).toFixed(2)},${y(s.titik[n].nilai, sisi[i]).toFixed(2)}`,
+                      )
+                      .join(" ")}
+                    fill="none"
+                    strokeWidth={bagian.length === 1 ? 4 : s.putus ? 1.5 : 2}
+                    strokeDasharray={
+                      s.putus && bagian.length > 1 ? "5 4" : undefined
+                    }
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={s.warna}
+                    vectorEffect="non-scaling-stroke"
+                  />
+                )),
+              )}
             </svg>
 
             {/* Titiknya HTML, bukan SVG: viewBox yang diregangkan
                 membuat lingkaran jadi lonjong, dan yang lonjong terbaca
                 sebagai gaya, bukan sebagai penanda. */}
+            {/* Hari kerja tanpa laporan: lingkaran berongga di dasar
+                grafik — bukan titik di nol, yang akan terbaca sebagai
+                "GMV-nya nol". */}
+            {seri.flatMap((s) =>
+              s.putus
+                ? []
+                : s.titik.flatMap((t, n) =>
+                    t.kosong && t.tandai
+                      ? [
+                          <span
+                            key={`${s.kunci}-kosong-${n}`}
+                            aria-hidden
+                            title={`${label[n]}: ${t.catatan ?? "tidak ada data"}`}
+                            style={{ left: `${x(n)}%`, bottom: 0 }}
+                            className="absolute size-2 -translate-x-1/2 translate-y-1/2 rounded-full border border-danger bg-card"
+                          />,
+                        ]
+                      : [],
+                  ),
+            )}
+
             {seri.map((s, i) =>
-              s.putus ? null : (
+              s.putus || s.titik[dibaca].kosong ? null : (
                 <span
                   key={`${s.kunci}-titik`}
                   aria-hidden
@@ -313,7 +375,7 @@ export function GrafikBanding({
             )}
             <span className="font-semibold">{s.label}</span>
             <span className="tabular text-muted-foreground">
-              {teksSatuan(s.titik[dibaca].nilai, s.satuan)}
+              {teksTitik(s, dibaca)}
             </span>
             {/* Tanpa penanda ini, dua garis pada dua skala terbaca
                 seolah-olah sama besar. */}
@@ -324,6 +386,15 @@ export function GrafikBanding({
             ) : null}
           </li>
         ))}
+        {adaTanda ? (
+          <li className="flex items-center gap-1.5 text-[11px] leading-[14px] text-muted-foreground">
+            <span
+              aria-hidden
+              className="size-2 shrink-0 rounded-full border border-danger bg-card"
+            />
+            tidak lapor
+          </li>
+        ) : null}
       </ul>
 
       <p className="sr-only" aria-live="polite">

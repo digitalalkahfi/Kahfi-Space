@@ -4,6 +4,7 @@ import { gayaUnit } from "@/lib/unit";
 import {
   bacaJenisPeriode,
   rentangPeriode,
+  rentangSebelumnya,
   type RentangPeriode,
 } from "@/lib/periode-finance";
 
@@ -770,4 +771,28 @@ export function bacaRentangGmv(
     dari: satu(params.dari),
     sampai: satu(params.sampai),
   });
+}
+
+/**
+ * Periode pembanding "vs periode lalu" — satu-satunya definisinya.
+ *
+ * Periode sebelumnya yang sepanjang ini, dipotong sepanjang hari yang
+ * sudah berjalan (`potongSepadan`): pada tanggal 8, "bulan ini" yang
+ * baru 7 hari tidak dibandingkan dengan "bulan lalu" yang 30 hari penuh.
+ * Dipakai kartu Metrik utama, tabel per akun Affiliator, dan halaman
+ * detail akun, supaya ketiganya tidak pernah menghitung berbeda.
+ */
+export function rentangPembanding(
+  rentang: RentangPeriode,
+  hariIni: string,
+): RentangPeriode & { penuh: RentangPeriode; dipotong: boolean } {
+  const penuh = rentangSebelumnya(rentang);
+  const sepadan = potongSepadan(penuh, rentang, hariIni);
+  return {
+    ...penuh,
+    dari: sepadan.dari,
+    sampai: sepadan.sampai,
+    penuh,
+    dipotong: sepadan.dipotong,
+  };
 }

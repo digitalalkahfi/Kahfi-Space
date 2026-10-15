@@ -3,6 +3,7 @@
  * (docs/KOMISI-DETAIL-AKUN-AFFILIATOR.md §4.4). Tanpa impor server.
  */
 import type { Kepatuhan } from "@/lib/batas-minimum";
+import { bandingkan } from "@/lib/gmv";
 
 /** Bagian `AkunKelola` yang dipakai tabel ini. */
 type AkunDasar = {
@@ -42,7 +43,76 @@ export type BarisAkunAffiliator = {
   komisi: number;
   /** Akun aktif tanpa satu laporan pun di periode ini (ditandai, §4.4). */
   tanpaLaporan: boolean;
+  /**
+   * Angka periode pembanding (`rentangPembanding`), untuk penanda
+   * naik/turun (docs/DETAIL-PER-AKUN-GRAFIK.md §4). Kosong sampai
+   * digabung lewat `denganPembanding`.
+   */
+  sebelum?: { gmv: number; komisi: number; upload: number };
 };
+
+/**
+ * Perubahan satu angka terhadap periode lalu, siap tampil (§4).
+ *
+ * Dihitung dengan `bandingkan()` yang sama dengan kartu Metrik utama,
+ * supaya dua halaman tidak pernah berbeda cara hitungnya.
+ *
+ *   periode lalu > 0          → ▲ x% / ▼ x% / = 0%
+ *   lalu 0, sekarang > 0      → Baru
+ *   keduanya 0                → —
+ */
+export type Perubahan = {
+  arah: "naik" | "turun" | "tetap" | "baru" | "kosong";
+  teks: string;
+  /** Persen perubahan; null bila tidak ada pembanding (Baru / —). */
+  persen: number | null;
+};
+
+const PERSEN = new Intl.NumberFormat("id-ID", {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
+
+export function perubahan(sekarang: number, sebelumnya: number): Perubahan {
+  const b = bandingkan(sekarang, sebelumnya);
+  if (b.tanpaPembanding) {
+    return sekarang > 0
+      ? { arah: "baru", teks: "Baru", persen: null }
+      : { arah: "kosong", teks: "—", persen: null };
+  }
+  if (b.arah === "tetap") return { arah: "tetap", teks: "= 0%", persen: 0 };
+  const angka = PERSEN.format(Math.abs(b.persen));
+  return b.arah === "naik"
+    ? { arah: "naik", teks: `▲ ${angka}%`, persen: b.persen }
+    : { arah: "turun", teks: `▼ ${angka}%`, persen: b.persen };
+}
+
+/**
+ * Pasang angka periode pembanding ke tiap baris (per id akun). Akun
+ * yang tidak ada di periode pembanding dianggap 0 di sana.
+ */
+export function denganPembanding(
+  baris: readonly BarisAkunAffiliator[],
+  sebelum: readonly BarisAkunAffiliator[],
+): BarisAkunAffiliator[] {
+  const per = new Map(sebelum.map((b) => [b.id, b]));
+  return baris.map((b) => {
+    const s = per.get(b.id);
+    return {
+      ...b,
+      sebelum: {
+        gmv: s?.gmv ?? 0,
+        komisi: s?.komisi ?? 0,
+        upload: s?.totalUpload ?? 0,
+      },
+    };
+  });
+}
+
+/** Perubahan GMV sebuah baris dalam persen; null bila tanpa pembanding. */
+export function perubahanGmv(b: BarisAkunAffiliator): number | null {
+  return b.sebelum ? perubahan(b.gmv, b.sebelum.gmv).persen : null;
+}
 
 /**
  * Gabungkan akun dengan laporannya.
@@ -133,7 +203,9 @@ export type KolomUrut =
   | "kepatuhan"
   | "gmv"
   | "komisi"
-  | "hariLapor";
+  | "hariLapor"
+  /** "Turun terbanyak": perubahan GMV terhadap periode lalu (§4). */
+  | "perubahanGmv";
 
 /** Urutan bawaan: GMV terbesar (§4.4). */
 export const URUT_BAWAAN: { kolom: KolomUrut; arah: "naik" | "turun" } = {
@@ -151,9 +223,11 @@ export function urutkanAkun(
   arah: "naik" | "turun",
 ): BarisAkunAffiliator[] {
   const kali = arah === "naik" ? 1 : -1;
+  const nilai = (b: BarisAkunAffiliator) =>
+    kolom === "perubahanGmv" ? perubahanGmv(b) : b[kolom];
   return [...baris].sort((a, b) => {
-    const x = a[kolom];
-    const y = b[kolom];
+    const x = nilai(a);
+    const y = nilai(b);
     if (x === null && y === null) return a.username.localeCompare(b.username);
     if (x === null) return 1;
     if (y === null) return -1;

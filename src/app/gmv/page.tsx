@@ -28,9 +28,9 @@ import {
   granularitasUntuk,
   metrikGmv,
   metrikKomisi,
+  rentangPembanding,
   selisihHari,
   LABEL_GRANULARITAS,
-  potongSepadan,
   ringkasGmv,
   seriDariAgregat,
   seriHarian,
@@ -38,11 +38,7 @@ import {
   totalPerUnit,
 } from "@/lib/gmv";
 import { PilihRentangPeriode } from "@/components/shared/pilih-rentang-periode";
-import {
-  hariDalamRentang,
-  rentangSebelumnya,
-  type RentangPeriode,
-} from "@/lib/periode-finance";
+import { hariDalamRentang, type RentangPeriode } from "@/lib/periode-finance";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import { modeData } from "@/lib/supabase/config";
@@ -146,12 +142,13 @@ async function IsiAnalitik({
   /** Hanya CEO/Manager (K4): kartu Affiliator bisa dibuka per akun. */
   tautanAffiliator: string | null;
 }) {
-  const penuh = rentangSebelumnya(rentang);
   // Pembandingnya dipotong sepanjang hari yang sudah berjalan: pada
   // tanggal 8, "bulan ini" yang baru 7 hari tidak dibandingkan dengan
-  // "bulan lalu" yang 30 hari penuh.
-  const sepadan = potongSepadan(penuh, rentang, hariIni);
-  const sebelumnya = { ...penuh, dari: sepadan.dari, sampai: sepadan.sampai };
+  // "bulan lalu" yang 30 hari penuh (`rentangPembanding`, dipakai juga
+  // tabel per akun dan halaman detail akun).
+  const sebelumnya = rentangPembanding(rentang, hariIni);
+  const { penuh } = sebelumnya;
+  const sepadan = sebelumnya;
   // Rentang pendek menarik laporannya satu per satu supaya tiap hari
   // bisa dibuka sampai ke pelapornya. Rentang panjang tidak: basis data
   // yang menjumlahkan (RPC gmv_harian, migrasi 0110), dan tabel
