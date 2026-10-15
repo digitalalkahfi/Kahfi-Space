@@ -1,6 +1,11 @@
 import type { SatuanGrafik, TitikGrafik } from "@/lib/grafik";
 import type { KodeUnit } from "@/lib/types";
 import { gayaUnit } from "@/lib/unit";
+import {
+  bacaJenisPeriode,
+  rentangPeriode,
+  type RentangPeriode,
+} from "@/lib/periode-finance";
 
 /**
  * Analitik GMV harian.
@@ -608,6 +613,10 @@ export type MetrikGmv = {
   sebelumnya: number | null;
   /** Pengganti angka perbandingan saat `sebelumnya` null. */
   catatan?: string;
+  /** Keterangan kecil di bawah angka, mis. kelengkapan data komisi. */
+  keterangan?: string;
+  /** Tautan rincian di kartu, mis. "Lihat per akun" (CEO/Manager). */
+  tautan?: { href: string; label: string };
   warna: string;
   warnaLegenda: string;
   putus?: boolean;
@@ -701,4 +710,64 @@ export function metrikGmv({
   }
 
   return daftar;
+}
+
+/**
+ * Kartu "Komisi Affiliator" (docs/KOMISI-DETAIL-AKUN-AFFILIATOR.md §4.3).
+ *
+ * `titik` adalah titik grafik GMV yang SUDAH dikelompokkan, dengan `gmv`
+ * diganti komisi hari/pekan/bulan itu — supaya garisnya berbagi sumbu
+ * dengan metrik lain. Keterangan "x dari y laporan berisi komisi" ada
+ * karena laporan sebelum komisi wajib boleh kosong: CEO perlu tahu
+ * angkanya belum lengkap, bukan mengira omzet turun.
+ */
+export function metrikKomisi({
+  titik,
+  total,
+  sebelumnya,
+  laporan,
+  berkomisi,
+}: {
+  titik: TitikGmv[];
+  total: number;
+  sebelumnya: number;
+  laporan: number;
+  berkomisi: number;
+}): MetrikGmv {
+  return {
+    kunci: "komisi",
+    nama: "Komisi Affiliator",
+    kelompok: "utama",
+    satuan: "rupiah",
+    nilai: total,
+    sebelumnya,
+    keterangan: `${berkomisi} dari ${laporan} laporan berisi komisi`,
+    // Warna Affiliator, garis putus-putus: komisi milik lini Affiliator
+    // tetapi bukan GMV-nya.
+    warna: gayaUnit.affiliator.garis,
+    warnaLegenda: gayaUnit.affiliator.bar,
+    putus: true,
+    titik: keTitikGrafik(titik),
+  };
+}
+
+/**
+ * Rentang periode dasbor GMV dari parameter URL-nya (`periode`, `acuan`,
+ * `dari`, `sampai`). Dipakai dasbor GMV dan halaman Detail akun
+ * Affiliator supaya keduanya membaca periode yang sama dari URL yang sama.
+ */
+export function bacaRentangGmv(
+  params: Record<string, string | string[] | undefined>,
+  hariIni: string,
+): RentangPeriode {
+  const satu = (n: string | string[] | undefined) =>
+    Array.isArray(n) ? n[0] : n;
+  const acuanDiminta = satu(params.acuan);
+  const acuan = /^\d{4}-\d{2}-\d{2}$/.test(acuanDiminta ?? "")
+    ? acuanDiminta!
+    : hariIni;
+  return rentangPeriode(bacaJenisPeriode(satu(params.periode)), acuan, {
+    dari: satu(params.dari),
+    sampai: satu(params.sampai),
+  });
 }

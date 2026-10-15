@@ -53,9 +53,18 @@ export function DialogRevisi({
   onSimpan: (revisi: RevisiLaporan) => void;
 }) {
   const unit = laporan.departemen;
+  // Pelapor tanpa akses lihat untuk akun ini (0212, BR-K6, E11): angka
+  // tersimpannya tidak ditampilkan. Kotak komisi dibiarkan kosong; kosong
+  // berarti tidak diubah — memperbaiki GMV tidak boleh menimpa komisi
+  // yang tidak bisa ia lihat. Mengetik angka berarti menggantinya penuh.
+  const komisiRahasia =
+    punyaKolom(unit, "komisi") && laporan.komisiTerlihat === false;
   const [buka, setBuka] = useState(false);
   const [gmvBaru, setGmvBaru] = useState(laporan.gmv);
-  const [komisiBaru, setKomisiBaru] = useState(laporan.komisi ?? 0);
+  const [komisiBaru, setKomisiBaru] = useState(
+    komisiRahasia ? 0 : (laporan.komisi ?? 0),
+  );
+  const [isiUlangKomisi, setIsiUlangKomisi] = useState(false);
   const [uploadBaru, setUploadBaru] = useState(laporan.jumlahUpload ?? 0);
   const [liveBaru, setLiveBaru] = useState(laporan.gmvLive ?? 0);
   const [jamBaru, setJamBaru] = useState(
@@ -70,7 +79,7 @@ export function DialogRevisi({
   const jamDibaca = bacaAngka(jamBaru);
   const isiBaru = bersihkanIsi(unit, {
     gmv: gmvBaru,
-    komisi: komisiBaru,
+    komisi: komisiRahasia && !isiUlangKomisi ? null : komisiBaru,
     jumlahUpload: uploadBaru,
     gmvLive: laporan.gmvLive === null && liveBaru === 0 ? null : liveBaru,
     jamLive: jamDibaca,
@@ -80,9 +89,12 @@ export function DialogRevisi({
   // benar-benar berubah, dan alasannya.
   const ubahLive = (isiBaru.gmvLive ?? null) !== laporan.gmvLive;
   const ubahJam = (isiBaru.jamLive ?? null) !== laporan.jamLive;
+  const ubahKomisi = komisiRahasia
+    ? isiUlangKomisi
+    : isiBaru.komisi !== (laporan.komisi ?? null);
   const berubah =
     isiBaru.gmv !== laporan.gmv ||
-    isiBaru.komisi !== (laporan.komisi ?? null) ||
+    ubahKomisi ||
     isiBaru.jumlahUpload !== (laporan.jumlahUpload ?? null) ||
     ubahLive ||
     ubahJam;
@@ -112,7 +124,6 @@ export function DialogRevisi({
         return;
       }
 
-      const ubahKomisi = isiBaru.komisi !== (laporan.komisi ?? null);
       const ubahUpload =
         isiBaru.jumlahUpload !== (laporan.jumlahUpload ?? null);
       onSimpan({
@@ -120,8 +131,10 @@ export function DialogRevisi({
         reportId: laporan.id,
         gmvLama: laporan.gmv,
         gmvBaru: isiBaru.gmv,
-        komisiLama: ubahKomisi ? (laporan.komisi ?? 0) : null,
-        komisiBaru: ubahKomisi ? isiBaru.komisi : null,
+        // Komisi rahasia tidak dicatat di jejak lokal: angkanya memang
+        // tidak boleh tampil bagi pengirimnya.
+        komisiLama: ubahKomisi && !komisiRahasia ? (laporan.komisi ?? 0) : null,
+        komisiBaru: ubahKomisi && !komisiRahasia ? isiBaru.komisi : null,
         uploadLama: ubahUpload ? (laporan.jumlahUpload ?? 0) : null,
         uploadBaru: ubahUpload ? isiBaru.jumlahUpload : null,
         liveLama: ubahLive ? (laporan.gmvLive ?? 0) : null,
@@ -144,7 +157,8 @@ export function DialogRevisi({
         setBuka(v);
         if (v) {
           setGmvBaru(laporan.gmv);
-          setKomisiBaru(laporan.komisi ?? 0);
+          setKomisiBaru(komisiRahasia ? 0 : (laporan.komisi ?? 0));
+          setIsiUlangKomisi(false);
           setUploadBaru(laporan.jumlahUpload ?? 0);
           setLiveBaru(laporan.gmvLive ?? 0);
           setJamBaru(laporan.jamLive === null ? "" : angka(laporan.jamLive));
@@ -236,7 +250,21 @@ export function DialogRevisi({
                     maks={MAKS_KOMISI}
                     nilai={komisiBaru}
                     onUbah={setKomisiBaru}
+                    onKosong={
+                      komisiRahasia
+                        ? (kosong) => setIsiUlangKomisi(!kosong)
+                        : undefined
+                    }
                   />
+                  {komisiRahasia ? (
+                    <p
+                      id="komisi-revisi-bantuan"
+                      className="text-[11px] leading-[14px] text-pretty text-muted-foreground"
+                    >
+                      Angka tersimpan tidak ditampilkan. Ketik ulang angka yang
+                      benar bila perlu diperbaiki.
+                    </p>
+                  ) : null}
                 </div>
               ) : null}
 

@@ -7,6 +7,7 @@ import { menuPendampingTerlihat, menuUtama } from "@/lib/navigasi";
 import { MenuLainnya, type IsiLaci } from "@/components/layout/menu-lainnya";
 import { useSusunan } from "@/components/tampilan/penyedia-tampilan";
 import { pecahDock } from "@/lib/tampilan";
+import { LencanaMenu } from "@/components/layout/lencana-menu";
 
 /**
  * Dock navigasi bawah — hanya tampil di mobile (DESIGN.md §Layout).
@@ -18,9 +19,12 @@ import { pecahDock } from "@/lib/tampilan";
 export function BottomNav({
   bolehKeuangan,
   bolehMigrasi,
+  lencana = {},
 }: {
   bolehKeuangan: boolean;
   bolehMigrasi: boolean;
+  /** Angka di pojok ikon menu, per href. */
+  lencana?: Record<string, number>;
 }) {
   const pathname = usePathname();
   const urut = useSusunan("dock");
@@ -59,13 +63,14 @@ export function BottomNav({
               >
                 <span
                   className={cn(
-                    "flex h-9 w-full max-w-[3.5rem] items-center justify-center rounded-full transition-colors",
+                    "relative flex h-9 w-full max-w-[3.5rem] items-center justify-center rounded-full transition-colors",
                     aktif
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground",
                   )}
                 >
                   <Icon className="size-[18px]" strokeWidth={2} />
+                  <LencanaMenu jumlah={lencana[menu.href]} />
                 </span>
                 <span
                   className={cn(
@@ -82,7 +87,7 @@ export function BottomNav({
 
         {laci.length > 0 ? (
           <li className="flex-1">
-            <MenuLainnya menu={laci} />
+            <MenuLainnya menu={laci} lencana={lencana} />
           </li>
         ) : null}
       </ul>

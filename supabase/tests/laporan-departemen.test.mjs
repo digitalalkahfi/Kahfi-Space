@@ -126,16 +126,12 @@ uji("memindahkan laporan ke unit lain ikut diperiksa", async () => {
   );
 });
 
-uji("komisi tidak boleh melebihi GMV-nya", async () => {
-  await harusDitolak(
-    () =>
-      sebagaiAdmin(
-        db,
-        `insert into daily_reports (user_id, tanggal, account_id, gmv, komisi)
-         values ($1,$2,$3,1000000,1000001)`,
-        [U.rian, "2024-10-28", A.skincare],
-      ),
-    "komisi lebih besar dari GMV seharusnya ditolak",
+uji("komisi boleh melebihi GMV-nya sejak 0211 (komisi real bisa dari hari lain)", async () => {
+  await sebagaiAdmin(
+    db,
+    `insert into daily_reports (user_id, tanggal, account_id, gmv, komisi)
+     values ($1,$2,$3,1000000,1000001)`,
+    [U.rian, "2024-10-28", A.skincare],
   );
 });
 
@@ -354,8 +350,8 @@ uji("laporan bertanggal masa depan ditolak untuk pengguna", async () => {
       sebagai(
         db,
         U.rian,
-        `insert into daily_reports (user_id, tanggal, account_id, gmv)
-         values ($1,$2,$3,1000000)`,
+        `insert into daily_reports (user_id, tanggal, account_id, gmv, komisi)
+         values ($1,$2,$3,1000000,0)`,
         [U.rian, besokSekali, A.skincare],
       ),
     "tanggal masa depan seharusnya ditolak",

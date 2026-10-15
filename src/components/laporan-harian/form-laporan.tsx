@@ -42,6 +42,8 @@ import {
   MAKS_KOMISI,
   MAKS_UPLOAD,
   periksaIsiLaporan,
+  periksaKomisiWajib,
+  PESAN_KOMISI_WAJIB,
   punyaKolom,
   sasaranBelumDilapor,
   tanggalDataTerakhir,
@@ -105,6 +107,7 @@ export function FormLaporan({
   absenTerbuka,
   onTerkirim,
   coSampel = {},
+  sasaranKomisiTerlihat = [],
 }: {
   sasaran: SasaranLaporan[];
   /** Tanggal yang sedang dilapor: kemarin, atau tanggal susulan. */
@@ -126,6 +129,13 @@ export function FormLaporan({
    * pemindaian sampel. Read-only: pelapor tidak pernah mengetiknya sendiri.
    */
   coSampel?: Record<string, number>;
+  /**
+   * Kunci sasaran yang komisinya boleh ia lihat (0212). Pelapor mengisi
+   * komisi semua akun Affiliator-nya, tetapi setelah terkirim angkanya
+   * hanya ditampilkan lagi — termasuk di ringkasan "terkirim" di form
+   * ini — untuk akun dalam akses lihatnya (K5).
+   */
+  sasaranKomisiTerlihat?: string[];
 }) {
   // Yang terkirim dari layar ini ikut dihitung walau halaman belum
   // dimuat ulang, supaya pemilih langsung berpindah ke sasaran berikutnya.
@@ -156,6 +166,9 @@ export function FormLaporan({
   const [dipilih, setDipilih] = useState(sisa[0] ? kunciSasaran(sisa[0]) : "");
   const [nilai, setNilai] = useState(0);
   const [komisi, setKomisi] = useState(0);
+  // Komisi wajib diisi (BR-K1), dan "0" berbeda dari "belum diisi":
+  // kotak kosong berarti pelapor belum memutuskan.
+  const [komisiKosong, setKomisiKosong] = useState(true);
   const [upload, setUpload] = useState(0);
   // LIVE hanya diisi bila hari itu memang LIVE; tanpa centang, kedua
   // angkanya tidak ikut terkirim (null, bukan 0).
@@ -186,7 +199,7 @@ export function FormLaporan({
   const jamLiveAngka = bacaAngka(jamLive);
   const isi: IsiLaporan = {
     gmv: nilai,
-    komisi,
+    komisi: komisiKosong ? null : komisi,
     jumlahUpload: upload,
     gmvLive: adaLive ? gmvLive : null,
     jamLive: adaLive ? jamLiveAngka : null,
@@ -196,7 +209,8 @@ export function FormLaporan({
   // yang sempat diketik untuk akun Affiliator tidak boleh ikut saat pelapor
   // berpindah ke sasaran MCN.
   const bersih = bersihkanIsi(unit, isi);
-  const salah = periksaIsiLaporan(unit, bersih);
+  const salah =
+    periksaIsiLaporan(unit, bersih) ?? periksaKomisiWajib(unit, bersih);
   const siap = Boolean(aktif) && !terlapor.includes(dipilih) && !salah;
 
   /**
@@ -209,7 +223,7 @@ export function FormLaporan({
     setTerakhir({
       label: aktif ? labelSasaran(aktif) : "",
       gmv: bersih.gmv,
-      komisi: bersih.komisi,
+      komisi: sasaranKomisiTerlihat.includes(dipilih) ? bersih.komisi : null,
       jumlahUpload: bersih.jumlahUpload,
       kurangUpload:
         statusTerkirim(bersih.jumlahUpload, minimum) === "kurang"
@@ -219,6 +233,7 @@ export function FormLaporan({
     });
     setNilai(0);
     setKomisi(0);
+    setKomisiKosong(true);
     setUpload(0);
     setAdaLive(false);
     setGmvLive(0);
@@ -313,8 +328,8 @@ export function FormLaporan({
       {susulan ? (
         <p className="mx-5 rounded-2xl bg-warn-fill px-4 py-2.5 text-[11px] leading-[14px] text-pretty text-warn-text">
           Laporan ini dicatat untuk {tanggalLaporanPanjang(tanggal)}, bukan
-          kemarin, dan tidak membuka Absen Pulang. Isi angka GMV hari itu
-          sesuai Partner Center.
+          kemarin, dan tidak membuka Absen Pulang. Isi angka GMV hari itu sesuai
+          Partner Center.
         </p>
       ) : (
         <p className="mx-5 rounded-2xl bg-info-fill px-4 py-2.5 text-[11px] leading-[14px] text-pretty text-info-text">
@@ -382,7 +397,14 @@ export function FormLaporan({
           <PemilihSasaran
             sasaran={sasaran}
             nilai={dipilih}
-            onUbah={setDipilih}
+            onUbah={(kunci) => {
+              setDipilih(kunci);
+              // Kotak komisi dipasang ulang per sasaran (kosong), jadi
+              // angkanya juga dikosongkan: komisi akun lain tidak boleh
+              // terbawa diam-diam.
+              setKomisi(0);
+              setKomisiKosong(true);
+            }}
             sudahDilaporkan={terlapor}
           />
         </div>
@@ -474,12 +496,16 @@ export function FormLaporan({
                   Komisi diterima
                 </label>
                 <InputGmv
+                  // Dipasang ulang per sasaran supaya kotaknya ikut kosong
+                  // setelah laporan sebelumnya terkirim.
+                  key={`komisi-${dipilih}`}
                   id="komisi"
                   ringkas
                   maks={MAKS_KOMISI}
                   label="komisi"
                   nilai={komisi}
                   onUbah={setKomisi}
+                  onKosong={setKomisiKosong}
                 />
                 <p
                   id="komisi-bantuan"
@@ -487,7 +513,7 @@ export function FormLaporan({
                 >
                   {komisi > 0 && nilai > 0
                     ? `${persen(rasioCapaian(komisi, nilai))} dari GMV`
-                    : `Kosongkan kalau ${kapan} belum ada komisi.`}
+                    : PESAN_KOMISI_WAJIB}
                 </p>
               </div>
             ) : null}

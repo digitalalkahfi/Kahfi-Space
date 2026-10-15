@@ -3,6 +3,7 @@
 import "server-only";
 
 import { modeData } from "@/lib/supabase/config";
+import { bolehLihatKomisiSemua } from "@/lib/komisi";
 import { klienServer } from "@/lib/supabase/server";
 import {
   dataContoh,
@@ -251,7 +252,6 @@ type BarisLaporan = {
   account_id: string | null;
   unit_id: string | null;
   gmv: number;
-  komisi: number | null;
   jumlah_upload: number | null;
   gmv_live: number | null;
   jam_live: number | null;
@@ -324,7 +324,12 @@ export async function riwayatLaporan(
           departemen: ((akun?.unit ?? l.unit) as KodeUnit) ?? null,
           pelaporNama: l.user,
           gmv: l.gmv,
-          komisi: l.komisi ?? null,
+          // Mode demo tidak punya tabel akses lihat komisi (0212): selain
+          // CEO/Manager tidak melihat komisi sama sekali.
+          komisi: bolehLihatKomisiSemua(pengguna.role)
+            ? (l.komisi ?? null)
+            : null,
+          komisiTerlihat: bolehLihatKomisiSemua(pengguna.role),
           jumlahUpload: l.jumlah_upload ?? null,
           gmvLive: null,
           jamLive: null,
@@ -352,13 +357,11 @@ export async function riwayatLaporan(
   if (error) throw new Error(`Gagal memuat riwayat: ${error.message}`);
 
   const baris = data as unknown as BarisLaporan[];
-  const { data: revisi } = await sb
-    .from("daily_report_revisions")
-    .select("report_id")
-    .in(
-      "report_id",
-      baris.map((b) => b.id),
-    );
+  const ids = baris.map((b) => b.id);
+  const [{ data: revisi }, komisi] = await Promise.all([
+    sb.from("daily_report_revisions").select("report_id").in("report_id", ids),
+    komisiLaporan(ids),
+  ]);
 
   const jumlahRevisi = new Map<string, number>();
   for (const r of revisi ?? []) {
@@ -366,9 +369,35 @@ export async function riwayatLaporan(
   }
 
   return baris.map((b) => ({
-    ...bentukLaporan(b, sasaran),
+    ...bentukLaporan(b, sasaran, komisi),
     jumlahRevisi: jumlahRevisi.get(b.id) ?? 0,
   }));
+}
+
+/**
+ * Komisi laporan yang boleh dilihat pengguna ini — satu-satunya jalan
+ * membacanya sejak kolomnya dikunci (0210). CEO/Manager menerima semua;
+ * yang lain hanya akun dalam akses lihat komisinya (0212). Laporan yang
+ * tidak ada di peta berarti komisinya TIDAK BOLEH ditampilkan; yang ada
+ * dengan nilai null berarti memang belum diisi (laporan lama).
+ */
+async function komisiLaporan(
+  ids: string[],
+): Promise<Map<string, number | null>> {
+  const peta = new Map<string, number | null>();
+  if (ids.length === 0) return peta;
+  const sb = await klienServer();
+  const { data, error } = await sb.rpc("komisi_laporan", { p_ids: ids });
+  // Gagal membaca komisi tidak menjatuhkan riwayat: angka lain tetap
+  // berguna, dan komisi kosong tidak lebih menyesatkan daripada halaman gagal.
+  if (error) {
+    console.error(`Gagal memuat komisi: ${error.message}`);
+    return peta;
+  }
+  for (const k of data ?? []) {
+    peta.set(k.report_id, k.komisi === null ? null : Number(k.komisi));
+  }
+  return peta;
 }
 
 /**
@@ -381,6 +410,7 @@ export async function riwayatLaporan(
 function bentukLaporan(
   b: BarisLaporan,
   sasaran: SasaranLaporan[],
+  komisi: ReadonlyMap<string, number | null>,
 ): Omit<LaporanHarian, "jumlahRevisi"> {
   return {
     id: b.id,
@@ -391,7 +421,8 @@ function bentukLaporan(
     departemen: b.akun_unit_kode ?? b.unit_kode,
     pelaporNama: b.pelapor_nama ?? "—",
     gmv: Number(b.gmv),
-    komisi: b.komisi === null ? null : Number(b.komisi),
+    komisi: komisi.get(b.id) ?? null,
+    komisiTerlihat: komisi.has(b.id),
     jumlahUpload: b.jumlah_upload,
     gmvLive: b.gmv_live === null ? null : Number(b.gmv_live),
     jamLive: b.jam_live === null ? null : Number(b.jam_live),
@@ -600,28 +631,39 @@ export async function sudahDilaporkan(
   });
 }
 
+function angkaAtauNull(n: number | null | undefined) {
+  return n === null || n === undefined ? null : Number(n);
+}
+
 /** Jejak revisi satu laporan. */
 export async function jejakRevisi(reportId: string): Promise<RevisiLaporan[]> {
   if (modeData() === "demo") return [];
 
   const sb = await klienServer();
-  const { data } = await sb
-    .from("daily_report_revisions")
-    .select(
-      `id, report_id, gmv_lama, gmv_baru, komisi_lama, komisi_baru,
-       upload_lama, upload_baru, live_lama, live_baru, jam_lama, jam_baru,
-       alasan, created_at, users:diubah_oleh (nama)`,
-    )
-    .eq("report_id", reportId)
-    .order("created_at");
+  // Angka komisi di jejak revisi juga terkunci (0210): dibaca terpisah
+  // lewat `komisi_revisi`, yang hanya mengembalikannya kepada CEO/Manager
+  // dan pelapor Staff.
+  const [{ data }, { data: komisi }] = await Promise.all([
+    sb
+      .from("daily_report_revisions")
+      .select(
+        `id, report_id, gmv_lama, gmv_baru,
+         upload_lama, upload_baru, live_lama, live_baru, jam_lama, jam_baru,
+         alasan, created_at, users:diubah_oleh (nama)`,
+      )
+      .eq("report_id", reportId)
+      .order("created_at"),
+    sb.rpc("komisi_revisi", { p_report_ids: [reportId] }),
+  ]);
+  const komisiPer = new Map((komisi ?? []).map((k) => [k.revisi_id, k]));
 
   return (data ?? []).map((r) => ({
     id: r.id,
     reportId: r.report_id,
     gmvLama: Number(r.gmv_lama),
     gmvBaru: Number(r.gmv_baru),
-    komisiLama: r.komisi_lama === null ? null : Number(r.komisi_lama),
-    komisiBaru: r.komisi_baru === null ? null : Number(r.komisi_baru),
+    komisiLama: angkaAtauNull(komisiPer.get(r.id)?.komisi_lama),
+    komisiBaru: angkaAtauNull(komisiPer.get(r.id)?.komisi_baru),
     uploadLama: r.upload_lama,
     uploadBaru: r.upload_baru,
     liveLama: r.live_lama === null ? null : Number(r.live_lama),
@@ -669,11 +711,14 @@ export async function ambilLaporan(
   if (!data) return null;
 
   const b = data as unknown as BarisLaporan;
-  const sasaran = await sasaranUntuk(pengguna, b.tanggal);
-  const jejak = await jejakRevisi(id);
+  const [sasaran, jejak, komisi] = await Promise.all([
+    sasaranUntuk(pengguna, b.tanggal),
+    jejakRevisi(id),
+    komisiLaporan([id]),
+  ]);
 
   const laporan: LaporanHarian = {
-    ...bentukLaporan(b, sasaran),
+    ...bentukLaporan(b, sasaran, komisi),
     jumlahRevisi: jejak.length,
   };
 

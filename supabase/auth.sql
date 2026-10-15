@@ -12,13 +12,22 @@
 -- =====================================================================
 
 -- ---------------------------------------------------------------------
--- Akun Auth baru → baris profil
+-- Akun Auth baru → baris profil, atau pendaftaran yang menunggu
 --
 -- Anggota tim didaftarkan lebih dulu di tabel `users` (lewat seed atau
 -- oleh Manager). Saat akun Auth dibuat dengan email yang sama, id profil
--- disamakan dengan id Auth. Bila emailnya belum terdaftar, profil baru
--- dibuat sebagai Staff nonaktif — perlu diaktifkan dan diberi peran
--- oleh CEO/Manager, jadi pendaftaran liar tidak langsung punya akses.
+-- disamakan dengan id Auth (jalur A di docs/DAFTAR-GOOGLE-PERSETUJUAN.md).
+--
+-- Sejak 0209, email yang belum dikenal — biasanya orang yang masuk
+-- lewat Google — TIDAK dibuatkan profil. Ia dicatat di
+-- `pendaftaran_akun` berstatus menunggu sampai CEO/Manager menyetujui
+-- atau menolaknya. Tanpa profil aktif, RLS (0208) menolaknya membaca apa
+-- pun.
+--
+-- Profil yang SUDAH punya akun login lain tidak diambil alih walau
+-- emailnya cocok: akun baru itu ikut menunggu persetujuan. Tanpa
+-- pengecekan ini, mengganti email profil lalu masuk Google dengan email
+-- tersebut akan memindahkan profil dan membuat akun sandinya yatim.
 -- ---------------------------------------------------------------------
 create or replace function auth_ke_users()
 returns trigger
@@ -31,15 +40,27 @@ declare
 begin
   select id into lama from users where lower(email) = lower(new.email);
 
+  if lama is not null
+     and lama <> new.id
+     and exists (select 1 from auth.users a where a.id = lama) then
+    lama := null;
+  end if;
+
   if lama is null then
-    insert into users (id, nama, email, role, jabatan, status)
+    insert into pendaftaran_akun (id, email, nama_google, foto_url)
     values (
       new.id,
-      coalesce(new.raw_user_meta_data ->> 'nama', split_part(new.email, '@', 1)),
-      new.email,
-      'Staff',
-      'Belum ditetapkan',
-      'nonaktif'
+      lower(new.email),
+      coalesce(
+        nullif(new.raw_user_meta_data ->> 'full_name', ''),
+        nullif(new.raw_user_meta_data ->> 'name', ''),
+        nullif(new.raw_user_meta_data ->> 'nama', ''),
+        split_part(new.email, '@', 1)
+      ),
+      coalesce(
+        new.raw_user_meta_data ->> 'avatar_url',
+        new.raw_user_meta_data ->> 'picture'
+      )
     )
     on conflict (id) do nothing;
     return new;
@@ -47,8 +68,10 @@ begin
 
   if lama <> new.id then
     -- Menyamakan id profil dengan id Auth. Seluruh baris anak ikut
-    -- terbawa karena foreign key-nya on update cascade (lihat bawah).
-    update users set id = new.id where id = lama;
+    -- terbawa karena foreign key-nya on update cascade (lihat bawah);
+    -- `pindahkan_id_profil` (0209) menahan trigger penjaga riwayat
+    -- supaya cascade itu tidak ditolak.
+    perform pindahkan_id_profil(lama, new.id);
   end if;
 
   return new;

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Network } from "lucide-react";
+import { Network, UserPlus } from "lucide-react";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
 import { DaftarAnggota } from "@/components/tim/daftar-anggota";
@@ -14,6 +14,7 @@ import {
 } from "@/lib/data/anggota";
 import { DialogTambahAnggota } from "@/components/tim/dialog-anggota";
 import { pilihanOrganisasi } from "@/lib/data/organisasi";
+import { jumlahPendaftaranMenunggu } from "@/lib/data/pendaftaran";
 import { petaBawahan, petaRantai } from "@/lib/atasan";
 import { susunanDepartemen } from "@/lib/organisasi";
 import {
@@ -35,9 +36,10 @@ export default async function TimPage({ searchParams }: PageProps<"/tim">) {
   );
   if (!pengguna) redirect("/masuk");
 
-  const [semua, pilihan] = await Promise.all([
+  const [semua, pilihan, menunggu] = await Promise.all([
     daftarAnggotaTim(pengguna),
     pilihanOrganisasi(),
+    jumlahPendaftaranMenunggu(pengguna),
   ]);
   // Susunan dihitung dari daftar penuh, bukan hasil saringan: menyaring
   // satu unit tidak membuat departemen lain berhenti ada.
@@ -99,6 +101,20 @@ export default async function TimPage({ searchParams }: PageProps<"/tim">) {
               <Network className="size-3.5" />
               Struktur organisasi
             </Link>
+            {bolehKelola ? (
+              <Link
+                href="/tim/pendaftaran"
+                className="tekan-halus sentuh-nyaman inline-flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-[13px] leading-[18px] font-semibold ring-1 ring-border-subtle"
+              >
+                <UserPlus className="size-3.5" />
+                Menunggu persetujuan
+                {menunggu > 0 ? (
+                  <span className="rounded-full bg-danger px-1.5 text-[10px] leading-4 text-white">
+                    {menunggu}
+                  </span>
+                ) : null}
+              </Link>
+            ) : null}
             {bolehKelola ? (
               <DialogTambahAnggota pilihan={pilihan} semua={semua} />
             ) : null}

@@ -24,6 +24,7 @@ import {
   TAHUN_MULAI,
   tambahHari,
   type BarisGmv,
+  metrikKomisi,
 } from "@/lib/gmv";
 
 const baris = (
@@ -684,4 +685,41 @@ test("metrikGmv memberi tiap metrik warna yang berbeda", () => {
   });
   const warna = metrik.map((m) => m.warna);
   assert.equal(new Set(warna).size, warna.length, warna.join(", "));
+});
+
+test("kartu Komisi Affiliator: angka, pembanding, dan keterangan kelengkapan", () => {
+  const titik = [
+    {
+      tanggal: "2024-10-01",
+      label: "1 Okt",
+      gmv: 50_000,
+      target: 0,
+      jumlahLaporan: 3,
+      penyusun: [],
+    },
+    {
+      tanggal: "2024-10-02",
+      label: "2 Okt",
+      gmv: 0,
+      target: 0,
+      jumlahLaporan: 2,
+      penyusun: [],
+    },
+  ];
+  const m = metrikKomisi({
+    titik,
+    total: 50_000,
+    sebelumnya: 40_000,
+    laporan: 5,
+    berkomisi: 4,
+  });
+  assert.equal(m.kunci, "komisi");
+  assert.equal(m.nama, "Komisi Affiliator");
+  assert.equal(m.nilai, 50_000);
+  assert.equal(m.sebelumnya, 40_000);
+  assert.equal(m.keterangan, "4 dari 5 laporan berisi komisi");
+  assert.deepEqual(
+    m.titik.map((t) => t.nilai),
+    [50_000, 0],
+  );
 });

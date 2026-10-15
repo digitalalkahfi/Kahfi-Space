@@ -26,6 +26,7 @@ export function PanelLaporan({
   lokasi,
   sudahLaporAwal = false,
   coSampel,
+  sasaranKomisiTerlihat = [],
 }: {
   sasaran: SasaranLaporan[];
   sudahDilaporkan: string[];
@@ -43,6 +44,11 @@ export function PanelLaporan({
   sudahLaporAwal?: boolean;
   /** CO sampel pada tanggal laporan per kunci sasaran; dihitung, bukan diketik. */
   coSampel?: Record<string, number>;
+  /**
+   * Kunci sasaran yang komisinya boleh ia lihat kembali sesudah terkirim
+   * (0212). Mengisi komisi tidak berarti boleh melihatnya (K5).
+   */
+  sasaranKomisiTerlihat?: string[];
 }) {
   const [sudahLapor, setSudahLapor] = useState(sudahLaporAwal);
 
@@ -67,6 +73,7 @@ export function PanelLaporan({
                 : undefined
             }
             coSampel={coSampel}
+            sasaranKomisiTerlihat={sasaranKomisiTerlihat}
           />
         </Reveal>
       </div>

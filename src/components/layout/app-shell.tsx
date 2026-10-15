@@ -11,6 +11,7 @@ import {
   preferensiTampilanSaya,
 } from "@/lib/data/preferensi-tampilan";
 import { modeData } from "@/lib/supabase/config";
+import { jumlahPendaftaranMenunggu } from "@/lib/data/pendaftaran";
 import type { Pengguna } from "@/lib/types";
 
 /**
@@ -36,10 +37,14 @@ export async function AppShell({
   // Dua permintaan yang tidak saling bergantung dijalankan bersamaan;
   // kerangka ini dirender di setiap halaman, jadi tiap perjalanan
   // berurutan yang dihemat terasa di semua navigasi.
-  const [lama, susunan] = await Promise.all([
+  const [lama, susunan, menunggu] = await Promise.all([
     statusKspaceLama(),
     preferensiTampilanSaya(pengguna),
+    // Angka di menu Tim: pendaftaran Google yang menunggu (0 selain
+    // CEO/Manager, tanpa permintaan ke database).
+    jumlahPendaftaranMenunggu(pengguna),
   ]);
+  const lencana: Record<string, number> = menunggu > 0 ? { "/tim": menunggu } : {};
 
   return (
     <PenyediaTampilan
@@ -53,13 +58,18 @@ export async function AppShell({
           demo={modeData() === "demo"}
           bolehMigrasi={bolehMigrasi}
           bolehKeuangan={bolehKeuangan}
+          lencana={lencana}
         />
         <TopBar pengguna={pengguna} halaman={halaman} />
         <SpandukLama status={lama} />
         <main className="mx-auto w-full max-w-[1400px] px-4 pt-4 pb-28 lg:px-8 lg:pt-6 lg:pb-10">
           {children}
         </main>
-        <BottomNav bolehKeuangan={bolehKeuangan} bolehMigrasi={bolehMigrasi} />
+        <BottomNav
+          bolehKeuangan={bolehKeuangan}
+          bolehMigrasi={bolehMigrasi}
+          lencana={lencana}
+        />
       </div>
     </PenyediaTampilan>
   );

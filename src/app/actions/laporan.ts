@@ -14,7 +14,9 @@ import {
 import {
   alasanTanggalLaporan,
   PESAN_GMV_BELUM_PENUH,
+  PESAN_KOMISI_WAJIB,
   periksaIsiLaporan,
+  periksaKomisiWajib,
   type IsiLaporan,
   type KalenderLaporan,
 } from "@/lib/laporan";
@@ -41,7 +43,8 @@ function pesanGalatLaporan(error: {
   message: string;
 }): [string, KodeGagal] {
   const cocok: [RegExp, string][] = [
-    [/komisi_tak_lebih_dari_gmv/, "Komisi tidak mungkin melebihi GMV-nya."],
+    // 0211: komisi wajib untuk laporan baru akun Affiliator.
+    [/tidak ada komisi masuk/, PESAN_KOMISI_WAJIB],
     [/komisi_wajar/, "Nilai komisi di luar batas wajar, periksa lagi."],
     [/upload_wajar/, "Jumlah upload di luar batas wajar, periksa lagi."],
     [/gmv_wajar/, "Nilai GMV di luar batas wajar, periksa lagi."],
@@ -104,7 +107,7 @@ export async function kirimLaporanHarian(input: {
     catatan: input.catatan?.trim() ?? "",
   };
   const unit = await unitSasaranLaporan(input.sasaran);
-  const salah = periksaIsiLaporan(unit, isi);
+  const salah = periksaIsiLaporan(unit, isi) ?? periksaKomisiWajib(unit, isi);
   if (salah) return gagal(salah, "validasi");
 
   if (modeData() === "demo") return BALASAN_DEMO;

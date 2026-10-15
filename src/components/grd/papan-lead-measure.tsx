@@ -47,9 +47,10 @@ export function PapanLeadMeasure({ papan }: { papan: PapanLead[] }) {
                   <div className="min-w-0">
                     <p className="text-sm leading-5 font-semibold">{m.judul}</p>
                     <p className="tabular text-[11px] leading-[14px] text-muted-foreground">
-                      {ANGKA.format(m.realisasi)} dari {ANGKA.format(m.target)}{" "}
-                      {m.satuan}
-                      {m.labelPendukung && m.pendukung !== null
+                      {m.rahasia
+                        ? `Target ${ANGKA.format(m.target)} ${m.satuan} · angka komisi hanya untuk CEO & Manager`
+                        : `${ANGKA.format(m.realisasi)} dari ${ANGKA.format(m.target)} ${m.satuan}`}
+                      {!m.rahasia && m.labelPendukung && m.pendukung !== null
                         ? ` · ${m.labelPendukung}: ${ANGKA.format(m.pendukung)}`
                         : ""}
                     </p>
@@ -57,20 +58,26 @@ export function PapanLeadMeasure({ papan }: { papan: PapanLead[] }) {
                   <span
                     className={cn(
                       "tabular shrink-0 text-[13px] leading-[18px] font-bold",
-                      kuat ? gaya?.teks : "text-danger-text",
+                      m.rahasia
+                        ? "text-muted-foreground"
+                        : kuat
+                          ? gaya?.teks
+                          : "text-danger-text",
                     )}
                   >
-                    {persen(m.rasio)}
+                    {m.rahasia ? "Rahasia" : persen(m.rasio)}
                   </span>
                 </div>
 
-                <BarCapaian
-                  rasio={m.rasio}
-                  label={`Capaian ${m.judul}`}
-                  warna={kuat ? (gaya?.bar ?? "bg-primary") : "bg-danger"}
-                  tinggi="h-1.5"
-                  className="mt-2.5 bg-card"
-                />
+                {m.rahasia ? null : (
+                  <BarCapaian
+                    rasio={m.rasio}
+                    label={`Capaian ${m.judul}`}
+                    warna={kuat ? (gaya?.bar ?? "bg-primary") : "bg-danger"}
+                    tinggi="h-1.5"
+                    className="mt-2.5 bg-card"
+                  />
+                )}
               </li>
             );
           })}

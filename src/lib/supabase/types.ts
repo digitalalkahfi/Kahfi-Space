@@ -11,6 +11,10 @@ export type PeranDb =
 
 export type StatusAktifDb = "aktif" | "nonaktif";
 
+/** Hasil `status_akses_saya()` (migrasi 0208/0209). */
+export type StatusAkses =
+  "aktif" | "nonaktif" | "tanpa_profil" | "menunggu" | "ditolak";
+
 export type StatusLaporanDb = "terkirim" | "revisi";
 
 export type LevelGoalDb =
@@ -143,7 +147,64 @@ export type KategoriNotifikasiDb =
   | "izin"
   | "transaksi"
   | "anggaran"
-  | "masukan";
+  | "masukan"
+  /** Pendaftaran akun baru menunggu persetujuan (migrasi 0209). */
+  | "anggota";
+
+export type StatusPendaftaranDb = "menunggu" | "disetujui" | "ditolak";
+export type CaraPersetujuanDb = "baru" | "sambung";
+
+// Pendaftaran akun lewat Google + keputusan CEO/Manager (migrasi 0209).
+/** @tabel pendaftaran_akun */
+export type BarisPendaftaranAkun = {
+  id: string;
+  email: string;
+  nama_google: string;
+  foto_url: string | null;
+  no_wa: string | null;
+  unit_diajukan: string | null;
+  catatan: string | null;
+  status: StatusPendaftaranDb;
+  diputuskan_oleh: string | null;
+  diputuskan_pada: string | null;
+  alasan_tolak: string | null;
+  profil_id: string | null;
+  cara: CaraPersetujuanDb | null;
+  dibuat_pada: string;
+};
+
+export type CakupanAksesKomisiDb = "pegangan" | "tertentu" | "semua";
+
+// Akses lihat komisi per orang, diatur CEO/Manager (migrasi 0212).
+/** @tabel akses_komisi */
+export type BarisAksesKomisi = {
+  user_id: string;
+  cakupan: CakupanAksesKomisiDb;
+  diberi_oleh: string | null;
+  diberi_pada: string;
+};
+
+/** @tabel akses_komisi_akun */
+export type BarisAksesKomisiAkun = {
+  user_id: string;
+  account_id: string;
+};
+
+/** Potret akses pada `riwayat_akses_komisi`; null = tidak ada akses. */
+export type PotretAksesKomisi = {
+  cakupan: CakupanAksesKomisiDb;
+  akun: { id: string; username: string }[];
+} | null;
+
+/** @tabel riwayat_akses_komisi */
+export type BarisRiwayatAksesKomisi = {
+  id: string;
+  user_id: string;
+  sebelum: PotretAksesKomisi;
+  sesudah: PotretAksesKomisi;
+  oleh: string | null;
+  pada: string;
+};
 
 /** @tabel notifications */
 export type BarisNotification = {
@@ -859,7 +920,7 @@ export type BarisRiwayatLaporanMinimum = {
   account_id: string | null;
   unit_id: string | null;
   gmv: number;
-  komisi: number | null;
+  // Tanpa komisi sejak 0210 — komisi dibaca lewat `komisi_laporan()`.
   jumlah_upload: number | null;
   catatan: string;
   status: StatusLaporanDb;
@@ -1273,6 +1334,32 @@ type Tabel<Baris, Rel extends readonly unknown[] = []> = {
 export type Database = {
   public: {
     Tables: {
+      akses_komisi: Tabel<
+        BarisAksesKomisi,
+        [
+          Relasi<"akses_komisi_user_id_fkey", "user_id", "users">,
+          Relasi<"akses_komisi_diberi_oleh_fkey", "diberi_oleh", "users">,
+        ]
+      >;
+      akses_komisi_akun: Tabel<
+        BarisAksesKomisiAkun,
+        [Relasi<"akses_komisi_akun_account_id_fkey", "account_id", "accounts">]
+      >;
+      riwayat_akses_komisi: Tabel<
+        BarisRiwayatAksesKomisi,
+        [Relasi<"riwayat_akses_komisi_oleh_fkey", "oleh", "users">]
+      >;
+      pendaftaran_akun: Tabel<
+        BarisPendaftaranAkun,
+        [
+          Relasi<
+            "pendaftaran_akun_diputuskan_oleh_fkey",
+            "diputuskan_oleh",
+            "users"
+          >,
+          Relasi<"pendaftaran_akun_profil_id_fkey", "profil_id", "users">,
+        ]
+      >;
       notifications: Tabel<
         BarisNotification,
         [Relasi<"notifications_user_id_fkey", "user_id", "users">]
@@ -2044,6 +2131,43 @@ export type Database = {
       };
       /** Leader ke bawah wajib absen (migrasi 0170). */
       peran_wajib_absen: { Args: { p_role: PeranDb }; Returns: boolean };
+      /** Gerbang seluruh RLS: profil sendiri ada dan aktif (migrasi 0208). */
+      anggota_aktif: { Args: Record<string, never>; Returns: boolean };
+      /**
+       * Status akses akun yang sedang login (migrasi 0208/0209). Dipakai
+       * middleware untuk mengarahkan akun yang belum/tidak aktif.
+       */
+      status_akses_saya: {
+        Args: Record<string, never>;
+        Returns: StatusAkses | null;
+      };
+      /** Keputusan pendaftaran — hanya CEO/Manager aktif (migrasi 0209). */
+      setujui_pendaftaran_baru: {
+        Args: {
+          p_id: string;
+          p_status_awal: StatusPendaftaranDb;
+          p_nama: string;
+          p_role: PeranDb;
+          p_jabatan: string;
+          p_unit: string | null;
+          p_departemen: string | null;
+          p_program: string | null;
+          p_atasan: string | null;
+        };
+        Returns: undefined;
+      };
+      sambungkan_pendaftaran: {
+        Args: {
+          p_id: string;
+          p_status_awal: StatusPendaftaranDb;
+          p_profil: string;
+        };
+        Returns: undefined;
+      };
+      tolak_pendaftaran: {
+        Args: { p_id: string; p_alasan: string };
+        Returns: undefined;
+      };
       /**
        * Email & nomor WhatsApp orang dalam cakupan pemanggil — satu-satunya
        * jalan membaca kolom itu (migrasi 0174/0175).
@@ -2731,7 +2855,85 @@ export type Database = {
           p_gmv_live?: number | null;
           p_jam_live?: number | null;
         };
-        Returns: BarisDailyReport;
+        /** Id laporan; barisnya tidak dikembalikan karena memuat komisi (0210). */
+        Returns: string;
+      };
+      /**
+       * Pintu resmi membaca komisi (0210). Kolomnya sendiri tidak bisa
+       * di-SELECT klien: CEO/Manager membaca semua, Staff laporannya
+       * sendiri, peran lain tidak menerima baris apa pun.
+       */
+      boleh_lihat_komisi: { Args: Record<string, never>; Returns: boolean };
+      /** Akun Affiliator yang komisinya terlihat pemanggil (0212). */
+      akun_komisi_terlihat: {
+        Args: Record<string, never>;
+        Returns: { account_id: string }[];
+      };
+      /** Komisi per akun per hari, hanya akun yang terlihat (0212). */
+      komisi_akun: {
+        Args: { p_dari: string; p_sampai: string; p_account?: string | null };
+        Returns: {
+          account_id: string;
+          tanggal: string;
+          komisi: number;
+          laporan: number;
+          berkomisi: number;
+        }[];
+      };
+      /** Lead measure bersumber komisi yang angkanya terlihat (0212). */
+      lead_komisi_terlihat_semua: {
+        Args: Record<string, never>;
+        Returns: { lead_measure_id: string }[];
+      };
+      /** Hanya CEO/Manager; p_cakupan null = cabut (0212). */
+      atur_akses_komisi: {
+        Args: {
+          p_user: string;
+          p_cakupan: CakupanAksesKomisiDb | null;
+          p_akun?: string[] | null;
+        };
+        Returns: undefined;
+      };
+      komisi_laporan: {
+        Args: { p_ids: string[] };
+        Returns: { report_id: string; komisi: number | null }[];
+      };
+      komisi_laporan_saya: {
+        Args: { p_dari: string; p_sampai: string };
+        Returns: {
+          report_id: string;
+          tanggal: string;
+          account_id: string | null;
+          komisi: number | null;
+        }[];
+      };
+      komisi_revisi: {
+        Args: { p_report_ids: string[] };
+        Returns: {
+          revisi_id: string;
+          komisi_lama: number | null;
+          komisi_baru: number | null;
+        }[];
+      };
+      /** Hanya CEO/Manager; selain itu galat 42501. */
+      komisi_affiliator: {
+        Args: { p_dari: string; p_sampai: string };
+        Returns: {
+          /** null = laporan tingkat unit Affiliator (tanpa akun). */
+          account_id: string | null;
+          komisi: number;
+          laporan: number;
+          berkomisi: number;
+        }[];
+      };
+      komisi_affiliator_harian: {
+        Args: { p_dari: string; p_sampai: string };
+        Returns: {
+          tanggal: string;
+          komisi: number;
+          laporan: number;
+          berkomisi: number;
+        }[];
       };
       /** Migrasi 0119 — verifikasi nomor oleh CEO/Manager. */
       verifikasi_kontak: {

@@ -107,11 +107,13 @@ export function RekapPekanLead({
                             : "text-foreground",
                         )}
                       >
-                        {nilai !== undefined
-                          ? ANGKA.format(nilai)
-                          : lewat
-                            ? "—"
-                            : ""}
+                        {m.rahasia
+                          ? ""
+                          : nilai !== undefined
+                            ? ANGKA.format(nilai)
+                            : lewat
+                              ? "—"
+                              : ""}
                       </td>
                     );
                   })}
@@ -119,10 +121,14 @@ export function RekapPekanLead({
                   <td
                     className={cn(
                       "tabular py-2.5 pl-3 text-right text-[13px] leading-[18px] font-bold",
-                      kuat ? "text-ok-text" : "text-warn-text",
+                      m.rahasia
+                        ? "text-muted-foreground"
+                        : kuat
+                          ? "text-ok-text"
+                          : "text-warn-text",
                     )}
                   >
-                    {persen(m.rasio)}
+                    {m.rahasia ? "Rahasia" : persen(m.rasio)}
                   </td>
                 </tr>
               );

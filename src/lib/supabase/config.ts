@@ -33,3 +33,12 @@ export function wajibSupabase() {
     );
   }
 }
+
+/**
+ * Login Google dinyalakan lewat env, bukan otomatis: tombolnya baru
+ * berguna setelah provider Google diaktifkan di Supabase (Fase 4), dan
+ * tombol yang berujung galat hanya membingungkan.
+ */
+export function loginGoogleAktif() {
+  return supabaseSiap() && process.env.NEXT_PUBLIC_LOGIN_GOOGLE === "1";
+}

@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { SUPABASE_ANON_KEY, SUPABASE_URL, supabaseSiap } from "./config";
 import type { Database } from "./types";
 import { harusGantiSandiDulu } from "@/lib/keamanan";
+import { alihkanMenurutStatus } from "@/lib/pendaftaran";
 
 /** Halaman yang boleh dibuka tanpa sesi. */
 const TERBUKA = ["/masuk", "/auth"];
@@ -65,11 +66,31 @@ export async function segarkanSesi(request: NextRequest) {
     return NextResponse.redirect(tujuan);
   }
 
-  if (user && path === "/masuk") {
-    const tujuan = request.nextUrl.clone();
-    tujuan.pathname = "/beranda";
-    tujuan.search = "";
-    return NextResponse.redirect(tujuan);
+  // Gerbang anggota aktif (0208): akun tanpa profil aktif — pendaftar
+  // Google yang menunggu persetujuan, yang ditolak, atau profil yang
+  // dinonaktifkan — ditahan di layar /menunggu. Ini hanya kenyamanan;
+  // penjaga sebenarnya RLS, yang menolak akun itu membaca apa pun.
+  //
+  // Bila status gagal dibaca (galat jaringan, atau kode terpasang sebelum
+  // migrasi 0208), permintaan dibiarkan lewat: menahan SEMUA orang di
+  // layar tunggu karena satu galat lebih merugikan, dan akun yang tidak
+  // aktif tetap tidak membaca apa pun karena RLS.
+  if (user) {
+    const { data: status, error } = await sb.rpc("status_akses_saya");
+    if (error) {
+      console.error(`Status akses tidak terbaca: ${error.message}`);
+      return balasan;
+    }
+    const alih = alihkanMenurutStatus(status ?? null, path);
+    if (alih) {
+      const tujuan = request.nextUrl.clone();
+      tujuan.pathname = alih;
+      tujuan.search = "";
+      // Cookie sesi yang baru disegarkan ikut dibawa ke pengalihan.
+      const ke = NextResponse.redirect(tujuan);
+      balasan.cookies.getAll().forEach((c) => ke.cookies.set(c));
+      return ke;
+    }
   }
 
   return balasan;

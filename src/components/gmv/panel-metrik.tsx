@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Check, TrendingUp } from "lucide-react";
+import Link from "next/link";
+import { Check, ChevronRight, TrendingUp } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { persen } from "@/lib/format";
@@ -160,7 +161,7 @@ export function PanelMetrik({
           {metrik.map((m) => {
             const aktif = dipilih.includes(m.kunci);
             return (
-              <li key={m.kunci}>
+              <li key={m.kunci} className="relative">
                 <button
                   type="button"
                   role="checkbox"
@@ -168,6 +169,8 @@ export function PanelMetrik({
                   onClick={() => alihkan(m.kunci)}
                   className={cn(
                     "tekan-halus flex size-full flex-col items-start gap-1 rounded-2xl p-3 text-left ring-1 transition-colors",
+                    // Ruang untuk tautan rincian yang dipasang di dalam kartu.
+                    m.tautan && "pb-9",
                     aktif
                       ? "bg-muted/70 ring-border"
                       : "bg-muted/30 ring-transparent hover:bg-muted/50",
@@ -204,7 +207,24 @@ export function PanelMetrik({
                   </span>
 
                   {tren ? <Tren metrik={m} pembanding={pembanding} /> : null}
+                  {m.keterangan ? (
+                    <span className="text-[11px] leading-[14px] text-pretty text-muted-foreground">
+                      {m.keterangan}
+                    </span>
+                  ) : null}
                 </button>
+                {/* Di luar tombol centang: tautan di dalam tombol bukan
+                    HTML yang sah, dan klik pada kartunya tetap berarti
+                    "gambar garisnya". */}
+                {m.tautan ? (
+                  <Link
+                    href={m.tautan.href}
+                    className="tekan-halus absolute bottom-2.5 left-3 inline-flex items-center gap-1 rounded-full bg-card px-2.5 py-1 text-[12px] leading-4 font-semibold text-primary ring-1 ring-border-subtle"
+                  >
+                    {m.tautan.label}
+                    <ChevronRight className="size-3.5" />
+                  </Link>
+                ) : null}
               </li>
             );
           })}

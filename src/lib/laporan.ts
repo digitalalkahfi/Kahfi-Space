@@ -131,6 +131,24 @@ export function bersihkanIsi(
   };
 }
 
+/** BR-K1: pesan saat komisi laporan Affiliator dibiarkan kosong. */
+export const PESAN_KOMISI_WAJIB = "Isi 0 kalau hari ini tidak ada komisi masuk.";
+
+/**
+ * BR-K1: laporan BARU untuk akun Affiliator wajib berisi komisi (boleh
+ * 0). Hanya untuk laporan baru — perbaikan laporan lama tidak memakai
+ * ini, dan laporan lama yang komisinya kosong tetap sah (E2). Database
+ * menjaga hal yang sama (`wajib_komisi_affiliator`, 0211).
+ */
+export function periksaKomisiWajib(
+  unit: KodeUnit | null,
+  isi: Pick<IsiLaporan, "komisi">,
+): string | null {
+  return punyaKolom(unit, "komisi") && isi.komisi === null
+    ? PESAN_KOMISI_WAJIB
+    : null;
+}
+
 /**
  * Satu tempat pemeriksaan isi, dipakai form (untuk mengunci tombol) dan
  * Server Action (untuk menolak kiriman yang tidak lewat form). Mengembalikan
@@ -141,7 +159,13 @@ export function periksaIsiLaporan(
   isi: IsiLaporan,
 ): string | null {
   if (!Number.isFinite(isi.gmv) || isi.gmv < 0) return "Nilai GMV tidak sah.";
-  if (isi.gmv === 0) return "GMV belum diisi.";
+  // Komisi yang masuk hari ini bisa berasal dari pesanan hari-hari
+  // sebelumnya (K1, T2), jadi hari tanpa GMV tetap sah dilaporkan bila
+  // memang ada komisi masuk. Tanpa keduanya, GMV nol hampir selalu
+  // berarti lupa diisi.
+  if (isi.gmv === 0 && !(isi.komisi !== null && isi.komisi > 0)) {
+    return "GMV belum diisi.";
+  }
   if (isi.gmv > MAKS_GMV) return "Nilai GMV di luar batas wajar, periksa lagi.";
 
   if (isi.komisi !== null) {
@@ -154,9 +178,7 @@ export function periksaIsiLaporan(
     if (isi.komisi > MAKS_KOMISI) {
       return "Nilai komisi di luar batas wajar, periksa lagi.";
     }
-    if (isi.komisi > isi.gmv) {
-      return "Komisi tidak mungkin melebihi GMV, periksa lagi.";
-    }
+    // Komisi boleh melebihi GMV hari itu (0211, BR-K3).
   }
 
   if (isi.jumlahUpload !== null) {

@@ -6,6 +6,8 @@ import { klienServer } from "@/lib/supabase/server";
 import { dataContoh, lingkupContoh } from "@/lib/data/contoh";
 import { aktifDemo } from "@/lib/demo";
 import { idTerlihat } from "@/lib/lingkup";
+import { akunKomisiTerlihat } from "@/lib/data/akses-komisi";
+import { bolehLihatKomisiSemua, komisiAkunTerlihat } from "@/lib/komisi";
 import { batasMinimum, KEPATUHAN_KOSONG } from "@/lib/batas-minimum";
 import type { Kepatuhan } from "@/lib/batas-minimum";
 import {
@@ -32,6 +34,11 @@ export type AkunKelola = {
   status: StatusAkun;
   /** GMV akun ini sepanjang periode berjalan, dari Laporan Harian. */
   gmvPeriode: number;
+  /**
+   * Komisi periode yang sama — hanya bila akses lihat komisi pengguna ini
+   * mencakup akun itu (0212); null berarti tidak ditampilkan.
+   */
+  komisiPeriode: number | null;
   /** Level 0–8 yang menentukan batas minimum unggahannya; null bila belum. */
   level: number | null;
   /** Batas minimum unggahan per hari kerja; null bila levelnya belum ada. */
@@ -105,10 +112,23 @@ export async function daftarAkun(
 
   // Keduanya sekali jalan untuk seluruh akun, bukan sekali per baris:
   // halaman ini justru dibuka ketika akunnya banyak.
-  const [kepatuhan, jejak] = await Promise.all([
+  const [kepatuhan, jejak, terlihat, komisi] = await Promise.all([
     kepatuhanSemuaAkun(bulan, sampai),
     jejakLevelSemuaAkun(),
+    akunKomisiTerlihat(pengguna),
+    // Hanya akun yang terlihat yang dikembalikan database (0212).
+    sb.rpc("komisi_akun", { p_dari: bulan, p_sampai: sampai }),
   ]);
+  if (komisi.error) {
+    console.error(`Gagal memuat komisi akun: ${komisi.error.message}`);
+  }
+  const komisiPer = new Map<string, number>();
+  for (const k of komisi.data ?? []) {
+    komisiPer.set(
+      k.account_id,
+      (komisiPer.get(k.account_id) ?? 0) + Number(k.komisi),
+    );
+  }
 
   return (data ?? []).map((a) => ({
     id: a.id,
@@ -124,6 +144,12 @@ export async function daftarAkun(
     coLeaderNama: a.co_leader?.nama ?? null,
     status: a.status as StatusAkun,
     gmvPeriode: perAkun.get(a.id) ?? 0,
+    komisiPeriode:
+      !komisi.error &&
+      a.unit?.kode === "affiliator" &&
+      komisiAkunTerlihat(terlihat, a.id)
+        ? (komisiPer.get(a.id) ?? 0)
+        : null,
     level: a.level,
     minimum: batasMinimum(a.level),
     kepatuhan: kepatuhan.get(a.id) ?? { ...KEPATUHAN_KOSONG },
@@ -282,10 +308,15 @@ async function akunDemo(
   ]);
 
   const gmv = new Map<string, number>();
+  const komisi = new Map<string, number>();
   for (const l of daily_reports) {
     if (!l.akun || l.tanggal < bulan || l.tanggal > sampai) continue;
     gmv.set(l.akun, (gmv.get(l.akun) ?? 0) + l.gmv);
+    const k = (l as { komisi?: number | null }).komisi ?? 0;
+    komisi.set(l.akun, (komisi.get(l.akun) ?? 0) + k);
   }
+  // Mode demo tidak punya tabel akses lihat komisi: hanya CEO/Manager.
+  const lihatKomisi = bolehLihatKomisiSemua(pengguna.role);
 
   return accounts
     .map((a) => {
@@ -306,6 +337,10 @@ async function akunDemo(
         coLeaderNama: a.co_leader ?? null,
         status: "aktif" as StatusAkun,
         gmvPeriode: gmv.get(a.username) ?? 0,
+        komisiPeriode:
+          lihatKomisi && a.unit === "affiliator"
+            ? (komisi.get(a.username) ?? 0)
+            : null,
         level: (a as { level?: number }).level ?? null,
         minimum: batasMinimum((a as { level?: number }).level ?? null),
         kepatuhan: kepatuhan.get(a.id) ?? { ...KEPATUHAN_KOSONG },

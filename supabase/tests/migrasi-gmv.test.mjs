@@ -7,7 +7,6 @@ import {
   buatDb,
   buatSuite,
   harus,
-  harusDitolak,
   harusSama,
   sebagaiAdmin,
   terapkanSeed,
@@ -64,9 +63,16 @@ uji(
   async () => {
     const alasan =
       "Migrasi K-Space lama: angka disamakan dengan rekap GMV harian sistem lama.";
-    const hasil = await satu(
-      `select gmv, status from perbaiki_laporan_harian($1, 18300000, $2, null, null, null)`,
+    // Sejak 0210 fungsinya mengembalikan id, bukan baris (barisnya memuat
+    // komisi yang tidak boleh dibaca pemanggil).
+    const id = await satu(
+      `select perbaiki_laporan_harian($1, 18300000, $2, null, null, null) as id`,
       [idLaporan, alasan],
+    );
+    harusSama(id.id, idLaporan);
+    const hasil = await satu(
+      `select gmv, status from daily_reports where id = $1`,
+      [idLaporan],
     );
     harusSama(Number(hasil.gmv), 18300000);
     harusSama(hasil.status, "revisi");
@@ -85,15 +91,16 @@ uji(
   },
 );
 
-uji("komisi yang melebihi GMV barunya ditolak kendala, bukan lolos diam-diam", async () => {
-  await harusDitolak(
-    () =>
-      satu(
-        `select gmv from perbaiki_laporan_harian($1, 1000, 'Migrasi: uji kendala komisi', null, 5000, null)`,
-        [idLaporan],
-      ),
-    "komisi > gmv seharusnya ditolak",
+uji("komisi boleh melebihi GMV barunya sejak 0211 (komisi real bisa dari hari lain)", async () => {
+  await satu(
+    `select perbaiki_laporan_harian($1, 1000, 'Migrasi: uji komisi > GMV', null, 5000, null) id`,
+    [idLaporan],
   );
+  const { komisi } = await satu(
+    `select komisi::int komisi from daily_reports where id = $1`,
+    [idLaporan],
+  );
+  harusSama(komisi, 5000);
 });
 
 uji("rekap unit MCN masuk sebagai laporan unit", async () => {

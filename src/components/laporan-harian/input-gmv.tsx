@@ -32,6 +32,7 @@ export function InputGmv({
   prefix = "Rp",
   ringkas = false,
   label,
+  onKosong,
 }: {
   id?: string;
   /** Nilai dalam rupiah penuh. */
@@ -46,6 +47,11 @@ export function InputGmv({
   ringkas?: boolean;
   /** Dipakai saat kolom tidak punya <label> sendiri di sekitarnya. */
   label?: string;
+  /**
+   * Dipanggil saat kotaknya menjadi kosong atau terisi. Untuk kolom yang
+   * membedakan "belum diisi" dari "0", mis. komisi wajib (BR-K1).
+   */
+  onKosong?: (kosong: boolean) => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   const caretRef = useRef<number | null>(null);
@@ -74,6 +80,7 @@ export function InputGmv({
     const baru = formatRibuan(digit);
     setTeks(baru);
     onUbah(digit ? Number(digit) : 0);
+    onKosong?.(!digit);
 
     // Cari ulang posisi setelah sekian digit pada teks yang sudah diformat.
     let hitung = 0;
@@ -91,6 +98,7 @@ export function InputGmv({
   const kosongkan = () => {
     setTeks("");
     onUbah(0);
+    onKosong?.(true);
     ref.current?.focus();
   };
 

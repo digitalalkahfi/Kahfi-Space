@@ -21,6 +21,8 @@ import {
 import { daftarAkun } from "@/lib/data/akun";
 import { kontakAnggota } from "@/lib/data/profil";
 import { VerifikasiKontak } from "@/components/tim/verifikasi-kontak";
+import { AksesKomisi } from "@/components/tim/akses-komisi";
+import { aksesKomisiAnggota } from "@/lib/data/akses-komisi";
 import { asetDipegang } from "@/lib/data/aset";
 import { scorecardTim } from "@/lib/data/kpi";
 import { petaRantai } from "@/lib/atasan";
@@ -64,11 +66,16 @@ export default async function ProfilAnggotaPage({
   // Jejak perubahan hanya berarti bagi yang berwenang mengubahnya.
   const kelola = bolehKelolaAnggota(pengguna);
   const kontak = await kontakAnggota(anggota.id);
-  const [akun, scorecard, jejak, aset] = await Promise.all([
+  // CEO/Manager selalu melihat semua komisi, jadi akses lihat hanya
+  // diatur untuk peran lain (§4.5).
+  const aturKomisi =
+    kelola && anggota.role !== "CEO" && anggota.role !== "Manager";
+  const [akun, scorecard, jejak, aset, aksesKomisi] = await Promise.all([
     daftarAkun(pengguna, bulan, tanggal),
     scorecardTim(pengguna, bulan, tanggal),
     kelola ? jejakAnggota(id) : Promise.resolve([]),
     asetDipegang(id),
+    aturKomisi ? aksesKomisiAnggota(pengguna, id) : Promise.resolve(null),
   ]);
 
   // Garis pelaporan ke atas digambar dari struktur lengkap (kolom
@@ -126,6 +133,18 @@ export default async function ProfilAnggotaPage({
         <Reveal>
           <AsetDipegangKartu daftar={aset} />
         </Reveal>
+
+        {aksesKomisi ? (
+          <Reveal>
+            <AksesKomisi
+              userId={anggota.id}
+              nama={anggota.nama.split(" ")[0]}
+              akses={aksesKomisi.akses}
+              riwayat={aksesKomisi.riwayat}
+              akunAffiliator={aksesKomisi.akunAffiliator}
+            />
+          </Reveal>
+        ) : null}
 
         {kelola ? (
           <Reveal>
