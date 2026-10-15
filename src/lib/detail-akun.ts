@@ -39,12 +39,17 @@ export const LABEL_STATUS_HARI: Record<StatusHari, string> = {
 
 /**
  * Status satu hari (§5.2 no. 6). Tepat di batas sudah memenuhi, sama
- * dengan aturan kepatuhan. Akun tanpa level tidak punya batas, jadi
- * hari yang dilaporkan hanya "Terlapor".
+ * dengan aturan kepatuhan.
+ *
+ * Hanya hari kerja yang dinilai, persis `kepatuhan_minimum_akun`:
+ * laporan pada hari PIC tidak absen masuk — atau pada akun tanpa
+ * level — hanya "Terlapor". Dengan begitu jumlah "Memenuhi" di tabel
+ * sama dengan kartu kepatuhan, dan "Di bawah minimum" + "Tidak lapor"
+ * sama dengan sorotan hari kerja di bawah minimum.
  */
 export function statusHari(h: HariAkun, minimum: number | null): StatusHari {
   if (!h.lapor) return h.hariKerja ? "tidak-lapor" : "libur";
-  if (minimum === null) return "terlapor";
+  if (minimum === null || !h.hariKerja) return "terlapor";
   return (h.upload ?? 0) >= minimum ? "memenuhi" : "kurang";
 }
 
@@ -146,6 +151,23 @@ export function sorotanAkun(
         ? null
         : hari.filter((h) => h.hariKerja && (h.upload ?? 0) < minimum).length,
   };
+}
+
+export type BarisHarian = HariAkun & { status: StatusHari };
+
+/**
+ * Baris tabel harian (§5.2 no. 6): terbaru di atas, dengan statusnya.
+ * Batas minimumnya level akun saat ini — sama dengan penilaian
+ * `kepatuhan_minimum_akun`, supaya tabel ini dan kartu kepatuhan tidak
+ * pernah bertentangan.
+ */
+export function barisHarian(
+  hari: readonly HariAkun[],
+  minimum: number | null,
+): BarisHarian[] {
+  return [...hari]
+    .sort((a, b) => b.tanggal.localeCompare(a.tanggal))
+    .map((h) => ({ ...h, status: statusHari(h, minimum) }));
 }
 
 // ---------------------------------------------------------------------

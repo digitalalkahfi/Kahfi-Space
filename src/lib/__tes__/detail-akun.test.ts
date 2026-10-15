@@ -8,6 +8,7 @@ import {
   ringkasAkun,
   sejajarkan,
   sorotanAkun,
+  barisHarian,
   statusHari,
   susunHari,
   titikMetrik,
@@ -37,6 +38,32 @@ test("status hari: memenuhi, di bawah minimum, tidak lapor, libur/izin", () => {
   );
   // Akun tanpa level tidak punya batas.
   assert.equal(statusHari(hari({ tanggal: "x", upload: 1 }), null), "terlapor");
+  // Lapor di hari PIC tidak absen masuk: tidak dinilai, sama dengan kepatuhan.
+  assert.equal(
+    statusHari(hari({ tanggal: "x", upload: 1, hariKerja: false }), 5),
+    "terlapor",
+  );
+});
+
+test("tabel harian sepakat dengan sorotan dan kepatuhan", () => {
+  const h = [
+    hari({ tanggal: "2024-10-01", upload: 5 }),
+    hari({ tanggal: "2024-10-02", upload: 1 }),
+    hari({ tanggal: "2024-10-03", upload: 1, hariKerja: false }),
+    hari({ tanggal: "2024-10-04", lapor: false, hariKerja: true }),
+    hari({ tanggal: "2024-10-05", lapor: false, hariKerja: false }),
+  ];
+  const b = barisHarian(h, 3);
+  const n = (s: string) => b.filter((x) => x.status === s).length;
+  assert.equal(
+    n("kurang") + n("tidak-lapor"),
+    sorotanAkun(h, 3).hariDiBawahMinimum,
+  );
+  // Hari kerja = hari yang dinilai (Memenuhi + Di bawah + Tidak lapor).
+  assert.equal(
+    n("memenuhi") + n("kurang") + n("tidak-lapor"),
+    ringkasAkun(h).hariKerja,
+  );
 });
 
 test("susunHari: hari tanpa laporan tidak bernilai, komisi hanya bila diberikan", () => {
@@ -162,4 +189,38 @@ test("sorotan: GMV tertinggi, rata-rata per hari lapor, hari kerja di bawah mini
   assert.equal(s.hariDiBawahMinimum, 2);
   assert.equal(sorotanAkun([], null).tertinggi, null);
   assert.equal(sorotanAkun([], null).hariDiBawahMinimum, null);
+});
+
+test("tabel harian: terbaru di atas, status per hari, komisi tidak muncul bila tidak boleh", () => {
+  const b = barisHarian(
+    [
+      hari({ tanggal: "2024-10-01", gmv: 100, upload: 5 }),
+      hari({ tanggal: "2024-10-03", lapor: false, hariKerja: true }),
+      hari({ tanggal: "2024-10-02", gmv: 300, upload: 2 }),
+      hari({ tanggal: "2024-10-04", lapor: false, hariKerja: false }),
+    ],
+    3,
+  );
+  assert.deepEqual(
+    b.map((x) => [x.tanggal, x.status]),
+    [
+      ["2024-10-04", "libur"],
+      ["2024-10-03", "tidak-lapor"],
+      ["2024-10-02", "kurang"],
+      ["2024-10-01", "memenuhi"],
+    ],
+  );
+  // Akun tanpa level: hari yang dilaporkan hanya "Terlapor".
+  assert.equal(
+    barisHarian([hari({ tanggal: "2024-10-01" })], null)[0].status,
+    "terlapor",
+  );
+  // Tanpa izin komisi, `susunHari` menerima null → tidak ada angka komisi.
+  const tanpa = susunHari(
+    ["2024-10-01"],
+    new Map([["2024-10-01", { gmv: 1, upload: 1 }]]),
+    null,
+    new Set(),
+  );
+  assert.ok(barisHarian(tanpa, 1).every((x) => x.komisi === null));
 });

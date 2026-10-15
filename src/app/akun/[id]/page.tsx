@@ -8,6 +8,9 @@ import { Reveal } from "@/components/motion/reveal";
 import { PilihRentangPeriode } from "@/components/shared/pilih-rentang-periode";
 import { KartuRingkasAkun } from "@/components/akun/kartu-ringkas-akun";
 import { GrafikAkun, type DeretMetrik } from "@/components/akun/grafik-akun";
+import { SorotanAkun } from "@/components/akun/sorotan-akun";
+import { TabelHarianAkun } from "@/components/akun/tabel-harian-akun";
+import { RiwayatLevelAkun } from "@/components/akun/riwayat-level-akun";
 import {
   akunTerbuka,
   bolehLihatKomisiAkun,
@@ -16,10 +19,12 @@ import {
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
 import {
+  barisHarian,
   dalamRentang,
   rentangGrafik,
   ringkasAkun,
   sejajarkan,
+  sorotanAkun,
   titikMetrik,
   type MetrikGrafik,
 } from "@/lib/detail-akun";
@@ -82,7 +87,8 @@ export default async function DetailAkunPage({
     .at(-1) as string;
   const hari = await hariAkun(akun, awal, akhir, hariIni, lihatKomisi);
 
-  const kini = ringkasAkun(dalamRentang(hari, rentang));
+  const hariPeriode = dalamRentang(hari, rentang);
+  const kini = ringkasAkun(hariPeriode);
   const lalu = ringkasAkun(dalamRentang(hari, pembanding));
 
   const deret = (metrik: MetrikGrafik): DeretMetrik => {
@@ -206,6 +212,22 @@ export default async function DetailAkunPage({
             }
           />
         </Reveal>
+
+        <Reveal>
+          <SorotanAkun
+            sorotan={sorotanAkun(hariPeriode, akun.minimum)}
+            acuan={hariIni}
+          />
+        </Reveal>
+
+        <TabelHarianAkun
+          baris={barisHarian(hariPeriode, akun.minimum)}
+          minimum={akun.minimum}
+          lihatKomisi={lihatKomisi}
+          acuan={hariIni}
+        />
+
+        <RiwayatLevelAkun jejak={akun.jejakLevel} />
       </div>
     </AppShell>
   );
