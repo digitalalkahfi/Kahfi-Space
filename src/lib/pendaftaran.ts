@@ -16,7 +16,7 @@ export const JALUR_MENUNGGU = "/menunggu";
  * `/api` tidak dialihkan: tanggapannya JSON, dan datanya sudah dijaga
  * RLS (0208) — akun yang tidak aktif hanya menerima hasil kosong.
  */
-const TERBUKA_SAAT_TIDAK_AKTIF = [JALUR_MENUNGGU, "/auth", "/api"];
+const TERBUKA_SAAT_TIDAK_AKTIF = [JALUR_MENUNGGU, "/auth", "/api", "/privasi"];
 
 /**
  * Ke mana permintaan dialihkan berdasarkan status akses akun yang login.

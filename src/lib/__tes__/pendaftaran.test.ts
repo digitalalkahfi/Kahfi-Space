@@ -24,6 +24,8 @@ test("akun yang belum/tidak aktif ditahan di /menunggu (AC2, E6)", () => {
     assert.equal(alihkanMenurutStatus(status, "/menunggu"), null);
     assert.equal(alihkanMenurutStatus(status, "/auth/callback"), null);
     assert.equal(alihkanMenurutStatus(status, "/api/notifikasi"), null);
+    // Kebijakan privasi tetap terbaca oleh pendaftar yang menunggu.
+    assert.equal(alihkanMenurutStatus(status, "/privasi"), null);
   }
 });
 
