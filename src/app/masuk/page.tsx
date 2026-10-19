@@ -80,6 +80,12 @@ export default async function MasukPage({
             </div>
           </Card>
         ) : null}
+
+        <p className="text-center text-[11px] leading-[14px] text-muted-foreground">
+          <Link href="/privasi" className="underline-offset-2 hover:underline">
+            Kebijakan Privasi
+          </Link>
+        </p>
       </div>
     </main>
   );

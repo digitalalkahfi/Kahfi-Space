@@ -5,8 +5,12 @@ import type { Database } from "./types";
 import { harusGantiSandiDulu } from "@/lib/keamanan";
 import { alihkanMenurutStatus } from "@/lib/pendaftaran";
 
-/** Halaman yang boleh dibuka tanpa sesi. */
-const TERBUKA = ["/masuk", "/auth"];
+/**
+ * Halaman yang boleh dibuka tanpa sesi. `/privasi` wajib publik: Google
+ * mensyaratkan tautan kebijakan privasi yang bisa dibuka siapa pun
+ * sebelum login Google boleh dipakai di luar mode uji.
+ */
+const TERBUKA = ["/masuk", "/auth", "/privasi"];
 
 export function jalurTerbuka(path: string) {
   return TERBUKA.some((t) => path === t || path.startsWith(`${t}/`));
