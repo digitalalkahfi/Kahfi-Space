@@ -1,17 +1,43 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Camera, CameraOff, MapPin, RefreshCw } from "lucide-react";
+import { Camera, CameraOff, ImageUp, MapPin, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { fotoMasihBaru, ukuranKecil } from "@/lib/foto-selfie";
 
 export type HasilSelfie = { blob: Blob; pratinjau: string };
+
+/** Kecilkan gambar ke JPEG ≤ 720 px; null bila peramban gagal. */
+async function keJpeg(
+  sumber: CanvasImageSource,
+  lebarAsli: number,
+  tinggiAsli: number,
+): Promise<Blob | null> {
+  const { lebar, tinggi } = ukuranKecil(lebarAsli, tinggiAsli);
+  if (!lebar || !tinggi) return null;
+  const kanvas = document.createElement("canvas");
+  kanvas.width = lebar;
+  kanvas.height = tinggi;
+  const ctx = kanvas.getContext("2d");
+  if (!ctx) return null;
+  ctx.drawImage(sumber, 0, 0, lebar, tinggi);
+  return new Promise<Blob | null>((selesai) =>
+    kanvas.toBlob(selesai, "image/jpeg", 0.82),
+  );
+}
 
 /**
  * Pratinjau kamera depan untuk selfie absensi.
  *
  * Kamera baru dinyalakan saat tombol ditekan — bukan saat halaman dibuka —
  * supaya izin tidak diminta tanpa sebab dan baterai tidak terkuras.
+ *
+ * Jalur cadangan: sebagian peramban bawaan HP (mis. HeyTap di Realme/Oppo)
+ * dan peramban di dalam aplikasi menolak kamera untuk halaman web. Bila
+ * kamera gagal dibuka, tombol "Ambil foto dengan kamera HP" membuka
+ * aplikasi kamera bawaan lewat `<input capture>`, yang didukung hampir
+ * semua peramban. Fotonya dikecilkan dengan cara yang sama.
  */
 export function AmbilSelfie({
   onAmbil,
@@ -29,6 +55,9 @@ export function AmbilSelfie({
   const streamRef = useRef<MediaStream | null>(null);
   const [nyala, setNyala] = useState(false);
   const [galat, setGalat] = useState<string | null>(null);
+  /** Kamera di halaman gagal: tampilkan jalur kamera HP. */
+  const [pakaiCadangan, setPakaiCadangan] = useState(false);
+  const berkasRef = useRef<HTMLInputElement>(null);
 
   const matikan = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -64,9 +93,45 @@ export function AmbilSelfie({
       streamRef.current = stream;
       setNyala(true);
     } catch {
+      setPakaiCadangan(true);
       setGalat(
-        "Kamera tidak bisa dibuka. Izinkan akses kamera di peramban, lalu coba lagi.",
+        "Kamera tidak bisa dibuka di peramban ini. Pakai tombol Ambil foto dengan kamera HP di bawah, atau izinkan akses kamera lalu coba lagi.",
       );
+    }
+  };
+
+  const dariKameraHp = async (berkas: File | undefined) => {
+    if (!berkas) return;
+    if (!berkas.type.startsWith("image/")) {
+      setGalat("Berkas itu bukan foto. Ambil foto dengan kamera HP.");
+      return;
+    }
+    if (!fotoMasihBaru(berkas.lastModified, Date.now())) {
+      setGalat(
+        "Foto itu diambil lebih dari 10 menit lalu. Ambil selfie baru dengan kamera, bukan dari galeri.",
+      );
+      return;
+    }
+    const url = URL.createObjectURL(berkas);
+    try {
+      const gambar = new Image();
+      gambar.src = url;
+      await gambar.decode();
+      const blob = await keJpeg(
+        gambar,
+        gambar.naturalWidth,
+        gambar.naturalHeight,
+      );
+      if (!blob) {
+        setGalat("Foto tidak bisa diproses. Coba ambil ulang.");
+        return;
+      }
+      setGalat(null);
+      onAmbil({ blob, pratinjau: URL.createObjectURL(blob) });
+    } catch {
+      setGalat("Foto tidak bisa dibaca. Coba ambil ulang.");
+    } finally {
+      URL.revokeObjectURL(url);
     }
   };
 
@@ -79,20 +144,8 @@ export function AmbilSelfie({
     }
     setGalat(null);
 
-    const kanvas = document.createElement("canvas");
     // Turunkan resolusi: bukti kehadiran, bukti wajah — tidak perlu besar.
-    const lebar = Math.min(video.videoWidth || 640, 720);
-    const skala = lebar / (video.videoWidth || lebar);
-    kanvas.width = lebar;
-    kanvas.height = (video.videoHeight || 480) * skala;
-
-    const ctx = kanvas.getContext("2d");
-    if (!ctx) return;
-    ctx.drawImage(video, 0, 0, kanvas.width, kanvas.height);
-
-    const blob = await new Promise<Blob | null>((selesai) =>
-      kanvas.toBlob(selesai, "image/jpeg", 0.82),
-    );
+    const blob = await keJpeg(video, video.videoWidth, video.videoHeight);
     if (!blob) return;
 
     matikan();
@@ -102,7 +155,9 @@ export function AmbilSelfie({
   const ulangi = () => {
     if (hasil) URL.revokeObjectURL(hasil.pratinjau);
     onAmbil(null);
-    void nyalakan();
+    // Yang tadi memakai kamera HP langsung membukanya lagi.
+    if (pakaiCadangan) berkasRef.current?.click();
+    else void nyalakan();
   };
 
   return (
@@ -200,6 +255,33 @@ export function AmbilSelfie({
           </Button>
         )}
       </div>
+
+      {pakaiCadangan && !hasil ? (
+        <Button
+          type="button"
+          onClick={() => berkasRef.current?.click()}
+          disabled={nonaktif}
+          className="tekan-halus h-10 w-full rounded-full text-[13px] font-semibold"
+        >
+          <ImageUp className="size-4" />
+          Ambil foto dengan kamera HP
+        </Button>
+      ) : null}
+
+      <input
+        ref={berkasRef}
+        type="file"
+        accept="image/*"
+        capture="user"
+        className="hidden"
+        aria-hidden
+        tabIndex={-1}
+        onChange={(e) => {
+          void dariKameraHp(e.target.files?.[0]);
+          // Supaya memilih foto yang sama sekali lagi tetap memicu onChange.
+          e.target.value = "";
+        }}
+      />
     </div>
   );
 }
