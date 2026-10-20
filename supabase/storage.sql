@@ -82,6 +82,17 @@ create policy "foto profil ganti milik sendiri"
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
+-- Unggahan foto profil memakai upsert (menimpa berkas lama), dan upsert
+-- Storage butuh izin INSERT, UPDATE, DAN SELECT sekaligus. Bucket publik
+-- hanya membuka URL publik, bukan izin SELECT di tabel ini — tanpa policy
+-- ini setiap unggahan ditolak dengan 400 (terjadi sampai 20 Okt 2026).
+create policy "foto profil baca milik sendiri"
+  on storage.objects for select to authenticated
+  using (
+    bucket_id = 'foto-profil'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
 create policy "foto profil hapus milik sendiri"
   on storage.objects for delete to authenticated
   using (
