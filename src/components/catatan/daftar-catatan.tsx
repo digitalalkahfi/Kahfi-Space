@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { NotebookPen, Paperclip, Pin } from "lucide-react";
+import { ChevronRight, NotebookPen, Paperclip, Pin } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { tanggalRelatif } from "@/lib/format";
@@ -12,6 +12,15 @@ import {
   type Catatan,
 } from "@/lib/catatan";
 
+/**
+ * Daftar catatan; seluruh kartunya bisa diketuk.
+ *
+ * Dulu hanya judulnya yang berupa tautan, dan di HP tidak ada tanda apa
+ * pun bahwa judul itu bisa diketuk — pengguna melapor catatan lamanya
+ * "tidak bisa dibuka". Tautannya tetap satu (di judul) tetapi area
+ * ketuknya direntangkan menutupi kartu lewat `after:`, sehingga tidak ada
+ * elemen interaktif bersarang dan pembaca layar tetap membaca judulnya.
+ */
 export function DaftarCatatan({
   daftar,
   penggunaId,
@@ -39,7 +48,15 @@ export function DaftarCatatan({
         {daftar.map((c) => {
           const milik = c.pemilikId === penggunaId;
           return (
-            <li key={c.id} className="rounded-2xl bg-muted/50 p-3.5">
+            <li
+              key={c.id}
+              className="baris-interaktif relative rounded-2xl bg-muted/50 p-3.5 pr-8 hover:bg-muted active:bg-muted"
+            >
+              {/* Petunjuk bisa diketuk; di HP efek hover tidak pernah terlihat. */}
+              <ChevronRight
+                className="absolute top-1/2 right-2.5 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden
+              />
               <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
                 <span className="flex size-9 shrink-0 items-center justify-center rounded-2xl bg-card text-muted-foreground">
                   {milik && c.disematkan ? (
@@ -51,7 +68,10 @@ export function DaftarCatatan({
 
                 <div className="min-w-[10rem] flex-1">
                   <p className="text-sm leading-5 font-semibold text-pretty">
-                    <Link href={`/catatan/${c.id}`} className="hover:underline">
+                    <Link
+                      href={`/catatan/${c.id}`}
+                      className="outline-none after:absolute after:inset-0 after:rounded-2xl focus-visible:after:ring-2 focus-visible:after:ring-ring/40"
+                    >
                       {c.judul}
                     </Link>
                   </p>

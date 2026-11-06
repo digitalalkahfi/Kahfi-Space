@@ -1,29 +1,26 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Pencil, Pin, PinOff, Trash2 } from "lucide-react";
+import { Loader2, PencilLine, Pin, PinOff, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DialogKonfirmasi } from "@/components/shared/dialog-konfirmasi";
 import { PesanAksi, nadaHasil } from "@/components/shared/pesan-aksi";
-import { DialogUbahCatatan } from "@/components/catatan/dialog-catatan";
+import { useUbahCatatan } from "@/components/catatan/ubah-catatan";
 import { hapusCatatan, sematkanCatatan } from "@/app/actions/catatan";
-import type { Hasil } from "@/lib/data/hasil";
 import type { Catatan } from "@/lib/catatan";
-import type { PilihanOrganisasi } from "@/lib/types";
 
-/** Tombol milik penulis: sematkan, ubah, hapus. */
-export function AksiCatatan({
-  catatan,
-  pilihan,
-}: {
-  catatan: Catatan;
-  pilihan: PilihanOrganisasi;
-}) {
+/**
+ * Tombol milik penulis: ubah, sematkan, hapus.
+ *
+ * Ubah dibuat tombol utama yang besar karena laporan pengguna: tombol
+ * kecil sejajar Sematkan/Hapus tidak terbaca sebagai jalan untuk
+ * menyambung tulisan, sehingga catatan lama terasa "tidak bisa dibuka".
+ */
+export function AksiCatatan({ catatan }: { catatan: Catatan }) {
   const router = useRouter();
-  const [ubah, setUbah] = useState(false);
+  const { bukaUbah, hasil, setHasil } = useUbahCatatan();
   const [memproses, mulai] = useTransition();
-  const [hasil, setHasil] = useState<Hasil | null>(null);
 
   const sematkan = () => {
     if (memproses) return;
@@ -35,6 +32,14 @@ export function AksiCatatan({
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-1.5">
+        <Button
+          type="button"
+          onClick={bukaUbah}
+          className="tekan-halus h-10 rounded-full px-4 text-[13px] font-semibold"
+        >
+          <PencilLine className="size-4" />
+          Ubah / tambah tulisan
+        </Button>
         <Button
           type="button"
           variant="outline"
@@ -50,15 +55,6 @@ export function AksiCatatan({
             <Pin className="size-3.5" />
           )}
           {catatan.disematkan ? "Lepas sematan" : "Sematkan"}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setUbah(true)}
-          className="tekan-halus sentuh-nyaman h-8 rounded-full px-3 text-[11px] font-semibold"
-        >
-          <Pencil className="size-3.5" />
-          Ubah
         </Button>
         <DialogKonfirmasi
           pemicu={
@@ -83,16 +79,9 @@ export function AksiCatatan({
         />
       </div>
 
-      {hasil ? (
+      {hasil?.pesan ? (
         <PesanAksi nada={nadaHasil(hasil)}>{hasil.pesan}</PesanAksi>
       ) : null}
-
-      <DialogUbahCatatan
-        catatan={catatan}
-        pilihan={pilihan}
-        buka={ubah}
-        onBuka={setUbah}
-      />
     </div>
   );
 }

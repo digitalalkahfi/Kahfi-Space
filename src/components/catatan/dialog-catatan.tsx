@@ -1,6 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import {
+  useLayoutEffect,
+  useRef,
+  useState,
+  useTransition,
+  type RefObject,
+} from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Plus } from "lucide-react";
 import {
@@ -30,6 +36,7 @@ import {
   ubahCatatan,
   type MasukanCatatan,
 } from "@/app/actions/catatan";
+import type { Hasil } from "@/lib/data/hasil";
 import type { KodeUnit, PilihanOrganisasi } from "@/lib/types";
 
 const KELAS_LABEL = "text-[13px] leading-[18px] font-semibold";
@@ -37,6 +44,42 @@ const KELAS_INPUT =
   "h-12 w-full rounded-xl bg-muted px-4 text-[15px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40";
 const KELAS_AREA =
   "w-full rounded-xl bg-muted px-4 py-3 text-[13px] leading-[18px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40";
+
+/** Sama dengan potongan di server action; hanya ditampilkan, tidak diubah. */
+const BATAS_ISI = 20000;
+/**
+ * Penghitung baru muncul menjelang batas: di bawah itu angkanya cuma
+ * gangguan, tetapi tanpa angka orang yang tiba-tiba tidak bisa mengetik
+ * lagi tidak tahu sebabnya.
+ */
+const AMBANG_PENGHITUNG = 18000;
+
+/**
+ * Tinggi textarea mengikuti isinya, dibatasi CSS `max-h-*`.
+ *
+ * `field-sizing: content` belum ada di Chromium lama yang masih dipakai
+ * sebagian HP tim, jadi tingginya dihitung sendiri. Mengosongkan tinggi
+ * dulu membuat `rows` tetap jadi tinggi minimum.
+ */
+function useTinggiIkutIsi(
+  ref: RefObject<HTMLTextAreaElement | null>,
+  isi: string,
+) {
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    // Mengecilkan sesaat ke `auto` ikut memendekkan dialog yang bergulir,
+    // sehingga posisinya terpotong ke atas di setiap ketikan bila dialog
+    // sedang digulir ke bawah. Posisi gulir keduanya dipulihkan.
+    const dialog = el.closest<HTMLElement>('[data-slot="dialog-content"]');
+    const gulirDialog = dialog?.scrollTop ?? 0;
+    const gulirArea = el.scrollTop;
+    el.style.height = "auto";
+    el.style.height = `${el.scrollHeight}px`;
+    el.scrollTop = gulirArea;
+    if (dialog) dialog.scrollTop = gulirDialog;
+  }, [ref, isi]);
+}
 
 /**
  * Formulir catatan, dipakai dialog tambah maupun ubah.
@@ -48,12 +91,20 @@ function FormCatatan({
   pilihan,
   unitBawaan,
   awal,
+  refIsi,
   onSelesai,
 }: {
   pilihan: PilihanOrganisasi;
   unitBawaan: KodeUnit | null;
   awal?: Catatan;
-  onSelesai: (hasil: { id?: string; pesan: string | null }) => void;
+  /** Dipakai dialog ubah untuk menaruh kursor di akhir isi. */
+  refIsi?: RefObject<HTMLTextAreaElement | null>;
+  onSelesai: (hasil: {
+    id?: string;
+    pesan: string | null;
+    /** Hanya saat mengubah: dasar pesan berhasil di halaman detail. */
+    hasil?: Hasil;
+  }) => void;
 }) {
   const [judul, setJudul] = useState(awal?.judul ?? "");
   const [isi, setIsi] = useState(awal?.isi ?? "");
@@ -69,6 +120,9 @@ function FormCatatan({
   const [lampiran, setLampiran] = useState((awal?.lampiran ?? []).join("\n"));
   const [menyimpan, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
+  const refCadangan = useRef<HTMLTextAreaElement>(null);
+  const refArea = refIsi ?? refCadangan;
+  useTinggiIkutIsi(refArea, isi);
 
   const daftarLampiran = lampiran
     .split("\n")
@@ -96,7 +150,7 @@ function FormCatatan({
       if (awal) {
         const hasil = await ubahCatatan(awal.id, input);
         if (hasil.ok || hasil.kode === "demo") {
-          onSelesai({ pesan: hasil.ok ? null : (hasil.pesan ?? null) });
+          onSelesai({ pesan: hasil.pesan ?? null, hasil });
           return;
         }
         setPesan(hasil.pesan ?? null);
@@ -138,14 +192,39 @@ function FormCatatan({
             Isi
           </label>
           <textarea
+            ref={refArea}
             id="isi-catatan"
             value={isi}
-            maxLength={20000}
-            rows={8}
+            maxLength={BATAS_ISI}
+            // Saat mengubah, isinya sudah ada dan sering panjang; ruang
+            // yang lebih tinggi mengurangi gulir di dalam dialog yang juga
+            // bergulir.
+            rows={awal ? 12 : 8}
             onChange={(e) => setIsi(e.target.value)}
             placeholder="Tulis apa adanya; baris dan paragraf ikut tersimpan."
-            className={KELAS_AREA}
+            aria-describedby={
+              isi.length > AMBANG_PENGHITUNG ? "hitung-isi-catatan" : undefined
+            }
+            className={cn(
+              KELAS_AREA,
+              "max-h-[50dvh] resize-none overflow-y-auto",
+            )}
           />
+          {isi.length > AMBANG_PENGHITUNG ? (
+            <p
+              id="hitung-isi-catatan"
+              className={cn(
+                "text-right text-[11px] leading-[14px] tabular-nums",
+                isi.length >= BATAS_ISI
+                  ? "font-semibold text-warn-text"
+                  : "text-muted-foreground",
+              )}
+            >
+              {isi.length.toLocaleString("id-ID")} /{" "}
+              {BATAS_ISI.toLocaleString("id-ID")} huruf
+              {isi.length >= BATAS_ISI ? " — batas tercapai" : ""}
+            </p>
+          ) : null}
         </div>
 
         <fieldset className="space-y-1.5">
@@ -338,15 +417,39 @@ export function DialogUbahCatatan({
   pilihan,
   buka,
   onBuka,
+  fokusAkhirIsi = false,
+  onTersimpan,
 }: {
   catatan: Catatan;
   pilihan: PilihanOrganisasi;
   buka: boolean;
   onBuka: (b: boolean) => void;
+  /**
+   * Kebanyakan orang membuka catatan lamanya untuk menyambung tulisan,
+   * bukan mengganti judul — jadi kursor langsung ditaruh di akhir isi.
+   */
+  fokusAkhirIsi?: boolean;
+  onTersimpan?: (hasil: Hasil) => void;
 }) {
+  const refIsi = useRef<HTMLTextAreaElement>(null);
+
   return (
     <Dialog open={buka} onOpenChange={onBuka}>
-      <DialogContent className="max-h-[85dvh] overflow-y-auto rounded-3xl sm:max-w-lg">
+      <DialogContent
+        // Fokus diatur di sini, bukan lewat `autoFocus`: Radix memindahkan
+        // fokus setelah dialog terpasang dan akan menimpa fokus yang
+        // dipasang lebih awal.
+        onOpenAutoFocus={(e) => {
+          const el = refIsi.current;
+          if (!fokusAkhirIsi || !el) return;
+          e.preventDefault();
+          const akhir = el.value.length;
+          el.focus({ preventScroll: true });
+          el.setSelectionRange(akhir, akhir);
+          el.scrollTop = el.scrollHeight;
+        }}
+        className="max-h-[85dvh] overflow-y-auto rounded-3xl sm:max-w-2xl"
+      >
         <DialogHeader>
           <DialogTitle>Ubah catatan</DialogTitle>
           <DialogDescription>
@@ -358,7 +461,11 @@ export function DialogUbahCatatan({
             pilihan={pilihan}
             unitBawaan={catatan.unitKode}
             awal={catatan}
-            onSelesai={() => onBuka(false)}
+            refIsi={refIsi}
+            onSelesai={({ hasil }) => {
+              onBuka(false);
+              if (hasil) onTersimpan?.(hasil);
+            }}
           />
         ) : null}
       </DialogContent>
