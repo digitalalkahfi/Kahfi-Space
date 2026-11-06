@@ -19,7 +19,7 @@ import {
   LABEL_STATUS_MASUKAN,
 } from "@/lib/masukan";
 import { bolehKelolaMasukan, masukanDariId } from "@/lib/data/masukan";
-import { daftarAnggota, peranValid, sesiSaatIni } from "@/lib/data/sesi";
+import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 
 export async function generateMetadata({
   params,
@@ -46,13 +46,6 @@ export default async function DetailMasukanPage({
   if (!masukan) notFound();
 
   const bolehKelola = bolehKelolaMasukan(pengguna);
-  const anggota = bolehKelola
-    ? (await daftarAnggota()).map((a) => ({
-        id: a.id,
-        nama: a.nama,
-        jabatan: a.jabatan,
-      }))
-    : [];
 
   const gaya = GAYA_STATUS_MASUKAN[masukan.status];
 
@@ -147,7 +140,7 @@ export default async function DetailMasukanPage({
 
         {bolehKelola ? (
           <Reveal>
-            <PanelStatusMasukan masukan={masukan} anggota={anggota} />
+            <PanelStatusMasukan masukan={masukan} />
           </Reveal>
         ) : null}
 

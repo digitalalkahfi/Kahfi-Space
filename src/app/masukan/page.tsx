@@ -6,7 +6,7 @@ import {
   RingkasanMasukan,
 } from "@/components/masukan/daftar-masukan";
 import { Reveal } from "@/components/motion/reveal";
-import { daftarMasukan } from "@/lib/data/masukan";
+import { bolehKelolaMasukan, daftarMasukan } from "@/lib/data/masukan";
 import { SaringMasukan } from "@/components/masukan/saring-masukan";
 import { bacaSaringanMasukan, saringMasukan } from "@/lib/masukan";
 import { DialogKirimMasukan } from "@/components/masukan/dialog-masukan";
@@ -74,7 +74,11 @@ export default async function MasukanPage({
         />
 
         <Reveal>
-          <DaftarMasukan daftar={daftar} acuan={acuan} />
+          <DaftarMasukan
+            daftar={daftar}
+            acuan={acuan}
+            bolehKelola={bolehKelolaMasukan(pengguna)}
+          />
         </Reveal>
       </div>
     </AppShell>

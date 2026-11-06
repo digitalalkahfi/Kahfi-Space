@@ -121,7 +121,7 @@ export async function ubahDukungan(input: {
 }
 
 /**
- * Ubah status masukan, sekaligus menunjuk penanggung jawabnya.
+ * Ubah status masukan.
  *
  * Setiap perubahan menyisakan jejak (migrasi 0057), dan penolakan wajib
  * disertai alasan — laporan yang menghilang tanpa kabar adalah cara
@@ -131,7 +131,6 @@ export async function ubahStatusMasukan(input: {
   masukanId: string;
   status: StatusMasukan;
   alasanTolak?: string;
-  ditugaskanKe?: string | null;
 }): Promise<Hasil> {
   if (!input.masukanId) return gagal("Masukan tidak dikenali.", "validasi");
   if (modeData() === "demo") return BALASAN_DEMO;
@@ -165,17 +164,35 @@ export async function ubahStatusMasukan(input: {
     }
   }
 
+  // Semua laporan dikerjakan pengembangnya sendiri, jadi pengelola yang
+  // menandai "dikerjakan" otomatis tercatat sebagai pemiliknya — database
+  // menolak status itu tanpa pemilik (0094), dan memilih orang setiap kali
+  // hanya menambah satu langkah yang jawabannya selalu sama. Status lain
+  // melepas pemiliknya, seperti sebelumnya: penanggung jawab lama yang
+  // tertinggal masih boleh menggerakkan status (0093), termasuk membuka
+  // lagi laporan yang sudah ditolak atau diselesaikan pengelola.
+  const perubahan: {
+    status: StatusMasukan;
+    alasan_tolak?: string;
+    ditugaskan_ke?: string | null;
+  } = { status: input.status };
+  if (pengelola) {
+    perubahan.ditugaskan_ke =
+      input.status === "dikerjakan" ? pengguna.id : null;
+  }
+  if (pengelola && input.status === "ditolak") {
+    perubahan.alasan_tolak = (input.alasanTolak ?? "").trim().slice(0, 300);
+    if (perubahan.alasan_tolak.length < 10) {
+      return gagal(
+        "Tulis alasan penolakannya (minimal 10 huruf) — pelapor membacanya.",
+        "validasi",
+      );
+    }
+  }
+
   const { error } = await sb
     .from("feedback")
-    .update(
-      pengelola
-        ? {
-            status: input.status,
-            alasan_tolak: (input.alasanTolak ?? "").trim().slice(0, 300),
-            ditugaskan_ke: input.ditugaskanKe ?? null,
-          }
-        : { status: input.status },
-    )
+    .update(perubahan)
     .eq("id", input.masukanId);
 
   if (error) {
