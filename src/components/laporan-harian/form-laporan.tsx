@@ -17,6 +17,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { InputGmv } from "@/components/laporan-harian/input-gmv";
 import { KolomCatatan } from "@/components/laporan-harian/kolom-catatan";
+import { PilihanTanpaPenjualan } from "@/components/laporan-harian/pilihan-tanpa-penjualan";
 import {
   PilihTanggalLaporan,
   tautanTanggalLaporan,
@@ -165,6 +166,8 @@ export function FormLaporan({
 
   const [dipilih, setDipilih] = useState(sisa[0] ? kunciSasaran(sisa[0]) : "");
   const [nilai, setNilai] = useState(0);
+  // GMV nol harus dinyatakan: tanpa centang ini ia dianggap lupa diisi.
+  const [tanpaPenjualan, setTanpaPenjualan] = useState(false);
   const [komisi, setKomisi] = useState(0);
   // Komisi wajib diisi (BR-K1), dan "0" berbeda dari "belum diisi":
   // kotak kosong berarti pelapor belum memutuskan.
@@ -204,6 +207,7 @@ export function FormLaporan({
     gmvLive: adaLive ? gmvLive : null,
     jamLive: adaLive ? jamLiveAngka : null,
     catatan,
+    tanpaPenjualan,
   };
   // `bersihkanIsi` yang memutuskan kolom mana ikut terkirim: angka komisi
   // yang sempat diketik untuk akun Affiliator tidak boleh ikut saat pelapor
@@ -232,6 +236,7 @@ export function FormLaporan({
       minimum,
     });
     setNilai(0);
+    setTanpaPenjualan(false);
     setKomisi(0);
     setKomisiKosong(true);
     setUpload(0);
@@ -374,6 +379,7 @@ export function FormLaporan({
               gmvLive: bersih.gmvLive,
               jamLive: bersih.jamLive,
               catatan: bersih.catatan,
+              tanpaPenjualan: bersih.tanpaPenjualan,
               tanggal,
             });
             if (hasil.ok || hasil.kode === "demo") {
@@ -404,6 +410,8 @@ export function FormLaporan({
               // terbawa diam-diam.
               setKomisi(0);
               setKomisiKosong(true);
+              // Pernyataan "tidak ada penjualan" juga milik satu sasaran.
+              setTanpaPenjualan(false);
             }}
             sudahDilaporkan={terlapor}
           />
@@ -439,8 +447,12 @@ export function FormLaporan({
           </div>
 
           <InputGmv
+            // Dipasang ulang saat pilihannya berganti supaya angka yang
+            // sempat diketik tidak tertinggal di kotak.
+            key={tanpaPenjualan ? "gmv-nol" : "gmv"}
             nilai={nilai}
             onUbah={setNilai}
+            nonaktif={tanpaPenjualan}
             suffix={
               nilai > 0 && target > 0 ? (
                 <span
@@ -458,7 +470,17 @@ export function FormLaporan({
             }
           />
 
-          {nilai > 0 && target > 0 ? (
+          {tanpaPenjualan ? (
+            <p
+              id="gmv-bantuan"
+              className="text-[11px] leading-[14px] text-muted-foreground"
+            >
+              GMV {kapan} dicatat Rp 0.
+              {punyaKolom(unit, "komisi")
+                ? " Komisi dan jumlah upload tetap diisi apa adanya."
+                : ""}
+            </p>
+          ) : nilai > 0 && target > 0 ? (
             <p
               id="gmv-bantuan"
               className="tabular text-[11px] leading-[14px] text-muted-foreground"
@@ -482,6 +504,18 @@ export function FormLaporan({
               adanya.
             </p>
           )}
+
+          <PilihanTanpaPenjualan
+            kapan={kapan}
+            nilai={tanpaPenjualan}
+            onUbah={(pilih) => {
+              setTanpaPenjualan(pilih);
+              if (pilih) {
+                setNilai(0);
+                setGmvLive(0);
+              }
+            }}
+          />
         </div>
 
         {punyaKolom(unit, "komisi") || punyaKolom(unit, "jumlahUpload") ? (
@@ -606,12 +640,14 @@ export function FormLaporan({
                     GMV dari LIVE
                   </label>
                   <InputGmv
+                    key={tanpaPenjualan ? "gmv-live-nol" : "gmv-live"}
                     id="gmv-live"
                     ringkas
                     maks={MAKS_GMV}
                     label="GMV LIVE"
                     nilai={gmvLive}
                     onUbah={setGmvLive}
+                    nonaktif={tanpaPenjualan}
                   />
                   <p className="text-[11px] leading-[14px] text-muted-foreground">
                     Bagian dari GMV di atas yang berasal dari LIVE.
@@ -683,9 +719,7 @@ export function FormLaporan({
             ? statusUpload === "kurang"
               ? "Siap dikirim — di bawah minimum tetap dicatat apa adanya"
               : "Siap dikirim"
-            : nilai === 0
-              ? "Isi nilai GMV dulu untuk mengirim laporan"
-              : (salah ?? "Periksa lagi isiannya")}
+            : (salah ?? "Periksa lagi isiannya")}
         </p>
 
         {pesan ? (
@@ -724,7 +758,8 @@ export function FormLaporan({
 function RingkasTerkirim({ laporan }: { laporan: LaporanTerkirim }) {
   return (
     <>
-      {laporan.label} · {rupiahPenuh(laporan.gmv)}
+      {laporan.label} ·{" "}
+      {laporan.gmv > 0 ? rupiahPenuh(laporan.gmv) : "tidak ada penjualan"}
       {laporan.komisi !== null
         ? ` · komisi ${rupiahRingkas(laporan.komisi)}`
         : ""}

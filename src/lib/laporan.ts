@@ -101,6 +101,12 @@ export type IsiLaporan = {
   /** Lama LIVE dalam jam; null bila hari itu tidak LIVE. */
   jamLive?: number | null;
   catatan: string;
+  /**
+   * Pelapor menyatakan hari itu memang tidak ada penjualan, yang membedakan
+   * GMV Rp 0 dari lupa mengisi. Hanya dipakai saat pemeriksaan dan tidak
+   * disimpan: GMV 0 yang tersimpan sudah berarti jualan nihil (0110).
+   */
+  tanpaPenjualan?: boolean;
 };
 
 export const ISI_KOSONG: IsiLaporan = {
@@ -110,6 +116,7 @@ export const ISI_KOSONG: IsiLaporan = {
   gmvLive: null,
   jamLive: null,
   catatan: "",
+  tanpaPenjualan: false,
 };
 
 /**
@@ -128,6 +135,7 @@ export function bersihkanIsi(
     gmvLive: punyaKolom(unit, "gmvLive") ? (isi.gmvLive ?? null) : null,
     jamLive: punyaKolom(unit, "jamLive") ? (isi.jamLive ?? null) : null,
     catatan: isi.catatan.trim(),
+    tanpaPenjualan: isi.tanpaPenjualan === true,
   };
 }
 
@@ -149,6 +157,10 @@ export function periksaKomisiWajib(
     : null;
 }
 
+/** Pesan saat GMV nol tanpa pernyataan "Tidak ada penjualan". */
+export const PESAN_GMV_KOSONG =
+  'GMV belum diisi. Centang "Tidak ada penjualan" bila hari itu memang nol.';
+
 /**
  * Satu tempat pemeriksaan isi, dipakai form (untuk mengunci tombol) dan
  * Server Action (untuk menolak kiriman yang tidak lewat form). Mengembalikan
@@ -159,12 +171,19 @@ export function periksaIsiLaporan(
   isi: IsiLaporan,
 ): string | null {
   if (!Number.isFinite(isi.gmv) || isi.gmv < 0) return "Nilai GMV tidak sah.";
+  if (isi.tanpaPenjualan === true && isi.gmv > 0) {
+    return '"Tidak ada penjualan" dicentang, tetapi GMV terisi. Pilih salah satu.';
+  }
   // Komisi yang masuk hari ini bisa berasal dari pesanan hari-hari
   // sebelumnya (K1, T2), jadi hari tanpa GMV tetap sah dilaporkan bila
-  // memang ada komisi masuk. Tanpa keduanya, GMV nol hampir selalu
-  // berarti lupa diisi.
-  if (isi.gmv === 0 && !(isi.komisi !== null && isi.komisi > 0)) {
-    return "GMV belum diisi.";
+  // memang ada komisi masuk, atau bila pelapor menyatakan sendiri tidak ada
+  // penjualan. Tanpa keduanya, GMV nol hampir selalu berarti lupa diisi.
+  if (
+    isi.gmv === 0 &&
+    isi.tanpaPenjualan !== true &&
+    !(isi.komisi !== null && isi.komisi > 0)
+  ) {
+    return PESAN_GMV_KOSONG;
   }
   if (isi.gmv > MAKS_GMV) return "Nilai GMV di luar batas wajar, periksa lagi.";
 

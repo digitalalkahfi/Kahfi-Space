@@ -33,6 +33,7 @@ export function InputGmv({
   ringkas = false,
   label,
   onKosong,
+  nonaktif = false,
 }: {
   id?: string;
   /** Nilai dalam rupiah penuh. */
@@ -52,6 +53,11 @@ export function InputGmv({
    * membedakan "belum diisi" dari "0", mis. komisi wajib (BR-K1).
    */
   onKosong?: (kosong: boolean) => void;
+  /**
+   * Kotak tidak bisa diisi, mis. saat "Tidak ada penjualan" dicentang. Teks
+   * yang sudah diketik tidak ikut hilang; pasang ulang lewat `key` bila perlu.
+   */
+  nonaktif?: boolean;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   const caretRef = useRef<number | null>(null);
@@ -107,6 +113,7 @@ export function InputGmv({
       className={cn(
         "flex items-center gap-2 rounded-xl bg-muted focus-within:ring-2 focus-within:ring-ring/40",
         ringkas ? "px-3 py-2.5" : "px-4 py-3",
+        nonaktif && "opacity-60",
         className,
       )}
     >
@@ -130,13 +137,14 @@ export function InputGmv({
         aria-label={label}
         value={teks}
         onChange={tangani}
+        disabled={nonaktif}
         className={cn(
           "tabular w-full min-w-0 bg-transparent font-bold tracking-tight outline-none placeholder:text-muted-foreground/60",
           ringkas ? "text-[15px] leading-5" : "text-[22px] leading-7",
         )}
       />
 
-      {teks ? (
+      {teks && !nonaktif ? (
         <button
           type="button"
           onClick={kosongkan}
