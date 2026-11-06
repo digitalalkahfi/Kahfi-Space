@@ -345,6 +345,66 @@ uji("Leader seunit yang tidak tercatat di akun tetap ditolak", async () => {
   }
 });
 
+uji("yang melihat laporan membaca jejaknya; komisi terkunci", async () => {
+  const gadget = await idAkun("@gadget_daily");
+  const laporan = await kirimanManager("@gadget_daily");
+  await sebagai(
+    db,
+    U.manager,
+    `select perbaiki_laporan_harian($1, 2100000, $2, null, 60000)`,
+    [laporan, ALASAN],
+  );
+  await sebagaiAdmin(db, `update accounts set co_leader_id=null where id=$1`, [
+    gadget,
+  ]);
+  try {
+    const jumlahTerbaca = async (orang) =>
+      (
+        await sebagai(
+          db,
+          orang,
+          `select count(*)::int n from daily_report_revisions where report_id=$1`,
+          [laporan],
+        )
+      ).rows[0].n;
+
+    harusSama(
+      await bolehMenurutRiwayat(K.dewi, laporan),
+      false,
+      "Leader melihat laporan ini, tetapi tidak berhak memperbaikinya",
+    );
+    harusSama(await jumlahTerbaca(K.dewi), 1, "jejaknya ikut terbaca");
+    harusSama(
+      await jumlahTerbaca(U.anisa),
+      0,
+      "yang tidak melihat laporannya tidak melihat jejaknya",
+    );
+
+    await harusDitolak(
+      () =>
+        sebagai(
+          db,
+          K.dewi,
+          `select komisi_baru from daily_report_revisions where report_id=$1`,
+          [laporan],
+        ),
+      "kolom komisi di jejak tetap terkunci",
+    );
+    const { rows } = await sebagai(
+      db,
+      K.dewi,
+      `select * from komisi_revisi(array[$1::uuid])`,
+      [laporan],
+    );
+    harusSama(rows.length, 0, "pintu komisi tetap tertutup tanpa akses lihat");
+  } finally {
+    await sebagaiAdmin(db, `update accounts set co_leader_id=$1 where id=$2`, [
+      K.dewi,
+      gadget,
+    ]);
+  }
+});
+
 uji("Leader dan Co-Leader unit memperbaiki laporan unitnya", async () => {
   const mcn = (await sebagaiAdmin(db, `select id from units where kode='mcn'`))
     .rows[0].id;

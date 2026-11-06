@@ -117,23 +117,17 @@ revoke execute on function perbaiki_laporan_harian(uuid, numeric, text, text, nu
 grant execute on function perbaiki_laporan_harian(uuid, numeric, text, text, numeric, integer, numeric, numeric) to authenticated;
 
 -- ---------------------------------------------------------------------
--- Yang boleh memperbaiki boleh membaca jejaknya. Tanpa ini PIC melihat
--- "Belum pernah diperbaiki" pada laporan yang baru saja ia perbaiki.
+-- Yang bisa melihat laporan bisa membaca jejaknya. Sejak 0173 laporan
+-- akun terbaca lebih luas daripada jejaknya, sehingga PIC dan atasannya
+-- melihat "Belum pernah diperbaiki" pada laporan yang sudah direvisi.
+-- Subquery ini tunduk pada `daily_reports_baca`. Angka komisi di jejak
+-- tetap terkunci per kolom (0210) dan hanya terbaca lewat `komisi_revisi`.
 -- ---------------------------------------------------------------------
 drop policy if exists revisi_baca on daily_report_revisions;
 create policy revisi_baca on daily_report_revisions
   for select
   using (
-    exists (
-      select 1 from daily_reports r
-      where r.id = report_id
-        and (
-          lintas_angka()
-          or r.user_id = auth.uid()
-          or boleh_orang(r.user_id)
-          or boleh_perbaiki_laporan(r.user_id, r.account_id, r.unit_id)
-        )
-    )
+    exists (select 1 from daily_reports r where r.id = report_id)
   );
 
 -- ---------------------------------------------------------------------
