@@ -313,6 +313,37 @@ export function bolehLihatLaporan(
   );
 }
 
+/**
+ * Siapa boleh memperbaiki sebuah laporan harian.
+ *
+ * Cerminan `boleh_perbaiki_laporan` (migrasi 0216) untuk mode demo, yang
+ * tidak punya database: pengirimnya, CEO/Manager, dan yang berhak mengirim
+ * laporan untuk sasaran itu.
+ */
+export function bolehPerbaikiLaporan(
+  pengguna: { role: string; nama: string; unitId: KodeUnit | null },
+  laporan: {
+    /** Nama pelapor. */
+    pelapor: string;
+    /** Unit sasaran, hanya terisi pada laporan tingkat unit. */
+    unitLaporan: KodeUnit | null;
+    /** Nama PIC dan Co-Leader akun yang dilaporkan, bila sasarannya akun. */
+    picAkun: string | null;
+    coLeaderAkun: string | null;
+  },
+): boolean {
+  if (["CEO", "Manager"].includes(pengguna.role)) return true;
+  if (laporan.pelapor === pengguna.nama) return true;
+  if (laporan.picAkun === pengguna.nama) return true;
+  if (laporan.coLeaderAkun === pengguna.nama) return true;
+
+  return (
+    ["Leader", "Co-Leader"].includes(pengguna.role) &&
+    laporan.unitLaporan !== null &&
+    laporan.unitLaporan === pengguna.unitId
+  );
+}
+
 // ---------------------------------------------------------------------
 // Tanggal laporan dan laporan susulan
 //

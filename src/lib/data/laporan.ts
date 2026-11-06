@@ -14,6 +14,7 @@ import { hariIniWib } from "@/lib/format";
 import { targetHarianGrd } from "@/lib/goal";
 import {
   bolehLihatLaporan,
+  bolehPerbaikiLaporan,
   kunciSasaranLaporan,
   statusLaporanBulan,
   tanggalDataTerakhir,
@@ -265,6 +266,7 @@ type BarisLaporan = {
   unit_kode: KodeUnit | null;
   unit_nama: string | null;
   pelapor_nama: string | null;
+  boleh_perbaiki: boolean;
 };
 
 function targetUntuk(
@@ -323,6 +325,12 @@ export async function riwayatLaporan(
           label: l.akun ?? unit?.nama ?? "—",
           departemen: ((akun?.unit ?? l.unit) as KodeUnit) ?? null,
           pelaporNama: l.user,
+          bolehPerbaiki: bolehPerbaikiLaporan(pengguna, {
+            pelapor: l.user,
+            unitLaporan: (l.unit as KodeUnit) ?? null,
+            picAkun: akun?.pic ?? null,
+            coLeaderAkun: akun?.co_leader ?? null,
+          }),
           gmv: l.gmv,
           // Mode demo tidak punya tabel akses lihat komisi (0212): selain
           // CEO/Manager tidak melihat komisi sama sekali.
@@ -420,6 +428,7 @@ function bentukLaporan(
     label: b.akun_username ?? b.unit_nama ?? "—",
     departemen: b.akun_unit_kode ?? b.unit_kode,
     pelaporNama: b.pelapor_nama ?? "—",
+    bolehPerbaiki: b.boleh_perbaiki,
     gmv: Number(b.gmv),
     komisi: komisi.get(b.id) ?? null,
     komisiTerlihat: komisi.has(b.id),

@@ -454,12 +454,18 @@ export function TabelRiwayat({
                             Terkirim
                           </span>
                         )}
-                        <DialogRevisi
-                          laporan={{ ...r, ...angka }}
-                          jejak={jejak}
-                          olehNama={olehNama}
-                          onSimpan={simpanRevisi}
-                        />
+                        {r.bolehPerbaiki ? (
+                          <DialogRevisi
+                            laporan={{ ...r, ...angka }}
+                            jejak={jejak}
+                            olehNama={olehNama}
+                            onSimpan={simpanRevisi}
+                          />
+                        ) : (
+                          <span className="text-right text-[11px] leading-[14px] text-muted-foreground">
+                            Dikirim oleh {r.pelaporNama}
+                          </span>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -564,12 +570,18 @@ export function TabelRiwayat({
                       Terkirim
                     </span>
                   )}
-                  <DialogRevisi
-                    laporan={{ ...r, ...angka }}
-                    jejak={jejak}
-                    olehNama={olehNama}
-                    onSimpan={simpanRevisi}
-                  />
+                  {r.bolehPerbaiki ? (
+                    <DialogRevisi
+                      laporan={{ ...r, ...angka }}
+                      jejak={jejak}
+                      olehNama={olehNama}
+                      onSimpan={simpanRevisi}
+                    />
+                  ) : (
+                    <span className="text-right text-[11px] leading-[14px] text-muted-foreground">
+                      Dikirim oleh {r.pelaporNama}
+                    </span>
+                  )}
                 </div>
               </div>
             </Card>
