@@ -241,6 +241,12 @@ export type LaporanHarian = {
    * Leader adalah orangnya.
    */
   pelaporNama: string;
+  /**
+   * Pengguna yang sedang membuka boleh memperbaiki laporan ini (0216).
+   * Ditentukan database, supaya layar tidak menawarkan perbaikan yang nanti
+   * ditolak saat disimpan.
+   */
+  bolehPerbaiki: boolean;
   gmv: number;
   /** Kolom departemen Affiliator; null bagi departemen yang tak memakainya. */
   komisi: number | null;
