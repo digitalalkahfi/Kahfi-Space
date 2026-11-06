@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   CalendarDays,
   CheckCircle2,
@@ -43,6 +44,7 @@ export function FormIzin({ hariIni }: { hariIni: string }) {
   const [jamSelesai, setJamSelesai] = useState("10:00");
   const [alasan, setAlasan] = useState("");
   const [mengirim, mulaiKirim] = useTransition();
+  const router = useRouter();
   const [hasil, setHasil] = useState<{ ok: boolean; teks: string } | null>(
     null,
   );
@@ -68,16 +70,29 @@ export function FormIzin({ hariIni }: { hariIni: string }) {
     if (salah || mengirim) return;
     setHasil(null);
     mulaiKirim(async () => {
-      const r = await ajukanIzin({
-        bentuk,
-        mulai: isi.mulai,
-        selesai: isi.selesai,
-        jamMulai: isi.jamMulai,
-        jamSelesai: isi.jamSelesai,
-        alasan: isi.alasan,
-      });
-      setHasil({ ok: r.ok, teks: r.pesan ?? "Pengajuan terkirim." });
-      if (r.ok) setAlasan("");
+      try {
+        const r = await ajukanIzin({
+          bentuk,
+          mulai: isi.mulai,
+          selesai: isi.selesai,
+          jamMulai: isi.jamMulai,
+          jamSelesai: isi.jamSelesai,
+          alasan: isi.alasan,
+        });
+        setHasil({ ok: r.ok, teks: r.pesan ?? "Pengajuan terkirim." });
+        if (r.ok) setAlasan("");
+        // Tab yang terbuka sejak kemarin membawa tanggal kemarin; setelah
+        // ditolak, segarkan supaya percobaan berikutnya memakai hari ini.
+        else router.refresh();
+      } catch (e) {
+        // Server Action yang melempar (sinyal putus, aplikasi baru
+        // diperbarui) jangan sampai menjatuhkan halaman izin.
+        console.error("Pengajuan izin gagal terkirim:", e);
+        setHasil({
+          ok: false,
+          teks: "Pengajuan gagal terkirim karena koneksi terputus atau aplikasi baru diperbarui. Muat ulang halaman, lalu coba lagi.",
+        });
+      }
     });
   };
 
@@ -320,7 +335,11 @@ export function FormIzin({ hariIni }: { hariIni: string }) {
           ) : (
             <Send className="size-4" />
           )}
-          {mengirim ? "Mengirim…" : "Kirim pengajuan"}
+          {/* Bentuknya disebut di tombol: bawaan formulir adalah Sakit, dan
+              salah kirim berarti tercatat sakit sehari penuh. */}
+          {mengirim
+            ? "Mengirim…"
+            : `Kirim pengajuan ${LABEL_BENTUK[bentuk].label.toLowerCase()}`}
         </Button>
       </form>
     </Card>

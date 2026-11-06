@@ -408,6 +408,10 @@ export async function pengajuanMenunggu(
        users:user_id (nama, units:unit_id (nama))`,
     )
     .eq("persetujuan", "diajukan")
+    // RLS juga meloloskan baris milik sendiri, padahal pengajuan sendiri
+    // tidak boleh diputuskan sendiri (0019) — tombolnya hanya berujung
+    // galat. Padanan saringan `a.user !== pengguna.nama` di mode demo.
+    .neq("user_id", pengguna.id)
     // Hari lanjutan izin terencana ikut hari pertamanya; satu pengajuan,
     // satu keputusan.
     .is("izin_induk_id", null)
@@ -538,7 +542,15 @@ export async function izinSaya(
     id: a.id,
     tanggal: a.tanggal,
     sampai: hariTerakhir.get(a.id) ?? a.tanggal,
-    jenis: a.izin_jenis === "jam" ? "jam" : (a.status as "izin" | "sakit"),
+    // Izin/sakit yang ditolak lalu diabsen masuk berstatus hadir, jadi
+    // jenisnya dibaca dari izin_jenis dulu; sakit satu-satunya pengajuan
+    // tanpa izin_jenis (0132).
+    jenis:
+      a.izin_jenis === "jam"
+        ? "jam"
+        : a.izin_jenis === "terencana" || a.status === "izin"
+          ? "izin"
+          : "sakit",
     jamMulai: a.izin_mulai,
     jamSelesai: a.izin_selesai,
     alasan: a.alasan,

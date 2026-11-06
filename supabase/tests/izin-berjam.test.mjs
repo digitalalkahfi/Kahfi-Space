@@ -422,6 +422,248 @@ uji("ajukan_izin_terencana membuat seluruh harinya sekaligus", async () => {
   harus(baris.every((b) => b.persetujuan === "diajukan"));
 });
 
+uji("ajukan_izin_terencana untuk SATU hari berhasil (0213)", async () => {
+  // Isian bawaan formulir: besok sampai besok. Sebelum 0213 pengajuan
+  // inilah yang selalu gagal "FOREACH expression must not be null".
+  const besok = await geser(45);
+  const { rows } = await sebagai(
+    db,
+    U.eko,
+    `select ajukan_izin_terencana($1::date,$1::date,$2) as id`,
+    [besok, "acara keluarga sehari"],
+  );
+  const b = await satu(
+    `select id, status, izin_jenis, izin_induk_id, persetujuan
+       from attendance where user_id=$1 and tanggal=$2`,
+    [U.eko, besok],
+  );
+  harusSama(b.id, rows[0].id, "induk yang dikembalikan adalah baris itu");
+  harusSama(b.status, "izin");
+  harusSama(b.izin_jenis, "terencana");
+  harus(b.izin_induk_id === null);
+  harusSama(b.persetujuan, "diajukan");
+});
+
+uji(
+  "pengajuan yang mulai di hari lanjutan izin lama menjadi induk sendiri",
+  async () => {
+    const a = await geser(50);
+    const b = await geser(52);
+    const c = await geser(54);
+    const lama = (
+      await sebagai(
+        db,
+        U.eko,
+        `select ajukan_izin_terencana($1::date,$2::date,$3) as id`,
+        [a, b, "rencana pertama tiga hari"],
+      )
+    ).rows[0].id;
+
+    const baru = (
+      await sebagai(
+        db,
+        U.eko,
+        `select ajukan_izin_terencana($1::date,$2::date,$3) as id`,
+        [b, c, "rencana berubah, digeser"],
+      )
+    ).rows[0].id;
+
+    harus(baru !== lama, "induk baru bukan induk lama");
+    const { rows } = await sebagaiAdmin(
+      db,
+      `select tanggal, izin_induk_id from attendance
+        where user_id=$1 and tanggal between $2 and $3 order by tanggal`,
+      [U.eko, b, c],
+    );
+    harus(rows[0].izin_induk_id === null, "hari pertama tidak berinduk");
+    harus(
+      rows.slice(1).every((r) => r.izin_induk_id === baru),
+      "hari berikutnya menunjuk pengajuan baru",
+    );
+  },
+);
+
+uji(
+  "induk lama yang tertimpa rentang baru: sisa harinya menjadi pengajuan sendiri",
+  async () => {
+    // Lama: c..e (induk di c). Baru: a..c menimpa induk lama di c.
+    const a = await geser(60);
+    const c = await geser(62);
+    const d = await geser(63);
+    const e = await geser(64);
+    await sebagai(
+      db,
+      U.eko,
+      `select ajukan_izin_terencana($1::date,$2::date,$3)`,
+      [c, e, "rencana lama tiga hari"],
+    );
+    const baru = (
+      await sebagai(
+        db,
+        U.eko,
+        `select ajukan_izin_terencana($1::date,$2::date,$3) as id`,
+        [a, c, "rencana baru menimpa"],
+      )
+    ).rows[0].id;
+
+    const { rows } = await sebagaiAdmin(
+      db,
+      `select id, tanggal, izin_induk_id from attendance
+        where user_id=$1 and tanggal between $2 and $3 order by tanggal`,
+      [U.eko, a, e],
+    );
+    const pada = (t) =>
+      rows.find((r) => r.tanggal.toISOString().slice(0, 10) === t);
+    harusSama(pada(c).izin_induk_id, baru, "c kini milik pengajuan baru");
+    harus(pada(d).izin_induk_id === null, "d menjadi induk sisa pengajuan lama");
+    harusSama(pada(e).izin_induk_id, pada(d).id, "e ikut d");
+
+    // Keputusan atas sisa pengajuan lama menyebar sampai hari terakhirnya.
+    await sebagai(
+      db,
+      U.dimas,
+      `update attendance set persetujuan='disetujui' where id=$1`,
+      [pada(d).id],
+    );
+    const akhir = await satu(
+      `select persetujuan from attendance where id=$1`,
+      [pada(e).id],
+    );
+    harusSama(akhir.persetujuan, "disetujui");
+  },
+);
+
+uji(
+  "rentang baru yang lebih pendek dari induk lama tidak mewarisi sisa harinya",
+  async () => {
+    // Lama: f..h (induk di f). Baru: f..f — h dan g tidak ikut pengajuan baru.
+    const f = await geser(70);
+    const g = await geser(71);
+    const h = await geser(72);
+    await sebagai(
+      db,
+      U.eko,
+      `select ajukan_izin_terencana($1::date,$2::date,$3)`,
+      [f, h, "rencana lama tiga hari"],
+    );
+    const baru = (
+      await sebagai(
+        db,
+        U.eko,
+        `select ajukan_izin_terencana($1::date,$1::date,$2) as id`,
+        [f, "jadi cuma sehari"],
+      )
+    ).rows[0].id;
+    const anak = await satu(
+      `select count(*)::int as n from attendance where izin_induk_id=$1`,
+      [baru],
+    );
+    harusSama(anak.n, 0, "pengajuan sehari tidak punya hari lanjutan");
+    const sisa = await satu(
+      `select izin_induk_id from attendance where user_id=$1 and tanggal=$2`,
+      [U.eko, h],
+    );
+    const indukG = await satu(
+      `select id, izin_induk_id from attendance where user_id=$1 and tanggal=$2`,
+      [U.eko, g],
+    );
+    harus(indukG.izin_induk_id === null, "g menjadi induk sisa");
+    harusSama(sisa.izin_induk_id, indukG.id);
+  },
+);
+
+uji(
+  "izin berjam sebelum absen masuk: belum tercatat hadir, lalu absen masuk diterima (0213)",
+  async () => {
+    // Alur yang dijanjikan formulir: ajukan izin telat dulu, absen masuk
+    // menyusul. Upsert aplikasi tidak mengirim kolom status.
+    const tgl = await geser(-20);
+    await sebagai(
+      db,
+      U.eko,
+      `insert into attendance
+         (user_id, tanggal, izin_jenis, izin_mulai, izin_selesai, alasan,
+          persetujuan)
+       values ($1,$2,'jam','08:00','10:00','urus surat di kelurahan','diajukan')
+       on conflict (user_id, tanggal) do update
+         set izin_jenis = excluded.izin_jenis,
+             izin_mulai = excluded.izin_mulai,
+             izin_selesai = excluded.izin_selesai,
+             alasan = excluded.alasan,
+             persetujuan = excluded.persetujuan`,
+      [U.eko, tgl],
+    );
+    const sebelum = await satu(
+      `select id, status, jam_masuk from attendance
+        where user_id=$1 and tanggal=$2`,
+      [U.eko, tgl],
+    );
+    harusSama(sebelum.status, "alpa", "belum datang bukan hadir");
+    harus(sebelum.jam_masuk === null);
+
+    // Jalur update absenMasuk untuk baris yang sudah ada.
+    await sebagai(
+      db,
+      U.eko,
+      `update attendance
+          set jam_masuk = (($2::date + time '10:05') at time zone 'Asia/Jakarta'),
+              lat_masuk = -6.2, lng_masuk = 106.8, status = 'hadir'
+        where id = $1`,
+      [sebelum.id, tgl],
+    );
+    const sesudah = await satu(
+      `select status, izin_jenis, persetujuan, jam_masuk from attendance
+        where id=$1`,
+      [sebelum.id],
+    );
+    harus(sesudah.jam_masuk !== null, "jam masuk tercatat");
+    harus(
+      ["hadir", "terlambat"].includes(sesudah.status),
+      `status setelah absen ${sesudah.status}`,
+    );
+    harusSama(sesudah.izin_jenis, "jam", "izinnya tetap tercatat");
+    harusSama(sesudah.persetujuan, "diajukan");
+  },
+);
+
+uji(
+  "izin berjam sesudah absen masuk tidak mengusik status kehadiran",
+  async () => {
+    const tgl = await geser(-19);
+    await sebagai(
+      db,
+      U.eko,
+      `insert into attendance (user_id, tanggal, jam_masuk, lat_masuk, lng_masuk)
+       values ($1,$2, (($2::date + time '08:00') at time zone 'Asia/Jakarta'),
+               -6.2, 106.8)`,
+      [U.eko, tgl],
+    );
+    await sebagai(
+      db,
+      U.eko,
+      `insert into attendance
+         (user_id, tanggal, izin_jenis, izin_mulai, izin_selesai, alasan,
+          persetujuan)
+       values ($1,$2,'jam','14:00','16:00','kontrol ke dokter gigi','diajukan')
+       on conflict (user_id, tanggal) do update
+         set izin_jenis = excluded.izin_jenis,
+             izin_mulai = excluded.izin_mulai,
+             izin_selesai = excluded.izin_selesai,
+             alasan = excluded.alasan,
+             persetujuan = excluded.persetujuan`,
+      [U.eko, tgl],
+    );
+    const b = await satu(
+      `select status, jam_masuk, izin_jenis from attendance
+        where user_id=$1 and tanggal=$2`,
+      [U.eko, tgl],
+    );
+    harusSama(b.status, "hadir", "yang sudah absen tetap hadir");
+    harus(b.jam_masuk !== null);
+    harusSama(b.izin_jenis, "jam");
+  },
+);
+
 uji("satu hari yang gagal membatalkan seluruh pengajuan", async () => {
   // Hari tengah sudah terisi absensi yang tidak bisa dijadikan izin
   // terencana; pengajuannya harus gagal utuh, bukan separuh.

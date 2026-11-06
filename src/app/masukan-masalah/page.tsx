@@ -20,7 +20,7 @@ import { Reveal } from "@/components/motion/reveal";
 import { bacaSaringanMasukan, saringMasukan } from "@/lib/masukan";
 import { bacaSaringanMasalah, saringMasalah } from "@/lib/saring-masalah";
 import { bacaTab } from "@/lib/masukan-masalah";
-import { daftarMasukan } from "@/lib/data/masukan";
+import { bolehKelolaMasukan, daftarMasukan } from "@/lib/data/masukan";
 import { daftarMasalah } from "@/lib/data/masalah";
 import { pilihanOrganisasi } from "@/lib/data/organisasi";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
@@ -130,7 +130,11 @@ export default async function MasukanMasalahPage({
             />
 
             <Reveal>
-              <DaftarMasukan daftar={masukanTersaring} acuan={acuan} />
+              <DaftarMasukan
+                daftar={masukanTersaring}
+                acuan={acuan}
+                bolehKelola={bolehKelolaMasukan(pengguna)}
+              />
             </Reveal>
           </>
         ) : null}

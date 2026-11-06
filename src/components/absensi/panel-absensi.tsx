@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   CheckCircle2,
   Loader2,
@@ -66,6 +67,13 @@ export function PanelAbsensi({
   );
   const [sibuk, mulai] = useTransition();
   const { keadaan, minta } = useLokasi();
+  const router = useRouter();
+  // Foto yang sudah terunggah tetapi absennya ditolak: nama berkasnya tetap
+  // dan Storage menolak menimpa, jadi percobaan berikutnya memakai ulang
+  // berkas yang sama alih-alih kehilangan fotonya.
+  const terunggah = useRef<{ blob: Blob; tahap: Tahap; path: string } | null>(
+    null,
+  );
 
   const terkunci = tahap === "pulang" && !absen.sudahLapor;
 
@@ -74,8 +82,17 @@ export function PanelAbsensi({
     setPesan(null);
 
     mulai(async () => {
-      const titik = await minta();
-      if (!titik) return;
+      const { titik, pesan: pesanLokasi } = await minta();
+      // Tanpa lokasi absen tidak bisa dikirim. Sebelumnya tombol hanya
+      // kembali seperti semula tanpa kabar, dan terasa seperti absen yang
+      // "tidak terdeteksi".
+      if (!titik) {
+        setPesan({
+          ok: false,
+          teks: `Absen belum terkirim. ${pesanLokasi} Bila tetap gagal, nyalakan GPS/Lokasi akurat atau buka aplikasi lewat Chrome.`,
+        });
+        return;
+      }
 
       // Foto bersifat pelengkap: bila unggahannya gagal, absensi tetap jalan
       // dan pesannya disampaikan apa adanya.
@@ -84,23 +101,48 @@ export function PanelAbsensi({
       if (selfie) {
         // Absen ulang memakai nama berkas baru supaya foto lama tetap ada.
         const ulang = tahap === "masuk" ? absen.ulangMasuk : absen.ulangPulang;
-        const unggah = await unggahSelfie(selfie.blob, tanggal, tahap, ulang);
-        if (unggah.ok) {
-          fotoUrl = unggah.path;
+        if (
+          terunggah.current?.blob === selfie.blob &&
+          terunggah.current.tahap === tahap
+        ) {
+          fotoUrl = terunggah.current.path;
         } else {
-          catatanFoto = ` (${unggah.pesan})`;
+          const unggah = await unggahSelfie(selfie.blob, tanggal, tahap, ulang);
+          if (unggah.ok) {
+            fotoUrl = unggah.path;
+            if (unggah.path) {
+              terunggah.current = { blob: selfie.blob, tahap, path: unggah.path };
+            }
+          } else {
+            catatanFoto = ` (${unggah.pesan})`;
+          }
         }
       }
 
-      const hasil =
-        tahap === "masuk"
-          ? await absenMasuk({ tanggal, titik, fotoUrl })
-          : await absenPulang({ tanggal, titik, fotoUrl });
+      try {
+        const hasil =
+          tahap === "masuk"
+            ? await absenMasuk({ tanggal, titik, fotoUrl })
+            : await absenPulang({ tanggal, titik, fotoUrl });
 
-      setPesan({
-        ok: hasil.ok,
-        teks: `${hasil.pesan ?? "Tersimpan."}${catatanFoto}`,
-      });
+        setPesan({
+          ok: hasil.ok,
+          teks: `${hasil.pesan ?? "Tersimpan."}${catatanFoto}`,
+        });
+        // Penolakan seperti "sudah absen" atau "halaman dibuka sebelum hari
+        // berganti" berarti layar tertinggal dari database — balasan
+        // sebelumnya hilang di sinyal lemah, atau tab terbuka sejak kemarin.
+        if (!hasil.ok) router.refresh();
+      } catch (e) {
+        // Server Action yang melempar — sinyal putus, atau aplikasi baru
+        // diperbarui sementara tab lama masih terbuka — jangan sampai
+        // menjatuhkan seluruh halaman absensi.
+        console.error("Absen gagal terkirim:", e);
+        setPesan({
+          ok: false,
+          teks: "Absen gagal terkirim karena koneksi terputus atau aplikasi baru diperbarui. Muat ulang halaman, lalu coba lagi.",
+        });
+      }
     });
   };
 

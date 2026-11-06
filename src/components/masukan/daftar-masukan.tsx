@@ -1,15 +1,8 @@
-import Link from "next/link";
-import { Bug, MessageSquare, ThumbsUp, TriangleAlert } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { BarisMasukan } from "@/components/masukan/baris-masukan";
 import { cn } from "@/lib/utils";
-import { tanggalRelatif } from "@/lib/format";
 import {
-  GAYA_JENIS,
-  GAYA_KEPARAHAN,
-  GAYA_STATUS_MASUKAN,
-  LABEL_JENIS,
-  LABEL_KEPARAHAN,
-  LABEL_STATUS_MASUKAN,
   ringkasMasukan,
   urutkanMasukan,
   type Masukan,
@@ -99,9 +92,11 @@ export function RingkasanMasukan({ daftar }: { daftar: Masukan[] }) {
 export function DaftarMasukan({
   daftar,
   acuan,
+  bolehKelola,
 }: {
   daftar: Masukan[];
   acuan: string;
+  bolehKelola: boolean;
 }) {
   const urut = urutkanMasukan(daftar);
 
@@ -121,102 +116,20 @@ export function DaftarMasukan({
         <h2 className="text-base leading-6 font-semibold">Semua masukan</h2>
         <p className="text-[13px] leading-[18px] text-pretty text-muted-foreground">
           Bug yang parah selalu di atas saran sepopuler apa pun; di antara yang
-          setara, dukungan orang yang menentukan.
+          setara, dukungan orang yang menentukan. Ketuk untuk membaca
+          deskripsinya.
         </p>
       </div>
 
       <ul className="space-y-2 px-5">
-        {urut.map((m) => {
-          const gaya = GAYA_STATUS_MASUKAN[m.status];
-          return (
-            <li key={m.id} className="rounded-2xl bg-muted/50 p-3.5">
-              <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
-                <span
-                  className={cn(
-                    "flex size-9 shrink-0 items-center justify-center rounded-2xl",
-                    m.jenis === "bug"
-                      ? "bg-danger-fill text-danger-text"
-                      : "bg-card text-muted-foreground",
-                  )}
-                >
-                  {m.jenis === "bug" ? (
-                    <Bug className="size-4" />
-                  ) : (
-                    <MessageSquare className="size-4" />
-                  )}
-                </span>
-
-                <div className="min-w-[10rem] flex-1">
-                  <p className="text-sm leading-5 font-semibold text-pretty">
-                    <Link href={`/masukan/${m.id}`} className="hover:underline">
-                      {m.judul}
-                    </Link>
-                  </p>
-                  <p className="truncate text-[11px] leading-[14px] text-muted-foreground">
-                    {m.pelaporNama ?? "Anonim"}
-                    {m.halaman ? ` · ${m.halaman}` : ""} ·{" "}
-                    {tanggalRelatif(m.dibuatPada, acuan)}
-                  </p>
-                </div>
-
-                <span className="flex h-fit shrink-0 items-center gap-1.5 rounded-full bg-card px-2.5 py-1 text-[11px] leading-[14px] font-semibold">
-                  <ThumbsUp
-                    className={cn(
-                      "size-3",
-                      m.sayaDukung ? "text-secondary" : "text-muted-foreground",
-                    )}
-                  />
-                  {m.dukungan}
-                </span>
-              </div>
-
-              <div className="mt-2 flex flex-wrap gap-1">
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] leading-[14px] font-semibold",
-                    gaya.kelas,
-                  )}
-                >
-                  <span className={cn("size-1.5 rounded-full", gaya.titik)} />
-                  {LABEL_STATUS_MASUKAN[m.status]}
-                </span>
-                <span
-                  className={cn(
-                    "rounded-full px-2 py-0.5 text-[10px] leading-[14px] font-semibold",
-                    GAYA_JENIS[m.jenis],
-                  )}
-                >
-                  {LABEL_JENIS[m.jenis]}
-                </span>
-                {m.keparahan ? (
-                  <span
-                    className={cn(
-                      "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] leading-[14px] font-semibold",
-                      GAYA_KEPARAHAN[m.keparahan],
-                    )}
-                  >
-                    {m.keparahan === "kritis" ? (
-                      <TriangleAlert className="size-3" />
-                    ) : null}
-                    {LABEL_KEPARAHAN[m.keparahan]}
-                  </span>
-                ) : null}
-                {m.komentar.length > 0 ? (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-card px-2 py-0.5 text-[10px] leading-[14px] font-semibold text-muted-foreground">
-                    <MessageSquare className="size-3" />
-                    {m.komentar.length}
-                  </span>
-                ) : null}
-              </div>
-
-              {m.status === "ditolak" && m.alasanTolak ? (
-                <p className="mt-2 text-[11px] leading-[14px] text-pretty text-muted-foreground">
-                  Ditolak: {m.alasanTolak}
-                </p>
-              ) : null}
-            </li>
-          );
-        })}
+        {urut.map((m) => (
+          <BarisMasukan
+            key={m.id}
+            masukan={m}
+            acuan={acuan}
+            bolehKelola={bolehKelola}
+          />
+        ))}
       </ul>
     </Card>
   );
