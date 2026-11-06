@@ -14,6 +14,30 @@ export const dataContoh = seed;
 
 export const TANGGAL_ACUAN = seed.tanggalAcuan;
 
+/**
+ * Padanan `sudah_lapor_harian` (0214) untuk data contoh: melapor sendiri,
+ * unit yang dipimpinnya terlapor, atau tidak ada akunnya yang tersisa.
+ * Data contoh tidak menyimpan kapan akun dibuat, jadi akun baru tidak diuji.
+ */
+export function sudahLaporContoh(nama: string, tanggalData: string): boolean {
+  const laporan = seed.daily_reports.filter((l) => l.tanggal === tanggalData);
+  if (laporan.some((l) => l.user === nama)) return true;
+
+  const orang = seed.users.find((u) => u.nama === nama);
+  if (
+    orang?.role === "Leader" &&
+    laporan.some((l) => !l.akun && l.unit === orang.unit)
+  ) {
+    return true;
+  }
+
+  const akun = seed.accounts.filter((a) => a.pic === nama);
+  return (
+    akun.length > 0 &&
+    akun.every((a) => laporan.some((l) => l.akun === a.username))
+  );
+}
+
 type UserContoh = (typeof seed.users)[number];
 
 export function keUnitKode(unitId: string | null | undefined): KodeUnit | null {
