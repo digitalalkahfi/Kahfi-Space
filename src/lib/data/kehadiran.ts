@@ -4,7 +4,11 @@ import "server-only";
 
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
-import { dataContoh, lingkupContoh } from "@/lib/data/contoh";
+import {
+  dataContoh,
+  lingkupContoh,
+  sudahLaporContoh,
+} from "@/lib/data/contoh";
 import { aktifDemo } from "@/lib/demo";
 import { jamEfektifMasuk, menitTelat } from "@/lib/izin";
 import { batasMinimum } from "@/lib/batas-minimum";
@@ -105,14 +109,7 @@ function efektifDemo(a: {
 }
 
 function hitungDemo(pengguna: Pengguna, tanggal: string): RekapKehadiran {
-  const { users, units, attendance, daily_reports, accounts } = dataContoh;
-
-  // Laporan yang jatuh tempo pada `tanggal` memuat GMV kemarin (H-1).
-  const pelapor = new Set(
-    daily_reports
-      .filter((l) => l.tanggal === tanggalDataTerakhir(tanggal))
-      .map((l) => l.user),
-  );
+  const { users, units, attendance, accounts } = dataContoh;
 
   // Padanan `wajib_lapor_harian` di SQL: PIC akun aktif, plus Leader unit
   // yang tidak punya akun (MCN & TAP melapor per unit).
@@ -156,7 +153,8 @@ function hitungDemo(pengguna: Pengguna, tanggal: string): RekapKehadiran {
             : null,
         wajibAbsen: wajibAbsen(u.role as Peran),
         wajibLapor: wajibLapor(u),
-        sudahLapor: pelapor.has(u.nama),
+        // Laporan yang jatuh tempo pada `tanggal` memuat GMV kemarin (H-1).
+        sudahLapor: sudahLaporContoh(u.nama, tanggalDataTerakhir(tanggal)),
         ...unggahanDemo(u.nama, tanggal),
       } satisfies AnggotaKehadiran;
     })

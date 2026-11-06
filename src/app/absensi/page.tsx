@@ -14,12 +14,16 @@ import { PanelAbsensi } from "@/components/absensi/panel-absensi";
 import { Reveal } from "@/components/motion/reveal";
 import { absensiHariIni, pengaturanAbsensi } from "@/lib/data/absensi";
 import { TANGGAL_ACUAN } from "@/lib/data/contoh";
-import { sasaranUntuk, sudahDilaporkan } from "@/lib/data/laporan";
+import {
+  mulaiSasaran,
+  sasaranUntuk,
+  sudahDilaporkan,
+} from "@/lib/data/laporan";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
 import { modeData } from "@/lib/supabase/config";
 import { hariIniWib, tanggalPanjang } from "@/lib/format";
 import { KANTOR } from "@/lib/geo";
-import { tanggalDataTerakhir } from "@/lib/laporan";
+import { kunciSasaranLaporan, tanggalDataTerakhir } from "@/lib/laporan";
 import { wajibAbsen } from "@/lib/rekap-kehadiran";
 
 export const metadata: Metadata = {
@@ -57,9 +61,16 @@ export default async function AbsensiPage({
   // Yang tidak punya sasaran laporan (Manager, CEO) tidak terkunci, jadi
   // sasaran unit yang tampil untuknya bukan tagihan — tidak ditampilkan
   // sebagai alasan kunci.
-  const belumDilapor = absen.sudahLapor
+  const belumTerlapor = absen.sudahLapor
     ? []
     : sasaranSaya.filter((s) => !terlapor.includes(kunciSasaran(s)));
+  // Sasaran yang baru terdaftar sesudah tanggal laporan belum bisa dilapor,
+  // jadi tidak ditawarkan: formulirnya pun tidak memuatnya.
+  const mulaiPer = await mulaiSasaran(belumTerlapor);
+  const belumDilapor = belumTerlapor.filter((s) => {
+    const mulai = mulaiPer[kunciSasaranLaporan(s)];
+    return !mulai || mulai <= tanggalLaporan;
+  });
 
   // Leader ke bawah wajib absen. CEO, Manager, dan Finance memantau,
   // bukan dipantau: bagi mereka rekap timlah yang utama, dan absen di
