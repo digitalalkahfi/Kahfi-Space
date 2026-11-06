@@ -42,9 +42,17 @@ function titikSah(t: Titik | undefined): t is Titik {
     Number.isFinite(t.lat) &&
     Number.isFinite(t.lng) &&
     Math.abs(t.lat) <= 90 &&
-    Math.abs(t.lng) <= 180
+    Math.abs(t.lng) <= 180 &&
+    // (0, 0) adalah jawaban GPS yang rusak atau aplikasi lokasi palsu, bukan
+    // tempat siapa pun bekerja; jaraknya ke kantor (±11.800 km) bahkan
+    // melampaui kolom jarak_masuk_m sehingga simpanannya gagal mentah.
+    !(t.lat === 0 && t.lng === 0)
   );
 }
+
+/** Tanggal di halaman sudah lewat: tab dibiarkan terbuka sejak kemarin. */
+const PESAN_HALAMAN_BASI =
+  "Halaman ini dibuka sebelum hari berganti. Muat ulang halaman, lalu absen lagi.";
 
 /** Absen masuk. Validitas radius dan keterlambatan dihitung database. */
 export async function absenMasuk(input: {
@@ -63,7 +71,9 @@ export async function absenMasuk(input: {
   const hariIni = tanggalHariIni();
   if (input.tanggal !== hariIni) {
     return gagal(
-      "Absen hanya bisa dilakukan untuk hari ini. Untuk tanggal lain, ajukan izin.",
+      input.tanggal < hariIni
+        ? PESAN_HALAMAN_BASI
+        : "Absen hanya bisa dilakukan untuk hari ini. Untuk tanggal lain, ajukan izin.",
       "validasi",
     );
   }
@@ -80,29 +90,47 @@ export async function absenMasuk(input: {
     foto_masuk_url: input.fotoUrl ?? null,
   };
 
-  // Setelah absen ulang (migrasi 0171) baris hari ini masih ada tetapi
-  // jam masuknya kosong; absen berikutnya mengisi baris itu, bukan
-  // membuat baris baru yang pasti ditolak kunci unik per tanggal.
+  // Baris hari ini bisa sudah ada tanpa jam masuk: sesudah absen ulang
+  // (0171), atau karena izin beberapa jam diajukan sebelum datang. Absen
+  // berikutnya mengisi baris itu, bukan membuat baris baru yang pasti
+  // ditolak kunci unik per tanggal.
   const { data: ada } = await sb
     .from("attendance")
-    .select("id, jam_masuk, status")
+    .select("id, jam_masuk, status, persetujuan")
     .eq("user_id", pengguna.id)
     .eq("tanggal", input.tanggal)
     .maybeSingle();
 
-  if (ada && (ada.jam_masuk !== null || ada.status !== "alpa")) {
+  if (ada?.jam_masuk) {
     return gagal("Kamu sudah absen masuk hari ini.", "validasi");
+  }
+  // Izin/sakit sehari penuh yang masih berlaku memang tidak perlu absen.
+  // Yang sudah ditolak atasan tidak berlaku lagi, jadi orangnya boleh absen.
+  if (
+    ada &&
+    (ada.status === "izin" || ada.status === "sakit") &&
+    ada.persetujuan !== "ditolak"
+  ) {
+    return gagal(
+      `Hari ini kamu tercatat ${ada.status === "sakit" ? "sakit" : "izin"} (${
+        ada.persetujuan === "disetujui" ? "sudah disetujui" : "menunggu persetujuan"
+      }), jadi absen masuk tidak diperlukan. Bila ternyata kamu masuk, minta atasan menolak pengajuannya dulu.`,
+      "validasi",
+    );
   }
 
   // Status terlambat, validitas lokasi, dan jaraknya dihitung trigger database;
   // hasilnya diambil kembali supaya UI melaporkan angka yang sama persis.
+  // `.is("jam_masuk", null)`: dua ketukan yang hampir bersamaan sama-sama
+  // lolos pemeriksaan di atas; yang kedua tidak boleh menimpa jam masuk.
   const { data, error } = ada
     ? await sb
         .from("attendance")
         .update({ ...isi, status: "hadir" })
         .eq("id", ada.id)
+        .is("jam_masuk", null)
         .select(KOLOM)
-        .single()
+        .maybeSingle()
     : await sb
         .from("attendance")
         .insert({ user_id: pengguna.id, tanggal: input.tanggal, ...isi })
@@ -114,6 +142,7 @@ export async function absenMasuk(input: {
       ? gagal("Kamu sudah absen masuk hari ini.", "validasi")
       : gagal(`Gagal menyimpan: ${error.message}`);
   }
+  if (!data) return gagal("Kamu sudah absen masuk hari ini.", "validasi");
 
   revalidatePath("/absensi");
   revalidatePath("/beranda");
@@ -165,7 +194,12 @@ export async function absenPulang(input: {
   if (modeData() === "demo") return BALASAN_DEMO;
 
   if (input.tanggal !== tanggalHariIni()) {
-    return gagal("Absen pulang hanya untuk hari ini.", "validasi");
+    return gagal(
+      input.tanggal < tanggalHariIni()
+        ? PESAN_HALAMAN_BASI
+        : "Absen pulang hanya untuk hari ini.",
+      "validasi",
+    );
   }
 
   const pengguna = await sesiSaatIni();
@@ -278,7 +312,16 @@ export async function ajukanIzin(input: {
     jamSelesai: input.jamSelesai ?? "",
     alasan: input.alasan,
   };
-  const salah = periksaIzin(isi, tanggalHariIni());
+  const hariIni = tanggalHariIni();
+  // Sakit dan izin berjam selalu untuk hari berjalan; tanggal kemarin
+  // berarti tab izin dibiarkan terbuka sejak sebelum hari berganti.
+  if (isi.bentuk !== "terencana" && isi.mulai < hariIni) {
+    return gagal(
+      "Halaman ini dibuka sebelum hari berganti. Muat ulang halaman, lalu ajukan lagi.",
+      "validasi",
+    );
+  }
+  const salah = periksaIzin(isi, hariIni);
   if (salah) return gagal(salah, "validasi");
 
   if (modeData() === "demo") return BALASAN_DEMO;
@@ -313,6 +356,21 @@ export async function ajukanIzin(input: {
   }
 
   if (isi.bentuk === "sakit") {
+    // Sakit sehari penuh menggantikan izin beberapa jam yang terlanjur
+    // diajukan hari ini. Jamnya harus ikut dilepas: database melarang
+    // izin berjam pada baris sakit (0132), dan tanpa ini pengajuannya
+    // gagal dengan pesan yang tidak ada hubungannya dengan sakit.
+    const { data: ada } = await sb
+      .from("attendance")
+      .select("izin_jenis")
+      .eq("user_id", pengguna.id)
+      .eq("tanggal", isi.mulai)
+      .maybeSingle();
+    const lepasIzinJam =
+      ada?.izin_jenis === "jam"
+        ? { izin_jenis: null, izin_mulai: null, izin_selesai: null }
+        : {};
+
     const { error } = await sb.from("attendance").upsert(
       {
         user_id: pengguna.id,
@@ -320,6 +378,7 @@ export async function ajukanIzin(input: {
         status: "sakit",
         alasan,
         persetujuan: "diajukan",
+        ...lepasIzinJam,
       },
       { onConflict: "user_id,tanggal" },
     );
@@ -377,9 +436,20 @@ function pesanGalatIzin(error: {
       "validasi",
     ];
   }
-  if (/attendance_izin_beralasan|jam_izin_beralasan/.test(error.message)) {
+  if (
+    /attendance_izin_beralasan|jam_izin_beralasan|Tulis alasan minimal/.test(
+      error.message,
+    )
+  ) {
     return ["Tulis alasan minimal 5 karakter.", "validasi"];
   }
+  // Pesan ajukan_izin_terencana (0134) sudah ditulis untuk dibaca orang.
+  if (/paling lama 30 hari|tidak boleh sebelum tanggal mulai/.test(error.message)) {
+    return [`${error.message}.`, "validasi"];
+  }
+  // Galat yang tidak dikenali dicatat utuh di log server supaya laporan
+  // "izin error" berikutnya bisa ditelusuri tanpa menebak.
+  console.error("ajukanIzin gagal:", error.code, error.message);
   return [`Gagal menyimpan: ${error.message}`, "galat"];
 }
 
