@@ -33,7 +33,7 @@ dan `src/lib/__tes__/laporan.test.ts`.
 | Kunci Absen Pulang (`sudah_lapor_harian`) | laporan bertanggal hari absen | laporan bertanggal **hari absen − 1** |
 | Status Tim: `unggahan_hari_ini` | unggahan hari itu | unggahan **kemarin** (laporan terbaru) |
 | Kepatuhan minimum, tren 3 hari | hari ini ikut dinilai | hari ini **belum dinilai** (laporannya belum bisa dikirim) |
-| KPI "laporan tepat waktu" | tenggat pukul batas pada tanggal laporan | pukul batas pada **hari sesudahnya**; hari yang tenggatnya belum lewat belum dinilai |
+| KPI "laporan tepat waktu" | tenggat pukul batas pada tanggal laporan | pukul batas pada **hari sesudahnya**; hari yang tenggatnya belum lewat belum dinilai. Sejak `0215` dinilai per sasaran (lihat bagian akhir). |
 | Target prorata: KPI GMV, ukuran GRD, WRM, mingguan | target sampai hari ini | target sampai **kemarin** (GMV paling jauh ada sampai kemarin) |
 | Kunci KPI bulanan, laporan mingguan | boleh begitu bulan/pekan berakhir | boleh **sehari sesudahnya**, setelah GMV hari terakhir dilaporkan |
 | Beranda (hero WRM, GMV per unit, capaian pribadi) | GMV hari ini vs kemarin | GMV **kemarin** vs sehari sebelumnya |
@@ -70,3 +70,46 @@ Per fungsi ada daftar migrasi asalnya di komentar akhir `0207_laporan_gmv_h_min_
 jalankan ulang blok `create or replace` dari migrasi itu, lalu
 `drop function tanggal_data_terakhir()`. Laporan yang sudah tersimpan bertanggal kemarin
 tidak berubah oleh rollback.
+
+## Keputusan: KPI laporan tepat waktu dinilai per sasaran (`0215`)
+
+Diputuskan pemilik pada 6 November 2026. Migrasi:
+`0215_laporan_tepat_per_sasaran.sql`. Tes: `supabase/tests/laporan-tepat-per-sasaran.test.mjs`.
+
+**Masalahnya.** Indikator ini dulu hanya menghitung laporan yang dikirim pemilik lembar
+sendiri. Bila Manager, CEO, atau co-leader sudah mengirim laporan akun seorang PIC, PIC
+tidak bisa melapor lagi karena satu akun hanya boleh punya satu laporan per tanggal, dan
+harinya tercatat tidak melapor tanpa jalan keluar.
+
+**Aturannya kini.** Sebuah hari dihitung tepat bila ada laporan sebelum tenggat yang:
+
+- dikirim orang itu sendiri,
+- untuk akun yang PIC-nya orang itu, siapa pun pengirimnya, atau
+- untuk unit yang ia pimpin sebagai Leader, siapa pun pengirimnya.
+
+Laporan orang lain yang lewat tenggat tetap terlambat. Risiko yang diterima: PIC mendapat
+nilai dari laporan yang tidak ia kirim, jadi Manager yang menutupi PIC lalai tidak terlihat
+di KPI.
+
+**Beda dari kunci Absen Pulang (`0214`).**
+
+| | Kunci Absen Pulang | KPI laporan tepat waktu |
+|---|---|---|
+| PIC beberapa akun, laporan kiriman orang lain | semua akun harus terlapor | satu laporan cukup |
+| Tidak ada lagi yang bisa dilapor | kunci terbuka | tidak menghasilkan nilai, harus ada laporan |
+| Unit yang kemudian mendapat akun | Leader tidak lagi wajib lapor, laporan unit diabaikan | laporan unit lama tetap dihitung |
+
+Kunci menahan orang supaya tagihan berikutnya tidak hilang dari layar, sedangkan KPI hanya
+menilai hari yang sudah lewat. Nilai hari lampau tidak boleh hilang karena keadaan akun atau
+unit berubah sesudahnya.
+
+**Batasan.** Riwayat PIC tidak tersimpan, jadi laporan akun mengikuti PIC saat ini. PIC baru
+ikut menerima hari sebelum serah terima pada bulan itu; pengirim lama tidak kehilangan nilai.
+
+**Dampak saat rilis.** Persentase tidak pernah turun karena syarat lama tetap berlaku. Bulan
+yang belum dikunci langsung terhitung ulang, sedangkan bulan yang sudah dikunci tidak berubah
+karena scorecard membaca `kpi_snapshots`.
+
+**Rilis dan rollback.** Hanya database, tanpa perubahan aplikasi:
+`npx --yes supabase@2.118.0 db push --linked --dry-run` (hanya `0215`), lalu `--yes`. Untuk
+membatalkan, jalankan ulang blok `create or replace function pencapaian_otomatis` dari `0207`.
