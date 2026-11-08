@@ -14,6 +14,7 @@ import {
   ISI_KOSONG,
   periksaIsiLaporan,
   periksaKomisiWajib,
+  PESAN_GMV_KOSONG,
   PESAN_KOMISI_WAJIB,
 } from "@/lib/laporan";
 import {
@@ -50,6 +51,7 @@ const isiTanpaPenjualan = (unit, p = {}) =>
 
 const NABILA = await idUser("Nabila Putri"); // PIC Affiliator, wajib lapor
 const GALIH = await idUser("Galih Prakoso"); // Leader MCN
+const MANAGER = await idUser("Farhan Pratama");
 const AKUN = await idAkun("@fashion_hijab");
 const MCN = (await satu(`select id from units where kode='mcn'`)).id;
 
@@ -323,6 +325,49 @@ uji(
       (await satu(`select gmv::int g from daily_reports where id=$1`, [id])).g,
       0,
     );
+  },
+);
+
+uji(
+  "0216: PIC menolkan laporan akunnya yang dikirim Manager, lewat aturan yang sama",
+  async () => {
+    const { id } = (
+      await sebagai(
+        db,
+        MANAGER,
+        `insert into daily_reports (user_id, tanggal, account_id, gmv, komisi, jumlah_upload)
+       values ($1,$2,$3,800000,0,4) returning id`,
+        [MANAGER, DUA_HARI_LALU, AKUN],
+      )
+    ).rows[0];
+
+    // Dialog perbaikan memakai pemeriksaan yang sama dengan form laporan.
+    const perbaikan = (tanpaPenjualan) =>
+      bersihkanIsi("affiliator", {
+        ...ISI_KOSONG,
+        gmv: 0,
+        komisi: 0,
+        jumlahUpload: 4,
+        tanpaPenjualan,
+      });
+    harusSama(
+      periksaIsiLaporan("affiliator", perbaikan(false)),
+      PESAN_GMV_KOSONG,
+      "tanpa centang tetap ditolak",
+    );
+    harusSama(periksaIsiLaporan("affiliator", perbaikan(true)), null);
+
+    await sebagai(
+      db,
+      NABILA,
+      `select perbaiki_laporan_harian($1, 0, $2, null, null, 4)`,
+      [id, "Partner Center menunjukkan tidak ada penjualan"],
+    );
+    const r = await satu(
+      `select gmv::int g, user_id = $2 as tetap_pengirim from daily_reports where id=$1`,
+      [id, MANAGER],
+    );
+    harusSama(r, { g: 0, tetap_pengirim: true });
   },
 );
 
