@@ -935,6 +935,8 @@ export type BarisRiwayatLaporanMinimum = {
   /** Kolom LIVE laporan (0191). */
   gmv_live: number | null;
   jam_live: number | null;
+  /** Pengguna yang membaca boleh memperbaiki laporan ini (0216). */
+  boleh_perbaiki: boolean;
 };
 
 // Tren kepatuhan tiga hari kerja terakhir per akun aktif — view turunan

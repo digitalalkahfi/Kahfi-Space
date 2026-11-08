@@ -4,7 +4,11 @@ import "server-only";
 
 import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
-import { dataContoh, namaTerlihatContoh } from "@/lib/data/contoh";
+import {
+  dataContoh,
+  namaTerlihatContoh,
+  sudahLaporContoh,
+} from "@/lib/data/contoh";
 import { jamEfektifMasuk, menitTelat } from "@/lib/izin";
 import { KANTOR, jarakDariKantor } from "@/lib/geo";
 import { tanggalDataTerakhir } from "@/lib/laporan";
@@ -103,7 +107,7 @@ export async function absensiHariIni(
   tanggal: string,
 ): Promise<AbsensiHariIni> {
   if (modeData() === "demo") {
-    const { attendance, daily_reports, accounts } = dataContoh;
+    const { attendance, accounts } = dataContoh;
     // Harus dicocokkan tanggalnya: seed menyimpan beberapa hari
     // sekaligus, dan baris pertama milik orang itu belum tentu hari ini.
     const a = attendance.find(
@@ -118,11 +122,9 @@ export async function absensiHariIni(
         !unitBerakun.has(pengguna.unitId as string));
 
     // Laporan yang jatuh tempo pada `tanggal` memuat GMV kemarin (H-1).
-    const punyaLaporan = daily_reports.some(
-      (l) =>
-        l.tanggal === tanggalDataTerakhir(tanggal) &&
-        (l.user === pengguna.nama ||
-          (l.akun ? akunSaya.some((a) => a.username === l.akun) : false)),
+    const punyaLaporan = sudahLaporContoh(
+      pengguna.nama,
+      tanggalDataTerakhir(tanggal),
     );
 
     // Yang tidak punya sasaran lapor tidak pernah terkunci (lihat migrasi 0016).
@@ -246,14 +248,7 @@ export async function rekapAbsensi(
   hanyaSaya = false,
 ): Promise<BarisRekapAbsensi[]> {
   if (modeData() === "demo") {
-    const { attendance, users, units, daily_reports, accounts } = dataContoh;
-    const akunPic = new Map(accounts.map((a) => [a.username, a.pic]));
-
-    const pelapor = new Set(
-      daily_reports.map((l) =>
-        [l.tanggal, l.akun ? akunPic.get(l.akun) : l.user].join("|"),
-      ),
-    );
+    const { attendance, users, units } = dataContoh;
 
     return attendance
       .filter((a) => a.tanggal >= dari && a.tanggal <= sampai)
@@ -298,9 +293,7 @@ export async function rekapAbsensi(
           lokasiValid: jarak !== null && jarak <= KANTOR.radius,
           jarakMeter: jarak,
           alasan: a.alasan ?? "",
-          sudahLapor: pelapor.has(
-            [tanggalDataTerakhir(a.tanggal), a.user].join("|"),
-          ),
+          sudahLapor: sudahLaporContoh(a.user, tanggalDataTerakhir(a.tanggal)),
           ulangMasuk: 0,
           ulangPulang: 0,
         };

@@ -189,11 +189,13 @@ uji("data lama: to-do tanpa tenggat diisi 23:59 WIB tanggal dibuatnya", async ()
     `alter table tasks drop constraint tasks_pribadi_bertenggat`,
   );
   // Dibuat 00.30 WIB 30 Sep = 17.30 UTC 29 Sep: tanggalnya harus 30 Sep.
+  // Tahunnya sengaja jauh ke depan: to-do ini mewakili tenggat yang belum
+  // lewat, dan itu harus tetap benar kapan pun tes ini dijalankan.
   const { rows: a } = await sebagaiAdmin(
     db,
     `insert into tasks (tipe, judul, pembuat_id, penerima_id, created_at)
      values ('pribadi', 'To-do lama tengah malam', $1, $1,
-             '2026-09-29T17:30:00Z') returning id`,
+             '2099-09-29T17:30:00Z') returning id`,
     [RIAN],
   );
   // To-do lama yang sudah jauh lewat: tidak boleh memicu pengingat susulan.
@@ -217,7 +219,7 @@ uji("data lama: to-do tanpa tenggat diisi 23:59 WIB tanggal dibuatnya", async ()
   harusSama(
     rows.map((r) => [r.wib, r.tanpa_jam]),
     [
-      ["2026-09-30 23:59", true],
+      ["2099-09-30 23:59", true],
       ["2024-10-01 23:59", true],
     ],
   );

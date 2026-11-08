@@ -189,8 +189,11 @@ export function DialogRevisi({
         <DialogHeader>
           <DialogTitle>Perbaiki laporan</DialogTitle>
           <DialogDescription>
-            {laporan.label} · {tanggalPendek(laporan.tanggal)}. Setiap angka
-            yang berubah selalu meninggalkan jejak.
+            {laporan.label} · {tanggalPendek(laporan.tanggal)}.{" "}
+            {laporan.pelaporNama !== olehNama
+              ? `Dikirim oleh ${laporan.pelaporNama}. `
+              : null}
+            Setiap angka yang berubah selalu meninggalkan jejak.
           </DialogDescription>
         </DialogHeader>
 

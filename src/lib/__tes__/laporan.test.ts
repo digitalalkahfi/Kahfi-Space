@@ -4,6 +4,7 @@ import {
   alasanTanggalLaporan,
   bersihkanIsi,
   bolehLihatLaporan,
+  bolehPerbaikiLaporan,
   ISI_KOSONG,
   type IsiLaporan,
   kapanLaporan,
@@ -330,6 +331,65 @@ const lap = (p: Partial<Parameters<typeof bolehLihatLaporan>[1]> = {}) => ({
   departemen: "affiliator" as const,
   picAkun: "Rian Hidayat",
   ...p,
+});
+
+const kiriman = (
+  p: Partial<Parameters<typeof bolehPerbaikiLaporan>[1]> = {},
+) => ({
+  pelapor: "Farhan Pratama",
+  unitLaporan: null,
+  picAkun: "Rian Hidayat",
+  coLeaderAkun: "Dewi Lestari",
+  ...p,
+});
+
+test("yang berhak mengirim untuk sasaran itu boleh memperbaikinya", () => {
+  for (const [role, nama] of [
+    ["CEO", "Hafidz Alkahfi"],
+    ["Manager", "Siapa Saja"],
+    ["Staff", "Rian Hidayat"],
+    ["Leader", "Dewi Lestari"],
+    ["Staff", "Farhan Pratama"],
+  ]) {
+    assert.equal(
+      bolehPerbaikiLaporan(orang(role, nama, "affiliator"), kiriman()),
+      true,
+      nama,
+    );
+  }
+});
+
+test("melihat laporan tidak berarti boleh memperbaikinya", () => {
+  for (const pengguna of [
+    orang("Finance", "Tim Keuangan", null),
+    orang("Leader", "Leader Seunit", "affiliator"),
+    orang("Staff", "Anisa Larasati", "affiliator"),
+  ]) {
+    assert.equal(bolehPerbaikiLaporan(pengguna, kiriman()), false);
+  }
+});
+
+test("laporan unit diperbaiki Leader dan Co-Leader unit itu saja", () => {
+  const unit = kiriman({
+    unitLaporan: "mcn",
+    picAkun: null,
+    coLeaderAkun: null,
+  });
+  for (const role of ["Leader", "Co-Leader"]) {
+    assert.equal(
+      bolehPerbaikiLaporan(orang(role, "Pimpinan", "mcn"), unit),
+      true,
+    );
+    assert.equal(
+      bolehPerbaikiLaporan(orang(role, "Pimpinan", "tap"), unit),
+      false,
+    );
+  }
+  assert.equal(
+    bolehPerbaikiLaporan(orang("Staff", "Anggota", "mcn"), unit),
+    false,
+    "anggota unit melihat laporannya, tetapi tidak mengirimnya",
+  );
 });
 
 test("CEO, Manager, dan Finance melihat seluruh laporan", () => {

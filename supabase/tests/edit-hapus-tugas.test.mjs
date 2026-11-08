@@ -68,17 +68,29 @@ const buatToDo = async (pemilik, judul, status = "todo") =>
     )
   ).id;
 
-/** Notifikasi tugas seseorang, terbaru lebih dulu. */
+/**
+ * Notifikasi tugas seseorang, tanpa urutan.
+ *
+ * "Yang terbaru" tidak bisa dibaca dari `created_at`: nilainya `now()`, jam
+ * PGlite beresolusi 1 ms, dan dua peristiwa berurutan di tes ini kerap jatuh
+ * di milidetik yang sama. Pilih notifikasinya dengan `satuNotif`.
+ */
 const notif = async (untuk) =>
   (
     await sebagaiAdmin(
       db,
       `select judul, pesan from notifications
-        where user_id = $1 and kategori = 'tugas'
-        order by created_at desc, id`,
+        where user_id = $1 and kategori = 'tugas'`,
       [untuk],
     )
   ).rows;
+
+/** Satu-satunya notifikasi berjudul persis ini di dalam daftar. */
+const satuNotif = (daftar, judul) => {
+  const cocok = daftar.filter((x) => x.judul === judul);
+  harusSama(cocok.length, 1, `jumlah notifikasi "${judul}"`);
+  return cocok[0];
+};
 
 /** Galat yang dilempar fn, atau null bila berhasil. */
 const galatDari = async (fn) => {
@@ -116,9 +128,8 @@ uji("pemberi tiket mengedit isinya; penerima dikabari apa yang berubah", async (
 
   const n = await notif(NABILA);
   harusSama(n.length, sebelum + 1, "satu notifikasi untuk penerima");
-  harusSama(n[0].judul, "Tiket diubah: Rekap order pending pekan ini");
   harusSama(
-    n[0].pesan,
+    satuNotif(n, "Tiket diubah: Rekap order pending pekan ini").pesan,
     "Yang berubah: judul, kriteria selesai, tenggat (kini 2 Okt 17.00 WIB), prioritas.",
   );
 });
@@ -177,14 +188,16 @@ uji("penerima diganti selama To Do; penerima lama & baru dikabari", async () => 
   );
   harusSama(rows[0]?.penerima_id, BAYU);
 
-  const lama = await notif(NABILA);
-  harusSama(lama[0].judul, "Tiket dialihkan: Kurasi kreator fashion");
-  harus(lama[0].pesan.includes("Bayu Nugraha"), `pesan: ${lama[0].pesan}`);
+  const { pesan } = satuNotif(
+    await notif(NABILA),
+    "Tiket dialihkan: Kurasi kreator fashion",
+  );
+  harus(pesan.includes("Bayu Nugraha"), `pesan: ${pesan}`);
 
   // Penerima baru dikabari trigger lama (0112) — sekali saja, bukan
   // ditambah "Tiket diubah".
   const baru = await notif(BAYU);
-  harusSama(baru[0].judul, "Tugas dialihkan kepadamu: Kurasi kreator fashion");
+  satuNotif(baru, "Tugas dialihkan kepadamu: Kurasi kreator fashion");
   harus(
     !baru.some((x) => x.judul.startsWith("Tiket diubah: Kurasi kreator fashion")),
     "penerima baru tidak perlu notifikasi kedua",
@@ -275,10 +288,8 @@ uji("pemberi menghapus tiket; penerima dikabari, jejak QC ikut terhapus", async 
   );
   harusSama(sisa.n, 0, "jejak QC ikut terhapus");
 
-  const n = await notif(NABILA);
-  harusSama(n[0].judul, "Tiket dihapus: Susun brief live");
   harusSama(
-    n[0].pesan,
+    satuNotif(await notif(NABILA), "Tiket dihapus: Susun brief live").pesan,
     "Dewi Lestari menghapusnya. Kamu tidak perlu mengerjakannya lagi.",
   );
 });
