@@ -16,6 +16,8 @@ import {
   periksaKomisiWajib,
   perubahanRevisi,
   PESAN_GMV_BELUM_PENUH,
+  PESAN_GMV_KOSONG,
+  PESAN_KOMISI_WAJIB,
   punyaKolom,
   sasaranBelumDilapor,
   statusLaporanBulan,
@@ -95,7 +97,7 @@ test("bersihkanIsi mempertahankan kolom Affiliator dan merapikan catatan", () =>
 });
 
 test("GMV nol, negatif, atau di luar batas ditolak", () => {
-  assert.equal(periksaIsiLaporan("mcn", isi({ gmv: 0 })), "GMV belum diisi.");
+  assert.equal(periksaIsiLaporan("mcn", isi({ gmv: 0 })), PESAN_GMV_KOSONG);
   assert.match(String(periksaIsiLaporan("mcn", isi({ gmv: -1 }))), /tidak sah/);
   assert.match(
     String(periksaIsiLaporan("mcn", isi({ gmv: 100_000_000_001 }))),
@@ -143,7 +145,84 @@ test("AC2: GMV Rp 0 dengan komisi masuk Rp 50.000 sah", () => {
   // Tanpa GMV dan tanpa komisi tetap dianggap lupa diisi.
   assert.equal(
     periksaIsiLaporan("affiliator", isi({ gmv: 0, komisi: 0 })),
-    "GMV belum diisi.",
+    PESAN_GMV_KOSONG,
+  );
+});
+
+test("GMV nol sah hanya bila pelapor menyatakan tidak ada penjualan", () => {
+  const nyatakan = (p: Partial<IsiLaporan> = {}) =>
+    isi({ gmv: 0, tanpaPenjualan: true, ...p });
+
+  for (const unit of ["mcn", "tap", null] as const) {
+    assert.equal(periksaIsiLaporan(unit, isi({ gmv: 0 })), PESAN_GMV_KOSONG);
+    assert.equal(periksaIsiLaporan(unit, nyatakan()), null);
+  }
+  assert.equal(
+    periksaIsiLaporan("affiliator", nyatakan({ komisi: 0, jumlahUpload: 0 })),
+    null,
+  );
+  // Nilai selain `true` dari kiriman yang tidak lewat form bukan pernyataan.
+  assert.equal(
+    periksaIsiLaporan(
+      "mcn",
+      isi({ gmv: 0, tanpaPenjualan: "true" as unknown as boolean }),
+    ),
+    PESAN_GMV_KOSONG,
+  );
+});
+
+test("pernyataan tidak ada penjualan tidak boleh berisi GMV", () => {
+  assert.match(
+    String(periksaIsiLaporan("mcn", isi({ tanpaPenjualan: true }))),
+    /Pilih salah satu/,
+  );
+});
+
+test("BR-K1: tidak ada penjualan tetap wajib mengisi komisi akun Affiliator", () => {
+  const tanpaKomisi = isi({ gmv: 0, tanpaPenjualan: true, komisi: null });
+  assert.equal(periksaIsiLaporan("affiliator", tanpaKomisi), null);
+  assert.equal(
+    periksaKomisiWajib("affiliator", tanpaKomisi),
+    PESAN_KOMISI_WAJIB,
+  );
+  assert.equal(periksaKomisiWajib("mcn", tanpaKomisi), null);
+  // Komisi dari pesanan hari lain tetap boleh masuk pada hari tanpa penjualan.
+  assert.equal(
+    periksaIsiLaporan(
+      "affiliator",
+      isi({ gmv: 0, tanpaPenjualan: true, komisi: 50_000 }),
+    ),
+    null,
+  );
+});
+
+test("hari tanpa penjualan: LIVE boleh tercatat, GMV LIVE tetap nol", () => {
+  const nyatakan = (p: Partial<IsiLaporan>) =>
+    isi({ gmv: 0, tanpaPenjualan: true, komisi: 0, ...p });
+  assert.equal(
+    periksaIsiLaporan("affiliator", nyatakan({ gmvLive: 0, jamLive: 4 })),
+    null,
+  );
+  assert.match(
+    String(periksaIsiLaporan("affiliator", nyatakan({ gmvLive: 1 }))),
+    /tidak mungkin lebih besar/,
+  );
+});
+
+test("bersihkanIsi membawa pernyataan tanpa penjualan untuk semua departemen", () => {
+  for (const unit of ["affiliator", "mcn", "tap", null] as const) {
+    const mentah = isi({ gmv: 0, tanpaPenjualan: true, komisi: 0 });
+    const bersih = bersihkanIsi(unit, mentah);
+    assert.equal(bersih.tanpaPenjualan, true);
+    assert.equal(periksaIsiLaporan(unit, bersih), null);
+    assert.equal(periksaKomisiWajib(unit, bersih), null);
+  }
+  assert.equal(bersihkanIsi("mcn", isi()).tanpaPenjualan, false);
+  assert.equal(
+    bersihkanIsi("mcn", { ...ISI_KOSONG, tanpaPenjualan: undefined })
+      .tanpaPenjualan,
+    false,
+    "pengirim lama yang tidak membawa pernyataan dianggap tidak menyatakan",
   );
 });
 

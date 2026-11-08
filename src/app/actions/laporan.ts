@@ -84,6 +84,8 @@ export async function kirimLaporanHarian(input: {
   gmvLive?: number | null;
   jamLive?: number | null;
   catatan?: string;
+  /** Pelapor menyatakan hari itu tidak ada penjualan; syarat GMV Rp 0. */
+  tanpaPenjualan?: boolean;
   tanggal: string;
 }): Promise<Hasil<{ id: string }>> {
   const sasaran = uraikanSasaran(input.sasaran);
@@ -105,6 +107,7 @@ export async function kirimLaporanHarian(input: {
     gmvLive: input.gmvLive ?? null,
     jamLive: input.jamLive ?? null,
     catatan: input.catatan?.trim() ?? "",
+    tanpaPenjualan: input.tanpaPenjualan === true,
   };
   const unit = await unitSasaranLaporan(input.sasaran);
   const salah = periksaIsiLaporan(unit, isi) ?? periksaKomisiWajib(unit, isi);
@@ -177,6 +180,8 @@ export async function perbaikiLaporan(input: {
   jamLive?: number | null;
   alasan: string;
   catatan?: string;
+  /** Sama dengan laporan baru: GMV Rp 0 harus dinyatakan. */
+  tanpaPenjualan?: boolean;
 }): Promise<Hasil> {
   if (input.alasan.trim().length < 10) {
     return gagal("Alasan perbaikan minimal 10 karakter.", "validasi");
@@ -192,6 +197,7 @@ export async function perbaikiLaporan(input: {
     gmvLive: input.gmvLive ?? null,
     jamLive: input.jamLive ?? null,
     catatan: input.catatan?.trim() ?? "",
+    tanpaPenjualan: input.tanpaPenjualan === true,
   });
   if (salah) return gagal(salah, "validasi");
 

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { InputGmv } from "@/components/laporan-harian/input-gmv";
+import { PilihanTanpaPenjualan } from "@/components/laporan-harian/pilihan-tanpa-penjualan";
 import { cn } from "@/lib/utils";
 import {
   angka,
@@ -61,6 +62,9 @@ export function DialogRevisi({
     punyaKolom(unit, "komisi") && laporan.komisiTerlihat === false;
   const [buka, setBuka] = useState(false);
   const [gmvBaru, setGmvBaru] = useState(laporan.gmv);
+  // GMV Rp 0 yang sudah tersimpan berarti hari itu tidak ada penjualan.
+  // Tanpa ini, memperbaiki upload-nya saja ikut tertolak "GMV belum diisi".
+  const [tanpaPenjualan, setTanpaPenjualan] = useState(laporan.gmv === 0);
   const [komisiBaru, setKomisiBaru] = useState(
     komisiRahasia ? 0 : (laporan.komisi ?? 0),
   );
@@ -84,6 +88,7 @@ export function DialogRevisi({
     gmvLive: laporan.gmvLive === null && liveBaru === 0 ? null : liveBaru,
     jamLive: jamDibaca,
     catatan: laporan.catatan,
+    tanpaPenjualan,
   });
   // Perbaikan boleh menyentuh angka mana pun; yang wajib hanya ada yang
   // benar-benar berubah, dan alasannya.
@@ -116,6 +121,7 @@ export function DialogRevisi({
         gmvLive: ubahLive ? (isiBaru.gmvLive ?? null) : null,
         jamLive: ubahJam ? (isiBaru.jamLive ?? null) : null,
         alasan: alasan.trim(),
+        tanpaPenjualan: isiBaru.tanpaPenjualan,
       });
 
       // Di mode demo alurnya tetap diperlihatkan; datanya tidak tersimpan.
@@ -157,6 +163,7 @@ export function DialogRevisi({
         setBuka(v);
         if (v) {
           setGmvBaru(laporan.gmv);
+          setTanpaPenjualan(laporan.gmv === 0);
           setKomisiBaru(komisiRahasia ? 0 : (laporan.komisi ?? 0));
           setIsiUlangKomisi(false);
           setUploadBaru(laporan.jumlahUpload ?? 0);
@@ -215,7 +222,7 @@ export function DialogRevisi({
                     : "text-muted-foreground",
                 )}
               >
-                {gmvBaru > 0 ? rupiahPenuh(gmvBaru) : "—"}
+                {gmvBaru > 0 || tanpaPenjualan ? rupiahPenuh(gmvBaru) : "—"}
                 {berubah ? (
                   <span className="ml-1 text-[11px] leading-[14px]">
                     ({selisih > 0 ? "+" : "−"}
@@ -233,7 +240,24 @@ export function DialogRevisi({
             >
               Nilai GMV yang benar
             </label>
-            <InputGmv id="gmv-revisi" nilai={gmvBaru} onUbah={setGmvBaru} />
+            <InputGmv
+              // Dipasang ulang saat pilihannya berganti; kotak memegang
+              // teksnya sendiri.
+              key={tanpaPenjualan ? "gmv-nol" : "gmv"}
+              id="gmv-revisi"
+              nilai={gmvBaru}
+              onUbah={setGmvBaru}
+              nonaktif={tanpaPenjualan}
+            />
+            <PilihanTanpaPenjualan
+              kapan="hari itu"
+              nilai={tanpaPenjualan}
+              onUbah={(pilih) => {
+                setTanpaPenjualan(pilih);
+                setGmvBaru(pilih ? 0 : laporan.gmv);
+                setLiveBaru(pilih ? 0 : (laporan.gmvLive ?? 0));
+              }}
+            />
           </div>
 
           {punyaKolom(unit, "komisi") || punyaKolom(unit, "jumlahUpload") ? (
@@ -303,12 +327,14 @@ export function DialogRevisi({
                   GMV dari LIVE
                 </label>
                 <InputGmv
+                  key={tanpaPenjualan ? "live-nol" : "live"}
                   id="live-revisi"
                   ringkas
                   label="GMV LIVE"
                   maks={MAKS_GMV}
                   nilai={liveBaru}
                   onUbah={setLiveBaru}
+                  nonaktif={tanpaPenjualan}
                 />
               </div>
               <div className="space-y-1.5">
