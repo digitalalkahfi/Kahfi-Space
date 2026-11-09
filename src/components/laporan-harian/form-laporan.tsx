@@ -447,9 +447,10 @@ export function FormLaporan({
           </div>
 
           <InputGmv
-            // Dipasang ulang saat pilihannya berganti supaya angka yang
-            // sempat diketik tidak tertinggal di kotak.
-            key={tanpaPenjualan ? "gmv-nol" : "gmv"}
+            // Dipasang ulang per sasaran dan saat "Tidak ada penjualan"
+            // berganti, supaya angka yang diketik untuk akun lain — termasuk
+            // "0", yang tidak mengubah nilainya — tidak tertinggal di kotak.
+            key={`gmv-${dipilih}-${tanpaPenjualan ? "nol" : "isi"}`}
             nilai={nilai}
             onUbah={setNilai}
             nonaktif={tanpaPenjualan}
@@ -580,6 +581,8 @@ export function FormLaporan({
                   ) : null}
                 </div>
                 <InputGmv
+                  // Dipasang ulang per sasaran, seperti kotak komisi.
+                  key={`upload-${dipilih}`}
                   id="upload"
                   ringkas
                   maks={MAKS_UPLOAD}
@@ -640,7 +643,7 @@ export function FormLaporan({
                     GMV dari LIVE
                   </label>
                   <InputGmv
-                    key={tanpaPenjualan ? "gmv-live-nol" : "gmv-live"}
+                    key={`gmv-live-${dipilih}-${tanpaPenjualan ? "nol" : "isi"}`}
                     id="gmv-live"
                     ringkas
                     maks={MAKS_GMV}
