@@ -53,10 +53,7 @@ export function InputGmv({
    * membedakan "belum diisi" dari "0", mis. komisi wajib (BR-K1).
    */
   onKosong?: (kosong: boolean) => void;
-  /**
-   * Kotak tidak bisa diisi, mis. saat "Tidak ada penjualan" dicentang. Teks
-   * yang sudah diketik tidak ikut hilang; pasang ulang lewat `key` bila perlu.
-   */
+  /** Kotak tidak bisa diisi, mis. saat "Tidak ada penjualan" dicentang. */
   nonaktif?: boolean;
 }) {
   const ref = useRef<HTMLInputElement>(null);
@@ -64,6 +61,19 @@ export function InputGmv({
   const [teks, setTeks] = useState(() =>
     nilai > 0 ? formatRibuan(String(nilai)) : "",
   );
+
+  // Teks kotak adalah state sendiri, sedangkan `nilai` bisa diubah dari
+  // luar — formulir mengosongkannya setelah satu sasaran terkirim. Tanpa
+  // penyelarasan ini, akun berikutnya menampilkan angka akun sebelumnya
+  // padahal yang akan terkirim 0. Ketikan sendiri tidak ditimpa: teksnya
+  // sudah mewakili nilai yang sama, termasuk "0" yang berbeda dari kosong.
+  const [nilaiTerakhir, setNilaiTerakhir] = useState(nilai);
+  if (nilai !== nilaiTerakhir) {
+    setNilaiTerakhir(nilai);
+    if (Number(hanyaDigit(teks) || 0) !== nilai) {
+      setTeks(nilai > 0 ? formatRibuan(String(nilai)) : "");
+    }
+  }
 
   // Kembalikan kursor ke posisi yang setara setelah pemisah ribuan disisipkan.
   useLayoutEffect(() => {
