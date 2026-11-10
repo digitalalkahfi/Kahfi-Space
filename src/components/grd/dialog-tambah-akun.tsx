@@ -44,14 +44,22 @@ export function DialogTambahAkun({
   const [menyimpan, mulai] = useTransition();
   const [pesan, setPesan] = useState<string | null>(null);
 
-  const siap = /^@[a-z0-9._]{3,30}$/i.test(username.trim());
+  // "@" boleh tidak diketik — ditambahkan sendiri supaya tombol Simpan
+  // tidak diam-diam mati hanya karena lupa satu karakter.
+  const tanpaSpasi = username.trim();
+  const usernameRapi =
+    tanpaSpasi === "" || tanpaSpasi.startsWith("@")
+      ? tanpaSpasi
+      : `@${tanpaSpasi}`;
+  const siap = /^@[a-z0-9._]{3,30}$/i.test(usernameRapi);
+  const salahFormat = tanpaSpasi !== "" && !siap;
 
   const simpan = () => {
     if (!siap || menyimpan) return;
     setPesan(null);
     mulai(async () => {
       const hasil = await tambahAkun({
-        username: username.trim(),
+        username: usernameRapi,
         unitKode,
         programId,
         picId,
@@ -104,10 +112,20 @@ export function DialogTambahAkun({
               spellCheck={false}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="@nama_toko"
+              aria-invalid={salahFormat}
+              aria-describedby="petunjuk-username"
               className="h-12 w-full rounded-xl bg-muted px-4 text-[15px] outline-none placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-ring/40"
             />
-            <p className="text-[11px] leading-[14px] text-muted-foreground">
-              Diawali @, 3–30 huruf, angka, titik, atau garis bawah.
+            <p
+              id="petunjuk-username"
+              className={cn(
+                "text-[11px] leading-[14px]",
+                salahFormat ? "text-warn-text" : "text-muted-foreground",
+              )}
+            >
+              {salahFormat
+                ? "Belum sesuai: 3–30 huruf, angka, titik, atau garis bawah — tanpa spasi atau simbol lain."
+                : "3–30 huruf, angka, titik, atau garis bawah. Tanda @ ditambahkan otomatis."}
             </p>
           </div>
 

@@ -138,7 +138,9 @@ export async function tambahAkun(input: {
   programId: string | null;
   picId: string | null;
 }): Promise<Hasil> {
-  const username = input.username.trim();
+  const tanpaSpasi = input.username.trim();
+  // "@" yang lupa diketik ditambahkan sendiri, bukan ditolak.
+  const username = tanpaSpasi.startsWith("@") ? tanpaSpasi : `@${tanpaSpasi}`;
   if (!POLA_USERNAME.test(username)) {
     return gagal(
       "Username diawali @ dan terdiri dari 3–30 huruf, angka, titik, atau garis bawah.",
