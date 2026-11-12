@@ -189,6 +189,12 @@ uji("pesan error tidak pernah memuat sandi, alamat, atau connection string", asy
     const { pesan } = galatAman(e);
     harus(!pesan.includes(SANDI) && !pesan.includes(HOST) && !pesan.includes("postgresql://"), `bocor: ${pesan}`);
   }
+  // Pooler Supabase: peran masih NOLOGIN (tombol darurat, atau sandi belum disetel).
+  harusSama(
+    galatAman(Object.assign(new Error("(EAUTHQUERY) user not found in the database"), { code: "XX000" })).kode,
+    "belum_login",
+    "peran belum boleh login",
+  );
   // Pesan `raise exception` milik asisten.* tetap diteruskan apa adanya.
   harusSama(
     galatAman(Object.assign(new Error("Rentang maksimal 92 hari"), { code: "P0001" })).pesan,
