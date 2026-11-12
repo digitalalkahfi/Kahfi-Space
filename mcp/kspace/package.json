@@ -9,7 +9,10 @@
   },
   "scripts": {
     "start": "node index.mjs",
-    "test": "node tes/jalankan.mjs"
+    "test": "node tes/jalankan.mjs",
+    "pasang": "node skrip/pasang.mjs",
+    "setel-sandi": "bash skrip/setel-sandi.sh",
+    "cek": "node skrip/cek-sambungan.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.4.0",
