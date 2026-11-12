@@ -32,7 +32,7 @@ Akses langsung mati. Untuk menyalakan lagi, setel sandi baru (lihat
 | `belum_lapor(tanggal?)` | Siapa yang belum lapor, per Leader | `asisten.belum_lapor()` |
 | `gmv_unit(tanggal?)` | GMV satu tanggal dan bulan berjalan per unit vs target prorata | `asisten.gmv_unit()` |
 | `gmv_harian(dari, sampai, unit?)` | GMV per hari per unit, maksimal 92 hari | `asisten.gmv_harian()` |
-| `tugas_telat(waktu?, min_hari_telat?)` | Tiket/to-do lewat tenggat; "menunggu QC" dipisah | `asisten.tugas_telat()` |
+| `tugas_telat(waktu?, min_hari_telat?)` | Tiket lewat tenggat seluruh tim dan to-do pribadi Manager; "menunggu QC" dipisah | `asisten.tugas_telat()` |
 
 Yang perlu diingat saat membaca jawabannya:
 
@@ -84,8 +84,8 @@ Dasbor Supabase → Database → Settings → **SSL Configuration** →
 
 **4. Pastikan database siap**
 
-Migration `0217_asisten_baca.sql` dan `0218_pagar_asisten_baca.sql` harus
-sudah diterapkan. Untuk memeriksanya, jalankan isi
+Migration `0217_asisten_baca.sql`, `0218_pagar_asisten_baca.sql`, dan
+`0219_asisten_todo_pribadi.sql` harus sudah diterapkan. Untuk memeriksanya, jalankan isi
 [`sql/periksa-pagar.sql`](sql/periksa-pagar.sql) di SQL Editor. Yang
 diharapkan: `fungsi_asisten` = 7, `definer_terbuka_di_luar_asisten` = 0,
 `tabel_terbaca` = 0.

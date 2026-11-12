@@ -135,7 +135,7 @@ export const DAFTAR_TOOL = [
       "Parameter tanggal = HARI TAGIH (hari absen), default hari ini WIB.",
       ATURAN_H1,
       "Kolom: nama, role, unit, leader (Leader di garis atasannya; 'Tanpa Leader' bila tidak ada), wajib_lapor, sudah_lapor, tanggal_gmv (tanggal isi laporan = hari tagih - 1).",
-      "Jumlah orang adalah hitungan baris. Orang yang tidak wajib lapor hanya dijumlah, tidak dirinci.",
+      "Satu baris = satu orang. Orang yang tidak wajib lapor hanya dijumlah, tidak dirinci.",
       "Sumber: asisten.status_lapor(tanggal).",
     ].join(" "),
     skema: z.strictObject({
@@ -161,7 +161,7 @@ export const DAFTAR_TOOL = [
         baris_teks.push("Tidak ada data: fungsi tidak mengembalikan satu orang pun.");
       } else {
         baris_teks.push(
-          `Wajib lapor: ${ringkas.wajib} orang | sudah: ${ringkas.sudah} | belum: ${ringkas.belum} | tidak wajib lapor: ${ringkas.tidak_wajib} (hitungan baris)`,
+          `Wajib lapor: ${ringkas.wajib} orang | sudah: ${ringkas.sudah} | belum: ${ringkas.belum} | tidak wajib lapor: ${ringkas.tidak_wajib}`,
         );
         for (const [leader, anggota] of kelompokkan(wajib, "leader")) {
           const s = anggota.filter((b) => b.sudah_lapor);
@@ -205,7 +205,7 @@ export const DAFTAR_TOOL = [
       if (baris.length === 0) {
         teks.push("Tidak ada yang belum lapor: semua orang yang wajib lapor sudah lapor.");
       } else {
-        teks.push(`Belum lapor: ${baris.length} orang (hitungan baris)`);
+        teks.push(`Belum lapor: ${baris.length} orang`);
         for (const [leader, anggota] of kelompokkan(baris, "leader")) {
           teks.push(`Leader ${leader} (${anggota.length}): ${anggota.map(orang).join("; ")}`);
         }
@@ -339,7 +339,7 @@ export const DAFTAR_TOOL = [
     nama: "tugas_telat",
     judul: "Tugas lewat tenggat",
     deskripsi: [
-      "Tiket, to-do, dan komitmen yang sudah lewat tenggat dan belum selesai, milik anggota aktif.",
+      "Tiket dan komitmen yang sudah lewat tenggat dan belum selesai milik anggota aktif, plus to-do pribadi milik Manager sendiri. To-do pribadi orang lain tidak ditampilkan, sama seperti halaman Tugas.",
       "Pakai untuk 'tugas apa yang telat lebih dari N hari' atau 'tugas lewat tenggat yang menunggu QC'.",
       "Hasil dibagi DUA kelompok: TELAT (status todo/berjalan/revisi — masih di tangan penerima) dan MENUNGGU QC (sudah dikerjakan, menunggu pemeriksaan; tidak dihitung sebagai kelalaian penerima).",
       "Parameter waktu = patokan 'sekarang' (default saat ini). Parameter min_hari_telat menyaring hari_telat >= nilai itu; untuk 'telat lebih dari 3 hari' isi 4.",
@@ -371,7 +371,7 @@ export const DAFTAR_TOOL = [
         `- [${b.tipe}] ${potong(b.judul)} — penerima ${b.penerima} (${b.role}, ${b.unit}; Leader ${b.leader}),` +
         ` dibuat ${b.pembuat}, tenggat ${b.tenggat_wib} WIB, telat ${b.hari_telat} hari, status ${b.status}`;
       const blok = (judul, isi) => {
-        const keluar = [`${judul}: ${isi.length} tugas (hitungan baris)`];
+        const keluar = [`${judul}: ${isi.length} tugas`];
         if (isi.length === 0) keluar.push("  tidak ada");
         keluar.push(...isi.slice(0, MAKS).map(satu));
         if (isi.length > MAKS) keluar.push(`  … dan ${isi.length - MAKS} tugas lagi tidak ditampilkan (naikkan min_hari_telat).`);
