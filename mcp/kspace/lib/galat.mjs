@@ -47,6 +47,8 @@ export function galatAman(e) {
     return { kode: "belum_ada", pesan: "Fungsi asisten.* belum ada di database ini. Migration 0217 mungkin belum diterapkan." };
   if (kode === "28P01" || kode === "28000")
     return { kode: "sandi", pesan: "Database menolak login asisten_baca. Periksa sandi di Keychain, atau peran sedang dimatikan (nologin)." };
+  if (kode === "XX000" && /EAUTHQUERY|user not found in the database/i.test(asli))
+    return { kode: "belum_login", pesan: "Peran asisten_baca belum boleh login di database (sandi belum disetel, atau akses sedang dimatikan dengan nologin). Jalankan 'npm run setel-sandi' lalu tempel dan Run perintahnya di SQL Editor Supabase." };
   if (kode === "XX000" && /tenant or user not found/i.test(asli))
     return { kode: "pengguna", pesan: "Pooler Supabase tidak mengenali nama pengguna. Periksa 'user' di berkas setelan (bentuk: asisten_baca.<kode-proyek>)." };
   if (JARINGAN.has(kode))
