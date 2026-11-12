@@ -1,0 +1,22 @@
+{
+  "name": "kspace-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MCP server lokal hanya-baca untuk K-Space V2 (peran database asisten_baca).",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node index.mjs",
+    "test": "node tes/jalankan.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "^2.4.0",
+    "pg": "^8.23.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "^2.4.0"
+  }
+}
