@@ -56,8 +56,14 @@ export async function daftarMigrasi() {
   return berkas.filter((f) => f.endsWith(".sql")).sort();
 }
 
-/** Bikin database bersih berisi seluruh migrasi. */
-export async function buatDb({ diam = true } = {}) {
+/**
+ * Bikin database bersih berisi seluruh migrasi.
+ *
+ * `saring(namaBerkas)` (opsional) memilih migrasi yang dijalankan —
+ * dipakai tes yang perlu memotret keadaan SEBELUM sebuah migrasi lalu
+ * menerapkannya sendiri (lihat `terapkanMigrasi`).
+ */
+export async function buatDb({ diam = true, saring = () => true } = {}) {
   const db = new PGlite();
   await db.exec(SHIM_AUTH);
 
@@ -76,7 +82,7 @@ export async function buatDb({ diam = true } = {}) {
       grant execute on functions to anon, authenticated;
   `);
 
-  for (const berkas of await daftarMigrasi()) {
+  for (const berkas of (await daftarMigrasi()).filter(saring)) {
     const sql = await readFile(path.join(DIR_MIGRASI, berkas), "utf8");
     try {
       await db.exec(sql);
@@ -90,6 +96,12 @@ export async function buatDb({ diam = true } = {}) {
     }
   }
   return db;
+}
+
+/** Jalankan satu berkas migrasi di database yang sudah ada. */
+export async function terapkanMigrasi(db, berkas) {
+  await db.exec("reset role;");
+  await db.exec(await readFile(path.join(DIR_MIGRASI, berkas), "utf8"));
 }
 
 /** Terapkan supabase/seed.sql ke database uji. */
