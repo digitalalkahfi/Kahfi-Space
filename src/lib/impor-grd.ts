@@ -149,6 +149,12 @@ export type RencanaMentah = {
    * "Raka"). Dipakai mencocokkan nama orang lewat PIC akun di K-Space.
    */
   pemegangAkun: Record<string, string>;
+  /**
+   * Akun internal yang menurut file BELUM masuk MCN (kolom catatan sheet
+   * Target & Kurva WRM bagian A: "Belum masuk MCN …"). GMV akun internal
+   * lain sudah termuat di GMV MCN, jadi dikurangkan dari GMV eksternal.
+   */
+  akunBelumMcn: string[];
   /** Hal yang dilewati pembaca beserta alasannya. */
   catatan: string[];
 };
@@ -312,7 +318,8 @@ function bacaGoalSheet(ws: LembarXlsx, catatan: string[]) {
   let periodeLabel = "";
   let bagian: "perusahaan" | "planning" | "manager" | "leader" | "staf" | null =
     null;
-  let departemen: { unit: KodeUnit; leader: string | null } | null = null;
+  let departemen: { unit: KodeUnit | null; leader: string | null } | null =
+    null;
   let stafPemilik: string | null = null;
   const goals: GoalMentah[] = [];
   let rumusanPerusahaan: string | null = null;
@@ -351,9 +358,13 @@ function bacaGoalSheet(ws: LembarXlsx, catatan: string[]) {
     const dep = /^DEPARTEMEN (.+?) — Leader: ([A-Za-z]+)/.exec(b);
     if (dep) {
       const unit = UNIT_DEPARTEMEN[dep[1].trim()];
+      // Departemen tanpa unit di K-Space (mis. departemen baru): goalnya tetap
+      // milik Leader-nya, hanya tanpa unit.
       if (!unit)
-        catatan.push(`Departemen "${dep[1]}" tidak dikenal (baris ${r}).`);
-      departemen = unit ? { unit, leader: dep[2] } : null;
+        catatan.push(
+          `Departemen "${dep[1].trim()}" belum punya unit di K-Space (baris ${r}); goalnya masuk tanpa unit.`,
+        );
+      departemen = { unit: unit ?? null, leader: dep[2] };
       continue;
     }
     const staf = /^(TATA KELOLA|SEKRETARIAT) — ([A-Za-z]+)/.exec(b);
@@ -460,6 +471,8 @@ type AkunTarget = {
   akun: string | null;
   pemegang: string;
   baris: number;
+  /** Kolom catatan menulis "Belum masuk MCN". */
+  belumMcn: boolean;
 };
 
 function bacaTargetAkun(
@@ -554,6 +567,7 @@ function bacaTargetAkun(
       akun: username,
       pemegang,
       baris: r,
+      belumMcn: /belum masuk MCN/i.test(teks(ws, `K${r}`)),
     });
   }
 
@@ -586,15 +600,32 @@ function satuanKurva(k: string): string {
   return /^rp$/i.test(k.trim()) ? "IDR" : k.trim();
 }
 
-/** Lingkup khusus yang rumusnya tertulis di keterangan file, bukan sel. */
+/**
+ * Ukuran bantu: GMV akun internal yang SUDAH masuk MCN. Angka unit MCN
+ * (Partner Center) sudah memuat akun-akun ini, jadi dikurangkan dari GMV
+ * eksternal supaya tidak terhitung dua kali di goal perusahaan.
+ */
+export const KODE_INTERNAL_MCN = "1.2-internal-mcn";
+
+/**
+ * Lingkup khusus yang rumusnya tertulis di keterangan file, bukan sel.
+ *
+ * Aturan goal 1 (GMV perusahaan) = GMV MCN + GMV akun internal yang belum
+ * masuk MCN. Diperoleh dari tiga baris di bawah tanpa hitung dobel:
+ *   1.1 = semua akun internal (sudah maupun belum masuk MCN);
+ *   1.2 = GMV MCN − akun internal yang sudah masuk MCN;
+ *   1   = 1.1 + 1.2.
+ */
 const LINGKUP_KHUSUS: Record<string, LingkupMentah[]> = {
-  // Creator existing = GMV unit MCN − GMV creator besar baru (sheet Target &
-  // Kurva WRM: 1.2.2 dan 1.2.1 "ESTIMASI, dicatat setelah binding").
+  // Creator eksternal = GMV unit MCN − akun internal yang sudah masuk MCN
+  // − GMV baris 1.2.1 (creator besar baru / pemakai studio, dicatat sendiri).
   "1.2.2": [
     { unit: "mcn", jenisGmv: "semua", faktor: 1 },
+    { sumberKode: KODE_INTERNAL_MCN, faktor: -1 },
     { sumberKode: "1.2.1-gmv", faktor: -1 },
   ],
-  // "TOTAL GMV EKSTERNAL (creator existing + creator besar baru)".
+  // "TOTAL GMV EKSTERNAL (creator existing + creator besar baru)"
+  // = GMV MCN − akun internal yang sudah masuk MCN.
   "1.2": [
     { sumberKode: "1.2.2", faktor: 1 },
     { sumberKode: "1.2.1-gmv", faktor: 1 },
@@ -605,6 +636,17 @@ const LINGKUP_KHUSUS: Record<string, LingkupMentah[]> = {
     { sumberKode: "1.2", faktor: 1 },
   ],
 };
+
+/** Lingkup ukuran bantu: akun internal dikurangi yang belum masuk MCN. */
+function lingkupInternalMcn(
+  akunInternal: string[],
+  belumMcn: string[],
+): LingkupMentah[] {
+  const belum = new Set(belumMcn.map((a) => a.toLowerCase()));
+  return [...new Set(akunInternal)]
+    .filter((a) => !belum.has(a.toLowerCase()))
+    .map((akun) => ({ akun, jenisGmv: "semua" as const, faktor: 1 as const }));
+}
 
 function bacaKurva(
   ws: LembarXlsx,
@@ -625,13 +667,17 @@ function bacaKurva(
     return [];
   }
 
-  // Baris judul kolom: "Sab 3 Okt", "Sab 10 Okt", …
+  // Baris judul kolom: "Sab 3 Okt", "Sab 10 Okt", … dan titik akhir bulan
+  // yang bukan Sabtu ("Sen 30 Nov").
   const [tahun, bulan] = periode.split("-").map(Number);
   let kolomTitik: { kolom: string; tanggal: string }[] = [];
   for (let r = mulai; r <= mulai + 3 && kolomTitik.length === 0; r += 1) {
     kolomTitik = [...KOLOM]
       .map((k) => ({ k, t: teks(ws, `${k}${r}`) }))
-      .map(({ k, t }) => ({ k, m: /^Sab\s+(\d{1,2})\s+([A-Za-z]+)/.exec(t) }))
+      .map(({ k, t }) => ({
+        k,
+        m: /^(?:Sen|Sel|Rab|Kam|Jum|Sab|Min)\s+(\d{1,2})\s+([A-Za-z]+)/.exec(t),
+      }))
       .filter((x) => x.m)
       .map(({ k, m }) => ({
         kolom: k,
@@ -1322,8 +1368,34 @@ export function bacaRencanaGrd(workbook: {
     });
   }
 
+  // Ukuran bantu: akun internal yang sudah masuk MCN (lihat LINGKUP_KHUSUS).
+  const akunInternal = targetAkun.akun.filter((a) => a.akun);
+  const akunBelumMcn = [
+    ...new Set(
+      akunInternal.filter((a) => a.belumMcn).map((a) => a.akun as string),
+    ),
+  ];
+  if (ukuran.some((u) => u.kode === "1.2.2")) {
+    ukuran.push({
+      kode: KODE_INTERNAL_MCN,
+      judul: "GMV akun internal yang sudah masuk MCN",
+      satuan: "IDR",
+      sumber: "gmv",
+      goal: null,
+      pic: null,
+      picTeks: "",
+      urutan: (urutan += 1),
+      lingkup: lingkupInternalMcn(
+        akunInternal.map((a) => a.akun as string),
+        akunBelumMcn,
+      ),
+      titik: [],
+    });
+  }
+
   // Sumber dan lingkup tiap ukuran.
   for (const u of ukuran) {
+    if (u.kode === KODE_INTERNAL_MCN) continue;
     const goal = u.goal
       ? (goalPerKode.get(u.goal) ?? semuaGoal.find((g) => g.kode === u.goal))
       : null;
@@ -1400,6 +1472,7 @@ export function bacaRencanaGrd(workbook: {
     cascade,
     lead,
     pemegangAkun,
+    akunBelumMcn,
     catatan,
   };
 }
@@ -1437,6 +1510,12 @@ export type PemetaanGrd = {
    * CEO dan Manager (0196). Tanpa kunci ini daftar di database dibiarkan.
    */
   papan_akun_kecuali?: string[];
+  /**
+   * Akun internal (nama di file) yang BELUM masuk MCN. Bila diisi, daftar
+   * ini menggantikan bacaan kolom catatan file — dipakai saat ada akun
+   * yang baru didaftarkan (bind) ke MCN setelah file ditulis.
+   */
+  akun_belum_mcn?: string[];
 };
 
 export type SumberKpiOtomatis =
@@ -1539,7 +1618,8 @@ export type HasilCocok = {
  * tim (`users`) dan akun (`accounts`). Tidak ada tebakan: hanya aturan
  * pasti berikut, dan yang tidak cocok menjadi null (unmapped).
  *
- *   akun   1. username sama persis (tanpa beda huruf besar/kecil);
+ *   akun   1. username sama persis (tanpa beda huruf besar/kecil dan
+ *             tanpa "@" di depan);
  *          2. sama setelah tanda _ dan . diabaikan, dan hanya satu.
  *   orang  1. nama sama persis dengan satu anggota aktif;
  *          2. nama satu kata (≥ 3 huruf) yang menjadi awal kata nama
@@ -1565,13 +1645,15 @@ export function lengkapiPemetaan(
       .toLowerCase()
       .split(/[^a-z0-9]+/)
       .filter(Boolean);
-  const polos = (t: string) => t.toLowerCase().replace(/[_.]/g, "");
+  // "@" di depan username hanyalah cara tulis ("Tambah akun" menambahkannya).
+  const tanpaAt = (t: string) => t.toLowerCase().replace(/^@/, "");
+  const polos = (t: string) => tanpaAt(t).replace(/[_.]/g, "");
 
   const akun: HasilCocok[] = nama.akun.map((n) => {
     if (n in pemetaan.akun)
       return { nama: n, ke: pemetaan.akun[n], cara: "berkas pemetaan" };
     const persis = data.accounts.filter(
-      (a) => a.username.toLowerCase() === n.toLowerCase(),
+      (a) => tanpaAt(a.username) === tanpaAt(n),
     );
     if (persis.length === 1)
       return { nama: n, ke: persis[0].username, cara: "username sama persis" };
@@ -1755,6 +1837,24 @@ export function susunRencana(
       ];
     });
 
+  // Daftar "belum masuk MCN" dari berkas pemetaan menggantikan bacaan file.
+  const lingkupUkuran = (u: UkuranMentah): LingkupMentah[] => {
+    if (u.kode !== KODE_INTERNAL_MCN || !pemetaan.akun_belum_mcn)
+      return u.lingkup;
+    const dikenal = [
+      ...u.lingkup.flatMap((l) => ("akun" in l ? [l.akun] : [])),
+      ...mentah.akunBelumMcn,
+    ];
+    for (const a of pemetaan.akun_belum_mcn) {
+      if (!dikenal.some((d) => d.toLowerCase() === a.toLowerCase())) {
+        laporan.dilewati.push(
+          `akun_belum_mcn: "${a}" bukan akun internal di file, diabaikan.`,
+        );
+      }
+    }
+    return lingkupInternalMcn(dikenal, pemetaan.akun_belum_mcn);
+  };
+
   const ukuran = mentah.ukuran
     .filter((u) => !(u.goal && goalDilewati.has(u.goal)))
     .map((u) => ({
@@ -1767,7 +1867,7 @@ export function susunRencana(
       pic_teks: u.picTeks,
       urutan: u.urutan,
       asal: "",
-      lingkup: u.lingkup.flatMap((l): Record<string, unknown>[] => {
+      lingkup: lingkupUkuran(u).flatMap((l): Record<string, unknown>[] => {
         if ("sumberKode" in l) {
           return [{ sumber_kode: l.sumberKode, faktor: l.faktor }];
         }

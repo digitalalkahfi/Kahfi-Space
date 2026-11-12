@@ -2726,6 +2726,26 @@ export type Database = {
           rasio: number;
         }[];
       };
+      /** Periode GRD terbaru yang sudah dimulai pada bulan tanggal itu (0221). */
+      periode_grd_berlaku: {
+        Args: { p_tanggal: string };
+        Returns: string | null;
+      };
+      /** Realisasi satu goal dalam rentang, aturan `progres_goal` (0221). */
+      realisasi_goal_rentang: {
+        Args: { p_goal: string; p_dari: string; p_sampai: string };
+        Returns: number;
+      };
+      /** Goal → ukuran GRD satu periode beserta hak mengisinya (0221). */
+      ukuran_goal_grd: {
+        Args: { p_periode: string };
+        Returns: {
+          goal_id: string;
+          ukuran_id: string;
+          sumber: "gmv" | "isian";
+          boleh_isi: boolean;
+        }[];
+      };
       goal_korporasi: {
         Args: { p_tanggal: string };
         Returns: {

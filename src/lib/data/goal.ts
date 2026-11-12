@@ -5,6 +5,7 @@ import { modeData } from "@/lib/supabase/config";
 import { klienServer } from "@/lib/supabase/server";
 import { dataContoh } from "@/lib/data/contoh";
 import { aktifDemo } from "@/lib/demo";
+import { hariIniWib } from "@/lib/format";
 import type { Pengguna } from "@/lib/types";
 import {
   bandingKodeGrd,
@@ -36,6 +37,34 @@ function goalMilikStaf<T extends { pemilikId: string | null }>(
   );
 }
 
+/**
+ * Periode GRD yang berlaku pada sebuah tanggal (`periode_grd_berlaku`,
+ * 0221): GRD terbaru yang sudah dimulai, jadi GRD bulan lalu tetap tampil
+ * sampai GRD bulan ini diimpor. null = belum ada GRD sama sekali;
+ * undefined = tidak terbaca, dan pemanggil TIDAK menyaring (tampilan lama)
+ * supaya goal GRD tidak hilang hanya karena fungsinya gagal.
+ */
+async function periodeGrdBerlaku(
+  tanggal: string,
+): Promise<string | null | undefined> {
+  const sb = await klienServer();
+  const { data, error } = await sb.rpc("periode_grd_berlaku", {
+    p_tanggal: tanggal,
+  });
+  if (error) {
+    console.error(`Gagal membaca periode GRD berlaku: ${error.message}`);
+    return undefined;
+  }
+  return data ?? null;
+}
+
+/** Saringan PostgREST `or`: goal di luar GRD, ditambah GRD periode itu. */
+function saringPeriodeGrd(periode: string | null) {
+  return periode
+    ? `grd_periode.is.null,grd_periode.eq.${periode}`
+    : "grd_periode.is.null";
+}
+
 export type GoalRingkas = {
   id: string;
   judul: string;
@@ -46,7 +75,8 @@ export type GoalRingkas = {
 };
 
 /**
- * Goal aktif yang boleh dipakai sebagai induk komitmen mingguan.
+ * Goal aktif yang boleh dipakai sebagai induk komitmen mingguan: goal di
+ * luar GRD dan goal GRD periode yang berlaku (bukan GRD bulan lalu).
  * RLS sudah membatasi barisnya; di mode demo penyaringannya ditiru.
  */
 export async function goalAktif(pengguna: Pengguna): Promise<GoalRingkas[]> {
@@ -68,12 +98,13 @@ export async function goalAktif(pengguna: Pengguna): Promise<GoalRingkas[]> {
   }
 
   const sb = await klienServer();
-  const { data, error } = await sb
+  const periode = await periodeGrdBerlaku(hariIniWib());
+  let kueri = sb
     .from("goals")
     .select("id, judul, level, satuan, target_goal, periode")
-    .eq("status", "aktif")
-    .order("level")
-    .order("judul");
+    .eq("status", "aktif");
+  if (periode !== undefined) kueri = kueri.or(saringPeriodeGrd(periode));
+  const { data, error } = await kueri.order("level").order("judul");
 
   if (error) throw new Error(`Gagal memuat goal: ${error.message}`);
 
@@ -275,7 +306,10 @@ export async function pohonGoal(
   const status: ("aktif" | "draft")[] = bolehKelolaGoal(pengguna)
     ? ["aktif", "draft"]
     : ["aktif"];
-  const { data, error } = await sb
+  // Hanya GRD periode yang berlaku (0221): goal GRD bulan lalu tetap aktif
+  // supaya angkanya utuh, tetapi tidak ikut tampil di bulan berikutnya.
+  const periode = await periodeGrdBerlaku(tanggal);
+  let kueri = sb
     .from("goals")
     .select(
       `id, judul, level, periode, satuan, target_base, target_goal,
@@ -287,44 +321,46 @@ export async function pohonGoal(
        goal_months (bulan, target, dari, sampai)`,
     )
     .in("status", status);
+  if (periode !== undefined) kueri = kueri.or(saringPeriodeGrd(periode));
+  const { data, error } = await kueri;
 
   if (error) throw new Error(`Gagal memuat goal: ${error.message}`);
 
-  // Ukuran tiap goal GRD beserta hak mencatat capaiannya — satu panggilan
-  // per periode GRD, bukan satu per goal.
-  const periodeGrd = [
-    ...new Set(
-      (data ?? [])
-        .map((g) => g.grd_periode)
-        .filter((p): p is string => Boolean(p)),
-    ),
-  ];
+  // Ukuran tiap goal GRD beserta hak mencatat capaiannya, tanpa menghitung
+  // kurva (`kurva_grd` menghitung AKTUAL setiap titik — terlalu berat di
+  // sini, dan hasilnya tidak dipakai).
   const ukuranGoal = new Map<
     string,
     { id: string; sumber: "gmv" | "isian"; bolehIsi: boolean }
   >();
-  for (const p of periodeGrd) {
-    const { data: kurva } = await sb.rpc("kurva_grd", {
-      p_periode: p,
-      p_acuan: tanggal,
-    });
-    for (const k of kurva ?? []) {
-      if (k.goal_id) {
-        ukuranGoal.set(k.goal_id, {
-          id: k.ukuran_id,
-          sumber: k.sumber,
-          bolehIsi: k.boleh_isi,
-        });
-      }
+  if (periode) {
+    const { data: ukuran, error: galatUkuran } = await sb.rpc(
+      "ukuran_goal_grd",
+      { p_periode: periode },
+    );
+    if (galatUkuran) {
+      console.error(`Gagal memuat ukuran GRD: ${galatUkuran.message}`);
+    }
+    for (const u of ukuran ?? []) {
+      ukuranGoal.set(u.goal_id, {
+        id: u.ukuran_id,
+        sumber: u.sumber,
+        bolehIsi: u.boleh_isi,
+      });
     }
   }
 
   // Realisasi tiap goal dihitung database lewat `progres_goal` (0066):
   // satu aturan, satu tempat, dan goal unit ikut menghitung akun-akunnya.
-  const { data: progres } = await sb.rpc("progres_goal", {
+  const { data: progres, error: galatProgres } = await sb.rpc("progres_goal", {
     p_bulan: awalBulan,
     p_sampai: tanggal,
   });
+  // Capaian kosong lebih baik daripada halaman gagal, tetapi jangan diam:
+  // tanpa catatan ini angka nol tidak bisa dilacak sebabnya.
+  if (galatProgres) {
+    console.error(`Gagal menghitung capaian goal: ${galatProgres.message}`);
+  }
 
   const perGoal = new Map(
     (progres ?? []).map((p) => [
@@ -464,32 +500,28 @@ export async function anakTanggaBulanan(
   }
 
   const sb = await klienServer();
-  const [{ data: bulan }, { data: goal }] = await Promise.all([
-    sb
-      .from("goal_months")
-      .select("bulan, target, dari, sampai")
-      .eq("goal_id", goalId)
-      .order("bulan"),
-    sb
-      .from("goals")
-      .select("unit_id, account_id")
-      .eq("id", goalId)
-      .maybeSingle(),
-  ]);
+  const { data: bulan } = await sb
+    .from("goal_months")
+    .select("bulan, target, dari, sampai")
+    .eq("goal_id", goalId)
+    .order("bulan");
 
-  // Lingkup GMV-nya lewat `gmv_goal_rentang` (0178): goal unit ikut
-  // menghitung laporan akun-akun di unit itu, sama dengan pohon goal.
+  // Aturan yang sama dengan pohon goal (`realisasi_goal_rentang`, 0221):
+  // goal GRD dihitung lewat ukurannya — goal perusahaan November = GMV MCN
+  // + akun internal yang belum masuk MCN, tanpa hitung dobel — dan goal
+  // lain lewat lingkup akun/unitnya (`gmv_goal_rentang`, 0178).
   const tangga = ((bulan ?? []) as AnakTanggaLonggar[]).map(lengkapiRentang);
   return Promise.all(
     tangga.map(async (b) => {
       if (tanggal < b.dari) return capaianLangkah(b, tanggal, 0);
-      const { data: gmv } = await sb.rpc("gmv_goal_rentang", {
-        p_akun: goal?.account_id ?? null,
-        p_unit: goal?.unit_id ?? null,
-        p_dari: b.dari,
-        p_sampai: sampaiHitung(b),
-      });
-      return capaianLangkah(b, tanggal, Number(gmv ?? 0));
+      const { data: realisasi, error } = await sb.rpc(
+        "realisasi_goal_rentang",
+        { p_goal: goalId, p_dari: b.dari, p_sampai: sampaiHitung(b) },
+      );
+      if (error) {
+        console.error(`Gagal menghitung anak tangga goal: ${error.message}`);
+      }
+      return capaianLangkah(b, tanggal, Number(realisasi ?? 0));
     }),
   );
 }
@@ -534,19 +566,24 @@ export async function pilihanGoal(): Promise<PilihanGoal> {
   }
 
   const sb = await klienServer();
+  // Calon induk: goal di luar GRD dan GRD periode yang berlaku saja.
+  const periode = await periodeGrdBerlaku(hariIniWib());
+  let kueriInduk = sb
+    .from("goals")
+    .select(
+      "id, judul, level, unit_id, account_id, accounts:account_id (unit_id)",
+    )
+    .eq("status", "aktif");
+  if (periode !== undefined) {
+    kueriInduk = kueriInduk.or(saringPeriodeGrd(periode));
+  }
   const [orang, induk, unit, akun] = await Promise.all([
     sb
       .from("users")
       .select("id, nama, jabatan")
       .eq("status", "aktif")
       .order("nama"),
-    sb
-      .from("goals")
-      .select(
-        "id, judul, level, unit_id, account_id, accounts:account_id (unit_id)",
-      )
-      .eq("status", "aktif")
-      .order("judul"),
+    kueriInduk.order("judul"),
     sb.from("units").select("id, kode, nama").order("kode"),
     sb
       .from("accounts")
