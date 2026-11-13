@@ -149,6 +149,19 @@ export function tanggalKalenderPendek(tanggal: string, acuan?: string) {
   });
 }
 
+/**
+ * "Sab 7 Nov" / "Sen 30 Nov" — hari pendek yang sebenarnya + tanggal
+ * kalender pendek (tahun hanya bila beda dari `acuan`). Dibaca sebagai
+ * UTC seperti `tanggalKalenderPendek`, jadi harinya tidak bergeser.
+ */
+export function hariTanggalPendek(tanggal: string, acuan?: string) {
+  const hari = new Date(`${tanggal}T00:00:00Z`).toLocaleDateString("id-ID", {
+    weekday: "short",
+    timeZone: "UTC",
+  });
+  return `${hari} ${tanggalKalenderPendek(tanggal, acuan)}`;
+}
+
 /** 14:20 WIB */
 export function jamWib(tanggal: Date | string) {
   const d = typeof tanggal === "string" ? new Date(tanggal) : tanggal;
