@@ -5431,7 +5431,14 @@
       "lng": 106.8102,
       "nama": "Kantor Pusat"
     },
-    "hariKerja": ["senin", "selasa", "rabu", "kamis", "jumat", "sabtu"]
+    "hariKerja": [
+      "senin",
+      "selasa",
+      "rabu",
+      "kamis",
+      "jumat",
+      "sabtu"
+    ]
   },
   "leave-requests:all": [
     {
@@ -7354,8 +7361,14 @@
       "title": "Meeting dengan Dosen",
       "location": "https://zoom.us/j/1",
       "description": "Bahas kerja sama kampus.",
-      "attendeeIds": ["usr_001", "usr_002"],
-      "attendeeNames": ["A", "B"],
+      "attendeeIds": [
+        "usr_001",
+        "usr_002"
+      ],
+      "attendeeNames": [
+        "A",
+        "B"
+      ],
       "createdById": "usr_001",
       "createdByName": "A",
       "createdAt": "2024-10-01T02:00:00.000Z"
@@ -7471,8 +7484,12 @@
       "updatedAt": "2024-09-01T00:00:00.000Z",
       "description": "",
       "estimatedDays": 7,
-      "targetDivisions": ["internal"],
-      "targetJobTitles": ["Affiliator"]
+      "targetDivisions": [
+        "internal"
+      ],
+      "targetJobTitles": [
+        "Affiliator"
+      ]
     }
   ],
   "lms:courses:all": [
