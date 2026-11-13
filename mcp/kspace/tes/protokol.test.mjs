@@ -2,7 +2,7 @@
  * Server MCP kspace dilihat dari luar: lewat protokol MCP sungguhan.
  *
  * Yang dijaga:
- *  - klien MCP melihat tepat enam tool, semuanya bertanda hanya-baca,
+ *  - klien MCP melihat tepat delapan tool, semuanya bertanda hanya-baca,
  *  - log panggilan mencatat nama tool/parameter/jumlah baris, TANPA isi data,
  *  - proses server asli tidak menulis apa pun ke stdout selain pesan protokol,
  *  - sandi dan alamat database tidak pernah muncul di hasil tool, log, atau stderr.
@@ -43,12 +43,21 @@ async function klienDalamMemori() {
   return klien;
 }
 
-uji("klien MCP melihat tepat enam tool bertanda hanya-baca", async () => {
+uji("klien MCP melihat tepat delapan tool bertanda hanya-baca", async () => {
   const klien = await klienDalamMemori();
   const { tools } = await klien.listTools();
   harusSama(
     tools.map((t) => t.name).sort(),
-    ["belum_lapor", "gmv_harian", "gmv_unit", "status_lapor", "tanggal_hari_ini", "tugas_telat"],
+    [
+      "belum_lapor",
+      "gmv_grd",
+      "gmv_harian",
+      "gmv_unit",
+      "lead_measure_pekan",
+      "status_lapor",
+      "tanggal_hari_ini",
+      "tugas_telat",
+    ],
     "daftar tool",
   );
   for (const t of tools) {
@@ -156,7 +165,7 @@ uji("server asli: stdout hanya pesan protokol MCP; tanpa setelan menjawab rapi",
   for (const p of pesan) harusSama(p.jsonrpc, "2.0", "baris stdout bukan JSON-RPC");
 
   harusSama(pesan.find((p) => p.id === 1)?.result?.serverInfo?.name, "kspace", "nama server");
-  harusSama(pesan.find((p) => p.id === 2)?.result?.tools?.length, 6, "jumlah tool");
+  harusSama(pesan.find((p) => p.id === 2)?.result?.tools?.length, 8, "jumlah tool");
   const panggilan = pesan.find((p) => p.id === 3)?.result;
   harus(panggilan?.isError === true, "tanpa setelan seharusnya error rapi");
   harus(panggilan.content[0].text.includes("belum disetel"), "pesan 'belum disetel' tidak muncul");

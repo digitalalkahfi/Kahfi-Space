@@ -43,8 +43,8 @@ if (!gagal) {
         : {};
     const h = await panggilTool(tool, db, argumen);
     if (!h.sukses) gagal = true;
-    console.log(`${h.sukses ? "✓" : "✗"} ${tool.nama.padEnd(17)} ${h.sukses ? `${h.baris} baris` : h.teks}`);
+    console.log(`${h.sukses ? "✓" : "✗"} ${tool.nama.padEnd(19)} ${h.sukses ? `${h.baris} baris` : h.teks}`);
   }
 }
-console.log(gagal ? "\n✗ Ada yang gagal." : "\n✓ Sambungan dan keenam tool bekerja.");
+console.log(gagal ? "\n✗ Ada yang gagal." : `\n✓ Sambungan dan ${DAFTAR_TOOL.length} tool bekerja.`);
 process.exit(gagal ? 1 : 0);

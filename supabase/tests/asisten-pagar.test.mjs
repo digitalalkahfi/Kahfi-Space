@@ -107,12 +107,31 @@ uji("asisten_baca tetap bisa memanggil semua fungsi asisten.*", async () => {
             count(*) filter (where has_function_privilege('asisten_baca', p.oid, 'execute'))::int as boleh
      from pg_proc p where p.pronamespace = 'asisten'::regnamespace`,
   );
-  harus(total >= 7, "fungsi asisten.* hilang");
+  harus(total >= 9, "fungsi asisten.* hilang");
   harusSama(boleh, total, "fungsi asisten.* yang bisa dipanggil");
   const { rows } = await sebagaiAsisten("select * from asisten.gmv_unit('2024-10-24')");
   harus(rows.length > 0, "gmv_unit kosong");
   const lapor = await sebagaiAsisten("select * from asisten.status_lapor('2024-10-24')");
   harus(lapor.rows.length > 0, "status_lapor kosong");
+  // Tool GRD (0222): bisa dipanggil; seed tidak punya GRD, jadi gmv_grd boleh kosong.
+  await sebagaiAsisten("select * from asisten.gmv_grd('2024-10-24')");
+  const lead = await sebagaiAsisten("select * from asisten.lead_measure_pekan('2024-10-24')");
+  harus(lead.rows.length > 0, "lead_measure_pekan kosong");
+});
+
+uji("semua fungsi asisten.*: SECURITY DEFINER, tidak VOLATILE, search_path tetap", async () => {
+  // VOLATILE adalah satu-satunya jenis fungsi yang boleh menulis; definer
+  // + search_path tetap mencegah fungsi public dibajak lewat skema lain.
+  const fungsi = await q(
+    `select p.oid::regprocedure::text as f, p.prosecdef, p.provolatile, p.proconfig
+     from pg_proc p where p.pronamespace = 'asisten'::regnamespace order by 1`,
+  );
+  harus(fungsi.length >= 9, "fungsi asisten.* hilang");
+  for (const r of fungsi) {
+    harus(r.prosecdef, `${r.f} bukan SECURITY DEFINER`);
+    harus(r.provolatile !== "v", `${r.f} VOLATILE`);
+    harus((r.proconfig ?? []).includes("search_path=public"), `${r.f} tanpa search_path tetap`);
+  }
 });
 
 uji("fungsi di luar cakupan ditolak: kas, komisi, scorecard, akses", async () => {
