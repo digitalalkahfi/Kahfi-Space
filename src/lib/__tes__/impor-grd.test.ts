@@ -1093,3 +1093,22 @@ test("titik kurva akhir bulan yang bukan Sabtu, dan departemen tanpa unit", () =
   assert.equal(goal["1.3.1"].induk, "1.3");
   assert.ok(r.catatan.some((c) => /KEGIATAN.*tanpa unit/.test(c)));
 });
+
+test("departemen Sosial Impact masuk unit sosial (0223), bukan tanpa unit", () => {
+  const wb = workbookMcn();
+  for (const ws of Object.values(wb.Sheets)) {
+    for (const sel of Object.values(ws)) {
+      const s = sel as { v?: unknown; w?: string };
+      if (typeof s?.v === "string" && s.v.startsWith("DEPARTEMEN KEGIATAN")) {
+        const baru = "DEPARTEMEN SOSIAL IMPACT — Leader: Bayu (Blok Imarah)";
+        s.v = baru;
+        s.w = baru;
+      }
+    }
+  }
+  const r = bacaRencanaGrd(wb);
+  const goal = Object.fromEntries(r.goals.map((g) => [g.kode, g]));
+  assert.equal(goal["1.3.1"].pemilik, "Bayu");
+  assert.equal(goal["1.3.1"].unit, "sosial");
+  assert.ok(!r.catatan.some((c) => /tanpa unit/.test(c)), r.catatan.join(" | "));
+});

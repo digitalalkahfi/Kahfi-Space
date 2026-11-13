@@ -56,7 +56,7 @@ uji("Leader tidak boleh membentuk laporan mingguan", async () => {
 
 uji("Manager membentuk laporan tiap unit", async () => {
   const { rows } = await bentuk("Farhan Pratama");
-  const unit = (await sebagaiAdmin(db, "select count(*)::int n from units"))
+  const unit = (await sebagaiAdmin(db, "select count(*)::int n from units where lapor_harian"))
     .rows[0].n;
   harusSama(Number(rows[0].n), unit);
 
@@ -111,7 +111,7 @@ uji(
 );
 
 uji("membentuk ulang memperbarui, bukan menggandakan", async () => {
-  const unit = (await sebagaiAdmin(db, "select count(*)::int n from units"))
+  const unit = (await sebagaiAdmin(db, "select count(*)::int n from units where lapor_harian"))
     .rows[0].n;
   await bentuk("Farhan Pratama");
   harusSama(

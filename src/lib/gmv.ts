@@ -489,9 +489,13 @@ export const NAMA_UNIT: Record<KodeUnit, string> = {
   affiliator: "Affiliator",
   mcn: "MCN",
   tap: "TAP",
+  sosial: "Sosial Impact",
 };
 
-/** Urutan tetap supaya warna dan legendanya tidak berpindah-pindah. */
+/**
+ * Urutan tetap supaya warna dan legendanya tidak berpindah-pindah. Hanya
+ * unit pelapor GMV: Sosial Impact tidak punya GMV (0223).
+ */
 export const URUTAN_UNIT: KodeUnit[] = ["affiliator", "mcn", "tap"];
 
 export type BarisUnitHarian = {

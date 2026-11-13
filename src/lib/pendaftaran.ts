@@ -86,6 +86,7 @@ export const PILIHAN_UNIT_DAFTAR = [
   { kode: "affiliator", nama: "Affiliator" },
   { kode: "mcn", nama: "MCN (termasuk MMC)" },
   { kode: "tap", nama: "TAP" },
+  { kode: "sosial", nama: "Sosial Impact" },
 ] as const;
 
 export function namaUnitDaftar(kode: string | null): string | null {

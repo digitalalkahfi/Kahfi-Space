@@ -10,6 +10,7 @@ const NAMA_UNIT: Record<KodeUnit, string> = {
   affiliator: "Affiliator",
   mcn: "MCN",
   tap: "TAP",
+  sosial: "Sosial Impact",
 };
 
 /** Laporan tanpa unit tetap punya nama, supaya tidak hilang diam-diam. */

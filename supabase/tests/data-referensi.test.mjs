@@ -16,24 +16,27 @@ import {
 const db = await buatDb();
 const { uji, jalankan } = buatSuite("Data referensi");
 
-uji("lima departemen PRD tersedia", async () => {
+uji("lima departemen PRD dan Sosial Impact (0223) tersedia", async () => {
   const { rows } = await sebagaiAdmin(
     db,
     "select nama from departments order by nama",
   );
   harusSama(
     rows.map((r) => r.nama).join(", "),
-    "Affiliator, MCN, MMC, Mabit Scholar, TAP",
+    "Affiliator, MCN, MMC, Mabit Scholar, Sosial Impact, TAP",
   );
 });
 
-uji("tiga unit pelaporan tersedia beserta departemennya", async () => {
+uji("tiga unit pelapor GMV dan Sosial Impact tersedia beserta departemennya", async () => {
   const { rows } = await sebagaiAdmin(
     db,
-    `select u.kode, d.nama departemen from units u
+    `select u.kode, u.lapor_harian, d.nama departemen from units u
        left join departments d on d.id = u.department_id order by u.kode`,
   );
-  harusSama(rows.length, 3);
+  harusSama(
+    rows.map((r) => [r.kode, r.lapor_harian]),
+    [["affiliator", true], ["mcn", true], ["sosial", false], ["tap", true]],
+  );
   for (const r of rows) {
     harus(r.departemen !== null, `unit ${r.kode} harus punya departemen`);
   }

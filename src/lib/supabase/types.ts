@@ -100,10 +100,12 @@ export type BarisDepartment = {
 /** @tabel units */
 export type BarisUnit = {
   id: string;
-  kode: "affiliator" | "mcn" | "tap";
+  kode: "affiliator" | "mcn" | "tap" | "sosial";
   nama: string;
   department_id: string | null;
   deskripsi: string;
+  /** false = unit tanpa laporan GMV harian (Sosial Impact, 0223). */
+  lapor_harian: boolean;
   created_at: string;
 };
 
@@ -2539,7 +2541,7 @@ export type Database = {
           jumlah_upload: number | null;
           co_sampel: number;
           lingkup: string | null;
-          departemen: "affiliator" | "mcn" | "tap" | null;
+          departemen: "affiliator" | "mcn" | "tap" | "sosial" | null;
         }[];
       };
       ringkas_kv_lama: {
@@ -2766,7 +2768,7 @@ export type Database = {
           lead_id: string;
           judul: string;
           satuan: string;
-          unit_kode: "affiliator" | "mcn" | "tap" | null;
+          unit_kode: "affiliator" | "mcn" | "tap" | "sosial" | null;
           realisasi: number;
           target: number;
           rasio: number;
@@ -2783,7 +2785,7 @@ export type Database = {
           level: LevelGoalDb;
           pemilik: string | null;
           jabatan: string | null;
-          unit_kode: "affiliator" | "mcn" | "tap" | null;
+          unit_kode: "affiliator" | "mcn" | "tap" | "sosial" | null;
           target: number;
           realisasi: number;
           rasio: number;

@@ -141,6 +141,8 @@ uji("AC2: Leader yang dinonaktifkan kehilangan cakupan bawahannya", async () => 
 
 uji("AC3: anggota aktif tiap peran tetap membaca seperti sebelumnya", async () => {
   const total = await jumlah("select count(*)::int n from users");
+  // Semua unit, termasuk unit tanpa laporan GMV (Sosial Impact, 0223).
+  const totalUnit = await jumlah("select count(*)::int n from units");
   for (const peran of ["CEO", "Manager", "Leader", "Co-Leader", "Staff"]) {
     const id = await idPeran(db, peran);
     const { rows } = await sebagai(
@@ -153,7 +155,7 @@ uji("AC3: anggota aktif tiap peran tetap membaca seperti sebelumnya", async () =
               peran_saya()::text p`,
     );
     harusSama(rows[0].u, total, `${peran}: direktori users`);
-    harusSama(rows[0].un, 3, `${peran}: units`);
+    harusSama(rows[0].un, totalUnit, `${peran}: units`);
     harusSama(rows[0].a, true, `${peran}: anggota_aktif`);
     harusSama(rows[0].s, "aktif");
     harusSama(rows[0].p, peran);
@@ -396,7 +398,9 @@ uji("AC7: Manager menyetujui sebagai anggota baru", async () => {
     id,
     "select status_akses_saya() s, (select count(*)::int from units) n",
   );
-  harusSama(rows[0], { s: "aktif", n: 3 });
+  // Anggota yang baru disetujui melihat semua unit, seperti anggota lain.
+  const totalUnit = await jumlah("select count(*)::int n from units");
+  harusSama(rows[0], { s: "aktif", n: totalUnit });
 });
 
 uji("E1/AC11: persetujuan kedua ditolak dengan nama pemutusnya", async () => {

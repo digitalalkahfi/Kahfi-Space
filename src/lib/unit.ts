@@ -33,6 +33,13 @@ export const gayaUnit: Record<
     latar: "bg-accentmuted-fill",
     garis: "stroke-unit-tap",
   },
+  sosial: {
+    bar: "bg-unit-sosial",
+    titik: "bg-unit-sosial",
+    teks: "text-unit-sosial",
+    latar: "bg-ok-fill",
+    garis: "stroke-unit-sosial",
+  },
 };
 
 /** Badge matriks WRM (DESIGN.md §Components 3). */

@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { gayaUnit } from "@/lib/unit";
-import { DAFTAR_UNIT } from "@/lib/unit-pelaporan";
+import { UNIT_GMV } from "@/lib/unit-pelaporan";
 import { pindahUnitAkun } from "@/app/actions/akun";
 import type { AkunKelola } from "@/lib/data/akun";
 import type { KodeUnit } from "@/lib/types";
@@ -71,7 +71,8 @@ export function DialogPindahUnit({
         </DialogHeader>
 
         <div role="radiogroup" aria-label="Unit tujuan" className="space-y-1.5">
-          {DAFTAR_UNIT.filter((u) => u.kode !== akun.unitKode).map((u) => {
+          {/* Akun hanya bisa pindah ke unit pelapor GMV (0223). */}
+          {UNIT_GMV.filter((u) => u.kode !== akun.unitKode).map((u) => {
             const aktif = pilih === u.kode;
             return (
               <button

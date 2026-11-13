@@ -1,7 +1,7 @@
 /**
  * Keterangan tiap unit pelaporan — modul murni.
  *
- * Kode unit ('affiliator' | 'mcn' | 'tap') muncul di mana-mana sebagai
+ * Kode unit ('affiliator' | 'mcn' | 'tap' | 'sosial') muncul di mana-mana sebagai
  * huruf kecil tanpa keterangan. Di halaman yang memang menjelaskan
  * susunan organisasi, kode itu perlu dibaca sebagai kalimat: apa yang
  * dikerjakannya, dan bagaimana ia melapor.
@@ -13,10 +13,11 @@ export type KeteranganUnit = {
   nama: string;
   ringkas: string;
   /**
-   * Sasaran laporan hariannya: per akun (tiap PIC melapor akunnya) atau
-   * per unit (Leader melapor sekali untuk seluruh unit).
+   * Sasaran laporan hariannya: per akun (tiap PIC melapor akunnya), per
+   * unit (Leader melapor sekali untuk seluruh unit), atau tidak ada —
+   * unit tanpa laporan GMV (`units.lapor_harian` = false, 0223).
    */
-  lapor: "akun" | "unit";
+  lapor: "akun" | "unit" | "tidak";
   /** Kolom laporan yang dipakai unit ini di luar GMV. */
   kolomTambahan: string[];
 };
@@ -46,7 +47,25 @@ export const UNIT_PELAPORAN: Record<KodeUnit, KeteranganUnit> = {
     lapor: "unit",
     kolomTambahan: [],
   },
+  sosial: {
+    kode: "sosial",
+    nama: "Sosial Impact",
+    ringkas:
+      "Imarah masjid: kajian, kebersihan dan pemeliharaan, media. Tidak melaporkan GMV; capaiannya diukur lewat goal dan KPI GRD.",
+    lapor: "tidak",
+    kolomTambahan: [],
+  },
 };
+
+/** Unit ini melaporkan GMV harian (bisa memegang akun dan dilaporkan). */
+export function melaporGmv(kode: KodeUnit): boolean {
+  return UNIT_PELAPORAN[kode].lapor !== "tidak";
+}
+
+/** "lapor per akun", "lapor per unit", atau "tanpa laporan GMV". */
+export function caraLapor(u: Pick<KeteranganUnit, "lapor">): string {
+  return u.lapor === "tidak" ? "tanpa laporan GMV" : `lapor per ${u.lapor}`;
+}
 
 /** Kode unit yang sah; dipakai memeriksa parameter route. */
 export function kodeUnitSah(nilai: unknown): nilai is KodeUnit {
@@ -56,9 +75,13 @@ export function kodeUnitSah(nilai: unknown): nilai is KodeUnit {
   );
 }
 
-/** Seluruh unit, urut seperti urutan pelaporan di PRD. */
+/** Seluruh unit, urut seperti urutan pelaporan di PRD; Sosial Impact terakhir. */
 export const DAFTAR_UNIT: KeteranganUnit[] = [
   UNIT_PELAPORAN.affiliator,
   UNIT_PELAPORAN.mcn,
   UNIT_PELAPORAN.tap,
+  UNIT_PELAPORAN.sosial,
 ];
+
+/** Unit yang melaporkan GMV — satu-satunya tempat akun TikTok bisa berada. */
+export const UNIT_GMV: KeteranganUnit[] = DAFTAR_UNIT.filter((u) => u.lapor !== "tidak");

@@ -17,7 +17,7 @@ export type Sel = { v?: unknown; z?: string; f?: string };
 export type LembarXlsx = Record<string, unknown>;
 
 export type JenisGmv = "semua" | "live" | "video";
-export type KodeUnit = "affiliator" | "mcn" | "tap";
+export type KodeUnit = "affiliator" | "mcn" | "tap" | "sosial";
 
 export type GoalMentah = {
   kode: string;
@@ -301,6 +301,8 @@ const UNIT_DEPARTEMEN: Record<string, KodeUnit> = {
   TAP: "tap",
   MCN: "mcn",
   MMC: "mcn",
+  // Unit tanpa laporan GMV (0223): goalnya punya unit, ukurannya bukan GMV.
+  "SOSIAL IMPACT": "sosial",
 };
 
 /** Kata pertama yang berupa nama: "Siti (Leader Affiliator)" → "Siti". */

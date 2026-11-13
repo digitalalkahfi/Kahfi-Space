@@ -125,11 +125,11 @@ uji("program menempel pada unit dan uniknya per unit", async () => {
   const aff = await satu(`select id from units where kode='affiliator'`);
 
   // Nama yang sama di unit berbeda memang dua hal berbeda — seed sudah
-  // membuktikannya: "Reguler" ada di ketiga unit.
+  // membuktikannya: "Reguler" ada di setiap unit (Sosial Impact sejak 0223).
   harusSama(
     (await satu(`select count(*)::int as n from programs where nama='Reguler'`))
       .n,
-    3,
+    (await satu(`select count(*)::int as n from units`)).n,
   );
 
   await sebagai(

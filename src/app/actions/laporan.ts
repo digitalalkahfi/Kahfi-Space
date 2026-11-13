@@ -49,6 +49,8 @@ function pesanGalatLaporan(error: {
     [/upload_wajar/, "Jumlah upload di luar batas wajar, periksa lagi."],
     [/gmv_wajar/, "Nilai GMV di luar batas wajar, periksa lagi."],
     [/hanya melaporkan GMV/, error.message],
+    // 0223: unit tanpa laporan GMV (Sosial Impact).
+    [/tidak melaporkan GMV harian/, "Unit ini tidak melaporkan GMV harian."],
     [/bertanggal masa depan/, "Laporan tidak bisa bertanggal masa depan."],
     // 0207: hari ini pun belum bisa dilaporkan — GMV-nya belum satu hari penuh.
     [/GMV dihitung satu hari penuh/, PESAN_GMV_BELUM_PENUH],

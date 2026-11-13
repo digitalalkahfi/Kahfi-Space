@@ -2,6 +2,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   BarChart3,
+  HeartHandshake,
   Network,
   TrendingUp,
   Tv,
@@ -19,6 +20,8 @@ const ikonUnit: Record<KodeUnit, typeof Users> = {
   affiliator: Users,
   mcn: Tv,
   tap: Network,
+  // Tidak tampil di GMV per unit (ringkasan_gmv_unit, 0223); ada demi kelengkapan.
+  sosial: HeartHandshake,
 };
 
 /**

@@ -35,10 +35,11 @@
   --color-canvas: var(--canvas);
   --color-border-subtle: var(--border-subtle);
 
-  /* Warna unit pelaporan (Affiliator / MCN / TAP / lainnya) */
+  /* Warna unit (Affiliator / MCN / TAP / Sosial Impact / lainnya) */
   --color-unit-affiliator: #f97316;
   --color-unit-mcn: #2563eb;
   --color-unit-tap: #8b5cf6;
+  --color-unit-sosial: #0d9488;
   --color-unit-grosir: #c2410c;
 
   /* Status operasional (Matriks WRM, absensi, tiket) */
