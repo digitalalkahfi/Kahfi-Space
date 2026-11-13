@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Folder kerja lokal, bukan sumber proyek: salinan checkout lain
+    // (worktree) beserta hasil build-nya, dan berkas sementara. Tanpa
+    // ini `npm run lint` memeriksa ribuan berkas milik checkout lain.
+    ".claude/**",
+    ".tmp/**",
   ]),
 ]);
 
