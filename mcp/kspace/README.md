@@ -2,7 +2,8 @@
 
 Server kecil yang berjalan di Mac Manager supaya Claude Code dan Claude
 Desktop bisa menjawab pertanyaan dari data K-Space V2 yang terbaru:
-siapa belum lapor, GMV per unit, dan tugas yang lewat tenggat.
+siapa belum lapor, GMV per unit, GMV goal GRD vs target dan kurva,
+lead measure pekan ini, dan tugas yang lewat tenggat.
 
 - **Hanya membaca.** Ia masuk ke database sebagai peran `asisten_baca`,
   yang hanya boleh menjalankan fungsi di skema `asisten`. Ia tidak bisa
@@ -32,6 +33,8 @@ Akses langsung mati. Untuk menyalakan lagi, setel sandi baru (lihat
 | `belum_lapor(tanggal?)` | Siapa yang belum lapor, per Leader | `asisten.belum_lapor()` |
 | `gmv_unit(tanggal?)` | GMV satu tanggal dan bulan berjalan per unit vs target prorata | `asisten.gmv_unit()` |
 | `gmv_harian(dari, sampai, unit?)` | GMV per hari per unit, maksimal 92 hari | `asisten.gmv_harian()` |
+| `gmv_grd(tanggal?)` | GMV bulan ini vs target GRD: goal 1, 1.1, 1.2 beserta base, stretch, dan titik kurva | `asisten.gmv_grd()` → `progres_goal`, `kurva_grd` |
+| `lead_measure_pekan(tanggal?)` | Lead measure pekan Senin–Minggu vs target pekan | `asisten.lead_measure_pekan()` → `papan_lead_measure` |
 | `tugas_telat(waktu?, min_hari_telat?)` | Tiket lewat tenggat seluruh tim dan to-do pribadi Manager; "menunggu QC" dipisah | `asisten.tugas_telat()` |
 
 Yang perlu diingat saat membaca jawabannya:
@@ -40,11 +43,17 @@ Yang perlu diingat saat membaca jawabannya:
   "GMV kemarin", tanggalnya tanggal kemarin.
 - **Kosong bukan nol.** Tanggal tanpa laporan ditulis "tidak ada laporan".
 - **GMV adalah input manual K-Space**; acuan resmi tetap Partner Center.
-- **Target per unit** hanya muncul bila diisi di K-Space. Target GRD
-  (goal 1, 1.1, 1.2 dan lead measure) belum punya tool.
-- **Di luar cakupan:** keuangan/kas, gaji, komisi, absensi, lokasi,
-  selfie, email, nomor HP, alamat. Claude akan menjawab "data ini tidak
-  bisa diakses".
+- **GMV perusahaan = goal 1** di `gmv_grd`: GMV MCN + GMV akun internal
+  yang belum masuk MCN, tanpa hitung dobel. Jangan menjumlah GMV unit
+  sendiri — laporan unit MCN sudah memuat akun internal yang masuk MCN.
+- **GRD yang dipakai** adalah GRD bulan terakhir yang sudah diimpor.
+  Sebelum GRD bulan baru diimpor, `gmv_grd` menampilkan GRD bulan lalu
+  dan menuliskan peringatannya.
+- **Target per unit** (`gmv_unit`) hanya muncul bila diisi di K-Space;
+  target GRD ada di `gmv_grd` dan `lead_measure_pekan`.
+- **Di luar cakupan:** keuangan/kas, gaji, komisi (termasuk lead measure
+  bersumber komisi), absensi, lokasi, selfie, email, nomor HP, alamat.
+  Claude akan menjawab "data ini tidak bisa diakses".
 
 ## Cara pasang (sekali saja)
 
@@ -84,10 +93,11 @@ Dasbor Supabase → Database → Settings → **SSL Configuration** →
 
 **4. Pastikan database siap**
 
-Migration `0217_asisten_baca.sql`, `0218_pagar_asisten_baca.sql`, dan
-`0219_asisten_todo_pribadi.sql` harus sudah diterapkan. Untuk memeriksanya, jalankan isi
+Migration `0217_asisten_baca.sql`, `0218_pagar_asisten_baca.sql`,
+`0219_asisten_todo_pribadi.sql`, dan `0222_asisten_grd.sql` harus sudah
+diterapkan. Untuk memeriksanya, jalankan isi
 [`sql/periksa-pagar.sql`](sql/periksa-pagar.sql) di SQL Editor. Yang
-diharapkan: `fungsi_asisten` = 7, `definer_terbuka_di_luar_asisten` = 0,
+diharapkan: `fungsi_asisten` = 9, `definer_terbuka_di_luar_asisten` = 0,
 `tabel_terbaca` = 0.
 
 **5. Setel sandi** — lihat bagian berikutnya.
@@ -129,7 +139,7 @@ Tidak ada sandi di berkas ini; server mengambilnya sendiri dari Keychain.
 npm run cek
 ```
 
-Harus berakhir dengan "✓ Sambungan dan keenam tool bekerja." Perintah ini
+Harus berakhir dengan "✓ Sambungan dan 8 tool bekerja." Perintah ini
 tidak mencetak data, hanya jumlah baris.
 
 ## Cara ganti sandi
@@ -183,6 +193,8 @@ dan sandi tidak pernah bocor ke layar atau log.
 
 - Tes: `npm test` (PGlite, tidak menyentuh produksi). Tes pagar hak akses
   ada di `supabase/tests/asisten-pagar.test.mjs` dan ikut `npm run db:test`.
+  Data contoh GRD (Oktober–November 2024, nama dan angka rekaan) untuk
+  tes skema dan tes MCP ada di `scripts/grd-contoh.mjs`.
 - Menambah data baru: tambah fungsi pembungkus di skema `asisten` lewat
   migration baru dengan pola 0217, plus tes yang membuktikan angkanya sama
   dengan fungsi aslinya, baru tambah tool di `lib/tools.mjs`.

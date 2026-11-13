@@ -5,7 +5,8 @@
  *  - angka tiap tool SAMA dengan fungsi Beranda yang dilihat Manager,
  *  - input tidak valid ditolak SEBELUM menyentuh database,
  *  - peran asisten_baca tidak bisa menulis atau membaca tabel,
- *  - daftar tool tepat enam, tanpa tool di luar cakupan.
+ *  - daftar tool tepat delapan, tanpa tool di luar cakupan.
+ * Tool GRD (gmv_grd, lead_measure_pekan) diuji di grd.test.mjs.
  */
 import {
   buatDb,
@@ -36,10 +37,19 @@ const beranda = async (sql, params = []) => (await sebagai(pg, manager, sql, par
 const TGL = "2024-10-24";
 const TGL_KOSONG = "2024-10-30";
 
-uji("daftar tool tepat enam dan semuanya hanya memanggil asisten.*", async () => {
+uji("daftar tool tepat delapan dan semuanya hanya memanggil asisten.*", async () => {
   harusSama(
     DAFTAR_TOOL.map((t) => t.nama).sort(),
-    ["belum_lapor", "gmv_harian", "gmv_unit", "status_lapor", "tanggal_hari_ini", "tugas_telat"],
+    [
+      "belum_lapor",
+      "gmv_grd",
+      "gmv_harian",
+      "gmv_unit",
+      "lead_measure_pekan",
+      "status_lapor",
+      "tanggal_hari_ini",
+      "tugas_telat",
+    ],
     "nama tool",
   );
   const terlarang = /sql|query|kas|keuangan|gaji|absen|selfie|lokasi|email|telepon|alamat|komisi/i;

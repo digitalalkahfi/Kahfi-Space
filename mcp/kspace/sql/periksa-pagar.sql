@@ -3,7 +3,7 @@
 --
 -- Harapan SESUDAH 0218:
 --   peran_ada = true
---   fungsi_asisten = 7 (atau lebih bila tool bertambah)
+--   fungsi_asisten = 9 sejak 0222 (bertambah bila tool bertambah)
 --   definer_terbuka_di_luar_asisten = 0
 --   tabel_terbaca = 0
 --   skema_terjangkau = daftar skema yang boleh dimasuki (untuk ditinjau)

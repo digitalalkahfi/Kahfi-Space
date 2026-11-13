@@ -11,7 +11,7 @@ import { galatAman } from "./galat.mjs";
 import { DAFTAR_TOOL } from "./tools.mjs";
 
 export const NAMA_SERVER = "kspace";
-export const VERSI = "1.0.0";
+export const VERSI = "1.1.0";
 
 /** Jalankan satu tool: validasi → query → catat. Dipakai server dan tes. */
 export async function panggilTool(tool, db, argumen, catat = async () => {}) {
@@ -46,10 +46,11 @@ export function buatServer({ db, catat }) {
     {
       capabilities: { tools: {} },
       instructions: [
-        "Data K-Space V2 (hanya-baca): lapor harian, GMV per unit vs target, dan tugas lewat tenggat.",
+        "Data K-Space V2 (hanya-baca): lapor harian, GMV per unit, GMV goal GRD vs target dan kurva, lead measure pekan, dan tugas lewat tenggat.",
         "Setiap jawaban harus menyebut tanggal (WIB) dan fungsi sumber yang tertulis di hasil tool.",
         "Angka GMV adalah input manual K-Space; acuan resmi tetap Partner Center.",
-        "Data di luar tool ini (keuangan/kas, gaji, absensi, lokasi, selfie, email, nomor HP, alamat) TIDAK bisa diakses: katakan 'data ini tidak bisa diakses', jangan menebak.",
+        "GMV perusahaan = goal 1 dari gmv_grd (GMV MCN + GMV akun internal yang belum masuk MCN); jangan menjumlah GMV unit sendiri.",
+        "Data di luar tool ini (keuangan/kas, gaji, komisi, absensi, lokasi, selfie, email, nomor HP, alamat) TIDAK bisa diakses: katakan 'data ini tidak bisa diakses', jangan menebak.",
         "Bila hasil menulis 'tidak ada laporan' atau 'tidak ada data', sampaikan apa adanya — jangan diganti nol.",
       ].join(" "),
     },

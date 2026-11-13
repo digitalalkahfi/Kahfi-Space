@@ -1,10 +1,12 @@
 /**
- * Enam tool K-Space versi 1.
+ * Delapan tool K-Space: enam versi 1 (0217, 0219) dan dua tool GRD
+ * (0222: gmv_grd, lead_measure_pekan).
  *
  * ATURAN BERKAS INI
- *  - Satu tool = satu fungsi `asisten.*` (0217). Tidak ada rumus GMV,
- *    target, hari kerja, atau wajib lapor di sini. Yang dikerjakan hanya
- *    menyaring, mengelompokkan, menghitung jumlah baris, dan merapikan.
+ *  - Satu tool = satu fungsi `asisten.*`. Tidak ada rumus GMV, target,
+ *    kurva, lead measure, hari kerja, atau wajib lapor di sini. Yang
+ *    dikerjakan hanya menyaring, mengelompokkan, menghitung jumlah baris,
+ *    dan merapikan.
  *  - Teks SQL di bawah seluruhnya TETAP. Nilai dari pemanggil hanya
  *    masuk lewat parameter ($1, $2).
  *  - Tiap hasil membawa: rentang tanggal (WIB), nama fungsi sumber, dan
@@ -25,6 +27,13 @@ export const CATATAN_GMV = "Catatan: input manual K-Space; acuan resmi Partner C
 const ATURAN_H1 =
   "Aturan H-1: laporan yang ditagih pada hari D berisi GMV tanggal D-1 dan tersimpan bertanggal D-1.";
 
+export const ATURAN_GOAL1 =
+  "Aturan goal 1: GMV perusahaan = GMV MCN + GMV akun internal yang belum masuk MCN, tanpa hitung dobel. " +
+  "Goal 1 sudah total — jangan dijumlah lagi dengan 1.1 atau 1.2.";
+
+const JANGAN_JUMLAH_UNIT =
+  "Jangan menjumlah GMV unit untuk GMV perusahaan: laporan unit MCN sudah memuat akun internal yang masuk MCN. Untuk GMV perusahaan vs target, pakai gmv_grd (goal 1).";
+
 // ---------------------------------------------------------------------
 // Penolong tampilan (bukan rumus)
 // ---------------------------------------------------------------------
@@ -41,7 +50,30 @@ export function rupiah(n, kosong = "tidak ada data") {
   return "Rp" + Math.round(Number(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
+/** 1234.5 → "1.234,5". null → teks kosong yang diminta. */
+export function angka(n, kosong = "tidak ada data") {
+  if (n === null || n === undefined) return kosong;
+  return Number(n).toLocaleString("id-ID", { maximumFractionDigits: 2 });
+}
+
 const persen = (n) => (n === null || n === undefined ? "tidak bisa dihitung" : `${String(n).replace(".", ",")}%`);
+
+const BULAN = [
+  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+  "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+];
+
+/** "2026-11-01" → "November 2026". */
+export function namaBulan(t) {
+  const [y, m] = t.split("-").map(Number);
+  return `${BULAN[m - 1]} ${y}`;
+}
+
+/** Hari terakhir bulan tanggal itu, untuk label rentang. */
+function akhirBulan(t) {
+  const [y, m] = t.split("-").map(Number);
+  return new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
+}
 
 const potong = (s, maks = 120) => (s.length > maks ? s.slice(0, maks - 1) + "…" : s);
 
@@ -81,6 +113,8 @@ const SQL = {
   waktuPakai: `select to_char(coalesce($1::timestamptz, now()) at time zone 'Asia/Jakarta',
                               'YYYY-MM-DD"T"HH24:MI:SS"+07:00"') as waktu`,
   tugasTelat: `select to_jsonb(s) as j from asisten.tugas_telat($1::timestamptz) s`,
+  gmvGrd: `select to_jsonb(s) as j from asisten.gmv_grd($1::date) s`,
+  leadPekan: `select to_jsonb(s) as j from asisten.lead_measure_pekan($1::date) s`,
 };
 
 async function tanggalPakai(q, t) {
@@ -96,6 +130,17 @@ const catatanBukanHariKerja = (tp) =>
       ];
 
 const orang = (b) => `${b.nama} (${b.role}, ${b.unit})`;
+
+const LEVEL_GOAL = { company: "Perusahaan", manager: "Manager" };
+
+const SUMBER_LEAD = {
+  gmv: "otomatis dari GMV laporan harian",
+  gmv_live: "otomatis dari GMV LIVE laporan harian",
+  jam_live: "otomatis dari jam LIVE laporan harian",
+  jumlah_upload: "otomatis dari jumlah upload laporan harian",
+};
+
+const sumberLead = (s) => (s ? (SUMBER_LEAD[s] ?? `otomatis dari laporan harian (${s})`) : "diisi tangan");
 
 // ---------------------------------------------------------------------
 // Daftar tool
@@ -225,6 +270,7 @@ export const DAFTAR_TOOL = [
       "PENTING (H-1): GMV hari ini biasanya baru dilaporkan besok. Untuk 'GMV kemarin', isi tanggal kemarin. Untuk 'bulan ini sampai sekarang', tanggal hari ini boleh dipakai.",
       "Kolom: kode & nama unit; gmv_tanggal (GMV pada tanggal itu); ada_laporan (false = belum/tidak ada laporan pada tanggal itu, BUKAN nol); target_harian; gmv_bulan (akumulasi bulan berjalan); target_bulanan; porsi_bulan (bagian bulan yang sudah berjalan, 0–1); target_prorata (target_bulanan x porsi_bulan); rasio_prorata (gmv_bulan dibanding target_prorata, dalam persen).",
       "Target kosong berarti target belum diisi di K-Space; rasio tidak dihitung.",
+      JANGAN_JUMLAH_UNIT,
       CATATAN_GMV,
       "Sumber: asisten.gmv_unit(tanggal).",
     ].join(" "),
@@ -272,6 +318,7 @@ export const DAFTAR_TOOL = [
       "Ingat H-1: GMV tanggal D dilaporkan pada hari D+1.",
       "Kolom: tanggal, kode & nama unit, gmv, jumlah_laporan (banyaknya laporan yang membentuk angka itu).",
       "Tanggal/unit TANPA laporan tidak muncul dan ditulis 'tidak ada laporan' — itu bukan GMV nol. Tool ini tidak menjumlahkan total.",
+      JANGAN_JUMLAH_UNIT,
       CATATAN_GMV,
       "Sumber: asisten.gmv_harian(dari, sampai).",
     ].join(" "),
@@ -330,6 +377,140 @@ export const DAFTAR_TOOL = [
       return {
         baris: baris.length,
         data: { dari, sampai, baris, tanggal_tanpa_laporan: kosong },
+        teks: teks.join("\n"),
+      };
+    },
+  },
+
+  {
+    nama: "gmv_grd",
+    judul: "GMV goal GRD vs target dan kurva",
+    deskripsi: [
+      "GMV goal GRD tingkat perusahaan dan Manager (goal 1, 1.1, 1.2): realisasi sejak tanggal 1 bulan GRD sampai tanggal itu, dibanding target goal (juga base dan stretch) dan titik kurva WRM (target kumulatif tiap Sabtu dan akhir bulan).",
+      "Angkanya sama dengan kartu Goal korporasi di halaman GRD, pohon Goal & roll-down, dan halaman Kurva.",
+      "Pakai untuk 'GMV bulan ini vs target', 'capaian goal perusahaan', atau 'apakah GMV di atas kurva'.",
+      ATURAN_GOAL1,
+      "Parameter tanggal = TANGGAL GMV, default hari ini WIB. Ingat H-1: GMV hari ini biasanya baru dilaporkan besok, dan laporan harian yang belum masuk membuat realisasi lebih rendah — periksa dengan gmv_harian bila angkanya janggal.",
+      "GRD yang dipakai = GRD bulan terakhir yang sudah diimpor (bulan tanggal itu atau sebelumnya). Bila GRD bulan ini belum diimpor, yang tampil GRD bulan sebelumnya beserta peringatannya.",
+      "Kolom: periode_grd, kode, judul, level (company = perusahaan, manager), pemilik, target_base, target_goal, target_stretch, realisasi, rasio (realisasi dibanding target_goal, %), titik_lalu (titik kurva terakhir <= tanggal) dengan target, aktual, dan status (hijau = aktual >= target), titik_depan (titik kurva berikutnya) dengan targetnya.",
+      "Goal tingkat Leader dan akun tidak ada di tool ini.",
+      CATATAN_GMV,
+      "Sumber: asisten.gmv_grd(tanggal), membungkus progres_goal, kurva_grd, dan periode_grd_berlaku.",
+    ].join(" "),
+    skema: z.strictObject({
+      tanggal: tanggal.optional().describe("Tanggal GMV, YYYY-MM-DD (WIB). Kosongkan untuk hari ini."),
+    }),
+    async jalankan(db, { tanggal: t }) {
+      const { tp, baris } = await db.baca(async (q) => {
+        const tp = await tanggalPakai(q, t);
+        return { tp, baris: (await q(SQL.gmvGrd, [tp.tanggal])).map((r) => r.j) };
+      });
+      const periode = baris[0]?.periode_grd ?? null;
+      const teks = [];
+      if (!periode) {
+        teks.push(
+          `GMV goal GRD — tanggal ${tp.tanggal} (${namaHari(tp.tanggal)}, WIB)`,
+          "Tidak ada data: belum ada GRD yang diimpor untuk bulan ini atau sebelumnya.",
+        );
+      } else {
+        const akhir = akhirBulan(periode);
+        const sampai = tp.tanggal < akhir ? tp.tanggal : akhir;
+        teks.push(`GMV goal GRD — GRD ${namaBulan(periode)}; GMV ${periode} s.d. ${sampai} (WIB)`);
+        if (periode.slice(0, 7) !== tp.tanggal.slice(0, 7)) {
+          teks.push(
+            `Perhatian: GRD ${namaBulan(tp.tanggal)} belum diimpor; yang dipakai GRD ${namaBulan(periode)}, angkanya sampai ${akhir}.`,
+          );
+        }
+        teks.push(ATURAN_GOAL1);
+        for (const b of baris) {
+          const lalu = b.titik_lalu
+            ? `titik kurva ${b.titik_lalu}: target ${rupiah(b.target_titik_lalu)}, aktual ${rupiah(b.aktual_titik_lalu, "belum dicatat")}` +
+              (b.status_titik_lalu ? ` (${b.status_titik_lalu.toUpperCase()})` : "")
+            : "belum ada titik kurva yang lewat";
+          const depan = b.titik_depan
+            ? `titik berikutnya ${b.titik_depan}: target ${rupiah(b.target_titik_depan)}`
+            : "tidak ada titik kurva berikutnya di GRD ini";
+          teks.push(
+            `${b.kode} ${potong(b.judul, 160)} (${LEVEL_GOAL[b.level] ?? b.level}; pemilik ${b.pemilik})`,
+            `  realisasi ${rupiah(b.realisasi)} dari target ${rupiah(b.target_goal, "belum diisi")} (${persen(b.rasio)})` +
+              ` | base ${rupiah(b.target_base, "belum diisi")} | stretch ${rupiah(b.target_stretch, "belum diisi")}`,
+            `  ${lalu} | ${depan}`,
+          );
+        }
+      }
+      teks.push(
+        `Sumber: asisten.gmv_grd('${tp.tanggal}') — membungkus progres_goal dan kurva_grd (pohon goal, kartu Goal korporasi, Kurva)`,
+        CATATAN_GMV,
+      );
+      return {
+        baris: baris.length,
+        data: { tanggal: tp.tanggal, periode_grd: periode, baris },
+        teks: teks.join("\n"),
+      };
+    },
+  },
+
+  {
+    nama: "lead_measure_pekan",
+    judul: "Lead measure pekan vs target",
+    deskripsi: [
+      "Lead measure (langkah kunci GRD yang dicatat harian) pada pekan Senin–Minggu yang memuat tanggal itu: realisasi pekan itu dibanding target pekan.",
+      "Angkanya sama dengan papan lead measure di halaman GRD dan kolom Pekan di halaman Lead measure.",
+      "Pakai untuk 'lead measure pekan ini' atau 'langkah kunci mana yang tertinggal'.",
+      "Parameter tanggal = tanggal patokan (WIB), default hari ini; pekannya Senin–Minggu yang memuat tanggal itu. Pekan berjalan belum lengkap.",
+      "Target = target mingguan; bila lead measure mulai atau berakhir di tengah pekan, targetnya sebanding jumlah harinya. Realisasi = jumlah isian pekan itu yang sudah tercatat; realisasi 0 bisa berarti belum ada isian sama sekali.",
+      "sumber_laporan kosong = diisi tangan di K-Space; selain itu dihitung otomatis dari laporan harian (ingat H-1: angka hari ini biasanya baru masuk besok).",
+      "Kolom: pekan_dari, pekan_sampai, judul, satuan, unit, goal_kode dan goal_judul (goal yang didukung), realisasi, target, rasio (%), pendukung dan label_pendukung (angka pendukung, mis. peserta hadir), sumber_laporan.",
+      "Lead measure bersumber komisi tidak ikut (di luar cakupan).",
+      "Sumber: asisten.lead_measure_pekan(tanggal), membungkus papan_lead_measure.",
+    ].join(" "),
+    skema: z.strictObject({
+      tanggal: tanggal.optional().describe("Tanggal patokan, YYYY-MM-DD (WIB). Kosongkan untuk hari ini."),
+    }),
+    async jalankan(db, { tanggal: t }) {
+      const { tp, baris } = await db.baca(async (q) => {
+        const tp = await tanggalPakai(q, t);
+        return { tp, baris: (await q(SQL.leadPekan, [tp.tanggal])).map((r) => r.j) };
+      });
+      const nilai = (n, satuan) => (satuan === "IDR" ? rupiah(n) : `${angka(n)} ${satuan}`);
+      const realisasi = (b) =>
+        Number(b.realisasi) === 0
+          ? `${nilai(0, b.satuan)} (belum ada isian pekan ini, atau memang nol)`
+          : nilai(b.realisasi, b.satuan);
+      const [pertama] = baris;
+      const teks = [
+        pertama
+          ? `Lead measure pekan ${pertama.pekan_dari} (${namaHari(pertama.pekan_dari)}) s.d. ${pertama.pekan_sampai} (${namaHari(pertama.pekan_sampai)}), WIB — patokan ${tp.tanggal}`
+          : `Lead measure pekan yang memuat ${tp.tanggal} (${namaHari(tp.tanggal)}, WIB)`,
+      ];
+      if (baris.length === 0) {
+        teks.push("Tidak ada data: tidak ada lead measure aktif pada pekan ini.");
+      }
+      for (const b of baris) {
+        const unit = b.unit ?? b.unit_kode ?? "tanpa unit";
+        const pendukung =
+          b.pendukung === null || b.pendukung === undefined
+            ? ""
+            : ` | ${b.label_pendukung ?? "pendukung"}: ${angka(b.pendukung)}`;
+        const goal = b.goal_judul ? ` | goal ${b.goal_kode ? `${b.goal_kode} ` : ""}${potong(b.goal_judul, 100)}` : "";
+        teks.push(
+          `- ${potong(b.judul)} [${unit}] — realisasi ${realisasi(b)} dari target ${nilai(b.target, b.satuan)}` +
+            ` (${persen(b.rasio)})${pendukung}${goal} | ${sumberLead(b.sumber_laporan)}`,
+        );
+      }
+      teks.push(
+        "Lead measure bersumber komisi tidak ditampilkan (di luar cakupan).",
+        `Sumber: asisten.lead_measure_pekan('${tp.tanggal}') — membungkus papan_lead_measure (papan lead measure halaman GRD)`,
+      );
+      if (baris.some((b) => b.satuan === "IDR")) teks.push(CATATAN_GMV);
+      return {
+        baris: baris.length,
+        data: {
+          tanggal: tp.tanggal,
+          pekan_dari: pertama?.pekan_dari ?? null,
+          pekan_sampai: pertama?.pekan_sampai ?? null,
+          baris,
+        },
         teks: teks.join("\n"),
       };
     },
