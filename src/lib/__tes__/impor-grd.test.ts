@@ -459,7 +459,7 @@ test("pemetaan otomatis ke tabel tim: aturan pasti, sisanya unmapped", () => {
       { id: "u-alma", nama: "Alma", status: "aktif" },
     ],
     accounts: [
-      { id: "a-home", username: "alkahfihome_", pic_user_id: "u-siti" },
+      { id: "a-home", username: "@alkahfihome_", pic_user_id: "u-siti" },
       { id: "a-tao", username: "taokspill_", pic_user_id: "u-krimh" },
     ],
     units: [],
@@ -473,7 +473,8 @@ test("pemetaan otomatis ke tabel tim: aturan pasti, sisanya unmapped", () => {
   const ke = (d: { nama: string; ke: string | null }[], n: string) =>
     d.find((x) => x.nama === n)?.ke;
 
-  assert.equal(ke(hasil.akun, "alkahfihome_"), "alkahfihome_");
+  // "@" di depan username K-Space hanyalah cara tulis.
+  assert.equal(ke(hasil.akun, "alkahfihome_"), "@alkahfihome_");
   // Beda tanda _ saja: masih akun yang sama.
   assert.equal(ke(hasil.akun, "taokspill"), "taokspill_");
   // Awal nama yang hanya cocok satu anggota aktif.
@@ -879,4 +880,216 @@ test("pemetaan: PIC dari kolom SIAPA dan sumber otomatis KPI", () => {
       d.startsWith("KPI Raka #1 tetap diisi penilai"),
     ),
   );
+});
+
+// ---------------------------------------------------------------------
+// Goal 1 = GMV MCN + GMV akun internal yang belum masuk MCN
+// ---------------------------------------------------------------------
+function workbookMcn() {
+  const kepala = [null, "No", "Sasaran", "Target", null, "Base", "Satuan", ""];
+  const goal = lembar([
+    [],
+    [null, "GOAL NOVEMBER 2026"],
+    kepala,
+    [null, 1, "Menaikkan GMV bulanan", "12 M", null, "10 M", "Rupiah", ""],
+    [null, "GOAL MANAGER"],
+    kepala,
+    [null, 1, "Menaikkan GMV internal", "3 M", null, "2 M", "Rupiah", ""],
+    [null, 2, "Menaikkan GMV eksternal", "9 M", null, "8 M", "Rupiah", ""],
+    [null, 3, "Menaikkan peserta kegiatan", 40, null, 30, "Orang", ""],
+    [null, "GOAL LEADER — TACTICAL PLAN"],
+    [null, "DEPARTEMEN AFFILIATOR — Leader: Dewi (Blok Internal)"],
+    [
+      null,
+      1,
+      "1.1.1 — Menaikkan GMV akun pada 30 November 2026",
+      300_000_000,
+      null,
+      100_000_000,
+      "Rupiah",
+      "",
+    ],
+    [null, "DEPARTEMEN MCN — Leader: Galih (Blok Eksternal)"],
+    [
+      null,
+      2,
+      "1.2.2 — Menaikkan GMV creator eksternal pada 30 November 2026",
+      8_000_000_000,
+      null,
+      7_000_000_000,
+      "Rupiah",
+      "",
+    ],
+    [null, "DEPARTEMEN KEGIATAN — Leader: Bayu (Blok Kegiatan)"],
+    [
+      null,
+      3,
+      "1.3.1 — Menaikkan peserta kegiatan Jumat pada 30 November 2026",
+      25,
+      null,
+      20,
+      "Orang",
+      "",
+    ],
+    [null, "CEK PATUNGAN"],
+  ]);
+  const akun = (nama: string, catatan: string) => [
+    null,
+    nama,
+    "Dewi",
+    "L5",
+    1,
+    100_000_000,
+    1,
+    1,
+    null,
+    null,
+    catatan,
+  ];
+  const baris = (label: string, a: number, b: number) => [
+    null,
+    label,
+    "Galih",
+    "TARGET",
+    a,
+    b,
+    null,
+    null,
+    null,
+    null,
+    "Rp",
+  ];
+  const kurva = lembar([
+    [null, "A. TARGET PER AKUN"],
+    [null, "AKUN UTAMA — Goal 1.1.1"],
+    akun("sudahmcn_a", "Partner Center 1–31 Okt"),
+    akun("sudahmcn_b", "Partner Center 1–31 Okt"),
+    akun("belummcn_c", "Belum masuk MCN — Rp 0 di Partner Center"),
+    [null, "TOTAL — Goal 1.1.1", null, null, 1, 2],
+    [],
+    [null, "B. KURVA MINGGUAN — target KUMULATIF"],
+    [null, "Goal / Ukuran", "PIC", "Satuan", "Sab 28 Nov", "Sen 30 Nov"],
+    baris("1.1.1 GMV akun", 250_000_000, 300_000_000),
+    baris("1.2.2 GMV creator eksternal MCN", 7_500_000_000, 8_000_000_000),
+    baris("1.2.1 GMV creator pemakai studio", 150_000_000, 200_000_000),
+    baris("TOTAL GMV INTERNAL (1.1.1)", 250_000_000, 300_000_000),
+    baris("TOTAL GMV EKSTERNAL (creator)", 7_650_000_000, 8_200_000_000),
+    baris("TOTAL GMV AL-KAHFI CORP", 7_900_000_000, 8_500_000_000),
+  ]);
+  return {
+    Sheets: { GOAL: goal, "Target & Kurva WRM": kurva } as Record<
+      string,
+      LembarXlsx
+    >,
+  };
+}
+
+/**
+ * Menghitung sebuah ukuran dari lingkupnya dengan angka contoh, mengikuti
+ * cara `realisasi_ukuran` menjumlah (akun, unit, ukuran lain × faktor).
+ */
+function hitung(
+  ukuran: ReturnType<typeof bacaRencanaGrd>["ukuran"],
+  kode: string,
+  gmv: { akun: Record<string, number>; unit: Record<string, number> },
+  isian: Record<string, number> = {},
+): number {
+  const u = ukuran.find((x) => x.kode === kode)!;
+  if (u.lingkup.length === 0) return isian[kode] ?? 0;
+  return u.lingkup.reduce((t, l) => {
+    if ("sumberKode" in l)
+      return t + l.faktor * hitung(ukuran, l.sumberKode, gmv, isian);
+    if ("unit" in l) return t + l.faktor * (gmv.unit[l.unit] ?? 0);
+    return t + l.faktor * (gmv.akun[l.akun] ?? 0);
+  }, 0);
+}
+
+test("goal 1 = GMV MCN + akun internal yang belum masuk MCN, tanpa hitung dobel", () => {
+  const r = bacaRencanaGrd(workbookMcn());
+  assert.deepEqual(r.akunBelumMcn, ["belummcn_c"]);
+
+  const ukuran = Object.fromEntries(r.ukuran.map((u) => [u.kode, u]));
+  // Ukuran bantu: hanya akun internal yang sudah masuk MCN.
+  assert.deepEqual(ukuran["1.2-internal-mcn"].lingkup, [
+    { akun: "sudahmcn_a", jenisGmv: "semua", faktor: 1 },
+    { akun: "sudahmcn_b", jenisGmv: "semua", faktor: 1 },
+  ]);
+  assert.equal(ukuran["1.2-internal-mcn"].goal, null);
+  assert.deepEqual(ukuran["1.2.2"].lingkup, [
+    { unit: "mcn", jenisGmv: "semua", faktor: 1 },
+    { sumberKode: "1.2-internal-mcn", faktor: -1 },
+    { sumberKode: "1.2.1-gmv", faktor: -1 },
+  ]);
+  // 1.1 tetap semua akun internal, sudah maupun belum masuk MCN.
+  assert.equal(ukuran["1.1.1"].lingkup.length, 3);
+
+  // Angka contoh: MCN (Partner Center) 1.000 sudah memuat akun a dan b.
+  const gmv = {
+    unit: { mcn: 1_000 },
+    akun: { sudahmcn_a: 200, sudahmcn_b: 100, belummcn_c: 50 },
+  };
+  const studio = { "1.2.1-gmv": 30 };
+  assert.equal(hitung(r.ukuran, "1.1", gmv, studio), 350);
+  assert.equal(hitung(r.ukuran, "1.2.2", gmv, studio), 670);
+  // Eksternal = MCN − akun internal yang sudah masuk MCN.
+  assert.equal(hitung(r.ukuran, "1.2", gmv, studio), 700);
+  // Perusahaan = MCN + akun internal yang belum masuk MCN.
+  assert.equal(hitung(r.ukuran, "1", gmv, studio), 1_000 + 50);
+});
+
+test("berkas pemetaan menggantikan daftar akun belum masuk MCN", () => {
+  const mentah = bacaRencanaGrd(workbookMcn());
+  const data = {
+    users: [],
+    accounts: ["sudahmcn_a", "sudahmcn_b", "belummcn_c"].map((u) => ({
+      id: `id-${u}`,
+      username: u,
+    })),
+    units: [{ id: "unit-mcn", kode: "mcn" }],
+    goalLama: [],
+  };
+  const akun = Object.fromEntries(
+    data.accounts.map((a) => [a.username, a.username]),
+  );
+  const orang = {
+    Azka: null,
+    Kholid: null,
+    Dewi: null,
+    Galih: null,
+    Bayu: null,
+  };
+  const lingkup = (belum?: string[]) =>
+    susunRencana(
+      mentah,
+      { orang, akun, ...(belum ? { akun_belum_mcn: belum } : {}) },
+      data,
+    ).rencana.ukuran.find((u) => u.kode === "1.2-internal-mcn")!
+      .lingkup as { account_id?: string }[];
+
+  assert.deepEqual(
+    lingkup().map((l) => l.account_id),
+    ["id-sudahmcn_a", "id-sudahmcn_b"],
+  );
+  // belummcn_c sudah di-bind; sudahmcn_a ternyata belum.
+  assert.deepEqual(
+    lingkup(["sudahmcn_a"]).map((l) => l.account_id),
+    ["id-sudahmcn_b", "id-belummcn_c"],
+  );
+  // Daftar kosong = semua akun internal sudah masuk MCN.
+  assert.equal(lingkup([]).length, 3);
+});
+
+test("titik kurva akhir bulan yang bukan Sabtu, dan departemen tanpa unit", () => {
+  const r = bacaRencanaGrd(workbookMcn());
+  const ukuran = Object.fromEntries(r.ukuran.map((u) => [u.kode, u]));
+  assert.deepEqual(ukuran["1"].titik, [
+    { tanggal: "2026-11-28", target: 7_900_000_000 },
+    { tanggal: "2026-11-30", target: 8_500_000_000 },
+  ]);
+
+  const goal = Object.fromEntries(r.goals.map((g) => [g.kode, g]));
+  assert.equal(goal["1.3.1"].pemilik, "Bayu");
+  assert.equal(goal["1.3.1"].unit, null);
+  assert.equal(goal["1.3.1"].induk, "1.3");
+  assert.ok(r.catatan.some((c) => /KEGIATAN.*tanpa unit/.test(c)));
 });
