@@ -5,6 +5,7 @@ import {
   bulanPanjang,
   bulanPendek,
   hariIniWib,
+  hariTanggalPendek,
   jamWib,
   keJamWib,
   keTanggalWib,
@@ -75,6 +76,14 @@ test("tanggal kalender tidak bergeser karena zona waktu", () => {
   assert.equal(tanggalKalenderPanjang("2026-09-16"), "Rabu, 16 September 2026");
   assert.equal(tanggalKalenderPendek("2026-10-02", "2026-09-29"), "2 Okt");
   assert.match(tanggalKalenderPendek("2025-12-31", "2026-01-01"), /2025/);
+});
+
+test("judul kolom kurva memakai hari sebenarnya, bukan selalu Sabtu", () => {
+  assert.equal(hariTanggalPendek("2026-11-07", "2026-11-13"), "Sab 7 Nov");
+  // Titik akhir bulan November 2026 jatuh hari Senin.
+  assert.equal(hariTanggalPendek("2026-11-30", "2026-11-13"), "Sen 30 Nov");
+  assert.equal(hariTanggalPendek("2026-11-01", "2026-11-13"), "Min 1 Nov");
+  assert.equal(hariTanggalPendek("2025-12-27", "2026-01-01"), "Sab 27 Des 2025");
 });
 
 test("jam WIB untuk mengisi ulang isian jam", () => {

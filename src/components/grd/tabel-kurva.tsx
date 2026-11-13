@@ -2,7 +2,7 @@ import { LineChart } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { DialogCatatCapaian } from "@/components/grd/dialog-catat-capaian";
 import { cn } from "@/lib/utils";
-import { tanggalKalenderPendek } from "@/lib/format";
+import { hariTanggalPendek } from "@/lib/format";
 import { kelompokKurva, tampilNilaiGoal, type KelompokKurva } from "@/lib/goal";
 import type { BarisKurva, TitikKurva } from "@/lib/data/kurva";
 
@@ -149,7 +149,9 @@ export function TabelKurva({
                     key={t}
                     className="px-2 py-2 text-[11px] leading-[14px] font-semibold whitespace-nowrap text-muted-foreground"
                   >
-                    Sab {tanggalKalenderPendek(t, acuan)}
+                    {/* Titik kurva biasanya Sabtu, tetapi titik akhir bulan
+                        bisa hari apa saja (mis. Senin 30 Nov 2026). */}
+                    {hariTanggalPendek(t, acuan)}
                   </th>
                 ))}
               </tr>
