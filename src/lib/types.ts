@@ -10,8 +10,11 @@
 export type Peran =
   "CEO" | "Manager" | "Leader" | "Co-Leader" | "Staff" | "Finance";
 
-/** Tiga unit pelaporan (PRD §2). */
-export type KodeUnit = "affiliator" | "mcn" | "tap";
+/**
+ * Tiga unit pelaporan GMV (PRD §2) dan Sosial Impact, unit tanpa laporan
+ * GMV (0223) — lihat `UNIT_PELAPORAN[kode].lapor`.
+ */
+export type KodeUnit = "affiliator" | "mcn" | "tap" | "sosial";
 
 export type Pengguna = {
   id: string;

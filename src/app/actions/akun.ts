@@ -7,11 +7,18 @@ import { sesiSaatIni } from "@/lib/data/sesi";
 import { bolehKelolaAkun, PERAN_PIC } from "@/lib/data/akun";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
 import { levelSah, LEVEL_MAKS, LEVEL_MIN } from "@/lib/batas-minimum";
-import { kodeUnitSah } from "@/lib/unit-pelaporan";
+import { kodeUnitSah, melaporGmv, UNIT_PELAPORAN } from "@/lib/unit-pelaporan";
 import type { KodeUnit, Peran } from "@/lib/types";
 
 /** Username akun: diawali @, huruf/angka/titik/garis bawah. */
 const POLA_USERNAME = /^@[a-z0-9._]{3,30}$/i;
+
+/** Akun TikTok hanya bisa berada di unit pelapor GMV (dijaga juga 0223). */
+function alasanUnitTanpaGmv(kode: KodeUnit): string | null {
+  return melaporGmv(kode)
+    ? null
+    : `${UNIT_PELAPORAN[kode].nama} tidak melaporkan GMV, jadi tidak bisa memegang akun TikTok.`;
+}
 
 function segarkan() {
   revalidatePath("/grd");
@@ -147,6 +154,8 @@ export async function tambahAkun(input: {
       "validasi",
     );
   }
+  const tanpaGmv = kodeUnitSah(input.unitKode) ? alasanUnitTanpaGmv(input.unitKode) : null;
+  if (tanpaGmv) return gagal(tanpaGmv, "validasi");
   if (modeData() === "demo") return BALASAN_DEMO;
 
   const pengguna = await sesiSaatIni();
@@ -367,6 +376,8 @@ export async function pindahUnitAkun(input: {
   if (!kodeUnitSah(input.unitKode)) {
     return gagal("Unit tujuan tidak dikenali.", "validasi");
   }
+  const tanpaGmv = alasanUnitTanpaGmv(input.unitKode);
+  if (tanpaGmv) return gagal(tanpaGmv, "validasi");
 
   const pengguna = await sesiSaatIni();
   if (!pengguna) return gagal("Sesi berakhir, silakan masuk lagi.", "izin");

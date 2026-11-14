@@ -12,7 +12,7 @@ import { bolehKelolaAnggota, daftarAnggotaTim } from "@/lib/data/anggota";
 import { pilihanOrganisasi } from "@/lib/data/organisasi";
 import { susunanDepartemen } from "@/lib/organisasi";
 import { pohonStruktur, tercecer } from "@/lib/struktur";
-import { DAFTAR_UNIT } from "@/lib/unit-pelaporan";
+import { caraLapor, DAFTAR_UNIT } from "@/lib/unit-pelaporan";
 import { gayaUnit } from "@/lib/unit";
 import { cn } from "@/lib/utils";
 import { peranValid, sesiSaatIni } from "@/lib/data/sesi";
@@ -98,11 +98,11 @@ export default async function StrukturPage({
           />
         </Reveal>
 
-        {/* Tiga unit pelaporan disebut lebih dulu: departemen menjawab
-            "siapa sekelompok dengan siapa", unit menjawab "bagaimana
-            kelompok itu melapor" — dan yang kedua menentukan kewajiban
-            harian tiap orang. */}
-        <nav aria-label="Unit pelaporan" className="grid gap-2 sm:grid-cols-3">
+        {/* Unit disebut lebih dulu: departemen menjawab "siapa sekelompok
+            dengan siapa", unit menjawab "bagaimana kelompok itu melapor" —
+            dan yang kedua menentukan kewajiban harian tiap orang. Sosial
+            Impact tidak melaporkan GMV (0223). */}
+        <nav aria-label="Unit pelaporan" className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {DAFTAR_UNIT.map((u) => {
             const isi = semua.filter(
               (a) => a.status === "aktif" && a.unitKode === u.kode,
@@ -125,7 +125,7 @@ export default async function StrukturPage({
                     {u.nama}
                   </span>
                   <span className="tabular block text-[11px] leading-[14px] text-muted-foreground">
-                    {isi} orang · lapor per {u.lapor}
+                    {isi} orang · {caraLapor(u)}
                   </span>
                 </span>
                 <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />

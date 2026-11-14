@@ -33,6 +33,9 @@ export const KOLOM_PER_UNIT: Record<KodeUnit, readonly KolomLaporan[]> = {
   ],
   mcn: ["gmv", "catatan"],
   tap: ["gmv", "catatan"],
+  // Unit tanpa laporan GMV (0223): tidak pernah jadi sasaran laporan, dan
+  // database menolak laporan untuknya (jaga_kolom_departemen).
+  sosial: [],
 };
 
 /** Isian minimum saat unitnya belum diketahui — GMV tetap wajib. */

@@ -136,6 +136,8 @@ export async function unitSasaranLaporan(
   if (!jenis || !nilai) return null;
 
   if (jenis === "unit") {
+    // Sosial Impact sengaja tidak ada: unit itu tidak menerima laporan
+    // harian (0223), dan database menolaknya bila tetap dikirim.
     return (
       (["affiliator", "mcn", "tap"] as const).find((k) => k === nilai) ?? null
     );

@@ -6,7 +6,7 @@ import { klienServer } from "@/lib/supabase/server";
 import { BALASAN_DEMO, gagal, sukses, type Hasil } from "@/lib/data/hasil";
 import { CATATAN_DAFTAR_MAKS, rapikanNoWa } from "@/lib/pendaftaran";
 
-const KODE_UNIT = ["affiliator", "mcn", "tap"] as const;
+const KODE_UNIT = ["affiliator", "mcn", "tap", "sosial"] as const;
 
 /**
  * Calon anggota melengkapi pendaftarannya di /menunggu: No. WA (wajib),

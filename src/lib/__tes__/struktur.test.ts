@@ -209,9 +209,9 @@ test("tiap unit menyebut cara pelaporannya", () => {
   assert.deepEqual(UNIT_PELAPORAN.tap.kolomTambahan, []);
 });
 
-test("daftar unit memuat ketiganya tanpa duplikat", () => {
+test("daftar unit memuat keempatnya tanpa duplikat (Sosial Impact sejak 0223)", () => {
   assert.deepEqual(
     DAFTAR_UNIT.map((u) => u.kode),
-    ["affiliator", "mcn", "tap"],
+    ["affiliator", "mcn", "tap", "sosial"],
   );
 });

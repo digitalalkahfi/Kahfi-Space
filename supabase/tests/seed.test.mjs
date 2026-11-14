@@ -40,12 +40,13 @@ uji("25 anggota tim aktif sesuai PRD", async () => {
   );
 });
 
-uji("tiga unit pelaporan", async () => {
-  harusSama(await hitung("select count(*)::int as n from units"), 3);
+uji("tiga unit pelapor GMV, ditambah Sosial Impact (0223)", async () => {
+  harusSama(await hitung("select count(*)::int as n from units where lapor_harian"), 3);
+  harusSama(await hitung("select count(*)::int as n from units"), 4);
 });
 
-uji("lima departemen", async () => {
-  harusSama(await hitung("select count(*)::int as n from departments"), 5);
+uji("lima departemen, ditambah Sosial Impact (0223)", async () => {
+  harusSama(await hitung("select count(*)::int as n from departments"), 6);
 });
 
 uji("setiap akun punya PIC dan unit", async () => {

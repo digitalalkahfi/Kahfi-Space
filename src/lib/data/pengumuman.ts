@@ -72,6 +72,7 @@ const NAMA_UNIT: Record<KodeUnit, string> = {
   affiliator: "Affiliator Network",
   mcn: "MCN",
   tap: "TAP",
+  sosial: "Sosial Impact",
 };
 
 /** Pengumuman yang boleh dilihat pengguna ini. */

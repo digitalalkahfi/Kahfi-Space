@@ -35,7 +35,7 @@ const dariSql = async (unit) =>
   ).rows.map((r) => r.metrik);
 
 uji("tiap unit memuat kolom yang sama dengan kode aplikasi", async () => {
-  for (const unit of ["affiliator", "mcn", "tap"]) {
+  for (const unit of ["affiliator", "mcn", "tap", "sosial"]) {
     harusSama(await dariSql(unit), [...KOLOM_PER_UNIT[unit]], unit);
   }
 });
@@ -52,7 +52,7 @@ uji("urutannya sama dengan urutan tampil di form", async () => {
 });
 
 uji("kolomLaporan dan metrik_unit menjawab sama untuk tiap unit", async () => {
-  for (const unit of ["affiliator", "mcn", "tap"]) {
+  for (const unit of ["affiliator", "mcn", "tap", "sosial"]) {
     harusSama(await dariSql(unit), [...kolomLaporan(unit)], unit);
   }
 });

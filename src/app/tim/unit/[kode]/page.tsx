@@ -122,9 +122,11 @@ export default async function UnitPage({
             <p className="text-[13px] leading-[18px] text-pretty text-muted-foreground">
               {unit.lapor === "akun"
                 ? "Laporan harian diisi per AKUN: tiap PIC mengisi akunnya sendiri, dan akun tanpa PIC tidak akan pernah terlapor."
-                : "Laporan harian diisi per UNIT: Leader unit mengisinya sekali untuk seluruh unit, bukan per akun."}
+                : unit.lapor === "unit"
+                  ? "Laporan harian diisi per UNIT: Leader unit mengisinya sekali untuk seluruh unit, bukan per akun."
+                  : "Unit ini TIDAK melaporkan GMV harian: anggotanya tidak ditagih laporan, absen pulangnya tidak terkunci laporan, dan unit ini tidak memegang akun TikTok. Capaiannya diukur lewat goal dan KPI GRD."}
             </p>
-            {unit.kolomTambahan.length > 0 ? (
+            {unit.lapor === "tidak" ? null : unit.kolomTambahan.length > 0 ? (
               <p className="text-[13px] leading-[18px] text-pretty text-muted-foreground">
                 Selain GMV, unit ini mengisi {unit.kolomTambahan.join(", ")}.
               </p>
